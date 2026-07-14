@@ -1,0 +1,266 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "./ui/button";
+import { Coins, Sparkles, TrendingUp } from "lucide-react";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
+
+const FloatingCoin = ({ delay = 0, x = 0, y = 0, type = "gold" }) => (
+  <motion.div
+    className={`absolute w-8 h-8 ${
+      type === "gold" 
+        ? "bg-gradient-to-br from-[#ffbf00] to-[#ffd152]" 
+        : "bg-gradient-to-br from-[#4f46e5] to-[#7c3aed]"
+    } rounded-full flex items-center justify-center shadow-lg`}
+    style={{ left: `${x}%`, top: `${y}%` }}
+    animate={{
+      y: [0, -20, 0],
+      rotate: [0, 180, 360],
+    }}
+    transition={{
+      duration: 3,
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+  >
+    <Coins className="w-4 h-4 text-white" />
+  </motion.div>
+);
+
+const carouselData = [
+  {
+    id: "gold",
+    title: "Digital Gold",
+    gradient: "from-[#ffbf00] to-[#ffd152]",
+    textGradient: "from-[#ffbf00] to-[#ffd152]",
+    description: "Build wealth with automated gold investments. Powered by Augmont, start with just ₹1 and watch your savings grow with India's most trusted digital gold platform.",
+    badge: "India's Leading Digital Gold Platform",
+    image: "https://cdn.augrav.com/online/jewels/2021/07/05125125/shutterstock_404908750.jpg",
+    alt: "Elegant gold jewelry and coins representing digital gold savings and investment",
+    floatingCoins: "gold"
+  },
+  {
+    id: "silver",
+    title: "Digital Silver",
+    gradient: "from-[#4f46e5] to-[#7c3aed]",
+    textGradient: "from-[#4f46e5] to-[#7c3aed]",
+    description: "Diversify your portfolio with silver investments. Powered by Augmont, start with just ₹1 and explore the potential of India's premier digital silver platform.",
+    badge: "India's Leading Digital Silver Platform",
+    image: "https://png.pngtree.com/thumb_back/fw800/background/20231005/pngtree-shimmering-stack-of-silver-nft-coins-in-a-futuristic-digital-landscape-image_13547305.png",
+    alt: "Premium silver coins in a futuristic digital landscape representing digital silver investment",
+    floatingCoins: "silver"
+  }
+];
+
+export default function HeroSection({ onNavigate }: { onNavigate?: (page: string) => void }) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % carouselData.length);
+    }, 6000); // Auto-change every 6 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentData = carouselData[currentSlide];
+
+  return (
+    <section className="min-h-screen bg-gradient-to-br from-gray-50 to-white relative overflow-hidden pt-20">
+      {/* Dynamic Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <motion.div 
+          className={`absolute top-20 left-10 w-32 h-32 rounded-full blur-3xl transition-all duration-1000 ${
+            currentData.id === "gold" ? "bg-[#ffbf00]" : "bg-[#4f46e5]"
+          }`}
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3]
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+        />
+        <motion.div 
+          className={`absolute bottom-20 right-10 w-40 h-40 rounded-full blur-3xl transition-all duration-1000 ${
+            currentData.id === "gold" ? "bg-[#ffd152]" : "bg-[#7c3aed]"
+          }`}
+          animate={{ 
+            scale: [1.2, 1, 1.2],
+            opacity: [0.6, 0.3, 0.6]
+          }}
+          transition={{ duration: 4, repeat: Infinity, delay: 2 }}
+        />
+      </div>
+
+      {/* Floating Coins */}
+      <FloatingCoin delay={0} x={10} y={20} type={currentData.floatingCoins} />
+      <FloatingCoin delay={0.5} x={85} y={15} type={currentData.floatingCoins} />
+      <FloatingCoin delay={1} x={15} y={60} type={currentData.floatingCoins} />
+      <FloatingCoin delay={1.5} x={80} y={70} type={currentData.floatingCoins} />
+      <FloatingCoin delay={2} x={50} y={10} type={currentData.floatingCoins} />
+
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
+          <div className="text-center lg:text-left">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 50 }}
+                transition={{ duration: 0.8 }}
+              >
+                <motion.div
+                  className={`inline-flex items-center px-4 py-2 rounded-full mb-6 transition-all duration-500 ${
+                    currentData.id === "gold" 
+                      ? "bg-[#fff8dc] text-[#b38200]" 
+                      : "bg-indigo-50 text-indigo-700"
+                  }`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {currentData.badge}
+                </motion.div>
+
+                <motion.h1
+                  className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  Start Saving in{" "}
+                  <span className={`bg-gradient-to-r ${currentData.textGradient} bg-clip-text text-transparent`}>
+                    {currentData.title}
+                  </span>
+                </motion.h1>
+
+                <motion.p
+                  className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  {currentData.description}
+                </motion.p>
+              </motion.div>
+            </AnimatePresence>
+
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Button
+                size="lg"
+                className={`bg-gradient-to-r ${currentData.gradient} hover:opacity-90 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-6 text-lg`}
+                onClick={() => onNavigate?.('signup')}
+              >
+                <TrendingUp className="w-5 h-5 mr-2" />
+                Start Investing Now
+              </Button>
+            </motion.div>
+
+
+
+            <motion.div
+              className="flex items-center gap-8 mt-12 justify-center lg:justify-start"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+            >
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">50K+</div>
+                <div className="text-sm text-gray-600">Happy Users</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">₹100Cr+</div>
+                <div className="text-sm text-gray-600">
+                  {currentData.id === "gold" ? "Gold" : "Silver"} Invested
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">₹1</div>
+                <div className="text-sm text-gray-600">Min. Investment</div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right Content - Hero Carousel */}
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                className="relative"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.8 }}
+              >
+                <div className="relative">
+                  {/* Main Hero Image */}
+                  <div className="relative z-10">
+                    <ImageWithFallback
+                      src={currentData.image}
+                      alt={currentData.alt}
+                      className="w-full max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto rounded-3xl shadow-2xl"
+                    />
+                  </div>
+
+                  {/* Floating Elements */}
+                  <motion.div
+                    className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-xl p-4 z-20"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          +{currentData.id === "gold" ? "12.5" : "8.3"}%
+                        </div>
+                        <div className="text-xs text-gray-500">This Month</div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl p-4 z-20"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        currentData.id === "gold" 
+                          ? "bg-[#ffbf00]" 
+                          : "bg-indigo-600"
+                      }`}>
+                        <Coins className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          {currentData.id === "gold" ? "2.5g" : "45g"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {currentData.id === "gold" ? "Gold" : "Silver"} Saved
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
