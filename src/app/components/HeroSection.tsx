@@ -6,28 +6,33 @@ import { Button } from "./ui/button";
 import { Coins, Sparkles, TrendingUp } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-const FloatingCoin = ({ delay = 0, x = 0, y = 0, type = "gold" }) => (
-  <motion.div
-    className={`absolute w-8 h-8 ${
-      type === "gold" 
-        ? "bg-gradient-to-br from-[#ffbf00] to-[#ffd152]" 
-        : "bg-gradient-to-br from-[#4f46e5] to-[#7c3aed]"
-    } rounded-full flex items-center justify-center shadow-lg`}
-    style={{ left: `${x}%`, top: `${y}%` }}
-    animate={{
-      y: [0, -20, 0],
-      rotate: [0, 180, 360],
-    }}
-    transition={{
-      duration: 3,
-      delay,
-      repeat: Infinity,
-      ease: "easeInOut",
-    }}
-  >
-    <Coins className="w-4 h-4 text-white" />
-  </motion.div>
-);
+const FloatingCoin = ({ delay = 0, x = 0, y = 0, type = "gold" }) => {
+  let gradient = "bg-gradient-to-br from-[#ffbf00] to-[#ffd152]";
+  if (type === "silver") {
+    gradient = "bg-gradient-to-br from-[#4f46e5] to-[#7c3aed]";
+  } else if (type === "bill") {
+    gradient = "bg-gradient-to-br from-[#0ea5e9] to-[#2563eb]";
+  }
+
+  return (
+    <motion.div
+      className={`absolute w-8 h-8 ${gradient} rounded-full flex items-center justify-center shadow-lg`}
+      style={{ left: `${x}%`, top: `${y}%` }}
+      animate={{
+        y: [0, -20, 0],
+        rotate: [0, 180, 360],
+      }}
+      transition={{
+        duration: 3,
+        delay,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      <Coins className="w-4 h-4 text-white" />
+    </motion.div>
+  );
+};
 
 const carouselData = [
   {
@@ -37,7 +42,7 @@ const carouselData = [
     textGradient: "from-[#ffbf00] to-[#ffd152]",
     description: "Build wealth with automated gold investments. Powered by Augmont, start with just ₹1 and watch your savings grow with India's most trusted digital gold platform.",
     badge: "India's Leading Digital Gold Platform",
-    image: "https://cdn.augrav.com/online/jewels/2021/07/05125125/shutterstock_404908750.jpg",
+    image: "/hero_banner_digital_gold.png",
     alt: "Elegant gold jewelry and coins representing digital gold savings and investment",
     floatingCoins: "gold"
   },
@@ -48,9 +53,20 @@ const carouselData = [
     textGradient: "from-[#4f46e5] to-[#7c3aed]",
     description: "Diversify your portfolio with silver investments. Powered by Augmont, start with just ₹1 and explore the potential of India's premier digital silver platform.",
     badge: "India's Leading Digital Silver Platform",
-    image: "https://png.pngtree.com/thumb_back/fw800/background/20231005/pngtree-shimmering-stack-of-silver-nft-coins-in-a-futuristic-digital-landscape-image_13547305.png",
+    image: "/hero_banner_digital_silver.png",
     alt: "Premium silver coins in a futuristic digital landscape representing digital silver investment",
     floatingCoins: "silver"
+  },
+  {
+    id: "bill",
+    title: "Bill Payments",
+    gradient: "from-[#0ea5e9] to-[#2563eb]",
+    textGradient: "from-[#0ea5e9] to-[#2563eb]",
+    description: "Pay all your utility bills, mobile recharges, electricity, broadband, and more. Instant, secure, and hassle-free payments powered by Bharat BillPay (BBPS).",
+    badge: "Quick & Secure Utility Bill Payments",
+    image: "/hero_banner_bill_payments.png",
+    alt: "Digital payment screens showing online utility bill payments and secure mobile transactions",
+    floatingCoins: "bill"
   }
 ];
 
@@ -73,7 +89,11 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
       <div className="absolute inset-0 opacity-5">
         <motion.div 
           className={`absolute top-20 left-10 w-32 h-32 rounded-full blur-3xl transition-all duration-1000 ${
-            currentData.id === "gold" ? "bg-[#ffbf00]" : "bg-[#4f46e5]"
+            currentData.id === "gold" 
+              ? "bg-[#ffbf00]" 
+              : currentData.id === "silver" 
+                ? "bg-[#4f46e5]" 
+                : "bg-[#0ea5e9]"
           }`}
           animate={{ 
             scale: [1, 1.2, 1],
@@ -83,7 +103,11 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
         />
         <motion.div 
           className={`absolute bottom-20 right-10 w-40 h-40 rounded-full blur-3xl transition-all duration-1000 ${
-            currentData.id === "gold" ? "bg-[#ffd152]" : "bg-[#7c3aed]"
+            currentData.id === "gold" 
+              ? "bg-[#ffd152]" 
+              : currentData.id === "silver" 
+                ? "bg-[#7c3aed]" 
+                : "bg-[#2563eb]"
           }`}
           animate={{ 
             scale: [1.2, 1, 1.2],
@@ -116,7 +140,9 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                   className={`inline-flex items-center px-4 py-2 rounded-full mb-6 transition-all duration-500 ${
                     currentData.id === "gold" 
                       ? "bg-[#fff8dc] text-[#b38200]" 
-                      : "bg-indigo-50 text-indigo-700"
+                      : currentData.id === "silver" 
+                        ? "bg-indigo-50 text-indigo-700" 
+                        : "bg-sky-50 text-sky-700"
                   }`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -165,8 +191,6 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
               </Button>
             </motion.div>
 
-
-
             <motion.div
               className="flex items-center gap-8 mt-12 justify-center lg:justify-start"
               initial={{ opacity: 0, y: 30 }}
@@ -174,18 +198,32 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
               transition={{ delay: 1 }}
             >
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">50K+</div>
-                <div className="text-sm text-gray-600">Happy Users</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">₹100Cr+</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {currentData.id === "bill" ? "Instant" : "50K+"}
+                </div>
                 <div className="text-sm text-gray-600">
-                  {currentData.id === "gold" ? "Gold" : "Silver"} Invested
+                  {currentData.id === "bill" ? "Settlements" : "Happy Users"}
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">₹1</div>
-                <div className="text-sm text-gray-600">Min. Investment</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {currentData.id === "bill" ? "BBPS" : "₹100Cr+"}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {currentData.id === "gold" 
+                    ? "Gold Invested" 
+                    : currentData.id === "silver" 
+                      ? "Silver Invested" 
+                      : "Certified"}
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">
+                  {currentData.id === "bill" ? "0%" : "₹1"}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {currentData.id === "bill" ? "Added Fee" : "Min. Investment"}
+                </div>
               </div>
             </motion.div>
           </div>
@@ -224,9 +262,11 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-gray-900">
-                          +{currentData.id === "gold" ? "12.5" : "8.3"}%
+                          {currentData.id === "gold" ? "+12.5%" : currentData.id === "silver" ? "+8.3%" : "Secure"}
                         </div>
-                        <div className="text-xs text-gray-500">This Month</div>
+                        <div className="text-xs text-gray-500">
+                          {currentData.id === "bill" ? "Transactions" : "This Month"}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -241,16 +281,22 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         currentData.id === "gold" 
                           ? "bg-[#ffbf00]" 
-                          : "bg-indigo-600"
+                          : currentData.id === "silver" 
+                            ? "bg-indigo-600" 
+                            : "bg-sky-500"
                       }`}>
                         <Coins className="w-4 h-4 text-white" />
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-gray-900">
-                          {currentData.id === "gold" ? "2.5g" : "45g"}
+                          {currentData.id === "gold" ? "2.5g" : currentData.id === "silver" ? "45g" : "Fast"}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {currentData.id === "gold" ? "Gold" : "Silver"} Saved
+                          {currentData.id === "gold" 
+                            ? "Gold Saved" 
+                            : currentData.id === "silver" 
+                              ? "Silver Saved" 
+                              : "Settlement"}
                         </div>
                       </div>
                     </div>

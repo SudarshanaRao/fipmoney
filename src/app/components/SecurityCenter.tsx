@@ -369,7 +369,7 @@ export default function SecurityCenter({ onBack }: SecurityCenterProps) {
                   </div>
                   <div className="flex items-center space-x-3">
                     <Phone className="w-4 h-4 text-[#ffbf00]" />
-                    <span className="text-gray-700">+91 98765 43210</span>
+                    <span className="text-gray-700">+91 94918 41941</span>
                   </div>
                 </div>
                 <Button className="w-full mt-6 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] text-white interactive-button">

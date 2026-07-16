@@ -34,6 +34,9 @@ import AuthFlow from "./components/AuthFlow";
 import Dashboard from "./components/Dashboard";
 import RechargeDetails from "./components/RechargeDetails";
 import BillShowcaseSection from "./components/BillShowcaseSection";
+import RiskDisclosure from "./components/RiskDisclosure";
+import GrievancePolicy from "./components/GrievancePolicy";
+import InvestorCharter from "./components/InvestorCharter";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide';
 
@@ -275,11 +278,11 @@ export default function App() {
       case 'investors':
         return <ComingSoonPage title="Investor Relations" onBack={navigateToHome} />;
       case 'risk':
-        return <ComingSoonPage title="Risk Disclosure" onBack={navigateToHome} />;
+        return <RiskDisclosure onBack={navigateToHome} />;
       case 'grievance':
-        return <ComingSoonPage title="Grievance Policy" onBack={navigateToHome} />;
+        return <GrievancePolicy onBack={navigateToHome} />;
       case 'investor-charter':
-        return <ComingSoonPage title="Investor Charter" onBack={navigateToHome} />;
+        return <InvestorCharter onBack={navigateToHome} />;
       default:
         return (
           <>

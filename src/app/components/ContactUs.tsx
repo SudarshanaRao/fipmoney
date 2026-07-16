@@ -87,7 +87,7 @@ export default function ContactUs({ onBack }: ContactUsProps) {
       icon: Phone,
       title: "Phone Support",
       description: "Speak directly with our customer support team",
-      value: "+91 98765 43210"
+      value: "+91 94918 41941"
     },
     {
       icon: Mail,
@@ -105,15 +105,15 @@ export default function ContactUs({ onBack }: ContactUsProps) {
       icon: Headphones,
       title: "WhatsApp Support",
       description: "Connect with us on WhatsApp for quick assistance",
-      value: "+91 98765 43210"
+      value: "+91 94918 41941"
     }
   ];
 
   const offices = [
     {
       city: "Hyderabad (Head Office)",
-      address: "#709, Gowra FountainHead, HUDA Techno Enclave, HITEC City, Hyderabad, Telangana 500081",
-      phone: "+91 98765 43210",
+      address: "#709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081",
+      phone: "+91 94918 41941",
       email: "support@fipmoney.com"
     }
   ];
@@ -285,7 +285,7 @@ export default function ContactUs({ onBack }: ContactUsProps) {
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="+91 98765 43210"
+                        placeholder="+91 94918 41941"
                         className="h-12"
                       />
                     </div>

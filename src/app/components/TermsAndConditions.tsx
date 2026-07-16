@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, AlertTriangle, Shield, Users, CreditCard, Package, FileText, Scale, Gavel, Phone, Mail, MapPin } from "lucide-react";
 import { Button } from "./ui/button";
 
+
 interface TermsAndConditionsProps {
   onBack: () => void;
 }
@@ -13,23 +14,31 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Header */}
       <motion.div
-        className="bg-white border-b border-gray-200 sticky top-0 z-40"
+        className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shadow-sm"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               onClick={onBack}
-              className="flex items-center text-gray-600 hover:text-[#ffbf00]"
+              className="flex items-center text-gray-600 hover:text-[#ffbf00] transition-colors font-semibold"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
-            <h1 className="text-2xl font-bold text-gray-900">Terms and Conditions</h1>
-            <div className="w-20"></div>
+            <div className="flex items-center space-x-2 md:space-x-3 cursor-pointer" onClick={onBack}>
+              <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-10 w-auto object-contain" />
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-base md:text-lg font-extrabold text-gray-900 tracking-tight leading-none">FipMoney</span>
+                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">GOLD SIP PLATFORM</span>
+              </div>
+            </div>
+            <h1 className="text-base md:text-xl font-bold text-gray-900 tracking-tight uppercase border-l-2 border-[#ffbf00] pl-3">
+              Terms & Conditions
+            </h1>
           </div>
         </div>
       </motion.div>
@@ -63,7 +72,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               Important Notice
             </h2>
             <p className="text-[#b38200] leading-relaxed mb-4">
-              These terms and conditions ("Terms and Conditions" or "Terms") mandate the terms on which the users ("You" or "Your" or "User") can access and register on the website https://www.fipmoney.com/ including its mobile application – FipMoney; collectively the platform ("Platform") operated and managed by FipMoney Technologies Private Limited ("FipMoney" "We" or "Us") and FipMoney Gold Retail Private Limited ("FipMoney Gold" or "We" or "Us") collectively referred to as the company ("Company") to provide you the services.
+              These terms and conditions ("Terms and Conditions" or "Terms") mandate the terms on which the users ("You" or "Your" or "User") can access and register on the website https://www.fipmoney.com/ including its mobile application – FipMoney; collectively the platform ("Platform") operated and managed by Finpages Tech Pvt Ltd ("FipMoney" "We" or "Us") and Finpages Gold Retail Pvt Ltd ("FipMoney Gold" or "We" or "Us") collectively referred to as the company ("Company") to provide you the services.
             </p>
             <p className="text-[#b38200] font-semibold">
               IF YOU DO NOT AGREE TO THESE TERMS AND CONDITIONS, YOU MAY NOT USE THE PLATFORM AND SHOULD NOT PROCEED TO CREATE ANY ACCOUNTS OR ACQUIRE ANY SUBSCRIPTIONS TO THE PLATFORM. BY USING THE PLATFORM, YOU ARE AGREEING TO BE BOUND BY THESE TERMS AND CONDITIONS, INCLUDING ALL AMENDMENTS MADE HERETO FROM TIME TO TIME.
@@ -738,8 +747,8 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
                   Office Details
                 </h4>
                 <div className="space-y-2 text-gray-700">
-                  <p><strong>Phone:</strong> +91 98765 43210</p>
-                  <p><strong>Address:</strong> 123 Business Park, Bandra Kurla Complex, Mumbai - 400051</p>
+                  <p><strong>Phone:</strong> +91 94918 41941</p>
+                  <p><strong>Address:</strong> #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</p>
                 </div>
               </div>
             </div>
@@ -747,7 +756,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
 
           {/* Footer Notice */}
           <div className="mt-8 text-center text-sm text-gray-500 space-y-2">
-            <p>© 2025 FipMoney Technologies Private Limited. All rights reserved.</p>
+            <p>© 2025 Finpages Tech Pvt Ltd. All rights reserved.</p>
             <p>Corporate Identification Number: U47733KA2023PTC181719</p>
             <p>This document was last updated on January 15, 2025</p>
             <p>
