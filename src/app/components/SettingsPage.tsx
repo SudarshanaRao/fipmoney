@@ -2,53 +2,66 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  User, CreditCard, ShieldCheck, Heart, Sparkles, 
+import {
+  User, CreditCard, ShieldCheck, Heart, Sparkles,
   Trash2, Upload, CheckCircle2, AlertCircle, ChevronRight,
   Shield, Check, HelpCircle, PhoneOff, Camera, Video, Loader2
 } from "lucide-react";
 
 import { Input } from "./ui/input";
+import { useFipModal } from "./FipModal";
 
 type SettingsTab = "profile" | "bank" | "nominee" | "security";
 
 export default function SettingsPage() {
+  const { showAlert, showConfirm, ModalComponent } = useFipModal();
   const [activeSubTab, setActiveSubTab] = useState<SettingsTab>("profile");
 
   // Load current user details
   const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
-  
+
   // Predefined or saved user info
   const initialName = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "Dharsh" : loggedInMobile === "9491841941" ? "Finpages" : loggedInMobile === "7893863597" ? "purna" : "Rahul Kumar") : "Rahul Kumar";
   const initialKyc = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_kyc_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "full kyc" : loggedInMobile === "9491841941" ? "Min Kyc" : loggedInMobile === "7893863597" ? "pending" : "full kyc") : "full kyc";
   const initialEmail = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || `${initialName.toLowerCase().replace(/\s+/g, "")}@fipmoney.com` : "rahul@fipmoney.com";
+  const initialUsername = typeof window !== 'undefined' ? localStorage.getItem(`fm_username_${loggedInMobile}`) || initialName.toLowerCase().replace(/\s+/g, "") : initialName.toLowerCase().replace(/\s+/g, "");
+  const initialBio = typeof window !== 'undefined' ? localStorage.getItem(`fm_bio_${loggedInMobile}`) || "Investor. Passionate about wealth compounding in digital assets." : "Investor. Passionate about wealth compounding in digital assets.";
+  const initialJobTitle = typeof window !== 'undefined' ? localStorage.getItem(`fm_job_title_${loggedInMobile}`) || "Investor" : "Investor";
+  const initialIncomeRange = typeof window !== 'undefined' ? localStorage.getItem(`fm_income_range_${loggedInMobile}`) || "5to10" : "5to10";
 
   // Form Fields
   const [fullName, setFullName] = useState(initialName);
-  const [username, setUsername] = useState(initialName.toLowerCase().replace(/\s+/g, ""));
+  const [username, setUsername] = useState(initialUsername);
   const [website, setWebsite] = useState("fipmoney.com");
   const [email, setEmail] = useState(initialEmail);
   const [mobileNumber, setMobileNumber] = useState(loggedInMobile);
-  const [bio, setBio] = useState("Investor. Passionate about wealth compounding in digital assets.");
-  const [jobTitle, setJobTitle] = useState("Investor");
-  const [incomeRange, setIncomeRange] = useState("5to10");
+  const [bio, setBio] = useState(initialBio);
+  const [jobTitle, setJobTitle] = useState(initialJobTitle);
+  const [incomeRange, setIncomeRange] = useState(initialIncomeRange);
   const [sourceOfFunds, setSourceOfFunds] = useState("salary");
-  
+
+  // OTP Verification Modal states for email and mobile (current -> new verification flow)
+  const [changeFieldType, setChangeFieldType] = useState<"email" | "mobile" | null>(null);
+  const [changeStep, setChangeStep] = useState<1 | 2 | 3>(1);
+  const [currentVerifyOtp, setCurrentVerifyOtp] = useState("");
+  const [newValueInput, setNewValueInput] = useState("");
+  const [newVerifyOtp, setNewVerifyOtp] = useState("");
+
   // KYC States
   const [kycStatus, setKycStatus] = useState(initialKyc);
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [videoStep, setVideoStep] = useState<"connecting" | "intro" | "pan" | "verifying" | "done">("connecting");
-  
+
   // Aadhaar & PAN verification states
-  const [aadhaarNumber, setAadhaarNumber] = useState("");
-  const [panNumber, setPanNumber] = useState("");
-  const [aadhaarVerified, setAadhaarVerified] = useState(false);
-  const [panVerified, setPanVerified] = useState(false);
+  const [aadhaarVerified, setAadhaarVerified] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min"));
+  const [panVerified, setPanVerified] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min"));
+  const [aadhaarNumber, setAadhaarNumber] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min") ? "489218249419" : "");
+  const [panNumber, setPanNumber] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min") ? "ABCDE1234F" : "");
   const [aadhaarOtp, setAadhaarOtp] = useState("");
   const [showAadhaarOtp, setShowAadhaarOtp] = useState(false);
   const [isLinkingAadhaar, setIsLinkingAadhaar] = useState(false);
   const [isLinkingPan, setIsLinkingPan] = useState(false);
-  
+
   // Bank details
   const [bankName, setBankName] = useState("HDFC Bank");
   const [accountNumber, setAccountNumber] = useState("50100438290123");
@@ -74,12 +87,11 @@ export default function SettingsPage() {
     // Personal Details (max 40)
     if (fullName.trim()) { score += 10; details.push("Full Name added"); }
     if (username.trim()) { score += 10; details.push("Username added"); }
-    if (email.trim()) { score += 10; details.push("Email added"); }
-    if (bio.trim()) { score += 10; details.push("Bio summary completed"); }
+    if (email.trim()) { score += 10; details.push("Email verified"); }
+    if (mobileNumber.trim()) { score += 10; details.push("Mobile number verified"); }
 
     // Professional & Income (max 20)
-    if (jobTitle.trim()) { score += 10; details.push("Job title added"); }
-    if (incomeRange) { score += 10; details.push("Income range declared"); }
+    if (incomeRange) { score += 20; details.push("Income range declared"); }
 
     // Bank Account Link (max 20)
     if (bankName.trim() && accountNumber.trim() && ifscCode.trim()) {
@@ -104,6 +116,12 @@ export default function SettingsPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem(`fm_user_name_${loggedInMobile}`, fullName);
         localStorage.setItem(`fm_user_email_${loggedInMobile}`, email);
+        localStorage.setItem(`fm_user_mobile_${loggedInMobile}`, mobileNumber);
+        localStorage.setItem(`fm_username_${loggedInMobile}`, username);
+        localStorage.setItem(`fm_bio_${loggedInMobile}`, bio);
+        localStorage.setItem(`fm_job_title_${loggedInMobile}`, jobTitle);
+        localStorage.setItem(`fm_income_range_${loggedInMobile}`, incomeRange);
+        sessionStorage.setItem("fm_logged_in_name", fullName);
       }
       setIsSaving(false);
       setSaveSuccess(true);
@@ -111,10 +129,64 @@ export default function SettingsPage() {
     }, 1500);
   };
 
+  const handleVerifyCurrentOtp = () => {
+    if (currentVerifyOtp === "123456") {
+      setChangeStep(2);
+      setNewValueInput("");
+      showAlert("Current contact ownership verified. Please enter your new details.", "success", "Step 1 Verified");
+    } else {
+      showAlert("Incorrect OTP. Please enter 123456 to verify.", "error", "Verification Error");
+    }
+  };
+
+  const handleSendNewOtp = () => {
+    if (!newValueInput) {
+      showAlert(`Please enter a valid new ${changeFieldType}.`, "warning", "Input Required");
+      return;
+    }
+    if (changeFieldType === "email" && !newValueInput.includes("@")) {
+      showAlert("Please enter a valid email address.", "warning", "Invalid Input");
+      return;
+    }
+    if (changeFieldType === "mobile" && newValueInput.replace(/\D/g, "").length !== 10) {
+      showAlert("Please enter a valid 10-digit mobile number.", "warning", "Invalid Input");
+      return;
+    }
+    setChangeStep(3);
+    setNewVerifyOtp("");
+  };
+
+  const handleVerifyNewOtp = () => {
+    if (newVerifyOtp === "123456") {
+      if (changeFieldType === "email") {
+        setEmail(newValueInput);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`fm_user_email_${loggedInMobile}`, newValueInput);
+        }
+        showAlert("Email address updated successfully!", "success", "Verified & Saved");
+      } else if (changeFieldType === "mobile") {
+        const cleanMobile = newValueInput.replace(/\D/g, "");
+        setMobileNumber(cleanMobile);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`fm_user_mobile_${loggedInMobile}`, cleanMobile);
+          sessionStorage.setItem("fm_logged_in_mobile", cleanMobile);
+        }
+        showAlert("Mobile number updated successfully!", "success", "Verified & Saved");
+      }
+      setChangeFieldType(null);
+      setChangeStep(1);
+      setCurrentVerifyOtp("");
+      setNewValueInput("");
+      setNewVerifyOtp("");
+    } else {
+      showAlert("Incorrect OTP. Please enter 123456 to verify.", "error", "Verification Error");
+    }
+  };
+
   const startVideoKyc = () => {
     setVideoStep("connecting");
     setShowVideoCall(true);
-    
+
     const t1 = setTimeout(() => setVideoStep("intro"), 2500);
     const t2 = setTimeout(() => setVideoStep("pan"), 6500);
     const t3 = setTimeout(() => setVideoStep("verifying"), 11000);
@@ -173,9 +245,11 @@ export default function SettingsPage() {
   };
 
   const handleRemovePhoto = () => {
-    if (confirm("Are you sure you want to remove your profile photo?")) {
-      setAvatar("");
-    }
+    showConfirm(
+      "Are you sure you want to remove your profile photo?",
+      () => setAvatar(""),
+      { title: "Remove Photo", confirmText: "Remove", cancelText: "Keep" }
+    );
   };
 
   const handleUploadPhoto = () => {
@@ -186,17 +260,18 @@ export default function SettingsPage() {
   };
 
   return (
+    <>
     <div className="flex-1 h-screen overflow-y-auto bg-[#fafbfc]">
       <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8 pb-24 lg:pb-10">
-        
+
         {/* Title */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h1>
             <p className="text-xs text-gray-400 font-semibold mt-1">Manage your financial profile and account configurations</p>
           </div>
-          
-          <button 
+
+          <button
             onClick={handleSave}
             disabled={isSaving}
             className="px-6 py-3 rounded-xl text-white text-xs font-black shadow-[0_4px_14px_rgba(184,115,18,0.2)] hover:shadow-[0_6px_20px_rgba(184,115,18,0.3)] hover:-translate-y-0.5 disabled:bg-gray-300 disabled:shadow-none disabled:translate-y-0 cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2"
@@ -220,14 +295,14 @@ export default function SettingsPage() {
         {/* Sub Navigation Tabs (Underline Layout with Framer Motion) */}
         <div className="flex border-b border-gray-200 overflow-x-auto hide-scrollbar">
           {[
-            { id: "profile",  label: "Profile Details" },
-            { id: "bank",     label: "Bank Account" },
-            { id: "nominee",  label: "Nominee Setup" },
+            { id: "profile", label: "Profile Details" },
+            { id: "bank", label: "Bank Account" },
+            { id: "nominee", label: "Nominee Setup" },
             { id: "security", label: "Security & KYC" }
           ].map((tab) => {
             const active = activeSubTab === tab.id;
             return (
-              <button 
+              <button
                 key={tab.id}
                 onClick={() => setActiveSubTab(tab.id as SettingsTab)}
                 className={`relative px-5 py-3 text-sm font-semibold transition-all cursor-pointer outline-none border-none bg-transparent whitespace-nowrap
@@ -235,9 +310,9 @@ export default function SettingsPage() {
               >
                 {tab.label}
                 {active && (
-                  <motion.div 
+                  <motion.div
                     layoutId="activeSubTabLine"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500" 
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500"
                   />
                 )}
               </button>
@@ -247,13 +322,13 @@ export default function SettingsPage() {
 
         {/* 2-Column Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* LEFT: Live Form Column */}
           <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] border border-gray-150 shadow-[0_10px_30px_rgba(0,0,0,0.015)] space-y-6">
-            
+
             <AnimatePresence mode="wait">
               {activeSubTab === "profile" && (
-                <motion.div 
+                <motion.div
                   key="profile"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -275,8 +350,8 @@ export default function SettingsPage() {
                         <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
                           fipmoney.com/
                         </span>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={username}
                           onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
                           className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"
@@ -295,8 +370,8 @@ export default function SettingsPage() {
                         <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
                           https://
                         </span>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           value={website}
                           onChange={(e) => setWebsite(e.target.value)}
                           className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"
@@ -320,13 +395,13 @@ export default function SettingsPage() {
                         </div>
                       )}
                       <div className="flex gap-4">
-                        <button 
+                        <button
                           onClick={handleRemovePhoto}
                           className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer outline-none"
                         >
                           Delete
                         </button>
-                        <button 
+                        <button
                           onClick={handleUploadPhoto}
                           className="text-xs font-bold text-amber-600 hover:text-amber-800 transition-colors bg-transparent border-none cursor-pointer outline-none"
                         >
@@ -339,11 +414,11 @@ export default function SettingsPage() {
                   {/* Full Name Row */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
                     <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                      <label className="text-sm font-semibold text-gray-700">Full Name as per PAN</label>
                     </div>
                     <div className="md:col-span-8">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
@@ -356,13 +431,26 @@ export default function SettingsPage() {
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Email Address</label>
                     </div>
-                    <div className="md:col-span-8">
-                      <input 
-                        type="email" 
+                    <div className="md:col-span-8 flex gap-3 max-w-lg items-center">
+                      <input
+                        type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                        readOnly
+                        className="flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 outline-none select-none cursor-not-allowed"
                       />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setChangeFieldType("email");
+                          setChangeStep(1);
+                          setCurrentVerifyOtp("");
+                          setNewValueInput("");
+                          setNewVerifyOtp("");
+                        }}
+                        className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0"
+                      >
+                        Change
+                      </button>
                     </div>
                   </div>
 
@@ -371,48 +459,86 @@ export default function SettingsPage() {
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Mobile Number</label>
                     </div>
-                    <div className="md:col-span-8">
-                      <input 
-                        type="tel" 
+                    <div className="md:col-span-8 flex gap-3 max-w-lg items-center">
+                      <input
+                        type="tel"
                         value={mobileNumber}
-                        onChange={(e) => setMobileNumber(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                        readOnly
+                        className="flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 outline-none select-none cursor-not-allowed"
                       />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setChangeFieldType("mobile");
+                          setChangeStep(1);
+                          setCurrentVerifyOtp("");
+                          setNewValueInput("");
+                          setNewVerifyOtp("");
+                        }}
+                        className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0"
+                      >
+                        Change
+                      </button>
                     </div>
                   </div>
 
-                  {/* Bio Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-5 border-b border-gray-100">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Your bio</label>
-                      <span className="block text-xs text-gray-400 mt-1 font-semibold">Write a short introduction.</span>
-                    </div>
-                    <div className="md:col-span-8 space-y-1">
-                      <textarea 
-                        rows={4}
-                        value={bio}
-                        maxLength={300}
-                        onChange={(e) => setBio(e.target.value)}
-                        className="w-full max-w-xl px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm resize-none leading-relaxed"
-                      />
-                      <div className="text-right text-[10px] font-semibold text-gray-400">
-                        {300 - bio.length} characters remaining
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Job Title Row */}
+                  {/* Masked PAN Row */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
                     <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Job title</label>
+                      <label className="text-sm font-semibold text-gray-700">Permanent Account Number (PAN)</label>
                     </div>
                     <div className="md:col-span-8">
-                      <input 
-                        type="text" 
-                        value={jobTitle}
-                        onChange={(e) => setJobTitle(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
-                      />
+                      {panVerified ? (
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                            XXXXX{panNumber.slice(-5, -1)}{panNumber.slice(-1)}
+                          </span>
+                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            Linked & Verified
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-red-500">Not Verified / Linked</span>
+                          <button
+                            type="button"
+                            onClick={() => setActiveSubTab("security")}
+                            className="text-xs font-black text-amber-500 hover:text-amber-600 bg-transparent border-none cursor-pointer outline-none"
+                          >
+                            Link PAN Now &rarr;
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Masked Aadhaar Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Aadhaar Number</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      {aadhaarVerified ? (
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                            XXXX XXXX {aadhaarNumber.slice(-4)}
+                          </span>
+                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            Linked & Verified
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-red-500">Not Verified / Linked</span>
+                          <button
+                            type="button"
+                            onClick={() => setActiveSubTab("security")}
+                            className="text-xs font-black text-amber-500 hover:text-amber-600 bg-transparent border-none cursor-pointer outline-none"
+                          >
+                            Link Aadhaar Now &rarr;
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -423,8 +549,8 @@ export default function SettingsPage() {
                     </div>
                     <div className="md:col-span-8">
                       <div className="relative max-w-lg">
-                        <select 
-                          value={incomeRange} 
+                        <select
+                          value={incomeRange}
                           onChange={(e) => setIncomeRange(e.target.value)}
                           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all cursor-pointer appearance-none shadow-sm"
                         >
@@ -444,7 +570,7 @@ export default function SettingsPage() {
               )}
 
               {activeSubTab === "bank" && (
-                <motion.div 
+                <motion.div
                   key="bank"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -462,8 +588,8 @@ export default function SettingsPage() {
                       <label className="text-sm font-semibold text-gray-700">Bank Name</label>
                     </div>
                     <div className="md:col-span-8">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={bankName}
                         onChange={(e) => setBankName(e.target.value)}
                         className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
@@ -477,8 +603,8 @@ export default function SettingsPage() {
                       <label className="text-sm font-semibold text-gray-700">Account Number</label>
                     </div>
                     <div className="md:col-span-8">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={accountNumber}
                         onChange={(e) => setAccountNumber(e.target.value)}
                         className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
@@ -492,8 +618,8 @@ export default function SettingsPage() {
                       <label className="text-sm font-semibold text-gray-700">IFSC Code</label>
                     </div>
                     <div className="md:col-span-8">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={ifscCode}
                         onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
                         className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
@@ -504,7 +630,7 @@ export default function SettingsPage() {
               )}
 
               {activeSubTab === "nominee" && (
-                <motion.div 
+                <motion.div
                   key="nominee"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -522,8 +648,8 @@ export default function SettingsPage() {
                       <label className="text-sm font-semibold text-gray-700">Nominee Name</label>
                     </div>
                     <div className="md:col-span-8">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={nomineeName}
                         placeholder="Enter Nominee Name"
                         onChange={(e) => setNomineeName(e.target.value)}
@@ -539,8 +665,8 @@ export default function SettingsPage() {
                     </div>
                     <div className="md:col-span-8">
                       <div className="relative max-w-lg">
-                        <select 
-                          value={nomineeRelation} 
+                        <select
+                          value={nomineeRelation}
                           onChange={(e) => setNomineeRelation(e.target.value)}
                           className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all cursor-pointer appearance-none shadow-sm"
                         >
@@ -563,8 +689,8 @@ export default function SettingsPage() {
                       <label className="text-sm font-semibold text-gray-700">Nominee Date of Birth</label>
                     </div>
                     <div className="md:col-span-8">
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         value={nomineeDob}
                         onChange={(e) => setNomineeDob(e.target.value)}
                         className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
@@ -575,7 +701,7 @@ export default function SettingsPage() {
               )}
 
               {activeSubTab === "security" && (
-                <motion.div 
+                <motion.div
                   key="security"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -613,7 +739,7 @@ export default function SettingsPage() {
                           <AlertCircle size={12} /> KYC IS PENDING
                         </span>
                       </div>
-                      
+
                       <div className="bg-amber-50/40 rounded-2xl p-5 border border-amber-100/50 space-y-5">
                         <div>
                           <h5 className="text-xs font-bold text-gray-700">Link Aadhaar & PAN</h5>
@@ -630,16 +756,16 @@ export default function SettingsPage() {
                           ) : (
                             <div className="space-y-3">
                               <div className="flex gap-2">
-                                <Input 
-                                  type="text" 
+                                <Input
+                                  type="text"
                                   maxLength={12}
-                                  value={aadhaarNumber} 
-                                  onChange={e => setAadhaarNumber(e.target.value.replace(/\D/g,""))}
-                                  placeholder="Enter 12-digit Aadhaar Number" 
+                                  value={aadhaarNumber}
+                                  onChange={e => setAadhaarNumber(e.target.value.replace(/\D/g, ""))}
+                                  placeholder="Enter 12-digit Aadhaar Number"
                                   className="rounded-xl text-xs font-semibold bg-white"
                                   disabled={isLinkingAadhaar || showAadhaarOtp}
                                 />
-                                <button 
+                                <button
                                   onClick={handleVerifyAadhaar}
                                   disabled={aadhaarNumber.length !== 12 || isLinkingAadhaar}
                                   className="bg-amber-500 hover:bg-amber-600 disabled:bg-gray-250 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-none shrink-0"
@@ -647,20 +773,20 @@ export default function SettingsPage() {
                                   {isLinkingAadhaar ? "Sending..." : "Link"}
                                 </button>
                               </div>
-                              
+
                               {showAadhaarOtp && (
                                 <div className="bg-white p-3 rounded-xl border border-gray-100 space-y-2.5 shadow-sm max-w-sm">
                                   <p className="text-[10px] font-bold text-amber-600 animate-pulse">✓ OTP sent to your registered UIDAI mobile number</p>
                                   <div className="flex gap-2">
-                                    <Input 
+                                    <Input
                                       type="text"
                                       maxLength={6}
-                                      value={aadhaarOtp} 
-                                      onChange={e => setAadhaarOtp(e.target.value.replace(/\D/g,""))}
-                                      placeholder="Enter 6-digit OTP (123456)" 
+                                      value={aadhaarOtp}
+                                      onChange={e => setAadhaarOtp(e.target.value.replace(/\D/g, ""))}
+                                      placeholder="Enter 6-digit OTP (123456)"
                                       className="rounded-xl text-xs font-semibold bg-white"
                                     />
-                                    <button 
+                                    <button
                                       onClick={handleVerifyAadhaarOtp}
                                       disabled={aadhaarOtp.length < 6 || isLinkingAadhaar}
                                       className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer border-none"
@@ -683,16 +809,16 @@ export default function SettingsPage() {
                             </div>
                           ) : (
                             <div className="flex gap-2">
-                              <Input 
-                                type="text" 
+                              <Input
+                                type="text"
                                 maxLength={10}
-                                value={panNumber} 
+                                value={panNumber}
                                 onChange={e => setPanNumber(e.target.value.toUpperCase())}
-                                placeholder="Enter 10-char PAN (e.g. ABCDE1234F)" 
+                                placeholder="Enter 10-char PAN (e.g. ABCDE1234F)"
                                 className="rounded-xl text-xs font-semibold bg-white"
                                 disabled={isLinkingPan}
                               />
-                              <button 
+                              <button
                                 onClick={handleVerifyPan}
                                 disabled={panNumber.length !== 10 || isLinkingPan}
                                 className="bg-amber-500 hover:bg-amber-600 disabled:bg-gray-250 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-none shrink-0"
@@ -726,27 +852,27 @@ export default function SettingsPage() {
                           <AlertCircle size={12} /> MIN KYC COMPLETED
                         </span>
                       </div>
-                      
+
                       {/* Stepper for Full KYC upgrade */}
                       <div className="bg-amber-50/40 rounded-2xl p-5 border border-amber-100/50 space-y-4">
                         <div>
                           <h5 className="text-xs font-bold text-gray-700">Upgrade to Full KYC</h5>
                           <p className="text-[11px] text-gray-400 font-semibold mt-0.5 font-sans">Full KYC requires Min KYC details + a quick video verification call.</p>
                         </div>
-                        
+
                         <div className="relative pl-6 border-l-2 border-dashed border-amber-200/60 space-y-4 py-1">
                           <div className="relative">
                             <div className="absolute -left-[31px] top-0 w-4.5 h-4.5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[8px] font-black">✓</div>
                             <p className="text-xs font-extrabold text-gray-800">1. Link PAN & Aadhaar (Completed)</p>
                             <p className="text-[10px] text-gray-500 font-semibold">Verified against National Securities Depository portal.</p>
                           </div>
-                          
+
                           <div className="relative">
                             <div className="absolute -left-[31px] top-0 w-4.5 h-4.5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[8px] font-black">2</div>
                             <p className="text-xs font-extrabold text-gray-800">2. Video Call Verification (Pending)</p>
                             <p className="text-[10px] text-gray-500 font-semibold">Join a 2-minute secure live call with a verification officer.</p>
-                            
-                            <button 
+
+                            <button
                               onClick={startVideoKyc}
                               className="mt-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-4 py-2.5 rounded-xl transition-all cursor-pointer outline-none border-none shadow-sm flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0"
                             >
@@ -830,34 +956,34 @@ export default function SettingsPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-            
+
           </div>
 
           {/* RIGHT: Completion Status Indicator Sidebar Card */}
           <div className="lg:col-span-4 space-y-6">
-            
+
             {/* Completion Percentage card */}
             <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-150 shadow-[0_10px_30px_rgba(0,0,0,0.015)] flex flex-col items-center text-center">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Profile Completion</h3>
-              
+
               {/* Radial Circle progress bar (Fixed viewBox and overflow values to prevent clipping) */}
               <div className="relative w-36 h-36 flex items-center justify-center p-1">
                 <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90 overflow-visible">
-                  <circle 
-                    cx="60" 
-                    cy="60" 
-                    r="50" 
-                    stroke="#f1f5f9" 
-                    strokeWidth="8" 
-                    fill="transparent" 
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    stroke="#f1f5f9"
+                    strokeWidth="8"
+                    fill="transparent"
                   />
-                  <circle 
-                    cx="60" 
-                    cy="60" 
-                    r="50" 
-                    stroke="url(#goldGradient)" 
-                    strokeWidth="8" 
-                    fill="transparent" 
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="50"
+                    stroke="url(#goldGradient)"
+                    strokeWidth="8"
+                    fill="transparent"
                     strokeDasharray={2 * Math.PI * 50}
                     strokeDashoffset={2 * Math.PI * 50 * (1 - percentage / 100)}
                     strokeLinecap="round"
@@ -878,11 +1004,11 @@ export default function SettingsPage() {
 
               <div className="mt-6 space-y-2">
                 <h4 className="text-xs font-extrabold text-gray-800">
-                  {percentage === 100 
-                    ? "Perfect Profile Score! 🎉" 
-                    : percentage >= 80 
-                    ? "Profile is almost ready!" 
-                    : "Complete your profile details"}
+                  {percentage === 100
+                    ? "Perfect Profile Score! 🎉"
+                    : percentage >= 80
+                      ? "Profile is almost ready!"
+                      : "Complete your profile details"}
                 </h4>
                 <p className="text-[11px] font-semibold text-gray-400 leading-normal px-2">
                   {percentage === 100
@@ -895,7 +1021,7 @@ export default function SettingsPage() {
               {/* Progress checklist detail items */}
               <div className="w-full mt-6 pt-5 border-t border-gray-100 text-left space-y-3">
                 <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider block mb-2">Registry Checklist</span>
-                
+
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
@@ -903,7 +1029,7 @@ export default function SettingsPage() {
                   </div>
                   <span className="text-gray-400 text-[10px] font-bold">40%</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
@@ -962,13 +1088,13 @@ export default function SettingsPage() {
       {/* Video KYC Call Overlay */}
       <AnimatePresence>
         {showVideoCall && (
-          <motion.div 
+          <motion.div
             className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.div 
+            <motion.div
               className="bg-[#0f172a] text-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl relative border border-slate-850 flex flex-col h-[520px]"
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
@@ -1005,13 +1131,13 @@ export default function SettingsPage() {
                         </div>
                       </div>
                       <p className="text-xs font-bold text-slate-300 mt-3">Sarah (KYC Officer)</p>
-                      
+
                       {/* Voice waveform mockup */}
                       {videoStep !== "verifying" && videoStep !== "done" && (
                         <div className="flex gap-1 items-end h-6 mt-4">
                           {[0, 1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (
-                            <motion.div 
-                              key={i} 
+                            <motion.div
+                              key={i}
                               className="w-0.5 bg-amber-500 rounded-full"
                               animate={{ height: [4, h * 4, 4] }}
                               transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.05 }}
@@ -1043,7 +1169,7 @@ export default function SettingsPage() {
                         )}
                       </div>
                       <p className="text-xs font-bold text-slate-300 mt-3">{fullName}</p>
-                      
+
                       {/* Framing Overlay box */}
                       {videoStep === "pan" ? (
                         <div className="absolute inset-4 border-2 border-dashed border-amber-500/50 rounded-xl flex items-center justify-center pointer-events-none">
@@ -1071,8 +1197,8 @@ export default function SettingsPage() {
 
               {/* Footer action bar */}
               <div className="bg-[#1e293b] px-6 py-4 flex items-center justify-between border-t border-slate-850">
-                <button 
-                  onClick={cancelVideoKyc} 
+                <button
+                  onClick={cancelVideoKyc}
                   disabled={videoStep === "done"}
                   className="bg-transparent text-slate-400 hover:text-white hover:bg-slate-850 disabled:opacity-50 text-xs font-extrabold px-4 py-2.5 rounded-xl transition-all cursor-pointer outline-none border border-slate-700 flex items-center gap-1.5"
                 >
@@ -1080,7 +1206,7 @@ export default function SettingsPage() {
                 </button>
 
                 {videoStep === "done" ? (
-                  <button 
+                  <button
                     onClick={() => setShowVideoCall(false)}
                     className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black px-6 py-2.5 rounded-xl transition-all cursor-pointer outline-none border-none shadow-md"
                   >
@@ -1098,5 +1224,158 @@ export default function SettingsPage() {
       </AnimatePresence>
 
     </div>
+
+    {/* Email / Mobile Change Verification Modal */}
+    <AnimatePresence>
+      {changeFieldType !== null && (
+        <motion.div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="bg-white text-slate-800 rounded-3xl p-6 max-w-md w-full relative border border-slate-100 shadow-2xl space-y-5"
+            initial={{ scale: 0.95, y: 10 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.95, y: 10 }}
+          >
+            <div>
+              <h3 className="text-lg font-black text-slate-900 capitalize">
+                Change {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
+              </h3>
+              <p className="text-xs text-gray-400 font-semibold mt-1">
+                {changeStep === 1 && "Step 1: Cross-verify your current identity."}
+                {changeStep === 2 && "Step 2: Enter your new details."}
+                {changeStep === 3 && "Step 3: Verify your new details."}
+              </p>
+            </div>
+
+            {changeStep === 1 && (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Verify Current {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
+                  </label>
+                  <p className="text-[11px] font-bold text-amber-600 leading-normal bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
+                    🔑 Verification OTP sent to current detail: {changeFieldType === "email" ? email : mobileNumber}. Enter 123456.
+                  </p>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={currentVerifyOtp}
+                    onChange={(e) => setCurrentVerifyOtp(e.target.value.replace(/\D/g, ""))}
+                    placeholder="Enter 6-digit OTP"
+                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChangeFieldType(null);
+                      setCurrentVerifyOtp("");
+                    }}
+                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleVerifyCurrentOtp}
+                    disabled={currentVerifyOtp.length !== 6}
+                    className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm"
+                  >
+                    Next &rarr;
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {changeStep === 2 && (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    New {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
+                  </label>
+                  <input
+                    type={changeFieldType === "email" ? "email" : "tel"}
+                    value={newValueInput}
+                    onChange={(e) => setNewValueInput(e.target.value)}
+                    placeholder={changeFieldType === "email" ? "name@example.com" : "Enter 10-digit number"}
+                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChangeFieldType(null);
+                      setChangeStep(1);
+                      setCurrentVerifyOtp("");
+                    }}
+                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSendNewOtp}
+                    className="flex-1 py-3 rounded-xl text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm"
+                    style={{ background: "linear-gradient(135deg, #b87312, #efb652)" }}
+                  >
+                    Send OTP
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {changeStep === 3 && (
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Verify New {changeFieldType === "email" ? "Email" : "Mobile"}
+                  </label>
+                  <p className="text-[11px] font-bold text-amber-600 leading-normal bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
+                    🔑 OTP sent to new address: {newValueInput}. Enter 123456.
+                  </p>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={newVerifyOtp}
+                    onChange={(e) => setNewVerifyOtp(e.target.value.replace(/\D/g, ""))}
+                    placeholder="Enter 6-digit OTP"
+                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setChangeStep(2)}
+                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleVerifyNewOtp}
+                    disabled={newVerifyOtp.length !== 6}
+                    className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm"
+                  >
+                    Verify & Change
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {ModalComponent}
+    </>
   );
 }

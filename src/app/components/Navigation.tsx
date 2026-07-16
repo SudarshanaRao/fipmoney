@@ -23,12 +23,11 @@ interface NavProps {
 }
 
 export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
-  <div className="hidden lg:flex w-64 bg-[#f8f9fc] flex-col py-8 px-5 shrink-0 border-r border-gray-100 h-screen sticky top-0">
-    <div className="flex items-center gap-3 mb-10 px-2">
-      <div className="w-12 h-12 flex items-center justify-center shrink-0">
-        <img src={fipMoneyLogo} alt="FM" className="w-11 h-11 object-contain hover:scale-105 transition-transform" />
-      </div>
-      <span className="text-xl font-bold text-gray-800 tracking-tight">Fipmoney</span>
+  <>
+  <div className="hidden lg:flex w-64 bg-[#f8f9fc] flex-col py-5 px-3.5 shrink-0 border-r border-gray-100 h-screen sticky top-0">
+    <div className="flex items-center gap-2 mb-5 px-1">
+      <img src={fipMoneyLogo} alt="FM" className="w-16 h-16 object-contain hover:scale-105 transition-transform shrink-0" />
+      <span className="text-2xl font-black text-gray-900 tracking-tight">Fipmoney</span>
     </div>
 
     <div className="flex flex-col gap-2 flex-1">
@@ -47,12 +46,22 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
     </div>
 
     <div className="mt-auto pt-6">
-      <button onClick={onLogout} className="flex items-center gap-4 px-4 py-3 w-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 rounded-xl transition-all font-semibold text-sm bg-transparent border-none outline-none cursor-pointer">
-        <LogOut size={18} strokeWidth={2} />
-        Log out
+      <button 
+        onClick={onLogout} 
+        className="flex items-center gap-4 px-4 py-3.5 w-full text-white bg-gradient-to-r from-red-600 via-rose-600 to-red-800 hover:from-red-500 hover:via-rose-500 hover:to-red-700 border-none rounded-xl transition-all duration-300 font-extrabold text-sm outline-none cursor-pointer shadow-[0_4px_14px_rgba(225,29,72,0.35)] hover:shadow-[0_6px_20px_rgba(225,29,72,0.5)] relative overflow-hidden group"
+      >
+        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:animate-[sidebarShine_1.5s_ease-in-out_infinite]" />
+        <LogOut size={18} strokeWidth={2.5} className="text-white drop-shadow-sm" />
+        <span className="drop-shadow-sm">Log out</span>
       </button>
     </div>
   </div>
+  <style dangerouslySetInnerHTML={{ __html: `
+    @keyframes sidebarShine {
+      100% { transform: translateX(100%); }
+    }
+  `}} />
+  </>
 );
 
 export const MobileNav = ({ activeTab, onTabChange }: Omit<NavProps, "onLogout">) => (

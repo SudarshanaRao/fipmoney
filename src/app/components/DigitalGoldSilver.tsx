@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Switch } from "./ui/switch";
 import { Input } from "./ui/input";
+import { useFipModal } from "./FipModal";
 
 interface DigitalGoldSilverProps {
   onNavigate: (page: string) => void;
@@ -46,27 +47,28 @@ const DELIVERY_PRODUCTS = [
 ];
 
 export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGoldSilverProps) {
+  const { showAlert, ModalComponent } = useFipModal();
   const [metal, setMetal] = useState<"gold" | "silver">("gold");
   const [txType, setTxType] = useState<"buy" | "sell">("buy");
   const [timeframe, setTimeframe] = useState<TimeFrame>("1D");
-  
+
   // Dynamic inputs
   const [amount, setAmount] = useState<string>("");
   const [grams, setGrams] = useState<string>("");
-  
+
   // Security locks & simulated live prices
   const [vaultLocked, setVaultLocked] = useState<boolean>(false);
   const [goldPrice, setGoldPrice] = useState<number>(6420.50);
   const [silverPrice, setSilverPrice] = useState<number>(84.20);
-  
+
   // User simulated holdings
   const [goldHoldings, setGoldHoldings] = useState<number>(12.4502);
   const [silverHoldings, setSilverHoldings] = useState<number>(340.2005);
-  
+
   // Calculator inputs
   const [calcMonthly, setCalcMonthly] = useState<number>(1000);
   const [calcYears, setCalcYears] = useState<number>(3);
-  
+
   // Checkout & physical delivery flow
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [txSuccess, setTxSuccess] = useState<boolean>(false);
@@ -155,24 +157,24 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   // Handle transaction submit
   const handleTransaction = async () => {
     if (isKycPending) {
-      alert("Verification Pending. Please upgrade your KYC settings to start transacting.");
+      showAlert("Verification Pending. Please upgrade your KYC settings to start transacting.", "warning", "KYC Required");
       return;
     }
 
     const numAmount = Number(amount);
     if (txType === "buy") {
       if (numAmount + buyUsed > dailyBuyLimit) {
-        alert(`Transaction blocks: This exceeds your daily KYC purchase limit of ₹${dailyBuyLimit.toLocaleString()}.`);
+        showAlert(`This exceeds your daily KYC purchase limit of ₹${dailyBuyLimit.toLocaleString()}.`, "error", "Transaction Blocked");
         return;
       }
     } else {
       if (vaultLocked) return;
       if (Number(grams) > holdings) {
-        alert(`Insufficient vault holdings. You only have ${holdings.toFixed(4)}g.`);
+        showAlert(`Insufficient vault holdings. You only have ${holdings.toFixed(4)}g.`, "error", "Insufficient Holdings");
         return;
       }
       if (numAmount > dailySellLimit) {
-        alert(`Transaction blocks: This exceeds your daily KYC sell limit of ₹${dailySellLimit.toLocaleString()}.`);
+        showAlert(`This exceeds your daily KYC sell limit of ₹${dailySellLimit.toLocaleString()}.`, "error", "Transaction Blocked");
         return;
       }
     }
@@ -205,12 +207,12 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
     const monthlyAmt = calcMonthly;
     const months = calcYears * 12;
     let totalInvested = monthlyAmt * months;
-    
+
     // Future value of SIP formula
     let futureValue = 0;
     const monthlyRate = rate / 12;
     futureValue = monthlyAmt * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
-    
+
     return {
       invested: totalInvested,
       projected: Math.round(futureValue),
@@ -224,7 +226,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const activeDataset = metal === "gold" ? GOLD_DATASETS[timeframe] : SILVER_DATASETS[timeframe];
   const chartWidth = 500;
   const chartHeight = 150;
-  
+
   const minVal = Math.min(...activeDataset);
   const maxVal = Math.max(...activeDataset);
   const valRange = maxVal - minVal || 1;
@@ -248,12 +250,12 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   // Handle Physical Delivery Redemption
   const handleRedeemProduct = (prod: any) => {
     if (isKycPending) {
-      alert("Verification Pending. Please upgrade your KYC settings to link physical addresses.");
+      showAlert("Verification Pending. Please upgrade your KYC settings to link physical addresses.", "warning", "KYC Required");
       return;
     }
     const userHoldings = prod.metal === "gold" ? goldHoldings : silverHoldings;
     if (userHoldings < prod.reqHoldings) {
-      alert(`Insufficient holdings. You need at least ${prod.reqHoldings}g of digital ${prod.metal} in your vault to redeem this.`);
+      showAlert(`Insufficient holdings. You need at least ${prod.reqHoldings}g of digital ${prod.metal} in your vault to redeem this.`, "error", "Cannot Redeem");
       return;
     }
     setActiveDelivery(prod);
@@ -276,9 +278,10 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   };
 
   return (
+    <>
     <div className="flex-1 h-screen overflow-y-auto bg-slate-50 text-slate-800">
       <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8 pb-28">
-        
+
         {/* Dynamic KYC Warning Banner */}
         {isKycPending ? (
           <div className="bg-red-50 border border-red-200 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
@@ -293,7 +296,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 </p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => onNavigate("settings")}
               className="bg-red-500 hover:bg-red-600 text-white text-xs font-black px-5 py-3 rounded-2xl transition-all cursor-pointer border-none shrink-0"
             >
@@ -311,7 +314,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 </p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => onNavigate("settings")}
               className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0"
             >
@@ -329,22 +332,22 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
             </div>
             <h1 className="text-3xl md:text-4xl font-black tracking-tight mt-2 text-slate-900">Digital Gold & Silver Assets</h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => setMetal("gold")}
               className={`px-4 py-2.5 rounded-2xl text-xs font-black transition-all border outline-none cursor-pointer
-                ${metal === "gold" 
-                  ? "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20" 
+                ${metal === "gold"
+                  ? "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20"
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}
             >
               🪙 24K Pure Gold
             </button>
-            <button 
+            <button
               onClick={() => setMetal("silver")}
               className={`px-4 py-2.5 rounded-2xl text-xs font-black transition-all border outline-none cursor-pointer
-                ${metal === "silver" 
-                  ? "bg-slate-500 text-white border-slate-500 shadow-md shadow-slate-500/20" 
+                ${metal === "silver"
+                  ? "bg-slate-500 text-white border-slate-500 shadow-md shadow-slate-500/20"
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}
             >
               🥈 99.9% Silver
@@ -386,10 +389,10 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
         {/* Main Grid Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Left Area: Live Market Rates & Interactive Graph */}
           <div className="lg:col-span-8 space-y-8">
-            
+
             {/* Live Chart Container */}
             <Card className="bg-white border-slate-100 rounded-[2rem] overflow-hidden text-slate-800 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
               <div className="p-6 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -407,7 +410,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 {/* Timeframe Controls */}
                 <div className="bg-slate-100 p-1 rounded-xl border border-slate-200 flex gap-1">
                   {(["1D", "1W", "1M", "1Y", "5Y"] as TimeFrame[]).map((tf) => (
-                    <button 
+                    <button
                       key={tf}
                       onClick={() => setTimeframe(tf)}
                       className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wider transition-all border-none outline-none cursor-pointer
@@ -430,8 +433,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   </defs>
 
                   {/* Gradient Area */}
-                  <motion.path 
-                    d={fillPath} 
+                  <motion.path
+                    d={fillPath}
                     fill="url(#chartGradient)"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -439,11 +442,11 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   />
 
                   {/* Stroke Line */}
-                  <motion.path 
-                    d={linePath} 
-                    fill="none" 
-                    stroke={metal === "gold" ? "#d97706" : "#475569"} 
-                    strokeWidth="3" 
+                  <motion.path
+                    d={linePath}
+                    fill="none"
+                    stroke={metal === "gold" ? "#d97706" : "#475569"}
+                    strokeWidth="3"
                     strokeLinecap="round"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
@@ -451,13 +454,13 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   />
 
                   {/* Endpoint marker dot */}
-                  <circle 
-                    cx={chartWidth} 
-                    cy={chartHeight - ((activeDataset[activeDataset.length - 1] - minVal) / valRange) * (chartHeight - 30) - 15} 
-                    r="4" 
-                    fill={metal === "gold" ? "#d97706" : "#475569"} 
-                    stroke="#ffffff" 
-                    strokeWidth="2" 
+                  <circle
+                    cx={chartWidth}
+                    cy={chartHeight - ((activeDataset[activeDataset.length - 1] - minVal) / valRange) * (chartHeight - 30) - 15}
+                    r="4"
+                    fill={metal === "gold" ? "#d97706" : "#475569"}
+                    stroke="#ffffff"
+                    strokeWidth="2"
                   />
                 </svg>
               </div>
@@ -499,12 +502,12 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                       <span>Monthly investment amount</span>
                       <span className="text-amber-600 font-extrabold">₹{calcMonthly.toLocaleString()}</span>
                     </div>
-                    <input 
-                      type="range" 
-                      min="500" 
-                      max="20000" 
+                    <input
+                      type="range"
+                      min="500"
+                      max="20000"
                       step="500"
-                      value={calcMonthly} 
+                      value={calcMonthly}
                       onChange={(e) => setCalcMonthly(Number(e.target.value))}
                       className="w-full accent-amber-500 h-1 bg-slate-200 rounded-lg cursor-pointer"
                     />
@@ -539,7 +542,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                       <span className="text-emerald-600">₹{projection.growth.toLocaleString()}</span>
                     </div>
                   </div>
-                  
+
                   <div className="border-t border-slate-200 pt-3.5 mt-3.5">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Estimated Portfolio Value</span>
                     <span className="text-2xl font-black text-amber-600">₹{projection.projected.toLocaleString()}</span>
@@ -566,9 +569,9 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 {DELIVERY_PRODUCTS.map((prod) => {
                   const userHoldings = prod.metal === "gold" ? goldHoldings : silverHoldings;
                   const isEligible = userHoldings >= prod.reqHoldings;
-                  
+
                   return (
-                    <div 
+                    <div
                       key={prod.id}
                       className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between hover:border-slate-200 transition-all text-center relative overflow-hidden"
                     >
@@ -583,11 +586,11 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                         <span className="text-xs font-black text-amber-600">{prod.reqHoldings} g</span>
                       </div>
 
-                      <button 
+                      <button
                         onClick={() => handleRedeemProduct(prod)}
                         className={`w-full mt-3 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer border-none outline-none
-                          ${isEligible 
-                            ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/10" 
+                          ${isEligible
+                            ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/10"
                             : "bg-slate-200 text-slate-500 hover:bg-slate-250"}`}
                       >
                         {isEligible ? "Redeem Item" : "Buy to Unlock"}
@@ -602,19 +605,19 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
           {/* Right Area: Transaction Console, Lock, Limits */}
           <div className="lg:col-span-4 space-y-8">
-            
+
             {/* Unified Transaction Box */}
             <Card className="bg-white border-slate-100 rounded-[2rem] p-6 text-slate-800 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between">
               <div>
                 <div className="flex gap-4 border-b border-slate-100 pb-4 mb-6">
-                  <button 
+                  <button
                     onClick={() => { setTxType("buy"); setAmount(""); setGrams(""); }}
                     className={`text-xs font-black tracking-wider uppercase pb-2 bg-transparent cursor-pointer outline-none border-none transition-colors
                       ${txType === "buy" ? "text-amber-600 border-b-2 border-amber-500" : "text-slate-400 hover:text-slate-650"}`}
                   >
                     Buy Asset
                   </button>
-                  <button 
+                  <button
                     onClick={() => { setTxType("sell"); setAmount(""); setGrams(""); }}
                     className={`text-xs font-black tracking-wider uppercase pb-2 bg-transparent cursor-pointer outline-none border-none transition-colors
                       ${txType === "sell" ? "text-amber-600 border-b-2 border-amber-500" : "text-slate-400 hover:text-slate-650"}`}
@@ -630,7 +633,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     <div>
                       <p className="font-extrabold text-red-900">KYC Verification Required</p>
                       <p className="text-[11px] text-red-700/85 mt-1">Please complete Aadhaar and PAN verification under configurations to unlock buy/sell capabilities.</p>
-                      <button 
+                      <button
                         onClick={() => onNavigate("settings")}
                         className="mt-3 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black py-1.5 px-3 rounded-lg border-none cursor-pointer outline-none"
                       >
@@ -654,8 +657,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Investment amount (INR)</label>
                     <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
-                      <Input 
-                        type="text" 
+                      <Input
+                        type="text"
                         value={amount}
                         onChange={(e) => handleAmountChange(e.target.value)}
                         placeholder="0"
@@ -668,8 +671,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Weight equivalent (grams)</label>
                     <div className="relative">
-                      <Input 
-                        type="text" 
+                      <Input
+                        type="text"
                         value={grams}
                         onChange={(e) => handleGramsChange(e.target.value)}
                         placeholder="0.0000"
@@ -702,14 +705,14 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                       <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase">
                         <span>Used Daily Limit:</span>
                         <span>
-                          {txType === "buy" 
+                          {txType === "buy"
                             ? `₹${(Number(amount) || 0).toLocaleString()} / ₹${dailyBuyLimit.toLocaleString()}`
                             : `₹${(Number(amount) || 0).toLocaleString()} / ₹${dailySellLimit.toLocaleString()}`
                           }
                         </span>
                       </div>
                       <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="bg-amber-500 h-full rounded-full transition-all duration-350"
                           style={{
                             width: `${Math.min(100, (((Number(amount) || 0) / (txType === "buy" ? dailyBuyLimit : dailySellLimit)) * 100))}%`
@@ -722,13 +725,13 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
               </div>
 
               {/* Action trigger button */}
-              <button 
+              <button
                 onClick={handleTransaction}
                 disabled={isKycPending || isProcessing || !amount || Number(amount) <= 0 || (txType === "sell" && vaultLocked)}
                 className="w-full py-4 mt-6 rounded-2xl font-black text-xs uppercase tracking-widest transition-all outline-none border-none shadow-md cursor-pointer flex items-center justify-center gap-2"
                 style={{
                   background: (isKycPending || !amount || Number(amount) <= 0 || (txType === "sell" && vaultLocked))
-                    ? "#cbd5e1" 
+                    ? "#cbd5e1"
                     : txType === "buy" ? "#10b981" : "linear-gradient(135deg, #b87312, #efb652)",
                   color: (isKycPending || !amount || Number(amount) <= 0 || (txType === "sell" && vaultLocked)) ? "#94a3b8" : "white"
                 }}
@@ -765,7 +768,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <Clock size={14} /> Vault Statement Log
               </h3>
-              
+
               <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin scrollbar-thumb-slate-200">
                 {transactions.map((tx, idx) => (
                   <div key={idx} className="flex justify-between items-center p-3 bg-slate-50/50 rounded-xl border border-slate-100">
@@ -779,7 +782,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                         <p className="text-[9px] text-slate-400 font-semibold">{tx.date} • {tx.grams}</p>
                       </div>
                     </div>
-                    
+
                     <div className="text-right">
                       <p className="text-[11px] font-black text-slate-700">{tx.amount}</p>
                       <span className="text-[8px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
@@ -800,13 +803,13 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
       {/* Checkout Processing Overlay Dialog */}
       <AnimatePresence>
         {isProcessing && (
-          <motion.div 
+          <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.div 
+            <motion.div
               className="bg-white text-slate-800 rounded-3xl p-8 max-w-sm w-full text-center space-y-6 shadow-2xl border border-slate-100"
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
@@ -827,13 +830,13 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
       {/* Transaction Success Overlay Dialog */}
       <AnimatePresence>
         {txSuccess && (
-          <motion.div 
+          <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.div 
+            <motion.div
               className="bg-white text-slate-800 rounded-3xl p-8 max-w-sm w-full text-center space-y-6 shadow-2xl border border-slate-100"
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
@@ -847,8 +850,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 <p className="text-xs text-emerald-600 font-semibold bg-emerald-50 py-2 px-3 rounded-lg border border-emerald-100 inline-block">{successMsg}</p>
                 <p className="text-[10px] text-slate-400 font-bold block pt-2">TX Ref: {lastTxId} • Audited Vault Secure</p>
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={() => setTxSuccess(false)}
                 className="w-full bg-[#111827] text-white hover:bg-black py-3 rounded-xl font-bold text-xs"
               >
@@ -862,21 +865,21 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
       {/* Doorstep Physical Delivery Dialog */}
       <AnimatePresence>
         {activeDelivery && (
-          <motion.div 
+          <motion.div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.div 
+            <motion.div
               className="bg-white text-slate-800 rounded-3xl p-6 max-w-md w-full relative border border-slate-100 shadow-2xl space-y-5"
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
             >
               {/* Close Button */}
-              <button 
-                onClick={() => setActiveDelivery(null)} 
+              <button
+                onClick={() => setActiveDelivery(null)}
                 className="absolute right-4 top-4 bg-transparent border-none text-slate-400 hover:text-slate-800 cursor-pointer outline-none"
               >
                 <X size={18} />
@@ -899,7 +902,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     <h4 className="text-xs font-black text-slate-950">Redemption Successful!</h4>
                     <p className="text-[10px] text-slate-400 leading-normal mt-1">Your coins have been securely packed and dispatched. Track your delivery via SMS code in 24 hours.</p>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setActiveDelivery(null)}
                     className="w-full bg-[#111827] text-white py-3 rounded-xl font-bold text-xs"
                   >
@@ -915,10 +918,10 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Shipping Address</label>
-                    <textarea 
+                    <textarea
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
-                      placeholder="Enter full shipping address with PIN code..." 
+                      placeholder="Enter full shipping address with PIN code..."
                       rows={3}
                       className="w-full p-3.5 bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 rounded-xl focus:outline-none focus:border-amber-500 resize-none"
                     />
@@ -928,7 +931,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     ⚠️ Physical delivery requests will permanently reduce your vault virtual holdings. Insured transit packaging fee is sponsored by MMTC-PAMP.
                   </div>
 
-                  <Button 
+                  <Button
                     disabled={!deliveryAddress || isProcessing}
                     onClick={submitDeliveryRequest}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5"
@@ -944,12 +947,15 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
       </AnimatePresence>
 
       {/* Transactions list mockup */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .scrollbar-thin::-webkit-scrollbar { width: 5px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9px; }
       `}} />
 
     </div>
+    {ModalComponent}
+    </>
   );
 }

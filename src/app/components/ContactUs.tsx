@@ -8,6 +8,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card } from "./ui/card";
+import { useFipModal } from "./FipModal";
 
 interface ContactUsProps {
   onBack: () => void;
@@ -48,6 +49,7 @@ const FAQItem = ({ question, answer, delay = 0 }) => (
 );
 
 export default function ContactUs({ onBack }: ContactUsProps) {
+  const { showAlert, ModalComponent } = useFipModal();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -62,10 +64,10 @@ export default function ContactUs({ onBack }: ContactUsProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     setIsSubmitting(false);
     // Reset form
     setFormData({
@@ -76,8 +78,8 @@ export default function ContactUs({ onBack }: ContactUsProps) {
       category: '',
       message: ''
     });
-    
-    alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+
+    showAlert("Thank you for your message! We'll get back to you within 24 hours.", "success", "Message Sent");
   };
 
   const contactMethods = [
@@ -136,6 +138,7 @@ export default function ContactUs({ onBack }: ContactUsProps) {
   ];
 
   return (
+    <>
     <motion.div
       className="min-h-screen bg-white"
       initial={{ opacity: 0 }}
@@ -187,14 +190,14 @@ export default function ContactUs({ onBack }: ContactUsProps) {
               We're Here to{" "}
               <span className="gradient-text">Help You</span>
             </motion.h2>
-            
+
             <motion.p
               className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
             >
-              Have questions about digital gold investment? Need support with your account? 
+              Have questions about digital gold investment? Need support with your account?
               Our dedicated team is ready to assist you with anything you need.
             </motion.p>
 
@@ -242,7 +245,7 @@ export default function ContactUs({ onBack }: ContactUsProps) {
             >
               <Card className="p-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h3>
-                
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
@@ -364,7 +367,7 @@ export default function ContactUs({ onBack }: ContactUsProps) {
             >
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">Our Office</h3>
-                
+
                 <div className="space-y-6">
                   {offices.map((office, index) => (
                     <motion.div
@@ -376,18 +379,18 @@ export default function ContactUs({ onBack }: ContactUsProps) {
                       viewport={{ once: true }}
                     >
                       <h4 className="font-semibold text-gray-900 mb-3 text-lg">{office.city}</h4>
-                      
+
                       <div className="space-y-2">
                         <div className="flex items-start space-x-3">
                           <MapPin className="w-4 h-4 text-[#ffbf00] mt-1 flex-shrink-0" />
                           <span className="text-gray-600 text-sm">{office.address}</span>
                         </div>
-                        
+
                         <div className="flex items-center space-x-3">
                           <Phone className="w-4 h-4 text-[#ffbf00]" />
                           <span className="text-gray-600 text-sm">{office.phone}</span>
                         </div>
-                        
+
                         <div className="flex items-center space-x-3">
                           <Mail className="w-4 h-4 text-[#ffbf00]" />
                           <span className="text-gray-600 text-sm">{office.email}</span>
@@ -431,5 +434,7 @@ export default function ContactUs({ onBack }: ContactUsProps) {
         </div>
       </section>
     </motion.div>
+    {ModalComponent}
+    </>
   );
 }
