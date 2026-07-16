@@ -72,6 +72,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           { label: "Electricity", Icon: Zap, color: "#eab308", bg: "#fef08a" },
           { label: "Mobile Postpaid", Icon: FileText, color: "#8b5cf6", bg: "#f3e8ff" },
           { label: "Broadband", Icon: Wifi, color: "#06b6d4", bg: "#cffafe" },
+          { label: "Tuition Fees", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
           { label: "Education Fees", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
           { label: "Rent", Icon: Home, color: "#14b8a6", bg: "#ccfbf1" },
         ]
@@ -139,7 +140,18 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             <div className="absolute right-0 bottom-0 w-24 h-24 bg-gray-50 rounded-tl-full -mr-4 -mb-4 opacity-50 pointer-events-none" />
           </div>
 
-          {kycStatus.toLowerCase().includes("full") ? (
+          {kycStatus.toLowerCase() === "pending" ? (
+            <div 
+              onClick={() => setTab("settings")}
+              className="bg-red-50 rounded-3xl p-5 border border-red-100 shadow-sm flex items-start gap-3 cursor-pointer hover:bg-red-100/50 transition-colors"
+            >
+              <AlertCircle size={20} color="#dc2626" className="shrink-0 mt-0.5 animate-pulse" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-red-800 leading-relaxed">Identity KYC Pending</p>
+                <p className="text-xs font-semibold text-red-700 leading-relaxed mt-0.5">Please link your Aadhaar and PAN under profile settings to activate vault transactions.</p>
+              </div>
+            </div>
+          ) : kycStatus.toLowerCase().includes("full") ? (
             <div className="bg-[#ecfdf5] rounded-3xl p-5 border border-[#d1fae5] shadow-sm flex items-start gap-3">
               <CheckCircle2 size={20} color={POS} className="shrink-0 mt-0.5" />
               <p className="text-sm font-semibold text-[#065f46] leading-relaxed">You are successfully done with Full KYC. Now you can avail all premium services.</p>
@@ -265,7 +277,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   <div className="flex justify-between items-end">
                     <div>
                       <div className="text-[9px] uppercase tracking-wider opacity-80 mb-0.5">Card Holder name</div>
-                      <div className="text-sm font-bold tracking-wide">RAHUL KUMAR</div>
+                      <div className="text-sm font-bold tracking-wide">{userName.toUpperCase()}</div>
                     </div>
                     <div>
                       <div className="text-[9px] uppercase tracking-wider opacity-80 mb-0.5">Expiry Date</div>
@@ -299,7 +311,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   <div className="w-full h-10 bg-white/95 flex items-center justify-between px-4 text-black font-mono rounded-sm shadow-inner relative overflow-hidden">
                      {/* Signature Pattern */}
                      <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 1px, transparent 10px)" }} />
-                     <span className="relative z-10 font-bold italic text-gray-700 text-sm tracking-wide">Rahul Kumar</span>
+                     <span className="relative z-10 font-bold italic text-gray-700 text-sm tracking-wide">{userName}</span>
                      <span className="relative z-10 font-bold bg-amber-500 text-white px-2 py-0.5 rounded shadow-sm text-sm font-mono tracking-wider">
                        732
                      </span>

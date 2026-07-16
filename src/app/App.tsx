@@ -18,7 +18,6 @@ import HelpCenter from "./components/HelpCenter";
 import ContactUs from "./components/ContactUs";
 import SecurityCenter from "./components/SecurityCenter";
 import Blog from "./components/Blog";
-import SIPCalculator from "./components/SIPCalculator";
 import Chatbot from "./components/Chatbot";
 import FAQs from "./components/FAQs";
 import BuyGold from "./components/BuyGold";
@@ -29,13 +28,12 @@ import DigitalSilver from "./components/DigitalSilver";
 import RoundOff from "./components/RoundOff";
 import Loans from "./components/Loans";
 import GoldLoanCalculator from "./components/GoldLoanCalculator";
-import StepUpSIPCalculator from "./components/StepUpSIPCalculator";
-import GoldSIPCalculator from "./components/GoldSIPCalculator";
 import HowTos from "./components/HowTos";
 import GuideReader from "./components/GuideReader";
 import AuthFlow from "./components/AuthFlow";
 import Dashboard from "./components/Dashboard";
 import RechargeDetails from "./components/RechargeDetails";
+import BillShowcaseSection from "./components/BillShowcaseSection";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide';
 
@@ -228,9 +226,8 @@ export default function App() {
       case 'blog':
         return <Blog onBack={navigateToHome} />;
       case 'sip-calculator':
-        return <SIPCalculator onBack={navigateToHome} />;
       case 'gold-sip-calculator':
-        return <GoldSIPCalculator onBack={navigateToHome} />;
+        return <ComingSoonPage title="SIP Services Retired" onBack={navigateToHome} />;
       case 'faqs':
         return <FAQs onBack={navigateToHome} />;
       
@@ -254,7 +251,7 @@ export default function App() {
       case 'gold-loan-calculator':
         return <GoldLoanCalculator onBack={navigateToHome} />;
       case 'step-up-sip-calculator':
-        return <StepUpSIPCalculator onBack={navigateToHome} />;
+        return <ComingSoonPage title="Step Up SIP Retired" onBack={navigateToHome} />;
       case 'growth-calculator':
         return <ComingSoonPage title="Growth Calculator" onBack={navigateToHome} />;
       case 'retirement-calculator':
@@ -301,7 +298,10 @@ export default function App() {
               <HowItWorksSection />
 
               {/* Features Section */}
-              <FeaturesSection onNavigateToCalculator={() => navigateToPage('gold-sip-calculator')} />
+              <FeaturesSection onNavigateToCalculator={() => navigateToPage('gold-loan-calculator')} />
+
+              {/* Bill Showcase Section */}
+              <BillShowcaseSection onNavigate={navigateToPage} />
 
               {/* Testimonials Section */}
               <TestimonialsSection />

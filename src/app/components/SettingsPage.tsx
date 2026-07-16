@@ -8,6 +8,8 @@ import {
   Shield, Check, HelpCircle, PhoneOff, Camera, Video, Loader2
 } from "lucide-react";
 
+import { Input } from "./ui/input";
+
 type SettingsTab = "profile" | "bank" | "nominee" | "security";
 
 export default function SettingsPage() {
@@ -17,8 +19,8 @@ export default function SettingsPage() {
   const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
   
   // Predefined or saved user info
-  const initialName = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "Dharsh" : loggedInMobile === "9491841941" ? "Finpages" : "Rahul Kumar") : "Rahul Kumar";
-  const initialKyc = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_kyc_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "full kyc" : loggedInMobile === "9491841941" ? "Min Kyc" : "full kyc") : "full kyc";
+  const initialName = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "Dharsh" : loggedInMobile === "9491841941" ? "Finpages" : loggedInMobile === "7893863597" ? "purna" : "Rahul Kumar") : "Rahul Kumar";
+  const initialKyc = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_kyc_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "full kyc" : loggedInMobile === "9491841941" ? "Min Kyc" : loggedInMobile === "7893863597" ? "pending" : "full kyc") : "full kyc";
   const initialEmail = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || `${initialName.toLowerCase().replace(/\s+/g, "")}@fipmoney.com` : "rahul@fipmoney.com";
 
   // Form Fields
@@ -36,6 +38,16 @@ export default function SettingsPage() {
   const [kycStatus, setKycStatus] = useState(initialKyc);
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [videoStep, setVideoStep] = useState<"connecting" | "intro" | "pan" | "verifying" | "done">("connecting");
+  
+  // Aadhaar & PAN verification states
+  const [aadhaarNumber, setAadhaarNumber] = useState("");
+  const [panNumber, setPanNumber] = useState("");
+  const [aadhaarVerified, setAadhaarVerified] = useState(false);
+  const [panVerified, setPanVerified] = useState(false);
+  const [aadhaarOtp, setAadhaarOtp] = useState("");
+  const [showAadhaarOtp, setShowAadhaarOtp] = useState(false);
+  const [isLinkingAadhaar, setIsLinkingAadhaar] = useState(false);
+  const [isLinkingPan, setIsLinkingPan] = useState(false);
   
   // Bank details
   const [bankName, setBankName] = useState("HDFC Bank");
@@ -122,6 +134,42 @@ export default function SettingsPage() {
       (window as any)._kycTimers.forEach((t: any) => clearTimeout(t));
     }
     setShowVideoCall(false);
+  };
+
+  const handleVerifyAadhaar = async () => {
+    if (aadhaarNumber.length !== 12) return;
+    setIsLinkingAadhaar(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsLinkingAadhaar(false);
+    setShowAadhaarOtp(true);
+  };
+
+  const handleVerifyAadhaarOtp = async () => {
+    if (aadhaarOtp.length < 6) return;
+    setIsLinkingAadhaar(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsLinkingAadhaar(false);
+    setAadhaarVerified(true);
+    setShowAadhaarOtp(false);
+    checkAndUpgradeToMinKyc(true, panVerified);
+  };
+
+  const handleVerifyPan = async () => {
+    if (panNumber.length !== 10) return;
+    setIsLinkingPan(true);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsLinkingPan(false);
+    setPanVerified(true);
+    checkAndUpgradeToMinKyc(aadhaarVerified, true);
+  };
+
+  const checkAndUpgradeToMinKyc = (av: boolean, pv: boolean) => {
+    if (av && pv) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`fm_user_kyc_${loggedInMobile}`, "Min Kyc");
+      }
+      setKycStatus("Min Kyc");
+    }
   };
 
   const handleRemovePhoto = () => {
@@ -553,7 +601,111 @@ export default function SettingsPage() {
                   </div>
 
                   {/* KYC Verification status */}
-                  {kycStatus.toLowerCase().includes("full") ? (
+                  {/* KYC Verification status */}
+                  {kycStatus.toLowerCase() === "pending" ? (
+                    <div className="py-5 border-b border-gray-100 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
+                          <p className="text-xs text-gray-400 mt-1 font-medium">Verify Aadhaar and PAN database linkage.</p>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-red-50 text-red-600 font-extrabold text-[10px] border border-red-100 flex items-center gap-1">
+                          <AlertCircle size={12} /> KYC IS PENDING
+                        </span>
+                      </div>
+                      
+                      <div className="bg-amber-50/40 rounded-2xl p-5 border border-amber-100/50 space-y-5">
+                        <div>
+                          <h5 className="text-xs font-bold text-gray-700">Link Aadhaar & PAN</h5>
+                          <p className="text-[11px] text-gray-400 font-semibold mt-0.5">Please provide your Aadhaar and PAN credentials to set up a Minimum KYC tier.</p>
+                        </div>
+
+                        {/* Aadhaar Linking Field */}
+                        <div className="space-y-2 border-b border-gray-100 pb-4">
+                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">1. 12-Digit Aadhaar Number</label>
+                          {aadhaarVerified ? (
+                            <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold py-1">
+                              <CheckCircle2 size={14} className="text-emerald-500 shrink-0" /> Aadhaar Linked Successfully (XXXX XXXX {aadhaarNumber.slice(-4)})
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <div className="flex gap-2">
+                                <Input 
+                                  type="text" 
+                                  maxLength={12}
+                                  value={aadhaarNumber} 
+                                  onChange={e => setAadhaarNumber(e.target.value.replace(/\D/g,""))}
+                                  placeholder="Enter 12-digit Aadhaar Number" 
+                                  className="rounded-xl text-xs font-semibold bg-white"
+                                  disabled={isLinkingAadhaar || showAadhaarOtp}
+                                />
+                                <button 
+                                  onClick={handleVerifyAadhaar}
+                                  disabled={aadhaarNumber.length !== 12 || isLinkingAadhaar}
+                                  className="bg-amber-500 hover:bg-amber-600 disabled:bg-gray-250 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-none shrink-0"
+                                >
+                                  {isLinkingAadhaar ? "Sending..." : "Link"}
+                                </button>
+                              </div>
+                              
+                              {showAadhaarOtp && (
+                                <div className="bg-white p-3 rounded-xl border border-gray-100 space-y-2.5 shadow-sm max-w-sm">
+                                  <p className="text-[10px] font-bold text-amber-600 animate-pulse">✓ OTP sent to your registered UIDAI mobile number</p>
+                                  <div className="flex gap-2">
+                                    <Input 
+                                      type="text"
+                                      maxLength={6}
+                                      value={aadhaarOtp} 
+                                      onChange={e => setAadhaarOtp(e.target.value.replace(/\D/g,""))}
+                                      placeholder="Enter 6-digit OTP (123456)" 
+                                      className="rounded-xl text-xs font-semibold bg-white"
+                                    />
+                                    <button 
+                                      onClick={handleVerifyAadhaarOtp}
+                                      disabled={aadhaarOtp.length < 6 || isLinkingAadhaar}
+                                      className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer border-none"
+                                    >
+                                      Verify
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* PAN Linking Field */}
+                        <div className="space-y-2 pt-2">
+                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">2. 10-Character PAN Number</label>
+                          {panVerified ? (
+                            <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold py-1">
+                              <CheckCircle2 size={14} className="text-emerald-500 shrink-0" /> PAN Verified Successfully ({panNumber.toUpperCase()})
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <Input 
+                                type="text" 
+                                maxLength={10}
+                                value={panNumber} 
+                                onChange={e => setPanNumber(e.target.value.toUpperCase())}
+                                placeholder="Enter 10-char PAN (e.g. ABCDE1234F)" 
+                                className="rounded-xl text-xs font-semibold bg-white"
+                                disabled={isLinkingPan}
+                              />
+                              <button 
+                                onClick={handleVerifyPan}
+                                disabled={panNumber.length !== 10 || isLinkingPan}
+                                className="bg-amber-500 hover:bg-amber-600 disabled:bg-gray-250 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-none shrink-0"
+                              >
+                                {isLinkingPan ? "Verifying..." : "Verify"}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    </div>
+                  ) : kycStatus.toLowerCase().includes("full") ? (
                     <div className="flex items-center justify-between py-5 border-b border-gray-100">
                       <div>
                         <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
@@ -605,6 +757,55 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* KYC Limits & Tiers Table */}
+                  <div className="bg-white rounded-2xl p-5 border border-gray-150 shadow-sm space-y-4">
+                    <div>
+                      <h4 className="text-xs font-black text-gray-800 uppercase tracking-wider">KYC Tiers & Storage Limits</h4>
+                      <p className="text-[10px] text-gray-400 font-semibold mt-0.5">Compare asset buying, daily transfers, and secure storage capacity.</p>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs font-semibold">
+                        <thead>
+                          <tr className="border-b border-gray-100 text-[10px] text-gray-450 font-bold uppercase tracking-wider">
+                            <th className="py-2.5 pr-2">Tier</th>
+                            <th className="py-2.5 pr-2">Buy Limit</th>
+                            <th className="py-2.5 pr-2">Transfer/Sell Limit</th>
+                            <th className="py-2.5">Max Vault Storage</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50 text-gray-700">
+                          <tr className={kycStatus === "pending" ? "bg-amber-50/45 text-amber-900 font-extrabold" : ""}>
+                            <td className="py-2.5 flex items-center gap-1.5 font-bold">
+                              {kycStatus === "pending" && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
+                              Pending KYC
+                            </td>
+                            <td className="py-2.5">₹0</td>
+                            <td className="py-2.5">₹0</td>
+                            <td className="py-2.5">0 g</td>
+                          </tr>
+                          <tr className={kycStatus === "Min Kyc" ? "bg-amber-50/45 text-amber-900 font-extrabold" : ""}>
+                            <td className="py-2.5 flex items-center gap-1.5 font-bold">
+                              {kycStatus === "Min Kyc" && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
+                              Minimum KYC
+                            </td>
+                            <td className="py-2.5">₹10,000 / txn</td>
+                            <td className="py-2.5">₹5,000 / day</td>
+                            <td className="py-2.5">50 g</td>
+                          </tr>
+                          <tr className={kycStatus === "full kyc" ? "bg-emerald-50/45 text-emerald-900 font-extrabold" : ""}>
+                            <td className="py-2.5 flex items-center gap-1.5 font-bold">
+                              {kycStatus === "full kyc" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                              Full KYC
+                            </td>
+                            <td className="py-2.5">Unlimited (₹25L/day)</td>
+                            <td className="py-2.5">Unlimited (₹10L/day)</td>
+                            <td className="py-2.5">1,000 g</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
 
                   {/* Logged in devices */}
                   <div className="py-2">

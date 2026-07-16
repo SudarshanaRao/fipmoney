@@ -23,7 +23,8 @@ type Step = "mobile" | "otp" | "profile" | "success";
 /* localStorage-based registration mock */
 const PREDEFINED_USERS = {
   "7013302191": { name: "Dharsh", kyc: "full kyc" },
-  "9491841941": { name: "Finpages", kyc: "Min Kyc" }
+  "9491841941": { name: "Finpages", kyc: "Min Kyc" },
+  "7893863597": { name: "purna", kyc: "pending" }
 };
 
 const REG_KEY = (m: string) => `fm_registered_${m}`;
@@ -172,6 +173,11 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
         localStorage.setItem("fm_registered_9491841941", "1");
         localStorage.setItem("fm_user_name_9491841941", "Finpages");
         localStorage.setItem("fm_user_kyc_9491841941", "Min Kyc");
+      }
+      if (!localStorage.getItem("fm_registered_7893863597")) {
+        localStorage.setItem("fm_registered_7893863597", "1");
+        localStorage.setItem("fm_user_name_7893863597", "purna");
+        localStorage.setItem("fm_user_kyc_7893863597", "pending");
       }
     }
   }, []);

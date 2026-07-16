@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calculator, Zap, Target, PiggyBank, TrendingUp, Shield, ExternalLink } from "lucide-react";
 import { Button } from "./ui/button";
-import SIPCalculator from "./SIPCalculator";
+import GoldLoanCalculator from "./GoldLoanCalculator";
 
 interface FeaturesSectionProps {
   onNavigateToCalculator?: () => void;
@@ -183,20 +183,11 @@ export default function FeaturesSection({ onNavigateToCalculator }: FeaturesSect
   const features = [
     {
       icon: Calculator,
-      title: "SIP Calculator",
-      description: "Plan your investments with our smart calculator and see potential returns.",
+      title: "Gold Loan Calculator",
+      description: "Estimate your loan eligibility and monthly payments against gold assets.",
       component: () => (
-        <div className="space-y-4">
-          <SIPCalculator embedded={true} />
-          <div className="text-center">
-            <Button
-              onClick={onNavigateToCalculator}
-              className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] text-white px-6 py-3 interactive-button"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open Full Calculator
-            </Button>
-          </div>
+        <div className="space-y-4 max-h-[500px] overflow-y-auto p-4 bg-white rounded-2xl border border-gray-150 shadow-inner">
+          <GoldLoanCalculator onBack={() => {}} />
         </div>
       ),
     },

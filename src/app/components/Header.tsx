@@ -93,9 +93,6 @@ export default function Header({ onNavigate }: HeaderProps) {
   ];
 
   const calculatorItems = [
-    { name: "Gold SIP Calculator", action: () => onNavigate?.('gold-sip-calculator'), icon: Calculator },
-    { name: "SIP Calculator", action: () => onNavigate?.('sip-calculator'), icon: Calculator },
-    { name: "Step Up SIP Calculator", action: () => onNavigate?.('step-up-sip-calculator'), icon: BarChart3 },
     { name: "Gold Loan Calculator", action: () => onNavigate?.('gold-loan-calculator'), icon: BarChart3 },
   ];
 
@@ -330,13 +327,6 @@ export default function Header({ onNavigate }: HeaderProps) {
                   onClick={() => handleDropdownItemClick(() => onNavigate?.('signup'))}
                 >
                   Start Investing Now
-                </Button>
-                <Button
-                  className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] text-white shadow-lg hover:shadow-xl transition-all duration-300 interactive-button"
-                  onClick={() => handleDropdownItemClick(() => onNavigate?.('gold-sip-calculator'))}
-                >
-                  <Calculator className="w-4 h-4 mr-2" />
-                  Start SIP
                 </Button>
               </div>
             </div>

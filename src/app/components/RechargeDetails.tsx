@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { 
   ChevronRight, Smartphone, Car, Tv, MonitorPlay, Flame, 
   Droplets, Zap, FileText, Wifi, GraduationCap, Home, Gift, Play,
-  Search, Shield, ChevronLeft, CheckCircle2
+  Search, Shield, ChevronLeft, CheckCircle2, Info
 } from "lucide-react";
 import { Sidebar, MobileNav } from "./Navigation";
 // @ts-ignore
@@ -14,6 +14,9 @@ const bbpsServices = [
   { label: "Mobile Prepaid", Icon: Smartphone, color: "#d89221", bg: "#fdf8f0" },
   { label: "Electricity", Icon: Zap, color: "#eab308", bg: "#fef08a" },
   { label: "DTH", Icon: Tv, color: "#f59e0b", bg: "#fef3c7" },
+  { label: "Tuition Fees", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
+  { label: "Education Fees", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
+  { label: "Rent", Icon: Home, color: "#14b8a6", bg: "#ccfbf1" },
   { label: "Mobile Postpaid", Icon: FileText, color: "#d89221", bg: "#fdf8f0" },
   { label: "Gas", Icon: Flame, color: "#f97316", bg: "#ffedd5" },
   { label: "LPG Gas", Icon: Flame, color: "#ef4444", bg: "#fee2e2" },
@@ -79,6 +82,14 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
   const [loadingPlans, setLoadingPlans] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Credit Card to Bank Transfer States
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientAccount, setRecipientAccount] = useState("");
+  const [recipientIfsc, setRecipientIfsc] = useState("");
+  const [ccNumber, setCcNumber] = useState("");
+  const [ccExpiry, setCcExpiry] = useState("");
+  const [ccCvv, setCcCvv] = useState("");
+
   // Search & Filter States
   const [activePlanTab, setActivePlanTab] = useState<string>("All");
   const [searchPlanQuery, setSearchPlanQuery] = useState<string>("");
@@ -100,10 +111,14 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
 
   const isMobile = billLabel ? billLabel.includes("Mobile") : false;
   const isPostpaid = billLabel ? billLabel.toLowerCase().includes("postpaid") : false;
+  const isCcToBank = billLabel ? ["Tuition Fees", "Education Fees", "Rent", "House Rent"].includes(billLabel) : false;
+  const selectedProvider = operators.find(op => op.operatorCode === operator);
+  const serviceParamLabel = selectedProvider?.customerParams?.[0]?.name || "Service Number";
 
-  // Fetch mobile operators list when active tab changes to a mobile recharge category
+  // Fetch operators/providers list when category is Mobile or Electricity
   useEffect(() => {
-    if (isMobile) {
+    const hasProviders = isMobile || billLabel === "Electricity";
+    if (hasProviders) {
       setLoadingOperators(true);
       setOperators([]);
       setRawPlansData(null);
@@ -113,24 +128,34 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
       setAmount("");
       setError(null);
 
-      fetch("https://api.mockfly.dev/mocks/f8eb65bd-22cf-4f70-9842-44afcbc6922b/mobile-recharge/operator")
+      const url = billLabel === "Electricity"
+        ? "https://api.mockfly.dev/mocks/f8eb65bd-22cf-4f70-9842-44afcbc6922b/electricity/providers"
+        : "https://api.mockfly.dev/mocks/f8eb65bd-22cf-4f70-9842-44afcbc6922b/mobile-recharge/operator";
+
+      fetch(url)
         .then((res) => {
-          if (!res.ok) throw new Error("Failed to fetch operators");
+          if (!res.ok) throw new Error("Failed to fetch providers");
           return res.json();
         })
         .then((data) => {
-          if (data.success && data.data) {
-            setOperators(data.data);
-            if (data.data.length > 0) {
-              setOperator(data.data[0].operatorCode);
+          if ((data.success || data.status) && data.data) {
+            const list = data.data.map((item: any) => ({
+              operatorId: item.id || item.operatorId,
+              operatorCode: item.providerCode || item.operatorCode,
+              operatorName: item.providerName || item.operatorName,
+              customerParams: item.customerParams
+            }));
+            setOperators(list);
+            if (list.length > 0) {
+              setOperator(list[0].operatorCode);
             }
           } else {
-            setError("Failed to fetch operator list.");
+            setError("Failed to fetch provider list.");
           }
         })
         .catch((err) => {
           console.error(err);
-          setError("Failed to connect to the operator service.");
+          setError("Failed to connect to the payment service.");
         })
         .finally(() => {
           setLoadingOperators(false);
@@ -251,7 +276,36 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
   };
 
   const handleProceedRecharge = () => {
-    if (isMobile) {
+    if (isCcToBank) {
+      if (!recipientName) {
+        alert("Please enter recipient account name.");
+        return;
+      }
+      if (!recipientAccount || recipientAccount.length < 8) {
+        alert("Please enter a valid recipient bank account number.");
+        return;
+      }
+      if (!recipientIfsc || recipientIfsc.length !== 11) {
+        alert("Please enter a valid 11-digit bank IFSC code.");
+        return;
+      }
+      if (!ccNumber || ccNumber.length !== 16) {
+        alert("Please enter a valid 16-digit Credit Card number.");
+        return;
+      }
+      if (!ccExpiry || !ccExpiry.includes("/")) {
+        alert("Please enter a valid card expiry (MM/YY).");
+        return;
+      }
+      if (!ccCvv || ccCvv.length !== 3) {
+        alert("Please enter a valid 3-digit CVV code.");
+        return;
+      }
+      if (!amount || parseInt(amount) <= 0) {
+        alert("Please enter a valid payment amount.");
+        return;
+      }
+    } else if (isMobile) {
       if (!operator) {
         alert("Please select an operator.");
         return;
@@ -596,14 +650,172 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                         </div>
                       </div>
                     </>
+                  ) : isCcToBank ? (
+                    // CREDIT CARD TO BANK TRANSFER FOR RENT/EDUCATION/TUITION
+                    <>
+                      <div className="space-y-4">
+                        <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 text-xs font-semibold text-blue-800 flex items-start gap-2.5">
+                          <Info size={16} className="text-blue-500 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="font-extrabold text-blue-900">Credit Card to Bank Transfer</p>
+                            <p className="text-[11px] text-blue-700 mt-0.5 leading-relaxed">Direct transfer to any bank account from your credit card. Charges: 1.8% convenience fee + 18% GST on fee.</p>
+                          </div>
+                        </div>
+
+                        {/* Recipient Details */}
+                        <div>
+                          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Recipient Account Name</label>
+                          <input 
+                            type="text" 
+                            placeholder="Enter Account Holder Name" 
+                            value={recipientName}
+                            onChange={(e) => setRecipientName(e.target.value)}
+                            className="w-full px-5 py-3.5 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white transition-all" 
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Account Number</label>
+                            <input 
+                              type="text" 
+                              placeholder="Bank Account No." 
+                              value={recipientAccount}
+                              onChange={(e) => setRecipientAccount(e.target.value.replace(/\D/g,""))}
+                              className="w-full px-5 py-3.5 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white transition-all" 
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Bank IFSC Code</label>
+                            <input 
+                              type="text" 
+                              placeholder="IFSC Code" 
+                              maxLength={11}
+                              value={recipientIfsc}
+                              onChange={(e) => setRecipientIfsc(e.target.value.toUpperCase())}
+                              className="w-full px-5 py-3.5 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white transition-all" 
+                            />
+                          </div>
+                        </div>
+
+                        {/* CC Details */}
+                        <div className="border-t border-slate-100 pt-4 space-y-4">
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Credit Card Number</label>
+                            <input 
+                              type="text" 
+                              maxLength={16}
+                              placeholder="Enter 16-digit Card Number" 
+                              value={ccNumber}
+                              onChange={(e) => setCcNumber(e.target.value.replace(/\D/g,""))}
+                              className="w-full px-5 py-3.5 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white transition-all" 
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Expiry (MM/YY)</label>
+                              <input 
+                                type="text" 
+                                maxLength={5}
+                                placeholder="MM/YY" 
+                                value={ccExpiry}
+                                onChange={(e) => setCcExpiry(e.target.value)}
+                                className="w-full px-5 py-3.5 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white transition-all" 
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">CVV</label>
+                              <input 
+                                type="password" 
+                                maxLength={3}
+                                placeholder="***" 
+                                value={ccCvv}
+                                onChange={(e) => setCcCvv(e.target.value.replace(/\D/g,""))}
+                                className="w-full px-5 py-3.5 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white transition-all" 
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Amount */}
+                        <div className="border-t border-slate-100 pt-4">
+                          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Transfer Amount</label>
+                          <div className="relative">
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-extrabold text-gray-400">₹</span>
+                            <input 
+                              type="text" 
+                              placeholder="Enter Amount" 
+                              value={amount}
+                              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+                              className="w-full pl-9 pr-5 py-3.5 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white transition-all" 
+                            />
+                          </div>
+                        </div>
+
+                        {/* Calculations Panel */}
+                        {amount && Number(amount) > 0 && (
+                          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs font-semibold space-y-2.5 text-slate-600 shadow-inner">
+                            <div className="flex justify-between">
+                              <span>Transfer Amount:</span>
+                              <span className="text-slate-800">₹{Number(amount).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Convenience Charge (1.8%):</span>
+                              <span className="text-slate-800">₹{(Number(amount) * 0.018).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>GST (18% on convenience fee):</span>
+                              <span className="text-slate-800">₹{(Number(amount) * 0.018 * 0.18).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between border-t border-slate-200/60 pt-2 font-bold text-slate-900">
+                              <span>Total Card Chargeable:</span>
+                              <span className="text-amber-600 font-extrabold">₹{(Number(amount) + (Number(amount) * 0.018) + (Number(amount) * 0.018 * 0.18)).toFixed(2)}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </>
                   ) : (
                     // GENERAL BBPS BILLS
                     <>
+                      {billLabel === "Electricity" && (
+                        <div>
+                          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Electricity Provider</label>
+                          {loadingOperators ? (
+                            <div className="w-full px-5 py-4 rounded-xl text-sm font-semibold text-gray-500 bg-gray-50 border border-gray-100 flex items-center gap-2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-500 border-t-transparent" />
+                              Loading providers...
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <select 
+                                value={operator} 
+                                onChange={(e) => setOperator(e.target.value)}
+                                className="w-full px-5 py-4 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-50 transition-all cursor-pointer appearance-none"
+                              >
+                                <option value="" disabled>Select Provider</option>
+                                {operators.map((op) => (
+                                  <option key={op.operatorCode} value={op.operatorCode}>
+                                    {op.operatorName}
+                                  </option>
+                                ))}
+                              </select>
+                              <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <ChevronRight size={16} className="rotate-90" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div>
-                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Account Number</label>
+                        <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">
+                          {billLabel === "Electricity" ? serviceParamLabel : "Account Number"}
+                        </label>
                         <input 
                           type="text" 
-                          placeholder={`Enter ${billLabel} Account ID`} 
+                          placeholder={billLabel === "Electricity" ? `Enter ${serviceParamLabel}` : `Enter ${billLabel} Account ID`} 
                           value={accountNumber}
                           onChange={(e) => setAccountNumber(e.target.value)}
                           className="w-full px-5 py-4 rounded-xl text-sm font-bold text-gray-800 bg-gray-50 border border-gray-100 outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-50 transition-all" 
@@ -789,6 +1001,44 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                       </div>
                     )}
                   </>
+                ) : isCcToBank ? (
+                  <div className="flex-1 bg-white rounded-2xl p-6 border border-gray-100 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+                        <Shield className="text-amber-500" size={18} /> Transfer Guidelines & Benefits
+                      </h3>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-sm">✓</div>
+                          <div>
+                            <h4 className="text-xs font-bold text-gray-800">Optimize Cash Liquidity</h4>
+                            <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">Use your credit card limits to handle essential costs like Rent, School Fees, or Tuition Fees instantly, and pay back in 45-50 days.</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-sm">✓</div>
+                          <div>
+                            <h4 className="text-xs font-bold text-gray-800">Earn Credit Card Rewards</h4>
+                            <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">Transactions count towards credit cards spends limits, helping you meet annual fee waivers and unlock standard credit reward points.</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-sm">✓</div>
+                          <div>
+                            <h4 className="text-xs font-bold text-gray-800">Direct Recipient Settlements</h4>
+                            <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">Funds are settled directly in the recipient's bank account via IMPS/NEFT within minutes of transaction clearance.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/60 text-[10px] text-slate-500 font-semibold leading-relaxed mt-6">
+                      <strong>Note on Settlement:</strong> Settlements are instant by default but can occasionally take up to 2 hours depending on recipient bank's network availability. BBPS secure guarantees credit protection.
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex-1 bg-[#f8fafc] rounded-2xl flex items-center justify-center p-8 text-center min-h-[200px] border border-gray-50">
                     <p className="text-sm font-semibold text-gray-500">

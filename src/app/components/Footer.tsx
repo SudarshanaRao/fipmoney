@@ -5,7 +5,7 @@ import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube } 
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 
 interface FooterProps {
-  onNavigate?: (page: 'home' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'gold-sip-calculator') => void;
+  onNavigate?: (page: 'home' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'gold-loan-calculator') => void;
 }
 
 const FooterSection = ({ title, children, delay = 0 }) => (
@@ -135,10 +135,10 @@ export default function Footer({ onNavigate }: FooterProps) {
           {/* Products */}
           <FooterSection title="Products" delay={0.1}>
             <div className="space-y-2">
-              <FooterLink href="#features">Digital Gold SIP</FooterLink>
+              <FooterLink href="#features">Digital Gold & Silver</FooterLink>
               <FooterLink href="#features">Goal-Based Savings</FooterLink>
               <FooterLink href="#features">Auto-Save Features</FooterLink>
-              <FooterLink href="/gold-sip-calculator" onClick={handleLinkClick('gold-sip-calculator')}>SIP Calculator</FooterLink>
+              <FooterLink href="/gold-loan-calculator" onClick={handleLinkClick('gold-loan-calculator')}>Gold Loan Calculator</FooterLink>
               <FooterLink href="#features">Gold Vault</FooterLink>
             </div>
           </FooterSection>
