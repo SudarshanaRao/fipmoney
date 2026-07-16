@@ -35,8 +35,9 @@ import HowTos from "./components/HowTos";
 import GuideReader from "./components/GuideReader";
 import AuthFlow from "./components/AuthFlow";
 import Dashboard from "./components/Dashboard";
+import RechargeDetails from "./components/RechargeDetails";
 
-type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide';
+type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide';
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -101,7 +102,13 @@ const ComingSoonPage = ({ title, onBack }: { title: string; onBack: () => void }
 );
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('home');
+  const [currentPage, setCurrentPage] = useState<PageType>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.slice(1);
+      return (path as PageType) || 'home';
+    }
+    return 'home';
+  });
   const [currentGuideId, setCurrentGuideId] = useState<string>('');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const homeScrollPosition = useRef(0);
@@ -202,6 +209,8 @@ export default function App() {
         return <AuthFlow onNavigate={navigateToPage} />;
       case 'dashboard':
         return <Dashboard onNavigate={navigateToPage} />;
+      case 'recharge-details':
+        return <RechargeDetails onBack={() => navigateToPage('dashboard')} />;
       case 'terms':
         return <TermsAndConditions onBack={navigateToHome} />;
       case 'privacy':
@@ -371,7 +380,7 @@ export default function App() {
               </div>
 
               {/* Footer — hidden on auth and dashboard pages */}
-              {!['login','signup','dashboard'].includes(currentPage) && (
+              {!['login','signup','dashboard','recharge-details'].includes(currentPage) && (
                 <Footer onNavigate={navigateToPage} />
               )}
             </div>

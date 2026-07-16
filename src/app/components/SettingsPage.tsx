@@ -1,0 +1,901 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  User, CreditCard, ShieldCheck, Heart, Sparkles, 
+  Trash2, Upload, CheckCircle2, AlertCircle, ChevronRight,
+  Shield, Check, HelpCircle, PhoneOff, Camera, Video, Loader2
+} from "lucide-react";
+
+type SettingsTab = "profile" | "bank" | "nominee" | "security";
+
+export default function SettingsPage() {
+  const [activeSubTab, setActiveSubTab] = useState<SettingsTab>("profile");
+
+  // Load current user details
+  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
+  
+  // Predefined or saved user info
+  const initialName = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "Dharsh" : loggedInMobile === "9491841941" ? "Finpages" : "Rahul Kumar") : "Rahul Kumar";
+  const initialKyc = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_kyc_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "full kyc" : loggedInMobile === "9491841941" ? "Min Kyc" : "full kyc") : "full kyc";
+  const initialEmail = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || `${initialName.toLowerCase().replace(/\s+/g, "")}@fipmoney.com` : "rahul@fipmoney.com";
+
+  // Form Fields
+  const [fullName, setFullName] = useState(initialName);
+  const [username, setUsername] = useState(initialName.toLowerCase().replace(/\s+/g, ""));
+  const [website, setWebsite] = useState("fipmoney.com");
+  const [email, setEmail] = useState(initialEmail);
+  const [mobileNumber, setMobileNumber] = useState(loggedInMobile);
+  const [bio, setBio] = useState("Investor. Passionate about wealth compounding in digital assets.");
+  const [jobTitle, setJobTitle] = useState("Investor");
+  const [incomeRange, setIncomeRange] = useState("5to10");
+  const [sourceOfFunds, setSourceOfFunds] = useState("salary");
+  
+  // KYC States
+  const [kycStatus, setKycStatus] = useState(initialKyc);
+  const [showVideoCall, setShowVideoCall] = useState(false);
+  const [videoStep, setVideoStep] = useState<"connecting" | "intro" | "pan" | "verifying" | "done">("connecting");
+  
+  // Bank details
+  const [bankName, setBankName] = useState("HDFC Bank");
+  const [accountNumber, setAccountNumber] = useState("50100438290123");
+  const [ifscCode, setIfscCode] = useState("HDFC0000104");
+
+  // Nominee Details
+  const [nomineeName, setNomineeName] = useState("");
+  const [nomineeRelation, setNomineeRelation] = useState("spouse");
+  const [nomineeDob, setNomineeDob] = useState("");
+
+  // Saving States
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Profile Avatar
+  const [avatar, setAvatar] = useState("https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&auto=format");
+
+  // Dynamically calculate completion percentage
+  const getCompletionStats = () => {
+    let score = 0;
+    const details = [];
+
+    // Personal Details (max 40)
+    if (fullName.trim()) { score += 10; details.push("Full Name added"); }
+    if (username.trim()) { score += 10; details.push("Username added"); }
+    if (email.trim()) { score += 10; details.push("Email added"); }
+    if (bio.trim()) { score += 10; details.push("Bio summary completed"); }
+
+    // Professional & Income (max 20)
+    if (jobTitle.trim()) { score += 10; details.push("Job title added"); }
+    if (incomeRange) { score += 10; details.push("Income range declared"); }
+
+    // Bank Account Link (max 20)
+    if (bankName.trim() && accountNumber.trim() && ifscCode.trim()) {
+      score += 20;
+      details.push("Bank account linked");
+    }
+
+    // Nominee Link (max 20)
+    if (nomineeName.trim() && nomineeDob.trim()) {
+      score += 20;
+      details.push("Nominee declared");
+    }
+
+    return { percentage: score, details };
+  };
+
+  const { percentage } = getCompletionStats();
+
+  const handleSave = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`fm_user_name_${loggedInMobile}`, fullName);
+        localStorage.setItem(`fm_user_email_${loggedInMobile}`, email);
+      }
+      setIsSaving(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    }, 1500);
+  };
+
+  const startVideoKyc = () => {
+    setVideoStep("connecting");
+    setShowVideoCall(true);
+    
+    const t1 = setTimeout(() => setVideoStep("intro"), 2500);
+    const t2 = setTimeout(() => setVideoStep("pan"), 6500);
+    const t3 = setTimeout(() => setVideoStep("verifying"), 11000);
+    const t4 = setTimeout(() => {
+      setVideoStep("done");
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`fm_user_kyc_${loggedInMobile}`, "full kyc");
+      }
+      setKycStatus("full kyc");
+    }, 15000);
+
+    (window as any)._kycTimers = [t1, t2, t3, t4];
+  };
+
+  const cancelVideoKyc = () => {
+    if ((window as any)._kycTimers) {
+      (window as any)._kycTimers.forEach((t: any) => clearTimeout(t));
+    }
+    setShowVideoCall(false);
+  };
+
+  const handleRemovePhoto = () => {
+    if (confirm("Are you sure you want to remove your profile photo?")) {
+      setAvatar("");
+    }
+  };
+
+  const handleUploadPhoto = () => {
+    const newUrl = prompt("Enter image URL to update profile avatar:", avatar);
+    if (newUrl) {
+      setAvatar(newUrl);
+    }
+  };
+
+  return (
+    <div className="flex-1 h-screen overflow-y-auto bg-[#fafbfc]">
+      <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8 pb-24 lg:pb-10">
+        
+        {/* Title */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h1>
+            <p className="text-xs text-gray-400 font-semibold mt-1">Manage your financial profile and account configurations</p>
+          </div>
+          
+          <button 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="px-6 py-3 rounded-xl text-white text-xs font-black shadow-[0_4px_14px_rgba(184,115,18,0.2)] hover:shadow-[0_6px_20px_rgba(184,115,18,0.3)] hover:-translate-y-0.5 disabled:bg-gray-300 disabled:shadow-none disabled:translate-y-0 cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2"
+            style={{ background: "linear-gradient(135deg, #b87312, #efb652)" }}
+          >
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
+                Saving...
+              </>
+            ) : saveSuccess ? (
+              <>
+                <CheckCircle2 size={16} /> Saved!
+              </>
+            ) : (
+              "Save changes"
+            )}
+          </button>
+        </div>
+
+        {/* Sub Navigation Tabs (Underline Layout with Framer Motion) */}
+        <div className="flex border-b border-gray-200 overflow-x-auto hide-scrollbar">
+          {[
+            { id: "profile",  label: "Profile Details" },
+            { id: "bank",     label: "Bank Account" },
+            { id: "nominee",  label: "Nominee Setup" },
+            { id: "security", label: "Security & KYC" }
+          ].map((tab) => {
+            const active = activeSubTab === tab.id;
+            return (
+              <button 
+                key={tab.id}
+                onClick={() => setActiveSubTab(tab.id as SettingsTab)}
+                className={`relative px-5 py-3 text-sm font-semibold transition-all cursor-pointer outline-none border-none bg-transparent whitespace-nowrap
+                  ${active ? "text-amber-600 font-bold" : "text-gray-500 hover:text-gray-800"}`}
+              >
+                {tab.label}
+                {active && (
+                  <motion.div 
+                    layoutId="activeSubTabLine"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500" 
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 2-Column Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT: Live Form Column */}
+          <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] border border-gray-150 shadow-[0_10px_30px_rgba(0,0,0,0.015)] space-y-6">
+            
+            <AnimatePresence mode="wait">
+              {activeSubTab === "profile" && (
+                <motion.div 
+                  key="profile"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Profile</h3>
+                    <p className="text-xs text-gray-400 mt-1 font-semibold">Update your photo and personal details here.</p>
+                  </div>
+
+                  {/* Username Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Username</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <div className="flex max-w-lg rounded-lg shadow-sm border border-gray-200 overflow-hidden focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-50/55 transition-all">
+                        <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
+                          fipmoney.com/
+                        </span>
+                        <input 
+                          type="text" 
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
+                          className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Website Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Website</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <div className="flex max-w-lg rounded-lg shadow-sm border border-gray-200 overflow-hidden focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-50/55 transition-all">
+                        <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
+                          https://
+                        </span>
+                        <input 
+                          type="text" 
+                          value={website}
+                          onChange={(e) => setWebsite(e.target.value)}
+                          className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Photo Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Your photo</label>
+                      <span className="block text-xs text-gray-400 mt-1 font-semibold">This will be displayed on your profile.</span>
+                    </div>
+                    <div className="md:col-span-8 flex items-center gap-5">
+                      {avatar ? (
+                        <img src={avatar} alt="Avatar" className="w-14 h-14 rounded-full object-cover border border-gray-100 shadow-sm" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg border border-amber-100 shadow-sm">
+                          {fullName.charAt(0)}
+                        </div>
+                      )}
+                      <div className="flex gap-4">
+                        <button 
+                          onClick={handleRemovePhoto}
+                          className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer outline-none"
+                        >
+                          Delete
+                        </button>
+                        <button 
+                          onClick={handleUploadPhoto}
+                          className="text-xs font-bold text-amber-600 hover:text-amber-800 transition-colors bg-transparent border-none cursor-pointer outline-none"
+                        >
+                          Update
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Full Name Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="text" 
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Email Address</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="email" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mobile Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Mobile Number</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="tel" 
+                        value={mobileNumber}
+                        onChange={(e) => setMobileNumber(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bio Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Your bio</label>
+                      <span className="block text-xs text-gray-400 mt-1 font-semibold">Write a short introduction.</span>
+                    </div>
+                    <div className="md:col-span-8 space-y-1">
+                      <textarea 
+                        rows={4}
+                        value={bio}
+                        maxLength={300}
+                        onChange={(e) => setBio(e.target.value)}
+                        className="w-full max-w-xl px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm resize-none leading-relaxed"
+                      />
+                      <div className="text-right text-[10px] font-semibold text-gray-400">
+                        {300 - bio.length} characters remaining
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Job Title Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Job title</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="text" 
+                        value={jobTitle}
+                        onChange={(e) => setJobTitle(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Income Range Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Annual Income Range</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <div className="relative max-w-lg">
+                        <select 
+                          value={incomeRange} 
+                          onChange={(e) => setIncomeRange(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all cursor-pointer appearance-none shadow-sm"
+                        >
+                          <option value="" disabled>Select Income Range</option>
+                          <option value="under2">Below ₹2 Lakhs</option>
+                          <option value="2to5">₹2 Lakhs - ₹5 Lakhs</option>
+                          <option value="5to10">₹5 Lakhs - ₹10 Lakhs</option>
+                          <option value="above10">Above ₹10 Lakhs</option>
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                          <ChevronRight size={14} className="rotate-90" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeSubTab === "bank" && (
+                <motion.div 
+                  key="bank"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Bank Account</h3>
+                    <p className="text-xs text-gray-400 mt-1 font-semibold">Verify your linked bank account where investment dividends and cashouts are deposited.</p>
+                  </div>
+
+                  {/* Bank Name Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Bank Name</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="text" 
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account Number Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Account Number</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="text" 
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* IFSC Code Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">IFSC Code</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="text" 
+                        value={ifscCode}
+                        onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeSubTab === "nominee" && (
+                <motion.div 
+                  key="nominee"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Nominee Setup</h3>
+                    <p className="text-xs text-gray-400 mt-1 font-semibold">Add a legal beneficiary to claim your vault balance and gold investments in case of eventualities.</p>
+                  </div>
+
+                  {/* Nominee Name */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Nominee Name</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="text" 
+                        value={nomineeName}
+                        placeholder="Enter Nominee Name"
+                        onChange={(e) => setNomineeName(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Relationship */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Relationship</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <div className="relative max-w-lg">
+                        <select 
+                          value={nomineeRelation} 
+                          onChange={(e) => setNomineeRelation(e.target.value)}
+                          className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all cursor-pointer appearance-none shadow-sm"
+                        >
+                          <option value="spouse">Spouse</option>
+                          <option value="father">Father</option>
+                          <option value="mother">Mother</option>
+                          <option value="sibling">Sibling</option>
+                          <option value="child">Child</option>
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                          <ChevronRight size={14} className="rotate-90" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nominee Date of Birth */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Nominee Date of Birth</label>
+                    </div>
+                    <div className="md:col-span-8">
+                      <input 
+                        type="date" 
+                        value={nomineeDob}
+                        onChange={(e) => setNomineeDob(e.target.value)}
+                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeSubTab === "security" && (
+                <motion.div 
+                  key="security"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <div>
+                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Security & Compliance</h3>
+                    <p className="text-xs text-gray-400 mt-1 font-semibold">Check security configurations and financial compliance parameters.</p>
+                  </div>
+
+                  {/* Two-Factor Authentication Toggle */}
+                  <div className="flex items-center justify-between py-5 border-b border-gray-100">
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-800">Two-Factor Authentication</h4>
+                      <p className="text-xs text-gray-400 mt-1 font-medium">Require secure OTP verification for major cashouts.</p>
+                    </div>
+                    <div className="relative inline-flex items-center cursor-pointer select-none">
+                      <div className="w-10 h-6 bg-amber-500 rounded-full flex items-center justify-end px-1 shadow-inner">
+                        <div className="w-4.5 h-4.5 bg-white rounded-full shadow" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* KYC Verification status */}
+                  {kycStatus.toLowerCase().includes("full") ? (
+                    <div className="flex items-center justify-between py-5 border-b border-gray-100">
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
+                        <p className="text-xs text-gray-400 mt-1 font-medium">Verify Aadhaar and PAN database linkage.</p>
+                      </div>
+                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 font-extrabold text-[10px] border border-emerald-100 flex items-center gap-1">
+                        <CheckCircle2 size={12} /> FULL KYC COMPLETED
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="py-5 border-b border-gray-100 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
+                          <p className="text-xs text-gray-400 mt-1 font-medium">Verify Aadhaar and PAN database linkage.</p>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-600 font-extrabold text-[10px] border border-amber-100 flex items-center gap-1">
+                          <AlertCircle size={12} /> MIN KYC COMPLETED
+                        </span>
+                      </div>
+                      
+                      {/* Stepper for Full KYC upgrade */}
+                      <div className="bg-amber-50/40 rounded-2xl p-5 border border-amber-100/50 space-y-4">
+                        <div>
+                          <h5 className="text-xs font-bold text-gray-700">Upgrade to Full KYC</h5>
+                          <p className="text-[11px] text-gray-400 font-semibold mt-0.5 font-sans">Full KYC requires Min KYC details + a quick video verification call.</p>
+                        </div>
+                        
+                        <div className="relative pl-6 border-l-2 border-dashed border-amber-200/60 space-y-4 py-1">
+                          <div className="relative">
+                            <div className="absolute -left-[31px] top-0 w-4.5 h-4.5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[8px] font-black">✓</div>
+                            <p className="text-xs font-extrabold text-gray-800">1. Link PAN & Aadhaar (Completed)</p>
+                            <p className="text-[10px] text-gray-500 font-semibold">Verified against National Securities Depository portal.</p>
+                          </div>
+                          
+                          <div className="relative">
+                            <div className="absolute -left-[31px] top-0 w-4.5 h-4.5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[8px] font-black">2</div>
+                            <p className="text-xs font-extrabold text-gray-800">2. Video Call Verification (Pending)</p>
+                            <p className="text-[10px] text-gray-500 font-semibold">Join a 2-minute secure live call with a verification officer.</p>
+                            
+                            <button 
+                              onClick={startVideoKyc}
+                              className="mt-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-4 py-2.5 rounded-xl transition-all cursor-pointer outline-none border-none shadow-sm flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0"
+                            >
+                              <Sparkles size={12} /> Start Video Call Verification
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Logged in devices */}
+                  <div className="py-2">
+                    <h4 className="text-sm font-bold text-gray-800 mb-3">Active Device Sessions</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 shadow-inner">
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-gray-700">Windows PC • Bangalore, India</p>
+                          <p className="text-[10px] text-gray-450 font-semibold">Active session (Current Web Browser)</p>
+                        </div>
+                        <span className="text-[10px] font-extrabold text-amber-600 uppercase">Current</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100 shadow-inner">
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-gray-700">iPhone 15 Pro • Bangalore, India</p>
+                          <p className="text-[10px] text-gray-455 font-semibold">Logged in 2 days ago</p>
+                        </div>
+                        <button className="text-[10px] font-extrabold text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer outline-none">Revoke</button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+          </div>
+
+          {/* RIGHT: Completion Status Indicator Sidebar Card */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* Completion Percentage card */}
+            <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-150 shadow-[0_10px_30px_rgba(0,0,0,0.015)] flex flex-col items-center text-center">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Profile Completion</h3>
+              
+              {/* Radial Circle progress bar (Fixed viewBox and overflow values to prevent clipping) */}
+              <div className="relative w-36 h-36 flex items-center justify-center p-1">
+                <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90 overflow-visible">
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="50" 
+                    stroke="#f1f5f9" 
+                    strokeWidth="8" 
+                    fill="transparent" 
+                  />
+                  <circle 
+                    cx="60" 
+                    cy="60" 
+                    r="50" 
+                    stroke="url(#goldGradient)" 
+                    strokeWidth="8" 
+                    fill="transparent" 
+                    strokeDasharray={2 * Math.PI * 50}
+                    strokeDashoffset={2 * Math.PI * 50 * (1 - percentage / 100)}
+                    strokeLinecap="round"
+                    className="transition-all duration-500 ease-out"
+                  />
+                  <defs>
+                    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#b87312" />
+                      <stop offset="100%" stopColor="#efb652" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="text-3xl font-black text-gray-800 leading-none">{percentage}%</span>
+                  <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider mt-1.5">Completed</span>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <h4 className="text-xs font-extrabold text-gray-800">
+                  {percentage === 100 
+                    ? "Perfect Profile Score! 🎉" 
+                    : percentage >= 80 
+                    ? "Profile is almost ready!" 
+                    : "Complete your profile details"}
+                </h4>
+                <p className="text-[11px] font-semibold text-gray-400 leading-normal px-2">
+                  {percentage === 100
+                    ? "All information is successfully registered. You are eligible for unlimited digital gold limits and zero KYC issues."
+                    : "Fill in your Nominee and Bank account details to unlock premium daily SIP allocations and get verified."
+                  }
+                </p>
+              </div>
+
+              {/* Progress checklist detail items */}
+              <div className="w-full mt-6 pt-5 border-t border-gray-100 text-left space-y-3">
+                <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider block mb-2">Registry Checklist</span>
+                
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    <span className="text-gray-700 font-medium">Personal & Bio Info</span>
+                  </div>
+                  <span className="text-gray-400 text-[10px] font-bold">40%</span>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    <span className="text-gray-700 font-medium">Job Title & Income Range</span>
+                  </div>
+                  <span className="text-gray-400 text-[10px] font-bold">20%</span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    {bankName.trim() && accountNumber.trim() && ifscCode.trim() ? (
+                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    ) : (
+                      <AlertCircle size={14} className="text-amber-500 shrink-0 animate-pulse" />
+                    )}
+                    <span className={bankName.trim() && accountNumber.trim() && ifscCode.trim() ? "text-gray-700 font-medium" : "text-gray-450 font-medium"}>
+                      Link Bank Account
+                    </span>
+                  </div>
+                  <span className="text-gray-400 text-[10px] font-bold">20%</span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    {nomineeName.trim() && nomineeDob.trim() ? (
+                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    ) : (
+                      <AlertCircle size={14} className="text-amber-500 shrink-0 animate-pulse" />
+                    )}
+                    <span className={nomineeName.trim() && nomineeDob.trim() ? "text-gray-700 font-medium" : "text-gray-450 font-medium"}>
+                      Nominee Verification
+                    </span>
+                  </div>
+                  <span className="text-gray-400 text-[10px] font-bold">20%</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Quick security tips card */}
+            <div className="bg-amber-55/35 border border-amber-100/40 rounded-3xl p-5 space-y-2.5">
+              <div className="flex items-center gap-2 text-[#b87312] font-black text-xs">
+                <Shield size={14} /> Security Compliance
+              </div>
+              <p className="text-[11px] font-semibold text-gray-500 leading-normal">
+                Fipmoney complies with SEBI digital asset registry codes. All PAN and bank details are encrypted locally before transit.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Video KYC Call Overlay */}
+      <AnimatePresence>
+        {showVideoCall && (
+          <motion.div 
+            className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="bg-[#0f172a] text-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl relative border border-slate-850 flex flex-col h-[520px]"
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+            >
+              {/* Header */}
+              <div className="bg-[#1e293b] px-6 py-4 flex items-center justify-between border-b border-slate-850">
+                <div className="flex items-center gap-2">
+                  <Video size={16} className="text-red-500 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Live Video Verification</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-red-500">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                  REC 00:{videoStep === "connecting" ? "00" : "12"}
+                </div>
+              </div>
+
+              {/* Viewport splits */}
+              <div className="flex-1 grid grid-cols-2 gap-4 p-6 bg-slate-950">
+                {/* Officer Video */}
+                <div className="bg-[#1e293b] rounded-2xl relative overflow-hidden flex flex-col items-center justify-center border border-slate-800">
+                  {videoStep === "connecting" ? (
+                    <div className="text-center space-y-3">
+                      <Loader2 size={32} className="animate-spin text-amber-500 mx-auto" />
+                      <p className="text-xs font-bold text-slate-400">Connecting to officer...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Officer Face Mockup */}
+                      <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center border-2 border-amber-500 relative">
+                        <User size={48} className="text-slate-400" />
+                        <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center border-2 border-[#1e293b]">
+                          <CheckCircle2 size={12} className="text-white" />
+                        </div>
+                      </div>
+                      <p className="text-xs font-bold text-slate-300 mt-3">Sarah (KYC Officer)</p>
+                      
+                      {/* Voice waveform mockup */}
+                      {videoStep !== "verifying" && videoStep !== "done" && (
+                        <div className="flex gap-1 items-end h-6 mt-4">
+                          {[0, 1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (
+                            <motion.div 
+                              key={i} 
+                              className="w-0.5 bg-amber-500 rounded-full"
+                              animate={{ height: [4, h * 4, 4] }}
+                              transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.05 }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <span className="absolute bottom-3 left-3 text-[9px] font-bold bg-black/60 px-2 py-0.5 rounded text-slate-300">Live Agent Feed</span>
+                </div>
+
+                {/* User Camera Preview */}
+                <div className="bg-[#1e293b] rounded-2xl relative overflow-hidden flex flex-col items-center justify-center border border-slate-800">
+                  {videoStep === "connecting" ? (
+                    <div className="text-center space-y-2">
+                      <Camera size={24} className="text-slate-550 mx-auto" />
+                      <p className="text-xs font-bold text-slate-400">Starting camera...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* User mockup camera picture */}
+                      <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center border-2 border-dashed border-slate-650 relative overflow-hidden">
+                        <img src={avatar} className="w-full h-full object-cover" />
+                        {videoStep === "pan" && (
+                          <div className="absolute inset-0 bg-amber-500/25 flex items-center justify-center text-[10px] font-black text-amber-250">
+                            PAN CARD READY
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs font-bold text-slate-300 mt-3">{fullName}</p>
+                      
+                      {/* Framing Overlay box */}
+                      {videoStep === "pan" ? (
+                        <div className="absolute inset-4 border-2 border-dashed border-amber-500/50 rounded-xl flex items-center justify-center pointer-events-none">
+                          <span className="text-[8px] bg-amber-500/90 text-black font-black px-2 py-0.5 rounded">ALIGN PAN CARD HERE</span>
+                        </div>
+                      ) : (
+                        <div className="absolute inset-4 border border-dashed border-emerald-500/35 rounded-xl pointer-events-none" />
+                      )}
+                    </>
+                  )}
+                  <span className="absolute bottom-3 left-3 text-[9px] font-bold bg-black/60 px-2 py-0.5 rounded text-slate-300">Your Preview</span>
+                </div>
+              </div>
+
+              {/* Subtitles box */}
+              <div className="bg-slate-900 p-4 border-t border-slate-850 text-center min-h-[70px] flex items-center justify-center px-8">
+                <p className="text-xs font-medium text-slate-300 italic tracking-wide">
+                  {videoStep === "connecting" && "System: Setting up end-to-end encrypted connection with verification office..."}
+                  {videoStep === "intro" && "Sarah: Hello! I'm Sarah from the compliance desk. Can you please state your name and confirm you are opening a Fipmoney gold vault?"}
+                  {videoStep === "pan" && "Sarah: Great! Now please hold up your physical PAN card to the camera so we can log the database records."}
+                  {videoStep === "verifying" && "System: Capturing records. Running AI verification against NSDL database..."}
+                  {videoStep === "done" && "Sarah: Verification complete! Everything checks out. Your account has been upgraded to Full KYC."}
+                </p>
+              </div>
+
+              {/* Footer action bar */}
+              <div className="bg-[#1e293b] px-6 py-4 flex items-center justify-between border-t border-slate-850">
+                <button 
+                  onClick={cancelVideoKyc} 
+                  disabled={videoStep === "done"}
+                  className="bg-transparent text-slate-400 hover:text-white hover:bg-slate-850 disabled:opacity-50 text-xs font-extrabold px-4 py-2.5 rounded-xl transition-all cursor-pointer outline-none border border-slate-700 flex items-center gap-1.5"
+                >
+                  <PhoneOff size={14} /> Cancel call
+                </button>
+
+                {videoStep === "done" ? (
+                  <button 
+                    onClick={() => setShowVideoCall(false)}
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black px-6 py-2.5 rounded-xl transition-all cursor-pointer outline-none border-none shadow-md"
+                  >
+                    Finish & Upgrade Account
+                  </button>
+                ) : (
+                  <div className="text-[10px] text-slate-400 font-bold animate-pulse">
+                    Verification in progress...
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}

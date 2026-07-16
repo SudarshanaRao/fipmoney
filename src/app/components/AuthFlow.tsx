@@ -21,9 +21,24 @@ const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "success";
 
 /* localStorage-based registration mock */
+const PREDEFINED_USERS = {
+  "7013302191": { name: "Dharsh", kyc: "full kyc" },
+  "9491841941": { name: "Finpages", kyc: "Min Kyc" }
+};
+
 const REG_KEY = (m: string) => `fm_registered_${m}`;
-const isRegistered  = (m: string) => !!localStorage.getItem(REG_KEY(m));
-const markRegistered = (m: string) => localStorage.setItem(REG_KEY(m), "1");
+const isRegistered  = (m: string) => {
+  if (m in PREDEFINED_USERS) return true;
+  return !!localStorage.getItem(REG_KEY(m));
+};
+const markRegistered = (m: string) => {
+  localStorage.setItem(REG_KEY(m), "1");
+  if (m in PREDEFINED_USERS) {
+    const user = PREDEFINED_USERS[m];
+    localStorage.setItem(`fm_user_name_${m}`, user.name);
+    localStorage.setItem(`fm_user_kyc_${m}`, user.kyc);
+  }
+};
 
 function useResendTimer(secs = 30) {
   const [t, setT]     = useState(secs);
@@ -146,6 +161,20 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [mobile,   setMobile]   = useState("");
   const [otp,      setOtp]      = useState("");
   const [err,      setErr]      = useState("");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (!localStorage.getItem("fm_registered_7013302191")) {
+        localStorage.setItem("fm_registered_7013302191", "1");
+        localStorage.setItem("fm_user_name_7013302191", "Dharsh");
+        localStorage.setItem("fm_user_kyc_7013302191", "full kyc");
+      }
+      if (!localStorage.getItem("fm_registered_9491841941")) {
+        localStorage.setItem("fm_registered_9491841941", "1");
+        localStorage.setItem("fm_user_name_9491841941", "Finpages");
+        localStorage.setItem("fm_user_kyc_9491841941", "Min Kyc");
+      }
+    }
+  }, []);
 
   /* registration-check state */
   const [checking,    setChecking]    = useState(false);   // spinner while "checking"
@@ -207,12 +236,20 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     } else {
       // existing user → mark+go to success
       markRegistered(mobile);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("fm_logged_in_mobile", mobile);
+      }
       go(() => setStep("success"));
     }
   };
 
   const handleCreateAccount = () => {
     markRegistered(mobile);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`fm_user_name_${mobile}`, panName);
+      localStorage.setItem(`fm_user_kyc_${mobile}`, "full kyc");
+      sessionStorage.setItem("fm_logged_in_mobile", mobile);
+    }
     go(() => setStep("success"));
   };
 
