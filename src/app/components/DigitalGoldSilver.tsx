@@ -13,6 +13,7 @@ import { Badge } from "./ui/badge";
 import { Switch } from "./ui/switch";
 import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
+import { addTransaction } from "../utils/transactionStorage";
 
 interface DigitalGoldSilverProps {
   onNavigate: (page: string) => void;
@@ -88,12 +89,25 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
   useEffect(() => {
     if (txSuccess && successMsg) {
+      const amtVal = Number(amount || Math.round(Number(grams) * activePrice));
+
+      // Save to localStorage history
+      addTransaction({
+        type: txType === "buy" ? "Buy" : "Sell",
+        category: metal === "gold" ? "Gold" : "Silver",
+        amount: amtVal,
+        grams: `${Number(grams).toFixed(4)} g`,
+        status: "Completed",
+        paymentMethod: "UPI",
+        source: metal === "gold" ? "Gold Vault" : "Silver Vault"
+      });
+
       setTransactions(prev => [
         {
           id: lastTxId,
           type: txType === "buy" ? "Buy" : "Sell",
           metal: metal === "gold" ? "Gold" : "Silver",
-          amount: `₹${Number(amount || Math.round(Number(grams) * activePrice)).toLocaleString()}`,
+          amount: `₹${amtVal.toLocaleString()}`,
           grams: `${Number(grams).toFixed(4)} g`,
           date: "Just now",
           status: "Completed"

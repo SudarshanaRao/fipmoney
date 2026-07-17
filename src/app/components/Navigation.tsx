@@ -66,7 +66,7 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
 
 export const MobileNav = ({ activeTab, onTabChange }: Omit<NavProps, "onLogout">) => (
   <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-100 flex justify-around items-center px-4 z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.03)] pb-safe">
-    {navItems.filter(item => ['home', 'portfolio', 'sip', 'bills', 'settings'].includes(item.id)).map(({ id, Icon, label }) => {
+    {navItems.filter(item => ['home', 'portfolio', 'sip', 'bills', 'history', 'settings'].includes(item.id)).map(({ id, Icon, label }) => {
       const active = activeTab === id;
       return (
         <button key={id} onClick={() => onTabChange(id as Tab)} className="flex flex-col items-center gap-1 bg-transparent border-none outline-none cursor-pointer">

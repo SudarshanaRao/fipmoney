@@ -11,6 +11,7 @@ import { Sidebar, MobileNav } from "./Navigation";
 import { useFipModal } from "./FipModal";
 // @ts-ignore
 import confetti from "canvas-confetti";
+import { addTransaction } from "../utils/transactionStorage";
 
 const bbpsServices = [
   { label: "Mobile Prepaid", Icon: Smartphone, color: "#d89221", bg: "#fdf8f0" },
@@ -235,6 +236,20 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
             spread: 80,
             origin: { y: 0.6 },
             colors: ["#d89221", "#efb652", "#b87312", "#ffffff"]
+          });
+
+          // Log bill payment to localStorage history
+          const sourceName = isCcToBank 
+            ? `${billLabel} (${recipientName || "Self"})` 
+            : (selectedProvider?.operatorName || billLabel || "Utility Bill Pay");
+
+          addTransaction({
+            type: "Bill Pay",
+            category: billLabel || "Bills",
+            amount: Number(amount) || 0,
+            status: "Completed",
+            paymentMethod: isCcToBank ? "Credit Card" : "UPI",
+            source: sourceName
           });
         } else {
           setCurrentStep(prev => prev + 1);

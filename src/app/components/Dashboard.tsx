@@ -12,6 +12,8 @@ import cardBgGold from "../../assets/card_bg_gold.jpg";
 import cardBgSilver from "../../assets/card_bg_silver.jpg";
 import SettingsPage from "./SettingsPage";
 import DigitalGoldSilver from "./DigitalGoldSilver";
+import HistoryPage from "./HistoryPage";
+import BillsPage from "./BillsPage";
 
 type Metal = "gold" | "silver";
 
@@ -53,68 +55,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
     onNavigate("recharge-details");
   };
 
-  const AllBillsContent = () => {
-    const billSections = [
-      {
-        title: "Recharge",
-        items: [
-          { label: "Mobile Prepaid", Icon: Smartphone, color: "#8b5cf6", bg: "#f3e8ff" },
-          { label: "FASTag", Icon: Car, color: "#10b981", bg: "#d1fae5" },
-          { label: "DTH", Icon: Tv, color: "#f59e0b", bg: "#fef3c7" },
-          { label: "Cable TV", Icon: MonitorPlay, color: "#ec4899", bg: "#fce7f3" },
-        ]
-      },
-      {
-        title: "Utilities",
-        items: [
-          { label: "Gas", Icon: Flame, color: "#ef4444", bg: "#fee2e2" },
-          { label: "Water", Icon: Droplets, color: "#3b82f6", bg: "#dbeafe" },
-          { label: "Electricity", Icon: Zap, color: "#eab308", bg: "#fef08a" },
-          { label: "Mobile Postpaid", Icon: FileText, color: "#8b5cf6", bg: "#f3e8ff" },
-          { label: "Broadband", Icon: Wifi, color: "#06b6d4", bg: "#cffafe" },
-          { label: "Tuition Fees", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
-          { label: "Education Fees", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
-          { label: "Rent", Icon: Home, color: "#14b8a6", bg: "#ccfbf1" },
-        ]
-      },
-      {
-        title: "Purchases",
-        items: [
-          { label: "Brand Vouchers", Icon: Gift, color: "#d946ef", bg: "#fae8ff" },
-          { label: "Google Play", Icon: Play, color: "#10b981", bg: "#d1fae5" },
-          { label: "Subscriptions", Icon: MonitorPlay, color: "#3b82f6", bg: "#dbeafe" },
-        ]
-      }
-    ];
 
-    return (
-      <div className="flex-1 h-screen overflow-y-auto bg-white sm:bg-[#fcfdfd]">
-        <div className="p-6 md:p-8 lg:p-10 max-w-6xl mx-auto space-y-8 pb-24 lg:pb-10">
-          <div className="flex flex-col mb-4">
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Recharge & Bill Pay</h1>
-            <p className="text-xs text-gray-400 font-semibold mt-1">Manage all your bills under one roof</p>
-          </div>
-          
-          {billSections.map((section, idx) => (
-            <div key={idx} className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-50 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-              <h3 className="text-sm font-extrabold text-gray-800 mb-6">{section.title}</h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6 gap-y-8">
-                {section.items.map((item, i) => (
-                  <div key={i} onClick={() => handleBillClick(item.label)} className="flex flex-col items-center cursor-pointer group">
-                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1 shadow-sm border border-gray-50"
-                      style={{ background: item.bg, color: item.color }}>
-                      <item.Icon size={24} strokeWidth={2} />
-                    </div>
-                    <span className="text-[10px] md:text-[11px] font-bold text-gray-500 mt-3 text-center leading-tight max-w-[85px] group-hover:text-gray-900 transition-colors">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   const MainDashboard = () => (
     <div className="flex-1 h-screen overflow-y-auto bg-[#fcfdfd]">
@@ -335,10 +276,15 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </div>
 
           <div className="lg:col-span-3 bg-white rounded-[2rem] p-8 border border-gray-50 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-            <div className="flex gap-6 border-b border-gray-100 pb-4 mb-6">
-               <button className="text-sm font-extrabold text-gray-900 border-b-2 border-gray-900 pb-1 bg-transparent cursor-pointer outline-none">Quick Services</button>
-               <button className="text-sm font-bold text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer outline-none">Transactions</button>
-            </div>
+             <div className="flex gap-6 border-b border-gray-100 pb-4 mb-6">
+                <button className="text-sm font-extrabold text-gray-900 border-b-2 border-gray-900 pb-1 bg-transparent cursor-pointer outline-none">Quick Services</button>
+                <button 
+                  onClick={() => setTab("history")}
+                  className="text-sm font-bold text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer outline-none"
+                >
+                  Transactions
+                </button>
+             </div>
             
             <div className="grid grid-cols-2 gap-4">
               {[
@@ -397,11 +343,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         {tab === "home" ? (
           <MainDashboard />
         ) : tab === "bills" ? (
-          <AllBillsContent />
+          <BillsPage onNavigate={onNavigate} />
         ) : tab === "settings" ? (
           <SettingsPage />
         ) : tab === "sip" ? (
           <DigitalGoldSilver onNavigate={(target) => setTab(target as Tab)} kycStatus={kycStatus} />
+        ) : tab === "history" ? (
+          <HistoryPage />
         ) : (
           <MainDashboard />
         )}
