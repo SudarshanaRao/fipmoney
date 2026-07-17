@@ -32,7 +32,7 @@ export default function InvestorCharter({ onBack }: InvestorCharterProps) {
               <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-10 w-auto object-contain" />
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-base md:text-lg font-extrabold text-gray-900 tracking-tight leading-none">FipMoney</span>
-                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">GOLD SIP PLATFORM</span>
+                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">DIGITAL GOLD PLATFORM</span>
               </div>
             </div>
             <h1 className="text-base md:text-xl font-bold text-gray-900 tracking-tight uppercase border-l-2 border-[#ffbf00] pl-3">

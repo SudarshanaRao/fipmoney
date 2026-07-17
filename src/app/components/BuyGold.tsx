@@ -76,7 +76,7 @@ const BuyGold = ({ onBack }: BuyGoldProps) => {
     {
       icon: Shield,
       title: "100% Secure",
-      description: "Your gold is stored in MMTC-PAMP certified vaults"
+      description: "Your gold is stored in our partner's certified vaults"
     },
     {
       icon: TrendingUp,
@@ -372,7 +372,7 @@ const BuyGold = ({ onBack }: BuyGoldProps) => {
                     <div>
                       <h4 className="font-semibold text-green-900 mb-1">100% Secure & Insured</h4>
                       <p className="text-sm text-green-700">
-                        Your gold is stored in MMTC-PAMP certified vaults with full insurance coverage. 
+                        Your gold is stored in our partner's certified vaults with full insurance coverage. 
                         All transactions are encrypted and secure.
                       </p>
                     </div>

@@ -93,7 +93,7 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Buy, sell, and store 99.9% pure silver digitally. Powered by Augmont, start your precious metal investment journey with India's most trusted digital silver platform.
+              Buy, sell, and store 99.9% pure silver digitally. Powered by India's trusted partner, start your precious metal investment journey with India's most trusted digital silver platform.
             </p>
 
             {/* Live Silver Price */}
@@ -262,7 +262,7 @@ const DigitalSilverFeaturesSection = () => {
     {
       icon: Shield,
       title: "100% Safe",
-      description: "Your silver is securely stored in Augmont's certified vaults—no locker fees, no home storage risk.",
+      description: "Your silver is securely stored in our partner's certified vaults—no locker fees, no home storage risk.",
       gradient: "from-green-500 to-emerald-600"
     },
     {
@@ -469,8 +469,8 @@ const SecuritySection = () => {
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Augmont Secured Vaults</h4>
-                  <p className="text-gray-600">Your silver is stored in Augmont's highly secure, fully insured vaults with 24/7 monitoring and advanced security systems.</p>
+                  <h4 className="font-semibold text-gray-900 mb-1">Secured Vaults</h4>
+                  <p className="text-gray-600">Your silver is stored in India's trusted partner's highly secure, fully insured vaults with 24/7 monitoring and advanced security systems.</p>
                 </div>
               </div>
               

@@ -21,7 +21,7 @@ const faqs: FAQ[] = [
   {
     id: "1",
     question: "Is FipMoney App safe to use?",
-    answer: "FipMoney app is 100% safe and secure to use for your Daily Savings & Investments in Gold. The gold is stored in world class vaults by MMTC-PAMP. MMTC-PAMP is a global market leader in secure logistics and vault services that stores and safeguards all the gold that you have purchased via FipMoney platform. Furthermore, to safeguard your interest, FipMoney has appointed an independent Administrator, VISTRA.",
+    answer: "FipMoney app is 100% safe and secure to use for your Daily Savings & Investments in Gold. The gold is stored in world class vaults by India's trusted vault partner — a global market leader in secure logistics and vault services that stores and safeguards all the gold that you have purchased via FipMoney platform. Furthermore, to safeguard your interest, FipMoney has appointed an independent Administrator.",
     category: "fipmoney-app"
   },
   {
@@ -47,7 +47,7 @@ const faqs: FAQ[] = [
   {
     id: "5",
     question: "Is digital gold Real gold?",
-    answer: "Yes, digital gold represents real, physical gold. When you buy digital gold through FipMoney, you're purchasing actual 24-karat gold that is stored securely in MMTC-PAMP's vaults. Each purchase is backed by equivalent physical gold, and you can even convert your digital gold to physical gold coins or bars if needed.",
+    answer: "Yes, digital gold represents real, physical gold. When you buy digital gold through FipMoney, you're purchasing actual 24-karat gold that is stored securely in our partner's certified vaults. Each purchase is backed by equivalent physical gold, and you can even convert your digital gold to physical gold coins or bars if needed.",
     category: "digital-gold"
   },
   {

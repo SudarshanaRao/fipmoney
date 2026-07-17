@@ -13,7 +13,7 @@ const testimonials = [
     title: "Digital Marketing Head, Hyderabad",
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&face=center&auto=format",
     rating: 5,
-    text: "FipMoney has completely changed how I save and invest. The automatic SIP feature means I'm consistently building wealth without even thinking about it. Already saved 15 grams of gold in just 8 months!",
+    text: "FipMoney has completely changed how I save and invest. The daily savings feature means I'm consistently building wealth without even thinking about it. Already saved 15 grams of gold in just 8 months!",
     goldSaved: "15g",
     duration: "8 months",
   },

@@ -32,7 +32,7 @@ export default function RiskDisclosure({ onBack }: RiskDisclosureProps) {
               <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-10 w-auto object-contain" />
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-base md:text-lg font-extrabold text-gray-900 tracking-tight leading-none">FipMoney</span>
-                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">GOLD SIP PLATFORM</span>
+                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">DIGITAL GOLD PLATFORM</span>
               </div>
             </div>
             <h1 className="text-base md:text-xl font-bold text-gray-900 tracking-tight uppercase border-l-2 border-[#ffbf00] pl-3">
@@ -106,7 +106,7 @@ export default function RiskDisclosure({ onBack }: RiskDisclosureProps) {
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2">Storage and Custody Risk</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Although your physical gold is stored securely in 100% insured vaults managed by MMTC-PAMP, systemic disruptions or technical failures may cause temporary delays in trade settlement or physical delivery fulfillment.
+                  Although your physical gold is stored securely in 100% insured vaults managed by our certified vault partner, systemic disruptions or technical failures may cause temporary delays in trade settlement or physical delivery fulfillment.
                 </p>
               </div>
 
@@ -125,7 +125,7 @@ export default function RiskDisclosure({ onBack }: RiskDisclosureProps) {
             <div className="space-y-4 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-6">
               <h3 className="text-lg font-bold text-gray-900 mb-2">Platform Disclaimers</h3>
               <p>
-                1. <strong>Finpages Tech Pvt Ltd</strong> operates the FipMoney technology platform. Finpages Tech Pvt Ltd does not act as a custodian, trustee, or direct seller of digital gold. Sourcing, custody, and vaulting are managed exclusively by certified gold provider partners (MMTC-PAMP).
+                1. <strong>Finpages Tech Pvt Ltd</strong> operates the FipMoney technology platform. Finpages Tech Pvt Ltd does not act as a custodian, trustee, or direct seller of digital gold. Sourcing, custody, and vaulting are managed exclusively by certified gold provider partners (India's trusted vault partner).
               </p>
               <p>
                 2. Sells and purchases are bound by buyer-seller agreements and terms determined by the partner provider. Investors are requested to read product documents, transaction fees, and spreads before executing transactions.

@@ -105,7 +105,7 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Turn your everyday spending into gold investment. Every purchase gets rounded up to the nearest rupee, and the spare change is automatically invested in 24K pure gold through Augmont's secure platform.
+              Turn your everyday spending into gold investment. Every purchase gets rounded up to the nearest rupee, and the spare change is automatically invested in 24K pure gold through our secure platform.
             </p>
 
             {/* Live Stats */}

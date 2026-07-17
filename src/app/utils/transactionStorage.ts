@@ -114,7 +114,7 @@ const DEFAULT_TRANSACTIONS: Transaction[] = [
     date: "2026-06-25T08:12:00.000Z",
     status: "Pending",
     paymentMethod: "Wallet",
-    source: "Paytm FASTag"
+    source: "FASTag Recharge"
   }
 ];
 

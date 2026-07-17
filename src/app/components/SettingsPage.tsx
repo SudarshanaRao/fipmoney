@@ -1013,7 +1013,7 @@ export default function SettingsPage() {
                 <p className="text-[11px] font-semibold text-gray-400 leading-normal px-2">
                   {percentage === 100
                     ? "All information is successfully registered. You are eligible for unlimited digital gold limits and zero KYC issues."
-                    : "Fill in your Nominee and Bank account details to unlock premium daily SIP allocations and get verified."
+                    : "Fill in your Nominee and Bank account details to unlock premium gold vault features and get verified."
                   }
                 </p>
               </div>

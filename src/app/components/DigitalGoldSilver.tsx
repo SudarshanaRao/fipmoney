@@ -41,10 +41,10 @@ const SILVER_DATASETS: Record<TimeFrame, number[]> = {
 
 // Physical Delivery Products Catalog
 const DELIVERY_PRODUCTS = [
-  { id: "g1", metal: "gold", name: "24K MMTC-PAMP Gold Coin", weight: 1, reqHoldings: 1.0, image: "🪙", purity: "999.9 Purity" },
-  { id: "g5", metal: "gold", name: "24K Augmont Gold Bar", weight: 5, reqHoldings: 5.0, image: "💳", purity: "999.9 Purity" },
+  { id: "g1", metal: "gold", name: "24K Gold Coin", weight: 1, reqHoldings: 1.0, image: "🪙", purity: "999.9 Purity" },
+  { id: "g5", metal: "gold", name: "24K Gold Bar", weight: 5, reqHoldings: 5.0, image: "💳", purity: "999.9 Purity" },
   { id: "s10", metal: "silver", name: "99.9 Fine Silver Coin", weight: 10, reqHoldings: 10.0, image: "🪙", purity: "999 Purity" },
-  { id: "s50", metal: "silver", name: "99.9 Augmont Silver Bar", weight: 50, reqHoldings: 50.0, image: "🥈", purity: "999 Purity" },
+  { id: "s50", metal: "silver", name: "99.9 Silver Bar", weight: 50, reqHoldings: 50.0, image: "🥈", purity: "999 Purity" },
 ];
 
 export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGoldSilverProps) {
@@ -63,8 +63,30 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [silverPrice, setSilverPrice] = useState<number>(84.20);
 
   // User simulated holdings
-  const [goldHoldings, setGoldHoldings] = useState<number>(12.4502);
-  const [silverHoldings, setSilverHoldings] = useState<number>(340.2005);
+  const [goldHoldings, setGoldHoldings] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("fip_gold_holdings");
+      return saved ? parseFloat(saved) : 12.4502;
+    }
+    return 12.4502;
+  });
+  
+  const [silverHoldings, setSilverHoldings] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("fip_silver_holdings");
+      return saved ? parseFloat(saved) : 340.2005;
+    }
+    return 340.2005;
+  });
+
+  // Sync to localStorage
+  useEffect(() => {
+    localStorage.setItem("fip_gold_holdings", goldHoldings.toString());
+  }, [goldHoldings]);
+
+  useEffect(() => {
+    localStorage.setItem("fip_silver_holdings", silverHoldings.toString());
+  }, [silverHoldings]);
 
   // Calculator inputs
   const [calcMonthly, setCalcMonthly] = useState<number>(1000);
@@ -396,7 +418,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
             <div>
               <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">Total Vault Value</p>
               <p className="text-2xl font-black text-amber-600 mt-0.5">₹{Math.round((goldHoldings * goldPrice) + (silverHoldings * silverPrice)).toLocaleString()}</p>
-              <p className="text-xs font-semibold text-slate-500">Locker Insured by MMTC-PAMP</p>
+              <p className="text-xs font-semibold text-slate-500">Locker Insured by Our Certified Partner</p>
             </div>
           </div>
         </div>
@@ -833,7 +855,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 <Loader2 size={28} className="animate-spin" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-base font-extrabold text-slate-900">Connecting to MMTC-PAMP Locker</h3>
+                <h3 className="text-base font-extrabold text-slate-900">Connecting to Secure Locker</h3>
                 <p className="text-xs text-slate-500 leading-normal px-2">Finalizing weights, backing virtual assets with physical bullion vaults...</p>
               </div>
             </motion.div>
@@ -942,7 +964,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   </div>
 
                   <div className="bg-[#f0f9ff] p-3 rounded-xl border border-blue-50 text-[10px] text-slate-500 font-semibold leading-normal">
-                    ⚠️ Physical delivery requests will permanently reduce your vault virtual holdings. Insured transit packaging fee is sponsored by MMTC-PAMP.
+                    ⚠️ Physical delivery requests will permanently reduce your vault virtual holdings. Insured transit packaging fee is sponsored by our vault partner.
                   </div>
 
                   <Button

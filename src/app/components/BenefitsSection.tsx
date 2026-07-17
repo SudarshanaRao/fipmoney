@@ -7,7 +7,7 @@ const benefits = [
   {
     icon: Shield,
     title: "100% Safe & Secure",
-    description: "Your gold is stored in secure vaults with full insurance coverage and MMTC-PAMP certification.",
+    description: "Your gold is stored in secure vaults with full insurance coverage and our trusted vault partner's certification.",
     color: "from-blue-500 to-blue-600",
   },
   {
@@ -125,7 +125,7 @@ export default function BenefitsSection() {
         >
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-[#ffbf00] mb-2">MMTC-PAMP</div>
+              <div className="text-2xl font-bold text-[#ffbf00] mb-2">Certified Partner</div>
               <div className="text-sm text-gray-600">Certified Gold</div>
             </div>
             <div>

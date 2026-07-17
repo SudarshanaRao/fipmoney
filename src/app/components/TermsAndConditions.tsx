@@ -33,7 +33,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-10 w-auto object-contain" />
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-base md:text-lg font-extrabold text-gray-900 tracking-tight leading-none">FipMoney</span>
-                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">GOLD SIP PLATFORM</span>
+                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">DIGITAL GOLD PLATFORM</span>
               </div>
             </div>
             <h1 className="text-base md:text-xl font-bold text-gray-900 tracking-tight uppercase border-l-2 border-[#ffbf00] pl-3">
@@ -101,7 +101,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
             </p>
 
             <p>
-              In order to safeguard Your interest, FipMoney Gold has also appointed an Administrator, Vistra Corporate Services (India) Private Limited ("Administrator"), and You agree to the appointment of such Administrator and the Custodian, and also accede to the terms for such arrangement with the Administrator. The Administrator shall be responsible for monitoring the physical Precious Metal held on Your behalf with the Custodian.
+              In order to safeguard Your interest, FipMoney Gold has also appointed an Administrator, the appointed Corporate Services Administrator ("Administrator"), and You agree to the appointment of such Administrator and the Custodian, and also accede to the terms for such arrangement with the Administrator. The Administrator shall be responsible for monitoring the physical Precious Metal held on Your behalf with the Custodian.
             </p>
 
             <p>
@@ -317,7 +317,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               <div className="bg-blue-50 rounded-lg p-6 my-6">
                 <p className="font-semibold text-blue-800 mb-3">Payment Policy:</p>
                 <p className="text-blue-700">
-                  Payment will be accepted through the payment options made available on the Platform, which may include redirection to payment gateways and aggregators hosted by third‑party websites or applications, including UPI payments like PhonePe (https://www.phonepe.com/) and Paytm (https://paytm.com/), etc. At the time of purchase, fulfilment, sale and/or transfer of Precious Metal, the relevant taxes will be chargeable as applicable under Government regulations and applicable laws.
+                  Payment will be accepted through the payment options made available on the Platform, which may include redirection to payment gateways and aggregators hosted by third‑party websites or applications, including supported UPI providers and other payment methods, etc. At the time of purchase, fulfilment, sale and/or transfer of Precious Metal, the relevant taxes will be chargeable as applicable under Government regulations and applicable laws.
                 </p>
               </div>
 

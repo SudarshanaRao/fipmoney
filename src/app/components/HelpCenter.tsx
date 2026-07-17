@@ -184,7 +184,7 @@ export default function HelpCenter({ onBack }: HelpCenterProps) {
     },
     {
       question: "Is my gold investment safe and secure?",
-      answer: "Yes, absolutely! Your digital gold is stored in highly secure vaults with MMTC-PAMP certification. We use bank-grade security measures, including 256-bit SSL encryption and multi-factor authentication to protect your investments.",
+      answer: "Yes, absolutely! Your digital gold is stored in highly secure vaults with our trusted vault partner's certification. We use bank-grade security measures, including 256-bit SSL encryption and multi-factor authentication to protect your investments.",
       category: "security",
       tags: ["security", "safety", "vaults", "encryption"]
     },

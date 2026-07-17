@@ -93,7 +93,7 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Buy, sell, and store 24K pure gold digitally. Powered by Augmont, start your wealth building journey with India's most trusted digital gold platform.
+              Buy, sell, and store 24K pure gold digitally. Powered by India's trusted partner, start your wealth building journey with India's most trusted digital gold platform.
             </p>
 
             {/* Live Gold Price */}
@@ -262,7 +262,7 @@ const DigitalGoldFeaturesSection = () => {
     {
       icon: Shield,
       title: "100% Safe",
-      description: "Your gold is securely stored in Augmont's certified vaults—no locker fees, no home storage risk.",
+      description: "Your gold is securely stored in our partner's certified vaults—no locker fees, no home storage risk.",
       gradient: "from-green-500 to-emerald-600"
     },
     {
@@ -469,8 +469,8 @@ const SecuritySection = () => {
                   <CheckCircle className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Augmont Secured Vaults</h4>
-                  <p className="text-gray-600">Your gold is stored in Augmont's highly secure, fully insured vaults with 24/7 monitoring and advanced security systems.</p>
+                  <h4 className="font-semibold text-gray-900 mb-1">Secured Vaults</h4>
+                  <p className="text-gray-600">Your gold is stored in India's trusted partner's highly secure, fully insured vaults with 24/7 monitoring and advanced security systems.</p>
                 </div>
               </div>
               

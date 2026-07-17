@@ -666,7 +666,7 @@ export default function GoldSIPCalculator({ onBack }: GoldSIPCalculatorProps) {
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="text-gray-600 pt-4">
-                      Yes, your gold investments are backed by physical gold stored in secure vaults through our partner Augmont. Each gram of digital gold you own is backed by equivalent physical gold with full insurance coverage.
+                      Yes, your gold investments are backed by physical gold stored in secure vaults through India's trusted partner. Each gram of digital gold you own is backed by equivalent physical gold with full insurance coverage.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>

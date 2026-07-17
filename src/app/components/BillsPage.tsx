@@ -255,15 +255,11 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
 
           <div className="text-center md:text-left space-y-1">
             <h4 className="text-sm font-extrabold text-slate-800 flex items-center justify-center md:justify-start gap-1.5">
-              <Shield size={16} strokeWidth={2.5} className="text-emerald-600" /> RBI Authorized Security Assured
+              <Shield size={16} strokeWidth={2.5} className="text-emerald-600" /> Secure Payments Assured
             </h4>
             <p className="text-xs text-slate-400 font-semibold leading-relaxed">
               All recharges and bill transactions are processed securely via the national BBPS network. Invoices generated represent certified legal receipts.
             </p>
-          </div>
-          
-          <div className="ml-auto flex items-center gap-1.5 text-xs font-black text-slate-700 bg-slate-50 border border-slate-100 py-1.5 px-4 rounded-full shrink-0 shadow-sm">
-            <CheckCircle2 size={14} className="text-emerald-600" strokeWidth={3} /> PCI-DSS Compliant
           </div>
         </motion.div>
 

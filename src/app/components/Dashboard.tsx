@@ -14,6 +14,7 @@ import SettingsPage from "./SettingsPage";
 import DigitalGoldSilver from "./DigitalGoldSilver";
 import HistoryPage from "./HistoryPage";
 import BillsPage from "./BillsPage";
+import PortfolioPage from "./PortfolioPage";
 
 type Metal = "gold" | "silver";
 
@@ -342,6 +343,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {tab === "home" ? (
           <MainDashboard />
+        ) : tab === "portfolio" ? (
+          <PortfolioPage onNavigate={(target) => setTab(target as Tab)} />
         ) : tab === "bills" ? (
           <BillsPage onNavigate={onNavigate} />
         ) : tab === "settings" ? (

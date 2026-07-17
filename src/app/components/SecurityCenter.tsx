@@ -35,23 +35,7 @@ const SecurityFeature = ({ icon: Icon, title, description, status, delay = 0 }) 
   </motion.div>
 );
 
-const CertificationCard = ({ title, description, badge, delay = 0 }) => (
-  <motion.div
-    className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
-    initial={{ opacity: 0, scale: 0.9 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    transition={{ delay, duration: 0.6 }}
-    viewport={{ once: true }}
-  >
-    <div className="text-center">
-      <div className="w-16 h-16 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] rounded-full flex items-center justify-center mx-auto mb-4">
-        <span className="text-white font-bold text-lg">{badge}</span>
-      </div>
-      <h4 className="font-semibold text-gray-900 mb-2">{title}</h4>
-      <p className="text-gray-600 text-sm">{description}</p>
-    </div>
-  </motion.div>
-);
+
 
 const BestPractice = ({ title, description, delay = 0 }) => (
   <motion.div
@@ -92,7 +76,7 @@ export default function SecurityCenter({ onBack }: SecurityCenterProps) {
     {
       icon: Server,
       title: "Secure Cloud Infrastructure",
-      description: "Your data is stored in highly secure, ISO 27001 certified data centers with multiple redundancy layers.",
+      description: "Your data is stored in highly secure, world-class data centers with multiple redundancy layers.",
       status: "implemented"
     },
     {
@@ -109,28 +93,7 @@ export default function SecurityCenter({ onBack }: SecurityCenterProps) {
     }
   ];
 
-  const certifications = [
-    {
-      title: "ISO 27001 Certified",
-      description: "International standard for information security management systems",
-      badge: "ISO"
-    },
-    {
-      title: "PCI DSS Compliant",
-      description: "Payment Card Industry Data Security Standard compliance",
-      badge: "PCI"
-    },
-    {
-      title: "RBI Guidelines",
-      description: "Fully compliant with Reserve Bank of India regulations",
-      badge: "RBI"
-    },
-    {
-      title: "SEBI Registered",
-      description: "Securities and Exchange Board of India registration",
-      badge: "SEBI"
-    }
-  ];
+
 
   const bestPractices = [
     {
@@ -278,35 +241,7 @@ export default function SecurityCenter({ onBack }: SecurityCenterProps) {
         </div>
       </section>
 
-      {/* Certifications */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Certifications & Compliance</h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We maintain the highest industry standards and regulatory compliance
-            </p>
-          </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {certifications.map((cert, index) => (
-              <CertificationCard
-                key={cert.title}
-                title={cert.title}
-                description={cert.description}
-                badge={cert.badge}
-                delay={index * 0.1}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Security Best Practices */}
       <section className="py-20 bg-white">

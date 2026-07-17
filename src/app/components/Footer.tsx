@@ -78,12 +78,12 @@ export default function Footer({ onNavigate }: FooterProps) {
               <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-14 w-auto object-contain" />
               <div className="flex flex-col">
                 <span className="text-2xl font-black text-[#ffbf00] tracking-tight font-outfit">FipMoney</span>
-                <span className="text-[10px] font-bold text-gray-900/60 tracking-[0.2em] uppercase mt-0.5">Gold SIP Platform</span>
+                <span className="text-[10px] font-bold text-gray-900/60 tracking-[0.2em] uppercase mt-0.5">Digital Gold & Payments</span>
               </div>
             </div>
 
             <p className="text-slate-600 text-sm leading-relaxed font-medium">
-              India's first digital gold SIP platform. Build wealth systematically with automated gold investments starting from just ₹1. Stored in 100% insured physical vaults.
+              India's trusted digital gold and payments platform. Buy, sell, and store digital gold and silver starting from just ₹1. Secured in 100% insured physical vaults.
             </p>
             
             <div className="w-12 h-0.5 bg-amber-200 rounded-full mt-5 mb-5"></div>
@@ -138,7 +138,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             {[
               { title: 'VERIFIED PLATFORM', subtitle: '100% trusted & verified', icon: Shield },
               { title: 'SECURE PLATFORM', subtitle: 'Safe payments & data', icon: Lock },
-              { title: 'INSURED VAULTS', subtitle: 'MMTC-PAMP physical vaults', icon: Database },
+              { title: 'INSURED VAULTS', subtitle: 'Insured physical vaults', icon: Database },
               { title: 'START WITH ₹1', subtitle: 'Systematic gold savings', icon: Coins }
             ].map((item, idx) => (
               <div key={idx} className={`flex items-center gap-4 ${idx !== 0 ? 'pt-5 sm:pt-0 sm:pl-5 lg:pl-7' : ''}`}>
@@ -191,7 +191,7 @@ export default function Footer({ onNavigate }: FooterProps) {
                 FIPMONEY
               </div>
               <div className="mt-2 text-[#ffbf00]/40 font-bold uppercase tracking-[0.4em] text-[8px] md:text-[9px]">
-                Gold SIP Platform • Est. 2025
+                Digital Gold & Payments • Est. 2025
               </div>
             </div>
 
@@ -199,11 +199,11 @@ export default function Footer({ onNavigate }: FooterProps) {
             <div className="flex items-center gap-9 order-3 lg:order-3">
                <div className="flex flex-col items-center gap-2">
                  <span className="text-[8px] text-white/50 font-black uppercase tracking-widest">GOLD SOURCING PARTNER</span>
-                 <span className="text-xs font-black text-white/80 tracking-widest">MMTC-PAMP</span>
+                 <span className="text-xs font-black text-white/80 tracking-widest">India's Trusted Partner</span>
                </div>
                <div className="flex flex-col items-center gap-2">
                  <span className="text-[8px] text-white/50 font-black uppercase tracking-widest">TRUSTEE PARTNER</span>
-                 <span className="text-xs font-black text-white/80 tracking-widest">IDBI TRUSTEE</span>
+                 <span className="text-xs font-black text-white/80 tracking-widest">Certified Trustee</span>
                </div>
             </div>
           </div>
