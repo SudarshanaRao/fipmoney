@@ -49,9 +49,9 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
 
   // Mock due bills styled like bank cards
   const dueBills = [
-    { provider: "BESCOM Electricity", type: "Electricity", amount: "₹1,850", dueIn: "6 Days", icon: Zap, gradient: "linear-gradient(135deg, #7c2d12 0%, #b87312 100%)", text: "text-white" },
-    { provider: "Airtel Fiber", type: "Broadband", amount: "₹999", dueIn: "3 Days", icon: Wifi, gradient: "linear-gradient(135deg, #0369a1 0%, #06b6d4 100%)", text: "text-white" },
-    { provider: "Jio Mobile", type: "Prepaid", amount: "₹299", dueIn: "Expired", icon: Smartphone, gradient: "linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)", text: "text-white", expired: true }
+    { provider: "BESCOM Electricity", type: "Electricity", amount: "₹1,850", dueIn: "6 Days", icon: Zap, gradient: "linear-gradient(135deg, #7c2d12 0%, #ea580c 55%, #f59e0b 100%)", text: "text-white" },
+    { provider: "Airtel Fiber", type: "Broadband", amount: "₹999", dueIn: "3 Days", icon: Wifi, gradient: "linear-gradient(135deg, #0f172a 0%, #0284c7 55%, #0ea5e9 100%)", text: "text-white" },
+    { provider: "Jio Mobile", type: "Prepaid", amount: "₹299", dueIn: "Expired", icon: Smartphone, gradient: "linear-gradient(135deg, #3b0764 0%, #6d28d9 55%, #8b5cf6 100%)", text: "text-white", expired: true }
   ];
 
   // Filtering services
@@ -113,13 +113,23 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
               return (
                 <motion.div 
                   key={i} 
-                  className="rounded-[2rem] p-6 shadow-[0_10px_25px_rgba(0,0,0,0.05)] flex flex-col justify-between min-h-[175px] relative overflow-hidden group border border-solid border-white/20 text-white"
+                  className="rounded-[2.2rem] p-7 shadow-[0_20px_45px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.22)] flex flex-col justify-between min-h-[200px] relative overflow-hidden group border border-solid border-white/10 text-white"
                   style={{ background: bill.gradient }}
-                  whileHover={{ y: -4, scale: 1.02 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
+                  {/* Background Shape Overlay (Vector lines with soft Overlay blending) */}
+                  <div className="absolute inset-0 opacity-[0.38] mix-blend-overlay pointer-events-none group-hover:scale-108 transition-transform duration-700" 
+                       style={{ backgroundImage: "url('/bg_shape.svg')", backgroundSize: "cover", backgroundPosition: "center" }} />
+                  
+                  {/* Premium Glowing Aura */}
+                  <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/15 transition-colors duration-500" />
+
+                  {/* Glossy Diagonal Shine Sweep on Hover */}
+                  <div className="absolute -inset-full top-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
+
                   {/* Due Date Tag on Top-Right */}
-                  <div className="absolute right-6 top-6 flex items-center gap-1.5 bg-white py-1.5 px-3 rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+                  <div className="absolute right-6 top-6 flex items-center gap-1.5 bg-white py-1.5 px-3.5 rounded-full border border-solid border-slate-100/10 shadow-[0_4px_15px_rgba(0,0,0,0.12)]">
                     <span className={`w-2 h-2 rounded-full ${bill.expired ? "bg-rose-500 animate-pulse" : "bg-amber-500"}`} />
                     <span className={`text-[9px] font-black uppercase tracking-wider ${bill.expired ? "text-rose-600" : "text-amber-600"}`}>
                       {bill.expired ? "Expired" : `Due in ${bill.dueIn}`}
@@ -127,9 +137,14 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
                   </div>
                   
                   <div className="space-y-1 relative z-10 pt-4">
-                    <div className="flex items-center gap-2 opacity-85">
-                      <BillIcon size={14} strokeWidth={2.5} />
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider">{bill.type}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 opacity-85">
+                        <BillIcon size={14} strokeWidth={2.5} />
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider">{bill.type}</span>
+                      </div>
+                      
+                      {/* EMV Micro Chip Outline */}
+                      <div className="w-7 h-5 rounded bg-gradient-to-r from-amber-400/20 to-yellow-300/10 border border-yellow-300/30 opacity-70" />
                     </div>
                     <h3 className="text-lg font-black tracking-tight mt-1">{bill.provider}</h3>
                   </div>
@@ -137,12 +152,12 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
                   <div className="flex items-end justify-between relative z-10 mt-6 pt-4 border-t border-white/10">
                     <div>
                       <span className="text-[9px] font-bold uppercase tracking-wider opacity-60">Amount due</span>
-                      <h2 className="text-xl font-black">{bill.amount}</h2>
+                      <h2 className="text-2xl font-black font-outfit tracking-tight mt-0.5">{bill.amount}</h2>
                     </div>
                     
                     <button 
                       onClick={() => handleBillClick(bill.type === "Prepaid" ? "Mobile Prepaid" : bill.type)}
-                      className="flex items-center gap-1.5 py-2 px-4 rounded-xl text-slate-800 bg-white hover:bg-slate-50 border-none outline-none font-black text-xs cursor-pointer shadow-sm transition-transform active:scale-95 hover:scale-105"
+                      className="flex items-center gap-1.5 py-2.5 px-5 rounded-full text-slate-900 bg-white hover:bg-slate-50 border-none outline-none font-black text-xs cursor-pointer shadow-md transition-all duration-300 active:scale-95 hover:scale-102"
                     >
                       Pay Now <ChevronRight size={12} strokeWidth={3} />
                     </button>

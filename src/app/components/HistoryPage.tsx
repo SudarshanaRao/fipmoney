@@ -556,6 +556,14 @@ export function downloadInvoicePDF(tx: Transaction) {
 export default function HistoryPage() {
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<{[key: string]: boolean}>({});
+  
+  const toggleGroup = (dateKey: string) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [dateKey]: prev[dateKey] === false ? true : false
+    }));
+  };
   
   // Tabs: "all" | "gold" | "silver" | "bills"
   const [activeTab, setActiveTab] = useState<"all" | "gold" | "silver" | "bills">("all");
@@ -849,18 +857,29 @@ export default function HistoryPage() {
                     
                     {/* Day Header Row styled as a Gold Banner */}
                     <div 
-                      className="px-6 py-4 flex justify-between items-center text-white border-b shadow-sm font-sans"
+                      onClick={() => toggleGroup(dateKey)}
+                      className="px-6 py-4 flex justify-between items-center text-white border-b shadow-sm font-sans cursor-pointer select-none hover:brightness-105 active:brightness-95 transition-all"
                       style={{ 
                         background: `linear-gradient(135deg, ${GOLD.G_DK}, ${GOLD.G_LT})`,
                         borderColor: GOLD.G_DK 
                       }}
                     >
-                      <span className="text-xs font-black tracking-wide drop-shadow-sm">{dateKey}</span>
+                      <div className="flex items-center gap-2">
+                        <motion.span
+                          animate={{ rotate: expandedGroups[dateKey] === false ? -90 : 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex items-center justify-center shrink-0"
+                        >
+                          <ChevronDown size={14} className="text-white" strokeWidth={3} />
+                        </motion.span>
+                        <span className="text-xs font-black tracking-wide drop-shadow-sm">{dateKey}</span>
+                      </div>
                       <span className="text-xs font-black drop-shadow-sm">Total: ₹{group.total.toLocaleString()}</span>
                     </div>
 
                     {/* Transactions items */}
-                    <div className="divide-y divide-gray-100">
+                    {expandedGroups[dateKey] !== false && (
+                      <div className="divide-y divide-gray-100">
                       {group.list.map(tx => {
                         const statusColors = 
                           tx.status === "Completed" 
@@ -924,7 +943,8 @@ export default function HistoryPage() {
                           </div>
                         );
                       })}
-                    </div>
+                      </div>
+                    )}
 
                   </div>
                 ))}

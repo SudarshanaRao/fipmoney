@@ -34,6 +34,15 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const userName = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "Dharsh" : loggedInMobile === "9491841941" ? "Finpages" : loggedInMobile === "7893863597" ? "purna" : "Rahul Kumar") : "Rahul Kumar";
   const kycStatus = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_kyc_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "full kyc" : loggedInMobile === "9491841941" ? "Min Kyc" : loggedInMobile === "7893863597" ? "pending" : "full kyc") : "full kyc";
   
+  const isDemoUser = ["7013302191", "9491841941", "7893863597"].includes(loggedInMobile);
+  const goldPrice = 6420.50;
+  const silverPrice = 84.20;
+  const goldHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`) || (isDemoUser ? "12.4502" : "0")) : 12.4502;
+  const silverHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`) || (isDemoUser ? "340.2005" : "0")) : 340.2005;
+  const cashBalance = isDemoUser ? 5250.00 : 0.00;
+  const totalGrams = goldHoldings + silverHoldings;
+  const portfolioVal = (goldHoldings * goldPrice) + (silverHoldings * silverPrice) + cashBalance;
+  
   const P = metal === "gold" ? GOLD : SILVER;
   const { G, G_LT, G_DK } = P;
   const metalName = metal === "gold" ? "Gold" : "Silver";
@@ -67,7 +76,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <div className="bg-white rounded-3xl p-6 border border-gray-50 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center relative overflow-hidden">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Vault Balance</h3>
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-extrabold text-gray-900">{showBalance ? "124.50 g" : "******"}</h2>
+              <h2 className="text-2xl font-extrabold text-gray-900">{showBalance ? `${totalGrams.toFixed(2)} g` : "******"}</h2>
               <button onClick={() => setShowBalance(!showBalance)} className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer outline-none"><Eye size={16} /></button>
             </div>
             <div className="absolute right-0 bottom-0 w-24 h-24 bg-gray-50 rounded-tl-full -mr-4 -mb-4 opacity-50 pointer-events-none" />
@@ -76,7 +85,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <div className="bg-white rounded-3xl p-6 border border-gray-50 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center relative overflow-hidden">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Portfolio Value</h3>
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-extrabold text-gray-900">{showBalance ? "₹8,45,200" : "******"}</h2>
+              <h2 className="text-2xl font-extrabold text-gray-900">{showBalance ? `₹${Math.round(portfolioVal).toLocaleString()}` : "******"}</h2>
               <button onClick={() => setShowBalance(!showBalance)} className="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer outline-none"><Eye size={16} /></button>
             </div>
             <div className="absolute right-0 bottom-0 w-24 h-24 bg-gray-50 rounded-tl-full -mr-4 -mb-4 opacity-50 pointer-events-none" />
@@ -207,7 +216,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                     <span className="text-2xl font-black italic opacity-95 tracking-tight">VISA</span>
+                      <span className="text-xs font-black uppercase opacity-95 tracking-wider bg-white/20 px-2 py-0.5 rounded">Virtual Card</span>
                      <Wifi size={20} className="rotate-90 opacity-80 mt-1" />
                   </div>
                 </div>
@@ -269,11 +278,14 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   </div>
                   <div className="flex flex-col items-end opacity-95">
                     <span className="text-xs font-extrabold italic tracking-tight mb-0.5">Fipmoney</span>
-                    <span className="text-sm font-black italic tracking-tighter">VISA</span>
+                    <span className="text-xs font-black uppercase opacity-95 tracking-wider bg-white/20 px-2 py-0.5 rounded">Virtual Card</span>
                   </div>
                 </div>
               </div>
             </motion.div>
+            <p className="text-[10px] font-bold text-center text-slate-400 mt-4 leading-normal">
+              *This card is only used inside of this fipmoney website
+            </p>
           </div>
 
           <div className="lg:col-span-3 bg-white rounded-[2rem] p-8 border border-gray-50 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">

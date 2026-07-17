@@ -63,30 +63,33 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [silverPrice, setSilverPrice] = useState<number>(84.20);
 
   // User simulated holdings
+  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
+  const isDemoUser = ["7013302191", "9491841941", "7893863597"].includes(loggedInMobile);
+
   const [goldHoldings, setGoldHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("fip_gold_holdings");
-      return saved ? parseFloat(saved) : 12.4502;
+      const saved = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
+      return saved ? parseFloat(saved) : (isDemoUser ? 12.4502 : 0);
     }
     return 12.4502;
   });
   
   const [silverHoldings, setSilverHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("fip_silver_holdings");
-      return saved ? parseFloat(saved) : 340.2005;
+      const saved = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
+      return saved ? parseFloat(saved) : (isDemoUser ? 340.2005 : 0);
     }
     return 340.2005;
   });
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem("fip_gold_holdings", goldHoldings.toString());
-  }, [goldHoldings]);
+    localStorage.setItem(`fip_gold_holdings_${loggedInMobile}`, goldHoldings.toString());
+  }, [goldHoldings, loggedInMobile]);
 
   useEffect(() => {
-    localStorage.setItem("fip_silver_holdings", silverHoldings.toString());
-  }, [silverHoldings]);
+    localStorage.setItem(`fip_silver_holdings_${loggedInMobile}`, silverHoldings.toString());
+  }, [silverHoldings, loggedInMobile]);
 
   // Calculator inputs
   const [calcMonthly, setCalcMonthly] = useState<number>(1000);
