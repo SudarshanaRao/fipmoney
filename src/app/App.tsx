@@ -7,6 +7,7 @@ import HeroSection from "./components/HeroSection";
 import BenefitsSection from "./components/BenefitsSection";
 import HowItWorksSection from "./components/HowItWorksSection";
 import FeaturesSection from "./components/FeaturesSection";
+import AllInOneSection from "./components/AllInOneSection";
 import Footer from "./components/Footer";
 import TermsAndConditions from "./components/TermsAndConditions";
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -313,7 +314,8 @@ export default function App() {
                 </>
               )}
 
-
+              {/* All In One Services Section */}
+              <AllInOneSection onNavigate={navigateToPage} />
             </main>
 
             {/* Scroll Progress Indicator */}

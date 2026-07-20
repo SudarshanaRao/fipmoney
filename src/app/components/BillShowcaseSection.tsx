@@ -33,11 +33,10 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
             ⚡ Unified Payments Hub
           </div>
           <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-            Recharge & Pay Bills <br/>
-            <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent">Directly from Credit Card</span>
+            Recharge & Pay Bills
           </h2>
           <p className="text-sm md:text-base font-semibold text-slate-500 leading-relaxed">
-            Maximize your reward cycles! Pay utility bills, mobile recharges, tuition fees, and house rent directly from your Credit Card to recipient bank accounts with premium security checks.
+            Maximize your utility payments! Pay bills, mobile recharges, tuition fees, and house rent securely with premium checks and fast settlement.
           </p>
         </div>
 
