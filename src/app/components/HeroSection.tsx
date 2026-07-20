@@ -84,7 +84,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
   const currentData = carouselData[currentSlide];
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-gray-50 to-white relative overflow-hidden pt-20">
+    <section className="bg-gradient-to-br from-gray-50 to-white relative overflow-hidden pt-20 pb-4">
       {/* Dynamic Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <motion.div 
@@ -187,7 +187,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                 onClick={() => onNavigate?.('signup')}
               >
                 <TrendingUp className="w-5 h-5 mr-2" />
-                Start Investing Now
+                Start Savings Now
               </Button>
             </motion.div>
 

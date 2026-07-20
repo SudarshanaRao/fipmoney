@@ -351,7 +351,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
   return (
     <div className="flex h-screen bg-[#fcfdfd] font-sans overflow-hidden text-gray-800">
-      <Sidebar activeTab={tab} onTabChange={setTab} onLogout={() => onNavigate("home")} />
+      <Sidebar activeTab={tab} onTabChange={setTab} onLogout={() => {
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem("fm_logged_in_mobile");
+          sessionStorage.removeItem("fm_logged_in_name");
+        }
+        onNavigate("home");
+      }} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {tab === "home" ? (
           <MainDashboard />

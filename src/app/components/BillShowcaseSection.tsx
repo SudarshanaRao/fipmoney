@@ -24,7 +24,7 @@ const billsList = [
 
 export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionProps) {
   return (
-    <section className="py-24 bg-white" id="bills-showcase">
+    <section className="pt-2 pb-20 bg-white" id="bills-showcase">
       <div className="container mx-auto px-6 md:px-8 max-w-7xl space-y-16">
         
         {/* Section Header */}

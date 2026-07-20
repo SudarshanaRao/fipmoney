@@ -79,12 +79,14 @@ export default function Header({ onNavigate }: HeaderProps) {
     };
   }, []);
 
-  const featuresItems = [
-    { name: "Digital Gold", action: () => onNavigate?.('digital-gold'), icon: Coins },
-    { name: "Digital Silver", action: () => onNavigate?.('digital-silver'), icon: Sparkles },
-    { name: "Loans", action: () => onNavigate?.('instant-loan'), icon: CreditCard },
-    { name: "Round Off", action: () => onNavigate?.('round-off'), icon: PiggyBank },
-  ];
+  const handleBillClick = (label: string) => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem("fm_logged_in_mobile")) {
+      sessionStorage.setItem("selectedBillLabel", label);
+      onNavigate?.('recharge-details');
+    } else {
+      onNavigate?.('login');
+    }
+  };
 
   const helpItems = [
     { name: "Contact", action: () => onNavigate?.('contact'), icon: Phone },
@@ -159,13 +161,109 @@ export default function Header({ onNavigate }: HeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <DropdownMenu
-              title="Features"
-              items={featuresItems}
-              isOpen={activeDropdown === 'features'}
-              onToggle={handleDropdownToggle('features')}
-              onItemClick={handleDropdownItemClick}
-            />
+            {/* Features Megamenu Trigger */}
+            <div className="relative">
+              <motion.button
+                className="flex items-center space-x-1 text-gray-600 hover:text-[#ffbf00] font-medium transition-colors duration-200 hover-gold"
+                onClick={handleDropdownToggle('features')}
+                whileHover={{ scale: 1.05 }}
+              >
+                <span>Features</span>
+                <motion.div
+                  animate={{ rotate: activeDropdown === 'features' ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </motion.div>
+              </motion.button>
+
+              <AnimatePresence>
+                {activeDropdown === 'features' && (
+                  <motion.div
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[540px] bg-white rounded-2xl shadow-2xl border border-gray-150 p-6 z-50 grid grid-cols-3 gap-6"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Digital Gold */}
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2 border-b border-gray-100 pb-2">
+                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500">
+                          <Coins className="w-4 h-4" />
+                        </div>
+                        <span className="font-bold text-gray-900 text-sm">Digital Gold</span>
+                      </div>
+                      <div className="flex flex-col space-y-2">
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('buy-gold'))}
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-amber-500 hover:bg-amber-50/50 p-2 rounded-lg transition-all duration-200"
+                        >
+                          Buy Digital Gold
+                        </button>
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('sell-gold'))}
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-amber-500 hover:bg-amber-50/50 p-2 rounded-lg transition-all duration-200"
+                        >
+                          Sell Digital Gold
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Digital Silver */}
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2 border-b border-gray-100 pb-2">
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+                          <Sparkles className="w-4 h-4" />
+                        </div>
+                        <span className="font-bold text-gray-900 text-sm">Digital Silver</span>
+                      </div>
+                      <div className="flex flex-col space-y-2">
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('digital-silver'))}
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-slate-700 hover:bg-slate-50 p-2 rounded-lg transition-all duration-200"
+                        >
+                          Buy Digital Silver
+                        </button>
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('digital-silver'))}
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-slate-700 hover:bg-slate-50 p-2 rounded-lg transition-all duration-200"
+                        >
+                          Sell Digital Silver
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Bill Payments */}
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2 border-b border-gray-100 pb-2">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
+                          <CreditCard className="w-4 h-4" />
+                        </div>
+                        <span className="font-bold text-gray-900 text-sm">Bill Payments</span>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        {[
+                          { name: "Mobile Prepaid", label: "Mobile Prepaid" },
+                          { name: "Electricity", label: "Electricity Bill" },
+                          { name: "DTH Connection", label: "DTH Connection" },
+                          { name: "Credit Card Bill", label: "Credit Card Rent" }
+                        ].map((b) => (
+                          <button
+                            key={b.name}
+                            onClick={() => handleDropdownItemClick(() => handleBillClick(b.label))}
+                            className="w-full text-left text-xs font-semibold text-gray-600 hover:text-blue-500 hover:bg-blue-50/50 p-1.5 rounded-lg transition-all duration-200"
+                          >
+                            {b.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             
             <DropdownMenu
               title="Calculators"
@@ -214,7 +312,7 @@ export default function Header({ onNavigate }: HeaderProps) {
               whileTap={{ scale: 0.97 }}
               onClick={() => onNavigate?.('signup')}
             >
-              <span>Start Investing Now</span>
+              <span>Start Savings Now</span>
             </motion.button>
           </div>
 
@@ -246,21 +344,46 @@ export default function Header({ onNavigate }: HeaderProps) {
             <div className="container mx-auto px-4 py-6">
               <nav className="flex flex-col space-y-4">
                 {/* Mobile Features Section */}
-                <div className="border-b border-gray-200 pb-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Features</h4>
-                  {featuresItems.map((item, index) => (
-                    <motion.button
-                      key={item.name}
-                      className="flex items-center space-x-3 w-full text-left text-gray-600 hover:text-[#ffbf00] py-2 transition-colors duration-200"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => handleDropdownItemClick(item.action)}
-                    >
-                      <item.icon className="w-4 h-4 text-[#ffbf00]" />
-                      <span className="text-sm">{item.name}</span>
-                    </motion.button>
-                  ))}
+                <div className="border-b border-gray-200 pb-4 space-y-4">
+                  <h4 className="font-bold text-gray-900 text-sm">Features</h4>
+                  
+                  {/* Digital Gold */}
+                  <div className="pl-2 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-amber-600">
+                      <Coins className="w-3.5 h-3.5" />
+                      <span>Digital Gold</span>
+                    </div>
+                    <div className="pl-4 flex flex-col space-y-2">
+                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('buy-gold'))} className="text-left text-xs text-gray-600 hover:text-amber-500 py-1 font-semibold bg-transparent border-none">Buy Digital Gold</button>
+                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('sell-gold'))} className="text-left text-xs text-gray-600 hover:text-amber-500 py-1 font-semibold bg-transparent border-none">Sell Digital Gold</button>
+                    </div>
+                  </div>
+
+                  {/* Digital Silver */}
+                  <div className="pl-2 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Digital Silver</span>
+                    </div>
+                    <div className="pl-4 flex flex-col space-y-2">
+                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('digital-silver'))} className="text-left text-xs text-gray-600 hover:text-slate-700 py-1 font-semibold bg-transparent border-none">Buy Digital Silver</button>
+                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('digital-silver'))} className="text-left text-xs text-gray-600 hover:text-slate-700 py-1 font-semibold bg-transparent border-none">Sell Digital Silver</button>
+                    </div>
+                  </div>
+
+                  {/* Bill Payments */}
+                  <div className="pl-2 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-blue-600">
+                      <CreditCard className="w-3.5 h-3.5" />
+                      <span>Bill Payments</span>
+                    </div>
+                    <div className="pl-4 flex flex-col space-y-2">
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Mobile Prepaid"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">Mobile Prepaid</button>
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Electricity Bill"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">Electricity</button>
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("DTH Connection"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">DTH Connection</button>
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Credit Card Rent"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">Credit Card Bill</button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Mobile Calculators Section */}
@@ -326,7 +449,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                   className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] text-gray-900 shadow-lg font-bold"
                   onClick={() => handleDropdownItemClick(() => onNavigate?.('signup'))}
                 >
-                  Start Investing Now
+                  Start Savings Now
                 </Button>
               </div>
             </div>

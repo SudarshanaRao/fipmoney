@@ -7,8 +7,6 @@ import HeroSection from "./components/HeroSection";
 import BenefitsSection from "./components/BenefitsSection";
 import HowItWorksSection from "./components/HowItWorksSection";
 import FeaturesSection from "./components/FeaturesSection";
-import TestimonialsSection from "./components/TestimonialsSection";
-import AppDownloadSection from "./components/AppDownloadSection";
 import Footer from "./components/Footer";
 import TermsAndConditions from "./components/TermsAndConditions";
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -113,6 +111,8 @@ export default function App() {
   const [currentGuideId, setCurrentGuideId] = useState<string>('');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const homeScrollPosition = useRef(0);
+  const isLoggedOut = typeof window !== 'undefined' ? !sessionStorage.getItem("fm_logged_in_mobile") : true;
+
 
   useEffect(() => {
     // Add smooth scrolling behavior
@@ -294,23 +294,26 @@ export default function App() {
               {/* Hero Section */}
               <HeroSection onNavigate={navigateToPage} />
 
-              {/* Benefits Section */}
-              <BenefitsSection />
+              {isLoggedOut ? (
+                /* Bill Showcase Section */
+                <BillShowcaseSection onNavigate={navigateToPage} />
+              ) : (
+                <>
+                  {/* Benefits Section */}
+                  <BenefitsSection />
 
-              {/* How It Works Section */}
-              <HowItWorksSection />
+                  {/* How It Works Section */}
+                  <HowItWorksSection />
 
-              {/* Features Section */}
-              <FeaturesSection onNavigateToCalculator={() => navigateToPage('gold-loan-calculator')} />
+                  {/* Features Section */}
+                  <FeaturesSection onNavigateToCalculator={() => navigateToPage('gold-loan-calculator')} />
 
-              {/* Bill Showcase Section */}
-              <BillShowcaseSection onNavigate={navigateToPage} />
+                  {/* Bill Showcase Section */}
+                  <BillShowcaseSection onNavigate={navigateToPage} />
+                </>
+              )}
 
-              {/* Testimonials Section */}
-              <TestimonialsSection />
 
-              {/* App Download Section */}
-              <AppDownloadSection />
             </main>
 
             {/* Scroll Progress Indicator */}
