@@ -269,7 +269,6 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   </div>
                 </div>
                 
-                {/* Info Text & Network Logo */}
                 <div className="px-6 md:px-8 pb-6 md:pb-8 relative z-10 flex justify-between items-end mt-auto">
                   <div className="max-w-[70%]">
                     <p className="text-[7px] opacity-80 leading-normal">
@@ -283,9 +282,6 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 </div>
               </div>
             </motion.div>
-            <p className="text-[10px] font-bold text-center text-slate-400 mt-4 leading-normal">
-              *This card is only used inside of this fipmoney website
-            </p>
           </div>
 
           <div className="lg:col-span-3 bg-white rounded-[2rem] p-8 border border-gray-50 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">

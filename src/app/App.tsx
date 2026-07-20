@@ -230,7 +230,7 @@ export default function App() {
         return <Blog onBack={navigateToHome} />;
       case 'sip-calculator':
       case 'gold-sip-calculator':
-        return <ComingSoonPage title="SIP Services Retired" onBack={navigateToHome} />;
+        return <ComingSoonPage title="SIP Calculator Coming Soon" onBack={navigateToHome} />;
       case 'faqs':
         return <FAQs onBack={navigateToHome} />;
       
@@ -254,7 +254,7 @@ export default function App() {
       case 'gold-loan-calculator':
         return <GoldLoanCalculator onBack={navigateToHome} />;
       case 'step-up-sip-calculator':
-        return <ComingSoonPage title="Step Up SIP Retired" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Step Up SIP Calculator Coming Soon" onBack={navigateToHome} />;
       case 'growth-calculator':
         return <ComingSoonPage title="Growth Calculator" onBack={navigateToHome} />;
       case 'retirement-calculator':

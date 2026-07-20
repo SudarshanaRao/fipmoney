@@ -190,42 +190,6 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                 Start Savings Now
               </Button>
             </motion.div>
-
-            <motion.div
-              className="flex items-center gap-8 mt-12 justify-center lg:justify-start"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 }}
-            >
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
-                  {currentData.id === "bill" ? "Instant" : "50K+"}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {currentData.id === "bill" ? "Settlements" : "Happy Users"}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
-                  {currentData.id === "bill" ? "BBPS" : "₹100Cr+"}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {currentData.id === "gold" 
-                    ? "Gold Invested" 
-                    : currentData.id === "silver" 
-                      ? "Silver Invested" 
-                      : "Certified"}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">
-                  {currentData.id === "bill" ? "0%" : "₹1"}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {currentData.id === "bill" ? "Added Fee" : "Min. Investment"}
-                </div>
-              </div>
-            </motion.div>
           </div>
 
           {/* Right Content - Hero Carousel */}
