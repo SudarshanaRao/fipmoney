@@ -8,6 +8,7 @@ import BenefitsSection from "./components/BenefitsSection";
 import HowItWorksSection from "./components/HowItWorksSection";
 import FeaturesSection from "./components/FeaturesSection";
 import AllInOneSection from "./components/AllInOneSection";
+import PlatformTrustSection from "./components/PlatformTrustSection";
 import Footer from "./components/Footer";
 import TermsAndConditions from "./components/TermsAndConditions";
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -316,6 +317,9 @@ export default function App() {
 
               {/* All In One Services Section */}
               <AllInOneSection onNavigate={navigateToPage} />
+
+              {/* Platform Trust Section */}
+              <PlatformTrustSection />
             </main>
 
             {/* Scroll Progress Indicator */}

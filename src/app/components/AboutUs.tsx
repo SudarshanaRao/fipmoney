@@ -1,341 +1,339 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, Users, Target, Award, Heart, Lightbulb, Shield } from "lucide-react";
-import { Button } from "./ui/button";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { 
+  ArrowLeft, 
+  Smartphone, 
+  CreditCard, 
+  ShieldCheck, 
+  Users, 
+  Star, 
+  Lock, 
+  User, 
+  Lightbulb, 
+  Heart 
+} from "lucide-react";
+
+import aboutHeroFolder from "../../assets/about_hero_folder.png";
+import aboutVisionMountain from "../../assets/about_vision_mountain.png";
+import aboutMissionCompass from "../../assets/about_mission_compass.png";
 
 interface AboutUsProps {
   onBack: () => void;
 }
 
-const ValueCard = ({ icon: Icon, title, description, delay = 0 }) => (
-  <motion.div
-    className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 interactive-card"
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.6 }}
-    viewport={{ once: true }}
+// Gold Bars Custom SVG Icon
+const GoldBarsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    fill="none" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    {...props}
   >
-    <motion.div
-      className="w-12 h-12 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] rounded-xl flex items-center justify-center mb-4"
-      whileHover={{ scale: 1.1, rotate: 360 }}
-      transition={{ duration: 0.6 }}
-    >
-      <Icon className="w-6 h-6 text-white" />
-    </motion.div>
-    <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
-    <p className="text-gray-600 leading-relaxed">{description}</p>
-  </motion.div>
-);
-
-const TeamMember = ({ name, role, image, delay = 0 }) => (
-  <motion.div
-    className="text-center"
-    initial={{ opacity: 0, scale: 0.8 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    transition={{ delay, duration: 0.6 }}
-    viewport={{ once: true }}
-  >
-    <motion.div
-      className="relative mb-4 mx-auto"
-      whileHover={{ scale: 1.05 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="w-32 h-32 rounded-full overflow-hidden mx-auto border-4 border-[#ffbf00] shadow-lg">
-        <ImageWithFallback
-          src={image}
-          alt={name}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white"></div>
-    </motion.div>
-    <h4 className="font-semibold text-gray-900 mb-1">{name}</h4>
-    <p className="text-[#ffbf00] text-sm">{role}</p>
-  </motion.div>
-);
-
-const StatCard = ({ number, label, delay = 0 }) => (
-  <motion.div
-    className="text-center"
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.6 }}
-    viewport={{ once: true }}
-  >
-    <motion.div
-      className="text-3xl md:text-4xl font-bold text-[#ffbf00] mb-2"
-      initial={{ scale: 0 }}
-      whileInView={{ scale: 1 }}
-      transition={{ delay: delay + 0.2, duration: 0.5, type: "spring" }}
-      viewport={{ once: true }}
-    >
-      {number}
-    </motion.div>
-    <div className="text-gray-600">{label}</div>
-  </motion.div>
+    <path d="M2 20h20" />
+    <path d="M5 20l2-8h10l2 8" />
+    <path d="M7 12l1.5-6h7l1.5 6" />
+  </svg>
 );
 
 export default function AboutUs({ onBack }: AboutUsProps) {
-  const values = [
-    {
-      icon: Target,
-      title: "Mission Driven",
-      description: "To democratize gold investment and make wealth building accessible to every Indian family through innovative digital solutions."
-    },
-    {
-      icon: Shield,
-      title: "Trust & Security",
-      description: "We prioritize the highest standards of security and transparency, ensuring your investments are protected with bank-grade encryption."
-    },
-    {
-      icon: Lightbulb,
-      title: "Innovation First",
-      description: "Continuously developing cutting-edge features and tools to enhance your investment experience and financial growth."
-    },
-    {
-      icon: Heart,
-      title: "Customer Centric",
-      description: "Every decision we make is guided by our commitment to providing exceptional service and support to our valued customers."
-    }
+  const services = [
+    { label: "Recharge & Bills", icon: Smartphone },
+    { label: "Credit Card Payments", icon: CreditCard },
+    { label: "Digital Gold & Silver", icon: GoldBarsIcon },
+    { label: "Secure & Reliable", icon: ShieldCheck },
   ];
 
-  const team = [
-    { name: "Rajesh Kumar", role: "CEO & Founder", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&face=center&auto=format" },
-    { name: "Priya Sharma", role: "CTO", image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&face=center&auto=format" },
-    { name: "Amit Patel", role: "Head of Product", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&face=center&auto=format" },
-    { name: "Sneha Reddy", role: "Head of Operations", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&face=center&auto=format" }
+  const values = [
+    {
+      title: "Customer First",
+      desc: "We put our users at the heart of everything we do.",
+      icon: User,
+    },
+    {
+      title: "Trust & Transparency",
+      desc: "We believe in building trust through honesty and clear communication.",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Innovation",
+      desc: "We constantly innovate to bring you better and smarter solutions.",
+      icon: Lightbulb,
+    },
+    {
+      title: "Security",
+      desc: "Your data and money are always protected with top-notch security.",
+      icon: Lock,
+    },
   ];
 
   return (
     <motion.div
-      className="min-h-screen bg-white"
+      className="min-h-screen bg-[#fafbfc] text-slate-900 pb-16 relative overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
     >
-      {/* Header */}
-      <motion.div
-        className="bg-gradient-to-r from-[#fff8dc] to-[#ffe485] border-b border-gray-200"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onBack}
-              className="flex items-center space-x-2 text-gray-600 hover:text-[#ffbf00] interactive-button"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
-            </Button>
-            <div className="h-6 w-px bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5 text-[#ffbf00]" />
-              <h1 className="text-2xl font-bold text-gray-900">About FipMoney</h1>
-            </div>
+      {/* BACKGROUND CONCENTRIC CIRCULAR GLOW TRACKS */}
+      <div className="absolute right-0 top-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <svg 
+          className="absolute top-[-15%] right-[-15%] w-[85%] h-[130%] opacity-[0.28]" 
+          viewBox="0 0 1000 1000" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="750" cy="250" r="180" stroke="url(#goldGrad)" strokeWidth="1.2" />
+          <circle cx="750" cy="250" r="280" stroke="url(#goldGrad)" strokeWidth="1.6" />
+          <circle cx="750" cy="250" r="380" stroke="url(#goldGrad)" strokeWidth="2.2" />
+          <circle cx="750" cy="250" r="480" stroke="url(#goldGrad)" strokeWidth="2.6" strokeDasharray="6 6" />
+          <circle cx="750" cy="250" r="580" stroke="url(#goldGrad)" strokeWidth="3.2" />
+          <circle cx="750" cy="250" r="680" stroke="url(#goldGrad)" strokeWidth="3.8" />
+          <circle cx="750" cy="250" r="780" stroke="url(#goldGrad)" strokeWidth="4.4" />
+          <defs>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#c59325" stopOpacity="0.85" />
+              <stop offset="45%" stopColor="#f5ebd0" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#c59325" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Header spanning full width */}
+      <header className="w-full px-6 md:px-12 lg:px-20 py-6 flex justify-between items-center relative z-20">
+        <div className="flex items-center space-x-2">
+          {/* Fipmoney Logo */}
+          <div className="flex items-center gap-2 cursor-pointer" onClick={onBack}>
+            <span className="text-slate-900 text-2xl font-black tracking-wider flex items-center">
+              <span className="font-extrabold text-[#c59325] mr-1">FM</span> Fipmoney
+            </span>
           </div>
         </div>
-      </motion.div>
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-slate-200 bg-white font-extrabold text-xs text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-sm hover:shadow z-30"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </button>
+      </header>
 
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-[#ffbf00] rounded-full blur-3xl float-animation"></div>
-          <div className="absolute bottom-20 right-20 w-40 h-40 bg-[#ffd152] rounded-full blur-3xl" style={{ animationDelay: '1s' }}></div>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.h2
-              className="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              Revolutionizing{" "}
-              <span className="gradient-text">Digital Gold</span>{" "}
-              Investment in India
-            </motion.h2>
-            
-            <motion.p
-              className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              Founded in 2022, FipMoney is India's first comprehensive digital gold SIP platform, 
-              dedicated to making gold investment accessible, secure, and profitable for everyone. 
-              We combine traditional investment wisdom with modern technology to help you build lasting wealth.
-            </motion.p>
-
-            <motion.div
-              className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              <StatCard number="3L+" label="Happy Users" delay={0} />
-              <StatCard number="₹725Cr" label="Assets Under Management" delay={0.1} />
-              <StatCard number="41.2T" label="Gold Secured" delay={0.2} />
-              <StatCard number="4.9★" label="User Rating" delay={0.3} />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Story */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h3>
-              <div className="space-y-4 text-gray-600 leading-relaxed">
-                <p>
-                  FipMoney was born from a simple observation: despite gold being India's most trusted 
-                  investment, the process of buying, storing, and managing gold investments remained 
-                  complicated and expensive for the average investor.
-                </p>
-                <p>
-                  Our founders, experienced professionals from the fintech and precious metals industry, 
-                  envisioned a platform that would combine the security and growth potential of gold 
-                  with the convenience of modern digital banking.
-                </p>
-                <p>
-                  Today, we're proud to serve over 3 lakh users across India, helping them build 
-                  wealth systematically through our innovative SIP platform, goal-based savings, 
-                  and comprehensive gold investment solutions.
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <ImageWithFallback
-                  src="https://static.vecteezy.com/system/resources/previews/007/692/124/non_2x/people-concept-illustration-of-our-team-management-about-us-for-graphic-and-web-design-business-presentation-and-marketing-material-vector.jpg"
-                  alt="FipMoney team illustration"
-                  className="w-full h-80 object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+      {/* Main container spanning full width with responsive margins */}
+      <div className="w-full px-6 md:px-12 lg:px-20 space-y-12 relative z-10">
+        
+        {/* HERO SECTION */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-4">
+          {/* Left Text */}
+          <div className="lg:col-span-7 space-y-8 text-left">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-[#c59325] text-xs font-black uppercase tracking-wider">ABOUT US</span>
+                <div className="w-16 h-[2px] bg-[#c59325]/40" />
               </div>
               
-              <motion.div
-                className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-6 shadow-xl"
-                initial={{ opacity: 0, scale: 0 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <div className="flex items-center space-x-3">
-                  <Award className="w-8 h-8 text-[#ffbf00]" />
-                  <div>
-                    <div className="font-semibold text-gray-900">Best Fintech</div>
-                    <div className="text-sm text-gray-600">Startup 2024</div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-tight tracking-tight">
+                Fipmoney is built to<br />
+                <span className="text-[#c59325] bg-gradient-to-r from-[#c59325] to-[#e0b034] bg-clip-text text-transparent">
+                  Simplify Your Finances
+                </span>
+              </h1>
+
+              <p className="text-sm md:text-base font-semibold text-slate-500 leading-relaxed max-w-3xl">
+                Fipmoney is your all-in-one financial companion that helps you save, pay, invest and grow — all in one secure and seamless platform.
+              </p>
+            </div>
+
+            {/* Feature Icons Row */}
+            <div className="grid grid-cols-4 gap-4 max-w-xl">
+              {services.map((item, idx) => {
+                const IconComponent = item.icon;
+                return (
+                  <div key={idx} className="flex flex-col items-center text-center space-y-3">
+                    <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-[#c59325] shadow-sm hover:shadow-md hover:border-amber-100/50 hover:scale-105 transition-all duration-300">
+                      <IconComponent className="w-6 h-6 stroke-[2]" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs font-black text-slate-700 leading-tight">
+                      {item.label}
+                    </span>
                   </div>
-                </div>
-              </motion.div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right 3D Illustration */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <motion.div
+              className="relative max-w-md lg:max-w-full"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              <img
+                src={aboutHeroFolder}
+                alt="About Fipmoney Illustration"
+                className="max-h-[380px] w-auto object-contain drop-shadow-[0_20px_50px_rgba(197,147,37,0.08)]"
+              />
             </motion.div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Our Values */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Our Core Values</h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              The principles that guide every decision we make and every solution we build
-            </p>
-          </motion.div>
+        {/* STATISTICS CONTAINER */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-8 shadow-sm hover:shadow-md transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+            {/* Stat 1 */}
+            <div className="flex items-center justify-center space-x-4 pb-6 md:pb-0 md:px-6">
+              <div className="w-12 h-12 rounded-full bg-[#fdfaf2] border border-[#f5ebd0]/60 flex items-center justify-center text-[#c59325] shrink-0">
+                <Users className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div>
+                <div className="text-2xl md:text-3xl font-black text-slate-900">100K+</div>
+                <div className="text-xs font-black text-slate-400 uppercase tracking-wider">Happy Users</div>
+              </div>
+            </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <ValueCard
-                key={value.title}
-                icon={value.icon}
-                title={value.title}
-                description={value.description}
-                delay={index * 0.1}
-              />
-            ))}
+            {/* Stat 2 */}
+            <div className="flex items-center justify-center space-x-4 py-6 md:py-0 md:px-6">
+              <div className="w-12 h-12 rounded-full bg-[#fdfaf2] border border-[#f5ebd0]/60 flex items-center justify-center text-[#c59325] shrink-0">
+                <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div>
+                <div className="text-2xl md:text-3xl font-black text-slate-900">1M+</div>
+                <div className="text-xs font-black text-slate-400 uppercase tracking-wider">Secure Transactions</div>
+              </div>
+            </div>
+
+            {/* Stat 3 */}
+            <div className="flex items-center justify-center space-x-4 pt-6 md:pt-0 md:px-6">
+              <div className="w-12 h-12 rounded-full bg-[#fdfaf2] border border-[#f5ebd0]/60 flex items-center justify-center text-[#c59325] shrink-0">
+                <Star className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div>
+                <div className="text-2xl md:text-3xl font-black text-slate-900">25+</div>
+                <div className="text-xs font-black text-slate-400 uppercase tracking-wider">Services</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Leadership Team */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
+        {/* THREE COLUMN DETAILS SECTION (Mission, Vision, Values) */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* COLUMN 1: Our Mission */}
           <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            className="rounded-[1.5rem] text-white p-8 relative overflow-hidden flex flex-col justify-between h-[285px] border border-slate-950 shadow-sm"
+            style={{
+              background: "radial-gradient(circle at 80% 80%, rgba(197, 147, 37, 0.16) 0%, rgba(12, 13, 18, 1) 75%)"
+            }}
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.3 }}
           >
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Leadership Team</h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Meet the visionaries behind FipMoney's success
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
-            {team.map((member, index) => (
-              <TeamMember
-                key={member.name}
-                name={member.name}
-                role={member.role}
-                image={member.image}
-                delay={index * 0.1}
+            <div className="space-y-2 z-10 max-w-[60%] relative text-left">
+              <span className="text-[#ffd152] text-4xl font-serif leading-none block h-4">“</span>
+              <h3 className="text-xl font-black text-[#ffd152] tracking-tight">Our Mission</h3>
+              {/* Golden accent line underneath title */}
+              <div className="w-8 h-[2px] bg-[#ffd152] mt-1.5 mb-2.5" />
+              <p className="text-[11px] font-bold text-slate-300 leading-relaxed">
+                To empower every individual in India with simple, secure and smart financial solutions.
+              </p>
+            </div>
+            {/* Compass Image positioned in the bottom-right corner below text */}
+            <div className="absolute right-0 bottom-0 w-[55%] h-[80%] pointer-events-none z-0 flex items-end justify-end">
+              <img 
+                src={aboutMissionCompass} 
+                alt="Our Mission Compass" 
+                className="max-h-full max-w-full object-contain object-right-bottom select-none"
               />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-3xl font-bold mb-4">Join Our Growing Community</h3>
-            <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">
-              Be part of India's largest digital gold investment platform and start building your wealth today
-            </p>
-            <Button
-              size="lg"
-              className="bg-white text-[#ffbf00] hover:bg-gray-100 px-8 py-6 text-lg interactive-button"
-            >
-              Start Investing Now
-            </Button>
+            </div>
           </motion.div>
-        </div>
-      </section>
+
+          {/* COLUMN 2: Our Vision */}
+          <motion.div
+            className="rounded-[1.5rem] border border-slate-200/60 p-8 relative overflow-hidden flex flex-col justify-between h-[285px] shadow-sm"
+            style={{
+              background: "radial-gradient(circle at 80% 80%, rgba(245, 235, 208, 0.35) 0%, rgba(248, 250, 252, 1) 75%)"
+            }}
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="space-y-2 z-10 max-w-[55%] relative text-left">
+              <div className="h-4" /> {/* spacer */}
+              <h3 className="text-xl font-black text-[#c59325] tracking-tight">Our Vision</h3>
+              {/* Golden accent line underneath title */}
+              <div className="w-8 h-[2px] bg-[#c59325] mt-1.5 mb-2.5" />
+              <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
+                To become India's most trusted financial ecosystem where everyone can achieve financial freedom effortlessly.
+              </p>
+            </div>
+            {/* Mountain Image positioned in the bottom-right corner below text */}
+            <div className="absolute right-0 bottom-0 w-[60%] h-[85%] pointer-events-none z-0 flex items-end justify-end">
+              <img 
+                src={aboutVisionMountain} 
+                alt="Our Vision Mountain" 
+                className="max-h-full max-w-full object-contain object-right-bottom select-none"
+              />
+            </div>
+          </motion.div>
+
+          {/* COLUMN 3: Our Values */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-1 rounded-[1.5rem] bg-[#f8fafc] border border-slate-200/50 p-5 flex flex-col justify-between h-[285px] shadow-sm">
+            <h3 className="text-base font-black text-slate-800 text-center tracking-tight mb-2">Our Values</h3>
+            
+            <div className="space-y-2 flex-1 flex flex-col justify-between">
+              {values.map((val, idx) => {
+                const ValIcon = val.icon;
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex items-center space-x-3 bg-white border border-slate-100/80 px-3 py-2 rounded-xl shadow-sm hover:border-amber-100/50 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-white border border-[#f5ebd0] flex items-center justify-center text-[#c59325] shrink-0 shadow-sm">
+                      <ValIcon className="w-4 h-4 stroke-[2]" />
+                    </div>
+                    <div className="text-left">
+                      <h4 className="text-[10px] font-black text-slate-900 leading-tight">
+                        {val.title}
+                      </h4>
+                      <p className="text-[9px] font-semibold text-slate-400 leading-relaxed mt-0.5">
+                        {val.desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* BOTTOM BANNER */}
+        <section className="rounded-3xl bg-[#fdfaf2] border border-[#f5ebd0]/60 p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
+            .cursive-thankyou {
+              font-family: 'Allura', cursive;
+            }
+          `}</style>
+          
+          <div className="flex items-center space-x-5 text-left">
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-[#fcf8ee] flex items-center justify-center shadow-[0_4px_12px_rgba(197,147,37,0.08)] shrink-0">
+              <Heart className="w-7 h-7 fill-[#c59325] text-[#c59325] stroke-[1.5]" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-slate-500">Fipmoney is more than just an app,</span>
+              <span className="text-base font-black text-slate-900">it's a step towards your financial freedom.</span>
+            </div>
+          </div>
+          
+          <div className="shrink-0 text-center md:text-right pr-4">
+            <span className="cursive-thankyou text-4xl md:text-5xl text-[#c59325] font-normal leading-none block">
+              Thank you for being a part of our journey!
+            </span>
+          </div>
+        </section>
+
+      </div>
     </motion.div>
   );
 }
