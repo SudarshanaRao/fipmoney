@@ -37,8 +37,9 @@ import BillShowcaseSection from "./components/BillShowcaseSection";
 import RiskDisclosure from "./components/RiskDisclosure";
 import GrievancePolicy from "./components/GrievancePolicy";
 import InvestorCharter from "./components/InvestorCharter";
+import LiveMetalTracker from "./components/LiveMetalTracker";
 
-type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide';
+type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker';
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -266,7 +267,15 @@ export default function App() {
       case 'cpc-7th-calculator':
         return <ComingSoonPage title="7th CPC Salary Calculator" onBack={navigateToHome} />;
       case 'gold-rate-calculator':
-        return <ComingSoonPage title="Gold Rate Calculator" onBack={navigateToHome} />;
+      case 'live-metal-tracker':
+        return (
+          <LiveMetalTracker
+            onBack={navigateToHome}
+            onNavigateToHome={navigateToHome}
+            onNavigateToBuyGold={() => navigateToPage('buy-gold')}
+            onNavigateToBuySilver={() => navigateToPage('digital-silver')}
+          />
+        );
         
       // Help pages
       case 'jar-how-tos':

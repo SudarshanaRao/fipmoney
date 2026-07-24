@@ -186,8 +186,11 @@ export default function Footer({ onNavigate }: FooterProps) {
             </div>
 
             {/* Center: Branding Logo Watermark */}
-            <div className="flex flex-col items-center justify-center order-1 lg:order-2 text-center py-2">
-              <div className="font-black text-6xl md:text-[4.5rem] lg:text-[6rem] text-white/5 select-none tracking-tighter leading-none font-outfit uppercase">
+            <div 
+              className="flex flex-col items-center justify-center order-1 lg:order-2 text-center py-2 cursor-pointer group"
+              onClick={() => onNavigate?.('home')}
+            >
+              <div className="font-black text-6xl md:text-[4.5rem] lg:text-[6rem] text-white/5 group-hover:text-white/10 transition-colors select-none tracking-tighter leading-none font-outfit uppercase">
                 FIPMONEY
               </div>
               <div className="mt-2 text-[#ffbf00]/40 font-bold uppercase tracking-[0.4em] text-[8px] md:text-[9px]">

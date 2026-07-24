@@ -10,6 +10,7 @@ import { Label } from "./ui/label";
 import { Badge } from "./ui/badge";
 import { Slider } from "./ui/slider";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { fetchLatestMetalPrices } from "../utils/metalPriceApi";
 
 interface BuyGoldProps {
   onBack: () => void;
@@ -29,15 +30,18 @@ const BuyGold = ({ onBack }: BuyGoldProps) => {
   }, [investmentAmount, goldPrice]);
 
   useEffect(() => {
-    // Simulate real-time gold price updates
-    const interval = setInterval(() => {
-      setGoldPrice(prev => {
-        const change = (Math.random() - 0.5) * 10;
-        return Math.max(6400, Math.min(6500, prev + change));
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
+    // Fetch live gold price from MetalpriceAPI (utilizes 24h cache)
+    const loadLiveRate = async () => {
+      try {
+        const live = await fetchLatestMetalPrices();
+        if (live && live.gold && live.gold.perGram24K) {
+          setGoldPrice(live.gold.perGram24K);
+        }
+      } catch (e) {
+        console.warn("Using fallback gold price:", e);
+      }
+    };
+    loadLiveRate();
   }, []);
 
   const handlePurchase = async () => {

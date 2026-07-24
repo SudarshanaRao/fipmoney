@@ -208,6 +208,13 @@ export default function Header({ onNavigate }: HeaderProps) {
                         >
                           Sell Digital Gold
                         </button>
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('live-metal-tracker'))}
+                          className="w-full text-left text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-100/50 p-2 rounded-lg transition-all duration-200 flex items-center justify-between"
+                        >
+                          <span>Live Metal Rates (API)</span>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        </button>
                       </div>
                     </div>
 

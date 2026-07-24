@@ -14,6 +14,7 @@ import { Switch } from "./ui/switch";
 import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
 import { addTransaction } from "../utils/transactionStorage";
+import { fetchLatestMetalPrices } from "../utils/metalPriceApi";
 
 interface DigitalGoldSilverProps {
   onNavigate: (page: string) => void;
@@ -57,10 +58,25 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [amount, setAmount] = useState<string>("");
   const [grams, setGrams] = useState<string>("");
 
-  // Security locks & simulated live prices
+  // Security locks & live prices from MetalpriceAPI
   const [vaultLocked, setVaultLocked] = useState<boolean>(false);
   const [goldPrice, setGoldPrice] = useState<number>(6420.50);
   const [silverPrice, setSilverPrice] = useState<number>(84.20);
+
+  useEffect(() => {
+    const loadLiveRates = async () => {
+      try {
+        const live = await fetchLatestMetalPrices();
+        if (live && live.gold && live.silver) {
+          setGoldPrice(live.gold.perGram24K);
+          setSilverPrice(live.silver.perGram);
+        }
+      } catch (err) {
+        console.warn("MetalpriceAPI live fetch error:", err);
+      }
+    };
+    loadLiveRates();
+  }, []);
 
   // User simulated holdings
   const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
@@ -992,6 +1008,11 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9px; }
       `}} />
+
+      {/* MetalpriceAPI Free Plan Attribution */}
+      <div className="mt-8 text-center text-xs text-slate-500 py-4 border-t border-slate-200">
+        Powered by <a href="https://metalpriceapi.com/" title="Free Precious Metal Rates API" target="_blank" rel="noopener noreferrer" className="underline font-semibold text-amber-600 hover:text-amber-700">MetalpriceAPI.com</a>
+      </div>
 
     </div>
     {ModalComponent}
