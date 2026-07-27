@@ -1,337 +1,28 @@
-"use client";
+const fs = require('fs');
+const path = require('path');
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Shield, Lock, Unlock, TrendingUp, Coins, ArrowUpRight, ArrowDownRight,
-  Sparkles, Clock, Wallet, AlertCircle, CheckCircle2, Calculator,
-  Loader2, Truck, Gift, Info, BarChart3, HelpCircle, ChevronRight, X, ArrowRight } from "lucide-react";
-import { Card } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Switch } from "./ui/switch";
-import { Input } from "./ui/input";
-import { useFipModal } from "./FipModal";
-import { addTransaction } from "../utils/transactionStorage";
-import { fetchLatestMetalPrices } from "../utils/metalPriceApi";
+const filePath = path.join(__dirname, 'src/app/components/DigitalGoldSilver.tsx');
+const lines = fs.readFileSync(filePath, 'utf8').split('\\n');
 
-interface DigitalGoldSilverProps {
-  onNavigate: (page: string) => void;
-  kycStatus: string;
+let returnLineIndex = -1;
+for (let i = 300; i < lines.length; i++) {
+  if (lines[i].trim().startsWith('return (') && lines[i].trim().length < 15) {
+    returnLineIndex = i;
+    break;
+  }
 }
 
-type TimeFrame = "1D" | "1W" | "1M" | "1Y" | "5Y";
+if (returnLineIndex === -1) {
+  console.error("Could not find the return statement");
+  process.exit(1);
+}
 
-// Price datasets for Gold and Silver based on Timeframe
-const GOLD_DATASETS: Record<TimeFrame, number[]> = {
-  "1D": [6410, 6415, 6408, 6425, 6420, 6432, 6420.50],
-  "1W": [6350, 6380, 6410, 6390, 6440, 6410, 6420.50],
-  "1M": [6200, 6290, 6250, 6380, 6350, 6450, 6420.50],
-  "1Y": [5600, 5800, 5750, 6100, 5950, 6300, 6420.50],
-  "5Y": [4100, 4800, 5200, 5100, 5800, 6100, 6420.50]
-};
+let importIndex = lines.findIndex(line => line.includes('} from "lucide-react"'));
+if (importIndex !== -1 && !lines.slice(0, importIndex+1).join('\\n').includes('ArrowRight')) {
+  lines[importIndex - 1] = lines[importIndex - 1] + ', ArrowRight';
+}
 
-const SILVER_DATASETS: Record<TimeFrame, number[]> = {
-  "1D": [83.9, 84.1, 83.8, 84.5, 84.2, 84.6, 84.20],
-  "1W": [82.5, 83.1, 84.2, 83.6, 84.8, 83.9, 84.20],
-  "1M": [79.0, 81.2, 80.5, 82.8, 82.1, 84.9, 84.20],
-  "1Y": [68.0, 72.0, 70.5, 78.0, 75.0, 82.0, 84.20],
-  "5Y": [48.0, 56.0, 64.0, 61.0, 72.0, 78.0, 84.20]
-};
-
-// Physical Delivery Products Catalog
-const DELIVERY_PRODUCTS = [
-  { id: "g1", metal: "gold", name: "24K Gold Coin", weight: 1, reqHoldings: 1.0, image: "🪙", purity: "999.9 Purity" },
-  { id: "g5", metal: "gold", name: "24K Gold Bar", weight: 5, reqHoldings: 5.0, image: "💳", purity: "999.9 Purity" },
-  { id: "s10", metal: "silver", name: "99.9 Fine Silver Coin", weight: 10, reqHoldings: 10.0, image: "🪙", purity: "999 Purity" },
-  { id: "s50", metal: "silver", name: "99.9 Silver Bar", weight: 50, reqHoldings: 50.0, image: "🥈", purity: "999 Purity" },
-];
-
-export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGoldSilverProps) {
-  const { showAlert, ModalComponent } = useFipModal();
-  const [metal, setMetal] = useState<"gold" | "silver">("gold");
-  const [txType, setTxType] = useState<"buy" | "sell">("buy");
-  const [timeframe, setTimeframe] = useState<TimeFrame>("1D");
-
-  // Dynamic inputs
-  const [amount, setAmount] = useState<string>("");
-  const [grams, setGrams] = useState<string>("");
-
-  // Security locks & live prices from MetalpriceAPI
-  const [vaultLocked, setVaultLocked] = useState<boolean>(false);
-  const [goldPrice, setGoldPrice] = useState<number>(6420.50);
-  const [silverPrice, setSilverPrice] = useState<number>(84.20);
-
-  useEffect(() => {
-    const loadLiveRates = async () => {
-      try {
-        const live = await fetchLatestMetalPrices();
-        if (live && live.gold && live.silver) {
-          setGoldPrice(live.gold.perGram24K);
-          setSilverPrice(live.silver.perGram);
-        }
-      } catch (err) {
-        console.warn("MetalpriceAPI live fetch error:", err);
-      }
-    };
-    loadLiveRates();
-  }, []);
-
-  // User simulated holdings
-  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
-  const isDemoUser = ["7013302191", "9491841941", "7893863597"].includes(loggedInMobile);
-
-  const [goldHoldings, setGoldHoldings] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 12.4502 : 0);
-    }
-    return 12.4502;
-  });
-  
-  const [silverHoldings, setSilverHoldings] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 340.2005 : 0);
-    }
-    return 340.2005;
-  });
-
-  // Sync to localStorage
-  useEffect(() => {
-    localStorage.setItem(`fip_gold_holdings_${loggedInMobile}`, goldHoldings.toString());
-  }, [goldHoldings, loggedInMobile]);
-
-  useEffect(() => {
-    localStorage.setItem(`fip_silver_holdings_${loggedInMobile}`, silverHoldings.toString());
-  }, [silverHoldings, loggedInMobile]);
-
-  // Calculator inputs
-  const [calcMonthly, setCalcMonthly] = useState<number>(1000);
-  const [calcYears, setCalcYears] = useState<number>(3);
-
-  // Checkout & physical delivery flow
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [txSuccess, setTxSuccess] = useState<boolean>(false);
-  const [successMsg, setSuccessMsg] = useState<string>("");
-  const [lastTxId, setLastTxId] = useState<string>("");
-  const [activeDelivery, setActiveDelivery] = useState<any | null>(null);
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [deliverySuccess, setDeliverySuccess] = useState(false);
-
-  // Static mock transactions history
-  const [transactions, setTransactions] = useState([
-    { id: "FIP839120", type: "Buy", metal: "Gold", amount: "₹5,000", grams: "0.7788 g", date: "Today, 10:14 AM", status: "Completed" },
-    { id: "FIP728193", type: "Buy", metal: "Silver", amount: "₹2,500", grams: "29.6912 g", date: "12 Jul 2026", status: "Completed" },
-    { id: "FIP619283", type: "Sell", metal: "Gold", amount: "₹8,000", grams: "1.2461 g", date: "05 Jul 2026", status: "Completed" },
-    { id: "FIP510293", type: "Buy", metal: "Gold", amount: "₹150", grams: "0.0234 g", date: "01 Jul 2026", status: "Completed" }
-  ]);
-
-  useEffect(() => {
-    if (txSuccess && successMsg) {
-      const amtVal = Number(amount || Math.round(Number(grams) * activePrice));
-
-      // Save to localStorage history
-      addTransaction({
-        type: txType === "buy" ? "Buy" : "Sell",
-        category: metal === "gold" ? "Gold" : "Silver",
-        amount: amtVal,
-        grams: `${Number(grams).toFixed(4)} g`,
-        status: "Completed",
-        paymentMethod: "UPI",
-        source: metal === "gold" ? "Gold Vault" : "Silver Vault"
-      });
-
-      setTransactions(prev => [
-        {
-          id: lastTxId,
-          type: txType === "buy" ? "Buy" : "Sell",
-          metal: metal === "gold" ? "Gold" : "Silver",
-          amount: `₹${amtVal.toLocaleString()}`,
-          grams: `${Number(grams).toFixed(4)} g`,
-          date: "Just now",
-          status: "Completed"
-        },
-        ...prev
-      ]);
-    }
-  }, [txSuccess]);
-
-  // Live price simulator
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGoldPrice(prev => {
-        const change = (Math.random() - 0.5) * 1.5;
-        return Number((prev + change).toFixed(2));
-      });
-      setSilverPrice(prev => {
-        const change = (Math.random() - 0.5) * 0.08;
-        return Number((prev + change).toFixed(2));
-      });
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const activePrice = metal === "gold" ? goldPrice : silverPrice;
-  const holdings = metal === "gold" ? goldHoldings : silverHoldings;
-  const label = metal === "gold" ? "Gold" : "Silver";
-
-  // Handle input conversions
-  const handleAmountChange = (val: string) => {
-    setAmount(val);
-    if (!val || isNaN(Number(val))) {
-      setGrams("");
-      return;
-    }
-    setGrams((Number(val) / activePrice).toFixed(4));
-  };
-
-  const handleGramsChange = (val: string) => {
-    setGrams(val);
-    if (!val || isNaN(Number(val))) {
-      setAmount("");
-      return;
-    }
-    setAmount(Math.round(Number(val) * activePrice).toString());
-  };
-
-  // Limits calculations based on KYC tier
-  const isKycPending = kycStatus.toLowerCase() === "pending";
-  const isMinKyc = kycStatus.toLowerCase().includes("min");
-  const isFullKyc = kycStatus.toLowerCase().includes("full");
-
-  const dailyBuyLimit = isKycPending ? 0 : isMinKyc ? 10000 : 2500000;
-  const dailySellLimit = isKycPending ? 0 : isMinKyc ? 5000 : 1000000;
-  const maxStorage = isKycPending ? 0 : isMinKyc ? 50 : 1000;
-
-  // Visual limits used (mocked used buy limits)
-  const buyUsed = 2400; // Mocked amount bought today in rupees
-
-  // Handle transaction submit
-  const handleTransaction = async () => {
-    if (isKycPending) {
-      showAlert("Verification Pending. Please upgrade your KYC settings to start transacting.", "warning", "KYC Required");
-      return;
-    }
-
-    const numAmount = Number(amount);
-    if (txType === "buy") {
-      if (numAmount + buyUsed > dailyBuyLimit) {
-        showAlert(`This exceeds your daily KYC purchase limit of ₹${dailyBuyLimit.toLocaleString()}.`, "error", "Transaction Blocked");
-        return;
-      }
-    } else {
-      if (vaultLocked) return;
-      if (Number(grams) > holdings) {
-        showAlert(`Insufficient vault holdings. You only have ${holdings.toFixed(4)}g.`, "error", "Insufficient Holdings");
-        return;
-      }
-      if (numAmount > dailySellLimit) {
-        showAlert(`This exceeds your daily KYC sell limit of ₹${dailySellLimit.toLocaleString()}.`, "error", "Transaction Blocked");
-        return;
-      }
-    }
-
-    setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-
-    const txId = "FIP" + Math.floor(100000 + Math.random() * 900000);
-    setLastTxId(txId);
-
-    if (txType === "buy") {
-      if (metal === "gold") setGoldHoldings(prev => prev + Number(grams));
-      else setSilverHoldings(prev => prev + Number(grams));
-      setSuccessMsg(`Successfully bought ${Number(grams).toFixed(4)}g of 24K pure Digital ${label}!`);
-    } else {
-      if (metal === "gold") setGoldHoldings(prev => prev - Number(grams));
-      else setSilverHoldings(prev => prev - Number(grams));
-      setSuccessMsg(`Successfully sold ${Number(grams).toFixed(4)}g of Digital ${label}. Funds credited to your Bank account.`);
-    }
-
-    setTxSuccess(true);
-    setAmount("");
-    setGrams("");
-  };
-
-  // Savings Auto-Save projection formulas
-  const calculateAutoSaveProjection = () => {
-    const rate = 0.12; // +12% p.a gold growth projection
-    const monthlyAmt = calcMonthly;
-    const months = calcYears * 12;
-    let totalInvested = monthlyAmt * months;
-
-    // Future value of SIP formula
-    let futureValue = 0;
-    const monthlyRate = rate / 12;
-    futureValue = monthlyAmt * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
-
-    return {
-      invested: totalInvested,
-      projected: Math.round(futureValue),
-      growth: Math.round(futureValue - totalInvested)
-    };
-  };
-
-  const projection = calculateAutoSaveProjection();
-
-  // Dynamic SVG Path Calculations for Chart line
-  const activeDataset = metal === "gold" ? GOLD_DATASETS[timeframe] : SILVER_DATASETS[timeframe];
-  const chartWidth = 500;
-  const chartHeight = 150;
-
-  const minVal = Math.min(...activeDataset);
-  const maxVal = Math.max(...activeDataset);
-  const valRange = maxVal - minVal || 1;
-
-  const points = activeDataset.map((val, idx) => {
-    const x = (idx / (activeDataset.length - 1)) * chartWidth;
-    const y = chartHeight - ((val - minVal) / valRange) * (chartHeight - 30) - 15;
-    return `${x},${y}`;
-  });
-
-  const linePath = `M ${points.join(" L ")}`;
-  // Gradient fill area
-  const fillPath = `${linePath} L ${chartWidth},${chartHeight} L 0,${chartHeight} Z`;
-
-  // Percentage performance change in timeframe
-  const firstVal = activeDataset[0];
-  const lastVal = activeDataset[activeDataset.length - 1];
-  const performanceChange = (((lastVal - firstVal) / firstVal) * 100).toFixed(2);
-  const isPositive = Number(performanceChange) >= 0;
-
-  // Handle Physical Delivery Redemption
-  const handleRedeemProduct = (prod: any) => {
-    if (isKycPending) {
-      showAlert("Verification Pending. Please upgrade your KYC settings to link physical addresses.", "warning", "KYC Required");
-      return;
-    }
-    const userHoldings = prod.metal === "gold" ? goldHoldings : silverHoldings;
-    if (userHoldings < prod.reqHoldings) {
-      showAlert(`Insufficient holdings. You need at least ${prod.reqHoldings}g of digital ${prod.metal} in your vault to redeem this.`, "error", "Cannot Redeem");
-      return;
-    }
-    setActiveDelivery(prod);
-    setDeliveryAddress("");
-    setDeliverySuccess(false);
-  };
-
-  const submitDeliveryRequest = async () => {
-    if (!deliveryAddress) return;
-    setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-
-    if (activeDelivery.metal === "gold") {
-      setGoldHoldings(prev => prev - activeDelivery.reqHoldings);
-    } else {
-      setSilverHoldings(prev => prev - activeDelivery.reqHoldings);
-    }
-    setDeliverySuccess(true);
-  };
-
-  return (
+const newJsx = `  return (
     <>
     <div className="flex-1 h-screen overflow-y-auto bg-[#FAFAFA] text-slate-800 font-sans">
       <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 pb-28">
@@ -398,7 +89,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div 
             onClick={() => setMetal("gold")}
-            className={`bg-white border p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer transition-all hover:shadow-md ${metal === 'gold' ? 'border-amber-400 ring-2 ring-amber-100' : 'border-slate-100'}`}
+            className={\`bg-white border p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer transition-all hover:shadow-md \${metal === 'gold' ? 'border-amber-400 ring-2 ring-amber-100' : 'border-slate-100'}\`}
           >
             <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0">🪙</div>
             <div>
@@ -410,7 +101,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
           </div>
           <div 
             onClick={() => setMetal("silver")}
-            className={`bg-white border p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer transition-all hover:shadow-md ${metal === 'silver' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-100'}`}
+            className={\`bg-white border p-5 rounded-2xl shadow-sm flex items-center gap-4 cursor-pointer transition-all hover:shadow-md \${metal === 'silver' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-100'}\`}
           >
             <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xl shrink-0">🥈</div>
             <div>
@@ -459,7 +150,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   <span className="text-[11px] font-bold text-slate-800">Real-time Valuation</span>
                   <div className="flex items-baseline gap-2">
                     <h2 className="text-2xl font-black tracking-tight text-slate-900">₹{activePrice.toLocaleString()}<span className="text-xs font-semibold text-slate-400"> /gram</span></h2>
-                    <span className={`text-[10px] font-bold flex items-center gap-0.5 ${isPositive ? "text-emerald-500" : "text-rose-500"}`}>
+                    <span className={\`text-[10px] font-bold flex items-center gap-0.5 \${isPositive ? "text-emerald-500" : "text-rose-500"}\`}>
                       {isPositive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                       {isPositive ? "+" : ""}{performanceChange}%
                     </span>
@@ -472,8 +163,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     <button
                       key={tf}
                       onClick={() => setTimeframe(tf)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border-none outline-none cursor-pointer
-                        ${timeframe === tf ? "bg-indigo-600 text-white" : "bg-slate-50 text-slate-500 hover:bg-slate-100"}`}
+                      className={\`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border-none outline-none cursor-pointer
+                        \${timeframe === tf ? "bg-indigo-600 text-white" : "bg-slate-50 text-slate-500 hover:bg-slate-100"}\`}
                     >
                       {tf}
                     </button>
@@ -483,7 +174,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
               {/* Dynamic SVG Drawing Box */}
               <div className="px-6 py-4 relative">
-                 <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full overflow-visible">
+                 <svg viewBox={\`0 0 \${chartWidth} \${chartHeight}\`} className="w-full overflow-visible">
                   <defs>
                     <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
@@ -567,8 +258,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     <div className="flex gap-3">
                       {[1, 3, 5].map((y) => (
                         <button key={y} onClick={() => setCalcYears(y)}
-                          className={`flex-1 py-2 rounded-lg text-[11px] font-bold outline-none border transition-all cursor-pointer
-                            ${calcYears === y ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-slate-200 text-slate-600"}`}
+                          className={\`flex-1 py-2 rounded-lg text-[11px] font-bold outline-none border transition-all cursor-pointer
+                            \${calcYears === y ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-slate-200 text-slate-600"}\`}
                         >
                           {y} {y === 1 ? "Year" : "Years"}
                         </button>
@@ -625,16 +316,16 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 <div className="flex gap-6 border-b border-slate-100 pb-3 mb-5">
                   <button
                     onClick={() => { setTxType("buy"); setAmount(""); setGrams(""); }}
-                    className={`text-xs font-bold pb-2 bg-transparent cursor-pointer outline-none border-none transition-colors relative
-                      ${txType === "buy" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600"}`}
+                    className={\`text-xs font-bold pb-2 bg-transparent cursor-pointer outline-none border-none transition-colors relative
+                      \${txType === "buy" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600"}\`}
                   >
                     Buy {label}
                     {txType === "buy" && <div className="absolute bottom-[-3px] left-0 right-0 h-[2px] bg-indigo-600 rounded-t-md"></div>}
                   </button>
                   <button
                     onClick={() => { setTxType("sell"); setAmount(""); setGrams(""); }}
-                    className={`text-xs font-bold pb-2 bg-transparent cursor-pointer outline-none border-none transition-colors relative
-                      ${txType === "sell" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600"}`}
+                    className={\`text-xs font-bold pb-2 bg-transparent cursor-pointer outline-none border-none transition-colors relative
+                      \${txType === "sell" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600"}\`}
                   >
                     Sell {label}
                     {txType === "sell" && <div className="absolute bottom-[-3px] left-0 right-0 h-[2px] bg-indigo-600 rounded-t-md"></div>}
@@ -709,12 +400,12 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                       <div className="flex justify-between text-[10px] font-bold text-slate-500">
                         <span>Use Daily Limit</span>
                         <span className="text-slate-800">
-                          {txType === "buy" ? `₹${(Number(amount) || 0).toLocaleString()} / ₹${dailyBuyLimit.toLocaleString()}` : `₹${(Number(amount) || 0).toLocaleString()} / ₹${dailySellLimit.toLocaleString()}`}
+                          {txType === "buy" ? \`₹\${(Number(amount) || 0).toLocaleString()} / ₹\${dailyBuyLimit.toLocaleString()}\` : \`₹\${(Number(amount) || 0).toLocaleString()} / ₹\${dailySellLimit.toLocaleString()}\`}
                         </span>
                       </div>
                       <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                         <div className="bg-indigo-600 h-full rounded-full transition-all duration-350"
-                          style={{ width: `${Math.min(100, ((Number(amount) || 0) / (txType === "buy" ? dailyBuyLimit : dailySellLimit)) * 100)}` + "%" }}
+                          style={{ width: \`\${Math.min(100, ((Number(amount) || 0) / (txType === "buy" ? dailyBuyLimit : dailySellLimit)) * 100)}\` + "%" }}
                         />
                       </div>
                     </div>
@@ -728,7 +419,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   disabled={isKycPending || isProcessing || !amount || Number(amount) <= 0 || (txType === "sell" && vaultLocked)}
                   className="w-full py-3.5 rounded-xl font-bold text-xs transition-all outline-none border-none shadow-sm cursor-pointer flex items-center justify-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-slate-300 disabled:text-slate-500"
                 >
-                  {isProcessing ? <><Loader2 size={14} className="animate-spin" /> Executing...</> : `${txType === 'buy' ? 'Buy' : 'Sell'} 24K ${label}`}
+                  {isProcessing ? <><Loader2 size={14} className="animate-spin" /> Executing...</> : \`\${txType === 'buy' ? 'Buy' : 'Sell'} 24K \${label}\`}
                 </button>
                 <div className="mt-3 text-[10px] font-semibold text-slate-500 flex items-center justify-center gap-1">
                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
@@ -762,8 +453,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 {transactions.slice(0,3).map((tx, idx) => (
                   <div key={idx} className="flex justify-between items-start">
                     <div className="flex items-start gap-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center mt-0.5
-                        ${tx.type === "Buy" ? "bg-emerald-50 text-emerald-500" : "bg-amber-50 text-amber-500"}`}>
+                      <div className={\`w-6 h-6 rounded-full flex items-center justify-center mt-0.5
+                        \${tx.type === "Buy" ? "bg-emerald-50 text-emerald-500" : "bg-amber-50 text-amber-500"}\`}>
                         {tx.type === "Buy" ? <ArrowDownRight size={12} /> : <ArrowUpRight size={12} />}
                       </div>
                       <div>
@@ -816,10 +507,10 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
                   <button
                     onClick={() => handleRedeemProduct(prod)}
-                    className={`w-full mt-4 py-2.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer border-none outline-none
-                      ${isEligible
+                    className={\`w-full mt-4 py-2.5 rounded-xl text-[10px] font-bold transition-all cursor-pointer border-none outline-none
+                      \${isEligible
                         ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                        : "bg-indigo-600 text-white"}`} 
+                        : "bg-indigo-600 text-white"}\`} 
                   >
                     Redeem Item
                   </button>
@@ -985,3 +676,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
     </>
   );
 }
+`;
+
+lines.splice(returnLineIndex, lines.length - returnLineIndex, newJsx);
+fs.writeFileSync(filePath, lines.join('\\n'), 'utf8');
+console.log("Successfully replaced JSX content properly");

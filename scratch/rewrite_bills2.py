@@ -1,4 +1,6 @@
-"use client";
+import sys
+
+content = """"use client";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -343,3 +345,8 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
     </div>
   );
 }
+"""
+
+with open("src/app/components/BillsPage.tsx", "w", encoding="utf-8") as f:
+    f.write(content)
+print("BillsPage restored and updated.")

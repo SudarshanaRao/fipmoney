@@ -1,4 +1,6 @@
-"use client";
+import sys
+
+content = """"use client";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,13 +56,6 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
     onNavigate("recharge-details");
   };
 
-  // Mock due bills styled like bank cards
-  const dueBills = [
-    { provider: "BESCOM Electricity", type: "Electricity", amount: "₹1,850", dueIn: "6 Days", icon: Zap, gradient: "linear-gradient(135deg, #7c2d12 0%, #ea580c 55%, #f59e0b 100%)", text: "text-white" },
-    { provider: "Airtel Fiber", type: "Broadband", amount: "₹999", dueIn: "3 Days", icon: Wifi, gradient: "linear-gradient(135deg, #0f172a 0%, #0284c7 55%, #0ea5e9 100%)", text: "text-white" },
-    { provider: "Jio Mobile", type: "Prepaid", amount: "₹299", dueIn: "Expired", icon: Smartphone, gradient: "linear-gradient(135deg, #3b0764 0%, #6d28d9 55%, #8b5cf6 100%)", text: "text-white", expired: true }
-  ];
-
   const filteredServices = services.filter(service => {
     const matchesTab = activeSubTab === "all" || service.category === activeSubTab;
     const matchesSearch = service.label.toLowerCase().includes(searchQuery.toLowerCase());
@@ -68,112 +63,9 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
   });
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-[#FAFAFA] pb-24 text-slate-800 font-sans relative">
-      
-      {/* Decorative Floating Mesh Gradients */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-yellow-200/20 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute top-80 right-10 w-80 h-80 bg-purple-200/10 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-emerald-200/15 rounded-full blur-3xl pointer-events-none z-0" />
-
-      <div className="p-4 md:p-6 lg:p-10 max-w-[1400px] mx-auto space-y-10 relative z-10">
+    <div className="flex-1 h-screen overflow-y-auto bg-[#FAFAFA] pb-24 text-slate-800 font-sans">
+      <div className="p-4 md:p-6 lg:p-10 max-w-[1400px] mx-auto space-y-6">
         
-        {/* Sleek Minimal Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-8">
-          <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Recharge & Bills</h1>
-            <p className="text-sm font-semibold text-slate-400 mt-1">Manage utility, recharge and other payments with bank-grade security.</p>
-          </div>
-          
-          {/* Right Aligned Floating Search Bar */}
-          <div className="relative w-full md:w-80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-2xl border border-slate-100 bg-white overflow-hidden focus-within:border-indigo-500 transition-colors">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Search size={16} /></span>
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search operator or service..."
-              className="w-full pl-11 pr-4 py-3 text-xs font-bold text-slate-700 bg-transparent border-none outline-none placeholder-slate-400"
-            />
-          </div>
-        </div>
-
-        {/* Saved & Due Bills Showcase (Smart Cards Layout) */}
-        <motion.div 
-          className="space-y-4"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <Clock size={16} className="text-indigo-600" /> Pending Due Alerts
-            </h2>
-            <span className="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
-              3 Payments Due
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {dueBills.map((bill, i) => {
-              const BillIcon = bill.icon;
-              return (
-                <motion.div 
-                  key={i} 
-                  className="rounded-[2.2rem] p-7 shadow-[0_20px_45px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.22)] flex flex-col justify-between min-h-[200px] relative overflow-hidden group border border-solid border-white/10 text-white"
-                  style={{ background: bill.gradient }}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                  {/* Background Shape Overlay (Vector lines with soft Overlay blending) */}
-                  <div className="absolute inset-0 opacity-[0.38] mix-blend-overlay pointer-events-none group-hover:scale-108 transition-transform duration-700" 
-                       style={{ backgroundImage: "url('/bg_shape.svg')", backgroundSize: "cover", backgroundPosition: "center" }} />
-                  
-                  {/* Premium Glowing Aura */}
-                  <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/15 transition-colors duration-500" />
-
-                  {/* Glossy Diagonal Shine Sweep on Hover */}
-                  <div className="absolute -inset-full top-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
-
-                  {/* Due Date Tag on Top-Right */}
-                  <div className="absolute right-6 top-6 flex items-center gap-1.5 bg-white py-1.5 px-3.5 rounded-full border border-solid border-slate-100/10 shadow-[0_4px_15px_rgba(0,0,0,0.12)]">
-                    <span className={`w-2 h-2 rounded-full ${bill.expired ? "bg-rose-500 animate-pulse" : "bg-amber-500"}`} />
-                    <span className={`text-[9px] font-black uppercase tracking-wider ${bill.expired ? "text-rose-600" : "text-amber-600"}`}>
-                      {bill.expired ? "Expired" : `Due in ${bill.dueIn}`}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-1 relative z-10 pt-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 opacity-85">
-                        <BillIcon size={14} strokeWidth={2.5} />
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider">{bill.type}</span>
-                      </div>
-                      
-                      {/* EMV Micro Chip Outline */}
-                      <div className="w-7 h-5 rounded bg-gradient-to-r from-amber-400/20 to-yellow-300/10 border border-yellow-300/30 opacity-70" />
-                    </div>
-                    <h3 className="text-lg font-black tracking-tight mt-1">{bill.provider}</h3>
-                  </div>
-
-                  <div className="flex items-end justify-between relative z-10 mt-6 pt-4 border-t border-white/10">
-                    <div>
-                      <span className="text-[9px] font-bold uppercase tracking-wider opacity-60">Amount due</span>
-                      <h2 className="text-2xl font-black font-outfit tracking-tight mt-0.5">{bill.amount}</h2>
-                    </div>
-                    
-                    <button 
-                      onClick={() => handleBillClick(bill.type === "Prepaid" ? "Mobile Prepaid" : bill.type)}
-                      className="flex items-center gap-1.5 py-2.5 px-5 rounded-full text-slate-900 bg-white hover:bg-slate-50 border-none outline-none font-black text-xs cursor-pointer shadow-md transition-all duration-300 active:scale-95 hover:scale-102"
-                    >
-                      Pay Now <ChevronRight size={12} strokeWidth={3} />
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-
         {/* Split Category sidebar Layout */}
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           
@@ -343,3 +235,8 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
     </div>
   );
 }
+"""
+
+with open("src/app/components/BillsPage.tsx", "w", encoding="utf-8") as f:
+    f.write(content)
+print("BillsPage redesigned!")

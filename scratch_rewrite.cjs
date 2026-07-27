@@ -1,167 +1,17 @@
-"use client";
+const fs = require('fs');
+const file = 'c:/Users/purna/fipmoney_/fipmoney/src/app/components/PortfolioPage.tsx';
+const content = fs.readFileSync(file, 'utf8');
+const lines = content.split('\n');
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Wallet, TrendingUp, ArrowUpRight, ArrowDownRight, 
-  Coins, Sparkles, ChevronRight, ArrowRight, ShieldCheck, 
-  Activity, CircleDollarSign, Percent, X, Check, Search, Bell, Eye, Lock, RefreshCw, BarChart2, Info, ArrowUp, Crown, LineChart, Banknote, Calendar, ChevronDown, Clock
-} from "lucide-react";
-import { addTransaction } from "../utils/transactionStorage";
+const startIdx = lines.findIndex(l => l.includes('return ('));
+const endIdx = lines.findIndex(l => l.includes('{/* QUICK SELL MODAL DIALOG */}'));
 
-interface PortfolioPageProps {
-  onNavigate?: (page: string) => void;
+if (startIdx === -1 || endIdx === -1) {
+  console.log("Could not find bounds");
+  process.exit(1);
 }
 
-export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
-  // Load logged-in user details
-  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
-  const isDemoUser = ["7013302191", "9491841941", "7893863597"].includes(loggedInMobile);
-
-  const [goldPrice, setGoldPrice] = useState<number>(6420.50);
-  const [silverPrice, setSilverPrice] = useState<number>(84.20);
-
-  const [goldHoldings, setGoldHoldings] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 12.4502 : 0);
-    }
-    return 12.4502;
-  });
-
-  const [silverHoldings, setSilverHoldings] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 340.2005 : 0);
-    }
-    return 340.2005;
-  });
-
-  const [cashBalance, setCashBalance] = useState<number>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem(`fip_cash_balance_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 5250.00 : 0.00);
-    }
-    return isDemoUser ? 5250.00 : 0.00;
-  });
-
-  // Sell modal states
-  const [isSellModalOpen, setIsSellModalOpen] = useState(false);
-  const [sellMetal, setSellMetal] = useState<"gold" | "silver">("gold");
-  const [sellGrams, setSellGrams] = useState("");
-  const [sellAmount, setSellAmount] = useState("");
-  const [sellSuccess, setSellSuccess] = useState(false);
-  const [sellSuccessMsg, setSellSuccessMsg] = useState("");
-
-  const activePrice = sellMetal === "gold" ? goldPrice : silverPrice;
-  const activeHoldings = sellMetal === "gold" ? goldHoldings : silverHoldings;
-
-  // Calculate portfolio values
-  const goldValue = goldHoldings * goldPrice;
-  const silverValue = silverHoldings * silverPrice;
-  const totalValue = goldValue + silverValue + cashBalance;
-
-  // Mock Average Purchase Prices to calculate gains
-  const avgGoldBuyPrice = 5850.00;
-  const avgSilverBuyPrice = 76.50;
-
-  const goldCostBasis = goldHoldings * avgGoldBuyPrice;
-  const silverCostBasis = silverHoldings * avgSilverBuyPrice;
-  const totalCostBasis = goldCostBasis + silverCostBasis + cashBalance;
-
-  const totalGain = totalValue - totalCostBasis;
-  const totalGainPercent = totalCostBasis > 0 ? (totalGain / totalCostBasis) * 100 : 0;
-
-  // Sync holdings & cash from localStorage periodically
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const savedGold = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
-      if (savedGold) setGoldHoldings(parseFloat(savedGold));
-      const savedSilver = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
-      if (savedSilver) setSilverHoldings(parseFloat(savedSilver));
-      const savedCash = localStorage.getItem(`fip_cash_balance_${loggedInMobile}`);
-      if (savedCash) setCashBalance(parseFloat(savedCash));
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    const interval = setInterval(handleStorageChange, 1000);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [loggedInMobile]);
-
-  // Allocation percentages
-  const goldAlloc = totalValue > 0 ? (goldValue / totalValue) * 100 : 0;
-  const silverAlloc = totalValue > 0 ? (silverValue / totalValue) * 100 : 0;
-  const cashAlloc = totalValue > 0 ? (cashBalance / totalValue) * 100 : 0;
-
-  const handleSellInitiate = (metal: "gold" | "silver") => {
-    setSellMetal(metal);
-    setSellGrams("");
-    setSellAmount("");
-    setSellSuccess(false);
-    setIsSellModalOpen(true);
-  };
-
-  const handleGramsChange = (val: string) => {
-    setSellGrams(val);
-    if (!val || isNaN(Number(val))) {
-      setSellAmount("");
-      return;
-    }
-    const calculatedAmount = Number(val) * activePrice;
-    setSellAmount(Math.round(calculatedAmount).toString());
-  };
-
-  const handleAmountChange = (val: string) => {
-    setSellAmount(val);
-    if (!val || isNaN(Number(val))) {
-      setSellGrams("");
-      return;
-    }
-    const calculatedGrams = Number(val) / activePrice;
-    setSellGrams(calculatedGrams.toFixed(4));
-  };
-
-  const handleConfirmSell = () => {
-    const gramsNum = Number(sellGrams);
-    const amtNum = Number(sellAmount);
-
-    if (gramsNum <= 0 || isNaN(gramsNum)) return;
-    if (gramsNum > activeHoldings) return;
-
-    const newGrams = activeHoldings - gramsNum;
-    const newCash = cashBalance + amtNum;
-
-    if (sellMetal === "gold") {
-      setGoldHoldings(newGrams);
-      localStorage.setItem(`fip_gold_holdings_${loggedInMobile}`, newGrams.toString());
-    } else {
-      setSilverHoldings(newGrams);
-      localStorage.setItem(`fip_silver_holdings_${loggedInMobile}`, newGrams.toString());
-    }
-
-    setCashBalance(newCash);
-    localStorage.setItem(`fip_cash_balance_${loggedInMobile}`, newCash.toString());
-
-    // Add to transaction log
-    addTransaction({
-      type: "Sell",
-      category: sellMetal === "gold" ? "Gold" : "Silver",
-      amount: amtNum,
-      grams: `${gramsNum.toFixed(4)} g`,
-      status: "Completed",
-      paymentMethod: "Bank Account",
-      source: sellMetal === "gold" ? "Gold Vault" : "Silver Vault"
-    });
-
-    setSellSuccessMsg(`Successfully sold ${gramsNum.toFixed(4)}g of Digital ${sellMetal === "gold" ? "Gold" : "Silver"} for ₹${amtNum.toLocaleString()}! Funds added to your Cash Balance.`);
-    setSellSuccess(true);
-  };
-
-  return (
+const newJsx = `  return (
     <div className="flex-1 h-screen overflow-y-auto bg-[#fcfdfd] pb-24 relative font-sans text-gray-800">
 
       <div className="relative z-10 p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
@@ -252,13 +102,13 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
               <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-8">
                  {/* Donut Chart */}
                  <div className="relative w-40 h-40 shrink-0">
-                    <svg viewBox="0 0 38 38" className="w-full h-full transform -rotate-90">
-                       <circle cx="19" cy="19" r="15.9155" fill="transparent" stroke="#f1f5f9" strokeWidth="6" />
-                       <circle cx="19" cy="19" r="15.9155" fill="transparent" stroke="#10b981" strokeWidth="6" strokeDasharray={`${cashAlloc} ${100 - cashAlloc}`} strokeDashoffset="0" />
-                       <circle cx="19" cy="19" r="15.9155" fill="transparent" stroke="#94a3b8" strokeWidth="6" strokeDasharray={`${silverAlloc} ${100 - silverAlloc}`} strokeDashoffset={-cashAlloc} />
-                       <circle cx="19" cy="19" r="15.9155" fill="transparent" stroke="#fbbf24" strokeWidth="6" strokeDasharray={`${goldAlloc} ${100 - goldAlloc}`} strokeDashoffset={-(cashAlloc + silverAlloc)} />
+                    <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                       <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#f1f5f9" strokeWidth="6" />
+                       <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#10b981" strokeWidth="6" strokeDasharray={\`\${cashAlloc} \${100 - cashAlloc}\`} strokeDashoffset="0" />
+                       <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#94a3b8" strokeWidth="6" strokeDasharray={\`\${silverAlloc} \${100 - silverAlloc}\`} strokeDashoffset={-cashAlloc} />
+                       <circle cx="18" cy="18" r="15.9155" fill="transparent" stroke="#fbbf24" strokeWidth="6" strokeDasharray={\`\${goldAlloc} \${100 - goldAlloc}\`} strokeDashoffset={-(cashAlloc + silverAlloc)} />
                     </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white m-7 rounded-full shadow-inner">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white m-4 rounded-full shadow-inner">
                        <span className="text-[10px] font-bold text-gray-400 uppercase">Total</span>
                        <span className="text-[18px] font-black text-gray-900">100%</span>
                     </div>
@@ -516,132 +366,9 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
            </div>
         </div>
 
-      </div>
+      </div>`;
 
-      {/* QUICK SELL MODAL DIALOG */}
-      <AnimatePresence>
-        {isSellModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop Blur */}
-            <motion.div 
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSellModalOpen(false)}
-            />
+lines.splice(startIdx, endIdx - startIdx, newJsx);
 
-            {/* Modal Box */}
-            <motion.div 
-              className="bg-white rounded-[2rem] p-6 max-w-md w-full relative z-10 shadow-2xl border border-slate-100 overflow-hidden flex flex-col gap-6"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            >
-              
-              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <Coins size={18} className={sellMetal === "gold" ? "text-amber-500" : "text-slate-400"} />
-                  Sell {sellMetal === "gold" ? "Gold" : "Silver"} Instantly
-                </h3>
-                <button 
-                  onClick={() => setIsSellModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center border-none text-slate-400 hover:text-slate-600 cursor-pointer outline-none transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {!sellSuccess ? (
-                <div className="space-y-4">
-                  <div className="bg-[#fdf8f0] p-4 rounded-2xl border border-amber-100/50 flex justify-between items-center text-xs">
-                    <div>
-                      <span className="text-slate-400 font-bold block">Available Balance</span>
-                      <span className="font-extrabold text-slate-800 text-sm">{activeHoldings.toFixed(4)} g</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-slate-400 font-bold block">Live Sell Rate</span>
-                      <span className="font-extrabold text-[#b87312] text-sm">₹{activePrice.toLocaleString()}/g</span>
-                    </div>
-                  </div>
-
-                  {/* Dual Input Form */}
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-1 text-left">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Grams to Sell</label>
-                      <div className="relative">
-                        <input 
-                          type="number"
-                          step="any"
-                          value={sellGrams}
-                          onChange={(e) => handleGramsChange(e.target.value)}
-                          placeholder="0.0000"
-                          max={activeHoldings}
-                          className="w-full bg-[#f8fafc] border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 outline-none focus:border-[#b87312] transition-colors"
-                        />
-                        <button 
-                          onClick={() => handleGramsChange(activeHoldings.toString())}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 border-none outline-none bg-amber-50 hover:bg-amber-100 text-[#b87312] px-2.5 py-1 rounded text-[9px] font-black uppercase cursor-pointer transition-colors"
-                        >
-                          Sell Max
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1 text-left">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Estimated Amount (INR)</label>
-                      <div className="relative">
-                        <input 
-                          type="number"
-                          value={sellAmount}
-                          onChange={(e) => handleAmountChange(e.target.value)}
-                          placeholder="₹0"
-                          className="w-full bg-[#f8fafc] border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 outline-none focus:border-[#b87312] transition-colors"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-[10px] font-semibold text-slate-400 bg-slate-50 border border-slate-100 p-3 rounded-xl leading-normal text-left">
-                    ⚡ Instant Withdrawal Enabled: Upon confirmation, the specified grams will be deducted and proceeds will be credited instantly to your Cash wallet.
-                  </div>
-
-                  <button
-                    disabled={!sellGrams || Number(sellGrams) <= 0 || Number(sellGrams) > activeHoldings}
-                    onClick={handleConfirmSell}
-                    className="w-full bg-gradient-to-r from-amber-600 to-yellow-500 text-white font-extrabold text-xs py-3 rounded-xl border-none outline-none shadow-md cursor-pointer transition-all active:scale-98 disabled:opacity-50 disabled:pointer-events-none mt-2"
-                  >
-                    Confirm Sell Order
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 text-center gap-4">
-                  <div className="w-14 h-14 bg-emerald-50 text-emerald-500 border border-emerald-100 rounded-full flex items-center justify-center shadow-sm">
-                    <ShieldCheck size={28} />
-                  </div>
-                  <div className="space-y-1 px-4">
-                    <h4 className="text-sm font-black text-slate-900">Withdrawal Successful</h4>
-                    <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                      {sellSuccessMsg}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsSellModalOpen(false);
-                      setSellSuccess(false);
-                    }}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3 rounded-xl border-none outline-none cursor-pointer mt-4"
-                  >
-                    Back to Portfolio
-                  </button>
-                </div>
-              )}
-
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-    </div>
-  );
-}
+fs.writeFileSync(file, lines.join('\\n'));
+console.log("Successfully replaced the UI block");
