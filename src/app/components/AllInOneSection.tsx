@@ -17,7 +17,7 @@ export default function AllInOneSection({ onNavigate }: AllInOneSectionProps) {
       title: "Digital Gold",
       desc: "Invest in 24K 99.99% pure gold starting from just ₹1.",
       btnText: "Invest Now",
-      action: () => onNavigate?.('digital-gold'),
+      action: () => onNavigate?.('login'),
       bg: "bg-gradient-to-b from-[#fffdf5] to-[#fffbeb] border-[#fef3c7]",
       titleColor: "text-amber-700",
       btnBorder: "border-amber-600 text-amber-700 hover:bg-amber-600 hover:text-white",
@@ -27,7 +27,7 @@ export default function AllInOneSection({ onNavigate }: AllInOneSectionProps) {
       title: "Digital Silver",
       desc: "Diversify your portfolio with pure silver starting from ₹1.",
       btnText: "Invest Now",
-      action: () => onNavigate?.('digital-silver'),
+      action: () => onNavigate?.('login'),
       bg: "bg-gradient-to-b from-[#f8fafc] to-[#f1f5f9] border-[#e2e8f0]",
       titleColor: "text-slate-700",
       btnBorder: "border-slate-500 text-slate-700 hover:bg-slate-500 hover:text-white",
@@ -37,13 +37,7 @@ export default function AllInOneSection({ onNavigate }: AllInOneSectionProps) {
       title: "Pay Bills",
       desc: "Pay all your bills from credit card and earn exciting rewards.",
       btnText: "Pay Now",
-      action: () => {
-        if (typeof window !== 'undefined' && sessionStorage.getItem("fm_logged_in_mobile")) {
-          onNavigate?.('dashboard');
-        } else {
-          onNavigate?.('login');
-        }
-      },
+      action: () => onNavigate?.('login'),
       bg: "bg-gradient-to-b from-[#faf5ff] to-[#f3e8ff] border-[#f3e8ff]",
       titleColor: "text-purple-700",
       btnBorder: "border-purple-500 text-purple-700 hover:bg-purple-500 hover:text-white",
@@ -53,7 +47,7 @@ export default function AllInOneSection({ onNavigate }: AllInOneSectionProps) {
       title: "Smart Savings",
       desc: "Automate your savings and achieve your financial goals.",
       btnText: "Start Saving",
-      action: () => onNavigate?.('daily-savings'),
+      action: () => onNavigate?.('login'),
       bg: "bg-gradient-to-b from-[#f0fdf4] to-[#dcfce7] border-[#dcfce7]",
       titleColor: "text-emerald-700",
       btnBorder: "border-emerald-600 text-emerald-700 hover:bg-emerald-600 hover:text-white",
