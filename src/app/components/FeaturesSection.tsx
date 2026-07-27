@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calculator, Zap, Target, PiggyBank, TrendingUp, Shield, ExternalLink } from "lucide-react";
 import { Button } from "./ui/button";
-import GoldLoanCalculator from "./GoldLoanCalculator";
+
 
 interface FeaturesSectionProps {
   onNavigateToCalculator?: () => void;
@@ -182,14 +182,10 @@ export default function FeaturesSection({ onNavigateToCalculator }: FeaturesSect
   
   const features = [
     {
-      icon: Calculator,
-      title: "Gold Loan Calculator",
-      description: "Estimate your loan eligibility and monthly payments against gold assets.",
-      component: () => (
-        <div className="space-y-4 max-h-[500px] overflow-y-auto p-4 bg-white rounded-2xl border border-gray-150 shadow-inner">
-          <GoldLoanCalculator onBack={() => {}} />
-        </div>
-      ),
+      icon: Zap,
+      title: "Auto-Save Features",
+      description: "Automate your savings with round-ups, salary day investments, and smart triggers.",
+      component: AutoSaveFeature,
     },
     {
       icon: Zap,

@@ -27,7 +27,7 @@ import DigitalGold from "./components/DigitalGold";
 import DigitalSilver from "./components/DigitalSilver";
 import RoundOff from "./components/RoundOff";
 import Loans from "./components/Loans";
-import GoldLoanCalculator from "./components/GoldLoanCalculator";
+import MiniMetalTracker from "./components/MiniMetalTracker";
 import HowTos from "./components/HowTos";
 import GuideReader from "./components/GuideReader";
 import AuthFlow from "./components/AuthFlow";
@@ -253,9 +253,7 @@ export default function App() {
       case 'round-off':
         return <RoundOff onBack={navigateToHome} />;
       
-      // Calculator pages
-      case 'gold-loan-calculator':
-        return <GoldLoanCalculator onBack={navigateToHome} />;
+
       case 'step-up-sip-calculator':
         return <ComingSoonPage title="Step Up SIP Calculator Coming Soon" onBack={navigateToHome} />;
       case 'growth-calculator':
@@ -324,8 +322,8 @@ export default function App() {
                 </>
               )}
 
-              {/* All In One Services Section */}
-              <AllInOneSection onNavigate={navigateToPage} />
+              {/* Mini Live Metal Rates Tracker */}
+              <MiniMetalTracker onNavigate={navigateToPage} />
 
               {/* Platform Trust Section */}
               <PlatformTrustSection />

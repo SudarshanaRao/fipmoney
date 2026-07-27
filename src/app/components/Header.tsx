@@ -94,10 +94,6 @@ export default function Header({ onNavigate }: HeaderProps) {
     { name: "FAQs", action: () => onNavigate?.('faqs'), icon: FileQuestion },
   ];
 
-  const calculatorItems = [
-    { name: "Gold Loan Calculator", action: () => onNavigate?.('gold-loan-calculator'), icon: BarChart3 },
-  ];
-
   const navItems = [
     { name: "About", action: () => onNavigate?.('about') },
   ];
@@ -272,13 +268,7 @@ export default function Header({ onNavigate }: HeaderProps) {
               </AnimatePresence>
             </div>
             
-            <DropdownMenu
-              title="Calculators"
-              items={calculatorItems}
-              isOpen={activeDropdown === 'calculators'}
-              onToggle={handleDropdownToggle('calculators')}
-              onItemClick={handleDropdownItemClick}
-            />
+
 
             <DropdownMenu
               title="Help"
@@ -393,23 +383,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                   </div>
                 </div>
 
-                {/* Mobile Calculators Section */}
-                <div className="border-b border-gray-200 pb-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Calculators</h4>
-                  {calculatorItems.map((item, index) => (
-                    <motion.button
-                      key={item.name}
-                      className="flex items-center space-x-3 w-full text-left text-gray-600 hover:text-[#ffbf00] py-2 transition-colors duration-200"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => handleDropdownItemClick(item.action)}
-                    >
-                      <item.icon className="w-4 h-4 text-[#ffbf00]" />
-                      <span className="text-sm">{item.name}</span>
-                    </motion.button>
-                  ))}
-                </div>
+
 
                 {/* Mobile Help Section */}
                 <div className="border-b border-gray-200 pb-4">

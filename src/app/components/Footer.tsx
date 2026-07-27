@@ -29,7 +29,7 @@ export default function Footer({ onNavigate }: FooterProps) {
         { label: 'Digital Gold & Silver', href: '#features' },
         { label: 'Goal-Based Savings', href: '#features' },
         { label: 'Auto-Save Features', href: '#features' },
-        { label: 'Gold Loan Calculator', action: 'gold-loan-calculator' },
+        { label: 'Live Metal Rates', action: 'live-metal-tracker' },
         { label: 'Gold Vault', href: '#features' }
       ]
     },
