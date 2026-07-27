@@ -267,28 +267,23 @@ export default function SettingsPage() {
         {/* Title */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Settings</h1>
-            <p className="text-xs text-gray-400 font-semibold mt-1">Manage your financial profile and account configurations</p>
+            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Settings</h1>
+            <p className="text-sm text-gray-500 font-semibold mt-1">Manage your financial profile and account configurations</p>
           </div>
 
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-6 py-3 rounded-xl text-white text-xs font-black shadow-[0_4px_14px_rgba(184,115,18,0.2)] hover:shadow-[0_6px_20px_rgba(184,115,18,0.3)] hover:-translate-y-0.5 disabled:bg-gray-300 disabled:shadow-none disabled:translate-y-0 cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #b87312, #efb652)" }}
+            className="px-6 py-3 rounded-lg text-white text-sm font-bold shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:shadow-none cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2 bg-[#d97706]"
           >
             {isSaving ? (
-              <>
-                <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent" />
-                Saving...
-              </>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
             ) : saveSuccess ? (
-              <>
-                <CheckCircle2 size={16} /> Saved!
-              </>
+              <CheckCircle2 size={16} />
             ) : (
-              "Save changes"
+              <Save size={16} />
             )}
+            {saveSuccess ? "Saved!" : "Save Changes"}
           </button>
         </div>
 
@@ -335,9 +330,14 @@ export default function SettingsPage() {
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-6"
                 >
-                  <div>
-                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Profile</h3>
-                    <p className="text-xs text-gray-400 mt-1 font-semibold">Update your photo and personal details here.</p>
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-gray-50 rounded-full border border-gray-100 text-gray-700">
+                       <User size={24} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Profile Details</h3>
+                      <p className="text-sm text-gray-500 font-medium mt-0.5">Update your photo and personal details here.</p>
+                    </div>
                   </div>
 
                   {/* Username Row */}
@@ -396,16 +396,16 @@ export default function SettingsPage() {
                       )}
                       <div className="flex gap-4">
                         <button
-                          onClick={handleRemovePhoto}
-                          className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer outline-none"
+                          onClick={handleUploadPhoto}
+                          className="text-xs font-bold text-[#d97706] hover:bg-orange-50 border border-[#d97706] bg-transparent rounded-lg px-4 py-2 cursor-pointer transition-colors outline-none"
                         >
-                          Delete
+                          Change Photo
                         </button>
                         <button
-                          onClick={handleUploadPhoto}
-                          className="text-xs font-bold text-amber-600 hover:text-amber-800 transition-colors bg-transparent border-none cursor-pointer outline-none"
+                          onClick={handleRemovePhoto}
+                          className="text-xs font-bold text-red-500 hover:bg-red-50 border border-red-500 bg-transparent rounded-lg px-4 py-2 cursor-pointer transition-colors outline-none"
                         >
-                          Update
+                          Remove
                         </button>
                       </div>
                     </div>
@@ -447,7 +447,7 @@ export default function SettingsPage() {
                           setNewValueInput("");
                           setNewVerifyOtp("");
                         }}
-                        className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0"
+                        className="bg-[#d97706] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition-all cursor-pointer border-none shrink-0"
                       >
                         Change
                       </button>
@@ -475,7 +475,7 @@ export default function SettingsPage() {
                           setNewValueInput("");
                           setNewVerifyOtp("");
                         }}
-                        className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0"
+                        className="bg-[#d97706] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition-all cursor-pointer border-none shrink-0"
                       >
                         Change
                       </button>
@@ -493,7 +493,7 @@ export default function SettingsPage() {
                           <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
                             XXXXX{panNumber.slice(-5, -1)}{panNumber.slice(-1)}
                           </span>
-                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          <span className="text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-600">
                             Linked & Verified
                           </span>
                         </div>
@@ -523,7 +523,7 @@ export default function SettingsPage() {
                           <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
                             XXXX XXXX {aadhaarNumber.slice(-4)}
                           </span>
-                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          <span className="text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-600">
                             Linked & Verified
                           </span>
                         </div>
@@ -963,124 +963,144 @@ export default function SettingsPage() {
           <div className="lg:col-span-4 space-y-6">
 
             {/* Completion Percentage card */}
-            <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-150 shadow-[0_10px_30px_rgba(0,0,0,0.015)] flex flex-col items-center text-center">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Profile Completion</h3>
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col items-center text-center">
+              <div className="flex items-center gap-2 mb-6 w-full justify-center">
+                <Trophy size={18} className="text-[#d97706]" />
+                <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Profile Completion</h3>
+              </div>
 
-              {/* Radial Circle progress bar (Fixed viewBox and overflow values to prevent clipping) */}
               <div className="relative w-36 h-36 flex items-center justify-center p-1">
                 <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90 overflow-visible">
+                  <circle cx="60" cy="60" r="50" stroke="#f1f5f9" strokeWidth="8" fill="transparent" />
                   <circle
-                    cx="60"
-                    cy="60"
-                    r="50"
-                    stroke="#f1f5f9"
-                    strokeWidth="8"
-                    fill="transparent"
-                  />
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r="50"
-                    stroke="url(#goldGradient)"
-                    strokeWidth="8"
-                    fill="transparent"
+                    cx="60" cy="60" r="50" stroke="#d97706" strokeWidth="8" fill="transparent"
                     strokeDasharray={2 * Math.PI * 50}
                     strokeDashoffset={2 * Math.PI * 50 * (1 - percentage / 100)}
-                    strokeLinecap="round"
-                    className="transition-all duration-500 ease-out"
+                    strokeLinecap="round" className="transition-all duration-500 ease-out"
                   />
-                  <defs>
-                    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#b87312" />
-                      <stop offset="100%" stopColor="#efb652" />
-                    </linearGradient>
-                  </defs>
                 </svg>
                 <div className="absolute flex flex-col items-center justify-center">
                   <span className="text-3xl font-black text-gray-800 leading-none">{percentage}%</span>
-                  <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider mt-1.5">Completed</span>
+                  <span className="text-[9px] font-extrabold text-gray-500 uppercase tracking-wider mt-1.5">Completed</span>
                 </div>
               </div>
 
               <div className="mt-6 space-y-2">
-                <h4 className="text-xs font-extrabold text-gray-800">
-                  {percentage === 100
-                    ? "Perfect Profile Score! 🎉"
-                    : percentage >= 80
-                      ? "Profile is almost ready!"
-                      : "Complete your profile details"}
+                <h4 className="text-[13px] font-bold text-gray-800">
+                  {percentage === 100 ? "Perfect Profile Score! 🎉" : percentage >= 80 ? "Profile is almost ready!" : "Complete your profile details"}
                 </h4>
-                <p className="text-[11px] font-semibold text-gray-400 leading-normal px-2">
+                <p className="text-[11px] font-medium text-gray-500 leading-relaxed px-2">
                   {percentage === 100
-                    ? "All information is successfully registered. You are eligible for unlimited digital gold limits and zero KYC issues."
+                    ? "All information is successfully registered."
                     : "Fill in your Nominee and Bank account details to unlock premium gold vault features and get verified."
                   }
                 </p>
               </div>
 
               {/* Progress checklist detail items */}
-              <div className="w-full mt-6 pt-5 border-t border-gray-100 text-left space-y-3">
-                <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider block mb-2">Registry Checklist</span>
-
+              <div className="w-full mt-6 space-y-3">
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
-                    <span className="text-gray-700 font-medium">Personal & Bio Info</span>
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    <span className="text-gray-700 font-bold text-[13px]">Personal & Basic Info</span>
                   </div>
-                  <span className="text-gray-400 text-[10px] font-bold">40%</span>
+                  <span className="text-gray-500 text-xs font-bold">40%</span>
                 </div>
-
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
-                    <span className="text-gray-700 font-medium">Job Title & Income Range</span>
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    <span className="text-gray-700 font-bold text-[13px]">Job Title & Income Range</span>
                   </div>
-                  <span className="text-gray-400 text-[10px] font-bold">20%</span>
+                  <span className="text-gray-500 text-xs font-bold">20%</span>
                 </div>
-
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     {bankName.trim() && accountNumber.trim() && ifscCode.trim() ? (
-                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                     ) : (
-                      <AlertCircle size={14} className="text-amber-500 shrink-0 animate-pulse" />
+                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                     )}
-                    <span className={bankName.trim() && accountNumber.trim() && ifscCode.trim() ? "text-gray-700 font-medium" : "text-gray-450 font-medium"}>
-                      Link Bank Account
-                    </span>
+                    <span className="text-gray-700 font-bold text-[13px]">Link Bank Account</span>
                   </div>
-                  <span className="text-gray-400 text-[10px] font-bold">20%</span>
+                  <span className="text-gray-500 text-xs font-bold">20%</span>
                 </div>
-
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     {nomineeName.trim() && nomineeDob.trim() ? (
-                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
                     ) : (
-                      <AlertCircle size={14} className="text-amber-500 shrink-0 animate-pulse" />
+                      <Circle size={16} className="text-[#d97706] shrink-0" />
                     )}
-                    <span className={nomineeName.trim() && nomineeDob.trim() ? "text-gray-700 font-medium" : "text-gray-450 font-medium"}>
-                      Nominee Verification
-                    </span>
+                    <span className="text-gray-700 font-bold text-[13px]">Nominee Verification</span>
                   </div>
-                  <span className="text-gray-400 text-[10px] font-bold">20%</span>
+                  <span className="text-gray-500 text-xs font-bold">20%</span>
                 </div>
               </div>
-
             </div>
 
-            {/* Quick security tips card */}
-            <div className="bg-amber-55/35 border border-amber-100/40 rounded-3xl p-5 space-y-2.5">
-              <div className="flex items-center gap-2 text-[#b87312] font-black text-xs">
-                <Shield size={14} /> Security Compliance
+            {/* Security Compliance Card */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col relative overflow-hidden mt-6">
+              <div className="flex items-center gap-2 mb-4 relative z-10">
+                <ShieldCheck size={18} className="text-[#d97706]" />
+                <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Security Compliance</h3>
               </div>
-              <p className="text-[11px] font-semibold text-gray-500 leading-normal">
-                Fipmoney complies with SEBI digital asset registry codes. All PAN and bank details are encrypted locally before transit.
+              <p className="text-[12px] font-medium text-gray-500 leading-relaxed relative z-10">
+                Fipmoney complies with SEBI digital asset registry codes. All PAN and bank details are encrypted locally before transfer.
               </p>
+              
+              {/* Decorative graphic */}
+              <div className="mt-8 flex justify-center items-center relative h-32 w-full">
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-orange-50 rounded-full z-0 blur-3xl opacity-60" />
+                 <Shield size={110} strokeWidth={1} className="text-orange-100 fill-orange-50 relative z-10" />
+                 <Check size={40} strokeWidth={4} className="text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] z-20" />
+                 <Lock size={36} strokeWidth={1.5} className="text-orange-200 fill-orange-50 absolute left-1/2 top-1/2 ml-4 mt-2 z-30 drop-shadow-sm bg-white rounded-md p-1" />
+              </div>
             </div>
 
           </div>
+        </div>
 
+        {/* Footer info blocks */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm mt-8">
+           <div className="flex items-start gap-4">
+              <div className="p-3 bg-purple-50 rounded-full text-purple-600 shrink-0">
+                 <Lock size={20} />
+              </div>
+              <div>
+                 <h4 className="text-sm font-extrabold text-gray-900">Secure Data</h4>
+                 <p className="text-[11px] text-gray-500 font-semibold mt-1">Your data is protected with bank-grade encryption.</p>
+              </div>
+           </div>
+           <div className="flex items-start gap-4">
+              <div className="p-3 bg-orange-50 rounded-full text-orange-600 shrink-0">
+                 <ShieldCheck size={20} />
+              </div>
+              <div>
+                 <h4 className="text-sm font-extrabold text-gray-900">Verified Accounts</h4>
+                 <p className="text-[11px] text-gray-500 font-semibold mt-1">All accounts are verified and linked for safe transactions.</p>
+              </div>
+           </div>
+           <div className="flex items-start gap-4">
+              <div className="p-3 bg-blue-50 rounded-full text-blue-600 shrink-0">
+                 <Eye size={20} />
+              </div>
+              <div>
+                 <h4 className="text-sm font-extrabold text-gray-900">Privacy First</h4>
+                 <p className="text-[11px] text-gray-500 font-semibold mt-1">We do not share your information with third parties.</p>
+              </div>
+           </div>
+           <div className="flex items-start gap-4">
+              <div className="p-3 bg-green-50 rounded-full text-green-600 shrink-0">
+                 <Headset size={20} />
+              </div>
+              <div>
+                 <h4 className="text-sm font-extrabold text-gray-900">Need Help?</h4>
+                 <p className="text-[11px] text-gray-500 font-semibold mt-1">Our support team is available 24/7 to assist you.</p>
+                 <button className="text-[11px] font-bold text-[#d97706] mt-2 bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer">
+                    Contact Support <ChevronRight size={12} />
+                 </button>
+              </div>
+           </div>
         </div>
 
       </div>

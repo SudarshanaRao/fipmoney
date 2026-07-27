@@ -87,7 +87,7 @@ content = re.sub(
     content
 )
 
-# 6. Green checkmarks for inputs (Use regex safely targeting just the input tag)
+# 6. Green checkmarks for inputs
 content = re.sub(
     r'<input(.*?)className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"(.*?)/>',
     r'<input\1className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"\2/>\n                        <div className="flex items-center px-3 bg-white text-emerald-500"><CheckCircle2 size={16} /></div>',
@@ -147,9 +147,9 @@ content = content.replace(
     'text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-600'
 )
 
-# 10. Right Column (Profile Completion)
+# 10. Right Column (Profile Completion and Security Compliance)
 content = re.sub(
-    r'\{\/\* Completion Percentage card \*\/\}.*?\{\/\* Quick security tips card \*\/\}',
+    r'\{\/\* Completion Percentage card \*\/\}.*?\{\/\* Quick security tips card \*\/\}.*?</div>\s*</div>\s*</div>',
     '''{/* Completion Percentage card */}
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col items-center text-center">
               <div className="flex items-center gap-2 mb-6 w-full justify-center">
@@ -245,7 +245,8 @@ content = re.sub(
               </div>
             </div>
 
-            {/*''',
+          </div>
+        </div>''',
     content, flags=re.DOTALL
 )
 
@@ -302,4 +303,4 @@ content = content.replace('\n      </div>\n\n      {/* Video KYC Call Overlay */
 with open('src/app/components/SettingsPage.tsx', 'w', encoding='utf-8') as f:
     f.write(content)
 
-print("Applied UI redesign successfully!")
+print("Applied UI redesign cleanly!")
