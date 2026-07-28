@@ -8,28 +8,17 @@ import {
   Shield, Coins, BarChart3, Globe, ChevronDown, User, CheckCircle2, ArrowRight
 } from "lucide-react";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
+import { findUserByMobile, registerOrLoginUser, MongoUser } from "../utils/userStorage";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "success";
 
-const PREDEFINED_USERS = {
-  "7013302191": { name: "Dharsh", kyc: "full kyc" },
-  "9491841941": { name: "Finpages", kyc: "Min Kyc" },
-  "7893863597": { name: "purna", kyc: "pending" }
-};
-
 const REG_KEY = (m: string) => `fm_registered_${m}`;
 const isRegistered  = (m: string) => {
-  if (m in PREDEFINED_USERS) return true;
   return !!localStorage.getItem(REG_KEY(m));
 };
 const markRegistered = (m: string) => {
   localStorage.setItem(REG_KEY(m), "1");
-  if (m in PREDEFINED_USERS) {
-    const user = PREDEFINED_USERS[m];
-    localStorage.setItem(`fm_user_name_${m}`, user.name);
-    localStorage.setItem(`fm_user_kyc_${m}`, user.kyc);
-  }
 };
 
 function useResendTimer(secs = 30) {
@@ -95,25 +84,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [otp,      setOtp]      = useState("");
   const [err,      setErr]      = useState("");
   
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (!localStorage.getItem("fm_registered_7013302191")) {
-        localStorage.setItem("fm_registered_7013302191", "1");
-        localStorage.setItem("fm_user_name_7013302191", "Dharsh");
-        localStorage.setItem("fm_user_kyc_7013302191", "full kyc");
-      }
-      if (!localStorage.getItem("fm_registered_9491841941")) {
-        localStorage.setItem("fm_registered_9491841941", "1");
-        localStorage.setItem("fm_user_name_9491841941", "Finpages");
-        localStorage.setItem("fm_user_kyc_9491841941", "Min Kyc");
-      }
-      if (!localStorage.getItem("fm_registered_7893863597")) {
-        localStorage.setItem("fm_registered_7893863597", "1");
-        localStorage.setItem("fm_user_name_7893863597", "purna");
-        localStorage.setItem("fm_user_kyc_7893863597", "pending");
-      }
-    }
-  }, []);
+
 
   const [checking,    setChecking]    = useState(false);
   const [regStatus,   setRegStatus]   = useState<"registered" | "new" | null>(null);
@@ -129,18 +100,47 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const go   = (fn: () => void) => { setDir(1);  fn(); };
   const back = (fn: () => void) => { setDir(-1); fn(); };
 
-  const handleMobileChange = (raw: string) => {
+  const [currentUser, setCurrentUser] = useState<MongoUser | null>(null);
+
+  const handleMobileChange = async (raw: string) => {
     const val = raw.replace(/\D/g,"").slice(0,10);
     setMobile(val);
     setErr("");
     setRegStatus(null);
+    setCurrentUser(null);
 
     if (val.length === 10) {
       setChecking(true);
-      setTimeout(() => {
+      try {
+        const res = await fetch("http://localhost:5000/api/users/check-mobile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile: val })
+        });
+        const data = await res.json();
         setChecking(false);
-        setRegStatus(isRegistered(val) ? "registered" : "new");
-      }, 700);
+        if (data.exists && data.data) {
+          setRegStatus("registered");
+          setCurrentUser(data.data);
+        } else {
+          const localUser = findUserByMobile(val);
+          if (localUser) {
+            setRegStatus("registered");
+            setCurrentUser(localUser);
+          } else {
+            setRegStatus("new");
+          }
+        }
+      } catch (err) {
+        setChecking(false);
+        const localUser = findUserByMobile(val);
+        if (localUser) {
+          setRegStatus("registered");
+          setCurrentUser(localUser);
+        } else {
+          setRegStatus("new");
+        }
+      }
     }
   };
 
@@ -157,24 +157,50 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     go(() => setStep("otp"));
   };
 
-  const handleOtpVerify = () => {
+  const handleOtpVerify = async () => {
     if (isNew) {
       go(() => setStep("profile"));
     } else {
       markRegistered(mobile);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("fm_logged_in_mobile", mobile);
+      try {
+        const res = await fetch("http://localhost:5000/api/users/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile })
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          setCurrentUser(data.data);
+        } else {
+          const u = registerOrLoginUser(mobile);
+          setCurrentUser(u);
+        }
+      } catch (e) {
+        const u = registerOrLoginUser(mobile);
+        setCurrentUser(u);
       }
       go(() => setStep("success"));
     }
   };
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async () => {
     markRegistered(mobile);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(`fm_user_name_${mobile}`, panName);
-      localStorage.setItem(`fm_user_kyc_${mobile}`, "full kyc");
-      sessionStorage.setItem("fm_logged_in_mobile", mobile);
+    try {
+      const res = await fetch("http://localhost:5000/api/users/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile, fullName: panName, password })
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setCurrentUser(data.data);
+      } else {
+        const u = registerOrLoginUser(mobile, panName, "", password);
+        setCurrentUser(u);
+      }
+    } catch (e) {
+      const u = registerOrLoginUser(mobile, panName, "", password);
+      setCurrentUser(u);
     }
     go(() => setStep("success"));
   };
@@ -521,6 +547,21 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <h2 className="font-black text-[32px] text-[#1e1b4b] mb-2 tracking-tight">
                          {isNew ? "Account Created!" : "Welcome to Fipmoney!"}
                        </h2>
+                       {(currentUser?.userCode || currentUser?.userId) && (
+                          <div className="flex flex-col items-center gap-2 mb-4">
+                            {currentUser?.userCode && (
+                              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-black shadow-xs">
+                                <span>User Code:</span>
+                                <span className="font-mono text-purple-900 tracking-wider">#{currentUser.userCode}</span>
+                              </div>
+                            )}
+                            {currentUser?.userId && (
+                              <p className="text-[11px] font-mono text-gray-400">
+                                UUID: {currentUser.userId}
+                              </p>
+                            )}
+                          </div>
+                        )}
                        <p className="text-[15px] mb-10 text-[#64748b] font-medium">Your premium digital gold portfolio awaits.</p>
                        <button 
                          onClick={() => onNavigate("dashboard")}

@@ -12,34 +12,36 @@ import {
 import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
 
+import { getLoggedInUser } from "../utils/userStorage";
+
 type SettingsTab = "profile" | "bank" | "nominee" | "security";
 
 export default function SettingsPage() {
   const { showAlert, showConfirm, ModalComponent } = useFipModal();
   const [activeSubTab, setActiveSubTab] = useState<SettingsTab>("profile");
 
-  // Load current user details
-  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
+  // Load logged-in user details directly from database session
+  const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+  const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
 
-  // Predefined or saved user info
-  const initialName = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "Dharsh" : loggedInMobile === "9491841941" ? "Finpages" : loggedInMobile === "7893863597" ? "purna" : "Rahul Kumar") : "Rahul Kumar";
-  const initialKyc = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_kyc_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "full kyc" : loggedInMobile === "9491841941" ? "Min Kyc" : loggedInMobile === "7893863597" ? "pending" : "full kyc") : "full kyc";
-  const initialEmail = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || `${initialName.toLowerCase().replace(/\s+/g, "")}@fipmoney.com` : "rahul@fipmoney.com";
-  const initialUsername = typeof window !== 'undefined' ? localStorage.getItem(`fm_username_${loggedInMobile}`) || initialName.toLowerCase().replace(/\s+/g, "") : initialName.toLowerCase().replace(/\s+/g, "");
-  const initialBio = typeof window !== 'undefined' ? localStorage.getItem(`fm_bio_${loggedInMobile}`) || "Investor. Passionate about wealth compounding in digital assets." : "Investor. Passionate about wealth compounding in digital assets.";
-  const initialJobTitle = typeof window !== 'undefined' ? localStorage.getItem(`fm_job_title_${loggedInMobile}`) || "Investor" : "Investor";
-  const initialIncomeRange = typeof window !== 'undefined' ? localStorage.getItem(`fm_income_range_${loggedInMobile}`) || "5to10" : "5to10";
+  const initialName = loggedInUser?.fullName || loggedInUser?.firstName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "" : "");
+  const initialKyc = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
+  const initialEmail = loggedInUser?.email || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || "" : "");
+  const initialUsername = loggedInUser?.userCode || "";
+  const initialBio = "";
+  const initialJobTitle = loggedInUser?.occupation || "";
+  const initialIncomeRange = loggedInUser?.annualIncome ? String(loggedInUser.annualIncome) : "";
 
   // Form Fields
   const [fullName, setFullName] = useState(initialName);
   const [username, setUsername] = useState(initialUsername);
-  const [website, setWebsite] = useState("fipmoney.com");
+  const [website, setWebsite] = useState("");
   const [email, setEmail] = useState(initialEmail);
   const [mobileNumber, setMobileNumber] = useState(loggedInMobile);
   const [bio, setBio] = useState(initialBio);
   const [jobTitle, setJobTitle] = useState(initialJobTitle);
   const [incomeRange, setIncomeRange] = useState(initialIncomeRange);
-  const [sourceOfFunds, setSourceOfFunds] = useState("salary");
+  const [sourceOfFunds, setSourceOfFunds] = useState("");
 
   // OTP Verification Modal states for email and mobile (current -> new verification flow)
   const [changeFieldType, setChangeFieldType] = useState<"email" | "mobile" | null>(null);

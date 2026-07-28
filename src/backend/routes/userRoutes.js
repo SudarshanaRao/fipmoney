@@ -1,7 +1,29 @@
 import express from 'express';
-import { authUser, getUsers, getUserById } from '../controllers/userController.js';
+import { checkMobile, authUser, getUsers, getUserById } from '../controllers/userController.js';
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/users/check-mobile:
+ *   post:
+ *     summary: Check Mobile Number Existence
+ *     description: Checks if a mobile number exists in the dev_users MongoDB table.
+ *     tags:
+ *       - User Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mobile: { type: string }
+ *     responses:
+ *       200:
+ *         description: Checked existence status.
+ */
+router.post('/check-mobile', checkMobile);
 
 /**
  * @swagger

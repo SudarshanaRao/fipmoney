@@ -84,17 +84,17 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [goldHoldings, setGoldHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 12.4502 : 0);
+      return saved ? parseFloat(saved) : 0;
     }
-    return 12.4502;
+    return 0;
   });
   
   const [silverHoldings, setSilverHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 340.2005 : 0);
+      return saved ? parseFloat(saved) : 0;
     }
-    return 340.2005;
+    return 0;
   });
 
   // Sync to localStorage

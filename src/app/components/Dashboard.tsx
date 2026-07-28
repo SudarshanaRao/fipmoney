@@ -19,6 +19,8 @@ import DigitalGoldSilver from "./DigitalGoldSilver";
 import HistoryPage from "./HistoryPage";
 import BillsPage from "./BillsPage";
 import PortfolioPage from "./PortfolioPage";
+import { getLoggedInUser } from "../utils/userStorage";
+import { getTransactions } from "../utils/transactionStorage";
 
 type Metal = "gold" | "silver";
 
@@ -97,19 +99,26 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
   
-  // Load dynamic logged-in user details
-  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
-  const userName = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "Dharsh" : loggedInMobile === "9491841941" ? "Finpages" : loggedInMobile === "7893863597" ? "purna" : "Rahul Kumar") : "Rahul Kumar";
-  const kycStatus = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_kyc_${loggedInMobile}`) || (loggedInMobile === "7013302191" ? "full kyc" : loggedInMobile === "9491841941" ? "Min Kyc" : loggedInMobile === "7893863597" ? "pending" : "full kyc") : "full kyc";
+  // Load dynamic logged-in user details directly from database session
+  const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+  const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
   
-  const isDemoUser = ["7013302191", "9491841941", "7893863597"].includes(loggedInMobile);
+  const userName = loggedInUser?.fullName || loggedInUser?.firstName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "Guest User" : "Guest User");
+  const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
+  const kycStatus = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
+  
   const goldPrice = 6420.50;
   const silverPrice = 84.20;
-  const goldHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`) || (isDemoUser ? "12.4502" : "0")) : 12.4502;
-  const silverHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`) || (isDemoUser ? "340.2005" : "0")) : 340.2005;
-  const cashBalance = isDemoUser ? 5250.00 : 0.00;
+  
+  // Zero out all predefined mock balances & holdings
+  const goldHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`) || "0") : 0;
+  const silverHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`) || "0") : 0;
+  const cashBalance = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_cash_balance_${loggedInMobile}`) || "0") : 0;
+  
   const totalGrams = goldHoldings + silverHoldings;
   const portfolioVal = (goldHoldings * goldPrice) + (silverHoldings * silverPrice) + cashBalance;
+  
+  const recentTransactions = typeof window !== 'undefined' ? getTransactions().slice(0, 4) : [];
   
   const P = metal === "gold" ? GOLD : SILVER;
   const { G, G_LT, G_DK } = P;
@@ -293,7 +302,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
                <div className="flex flex-col hidden sm:flex">
                  <span className="text-[11px] text-gray-500 font-medium">Welcome back,</span>
-                 <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors">Dharsh</span> <ChevronDown size={14} className="text-gray-400" /></div>
+                 <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors">{userName}</span> <ChevronDown size={14} className="text-gray-400" /></div>
                </div>
             </div>
          </div>
@@ -310,10 +319,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                <div className="bg-[#f3e8ff] rounded-3xl p-6 border border-purple-100 flex flex-col justify-center relative overflow-hidden shadow-sm">
                  <h3 className="text-xs font-bold text-purple-900 mb-3 flex items-center gap-1.5">Vault Balance</h3>
                  <div className="flex items-center gap-3 mb-1 relative z-10">
-                   <h2 className="text-[26px] font-black text-[#2e1065] tracking-tight">{showBalance ? "352.65 g" : "******"}</h2>
+                   <h2 className="text-[26px] font-black text-[#2e1065] tracking-tight">{showBalance ? `${totalGrams.toFixed(2)} g` : "******"}</h2>
                    <button onClick={() => setShowBalance(!showBalance)} className="bg-transparent border-none outline-none cursor-pointer"><Eye size={18} className="text-purple-400 hover:text-purple-600" /></button>
                  </div>
-                 <p className="text-xs font-bold text-purple-800/70 relative z-10">≈ ₹25,489.90</p>
+                 <p className="text-xs font-bold text-purple-800/70 relative z-10">≈ ₹{portfolioVal.toLocaleString('en-IN')}</p>
                  <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/40 rounded-2xl flex items-center justify-center text-purple-600 shadow-sm backdrop-blur-sm">
                     <Wallet size={24} />
                  </div>
@@ -322,7 +331,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                {/* Portfolio Value */}
                <div className="bg-[#fffbeb] rounded-3xl p-6 border border-amber-100 flex flex-col justify-center relative overflow-hidden shadow-sm">
                  <h3 className="text-xs font-bold text-amber-900 mb-3">Portfolio Value</h3>
-                 <h2 className="text-[26px] font-black text-[#78350f] mb-1 tracking-tight relative z-10">₹113,831</h2>
+                 <h2 className="text-[26px] font-black text-[#78350f] mb-1 tracking-tight relative z-10">₹{portfolioVal.toLocaleString('en-IN')}</h2>
                  <p className="text-xs font-bold text-amber-800/70 relative z-10">Total Investments</p>
                  <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/50 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm backdrop-blur-sm">
                     <TrendingUp size={24} />
@@ -332,8 +341,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                {/* KYC Status */}
                <div className="bg-white rounded-3xl p-6 border border-emerald-50 flex flex-col justify-center relative overflow-hidden shadow-sm shadow-emerald-500/5">
                  <h3 className="text-xs font-bold text-emerald-900/60 mb-3">KYC Status</h3>
-                 <h2 className="text-[26px] font-black text-gray-900 mb-1 tracking-tight relative z-10">Verified</h2>
-                 <p className="text-xs font-bold text-gray-500 relative z-10">Full KYC Completed</p>
+                 <h2 className="text-[26px] font-black text-gray-900 mb-1 tracking-tight relative z-10">{kycStatus === "full kyc" ? "Verified" : "Pending"}</h2>
+                 <p className="text-xs font-bold text-gray-500 relative z-10">{kycStatus === "full kyc" ? "Full KYC Completed" : "KYC Pending"}</p>
                  <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-[#10b981] rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
                     <Check size={28} strokeWidth={3} />
                  </div>
@@ -352,9 +361,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                  <div className="relative z-10 flex-1">
                    <p className="text-xs font-bold text-gray-400 mb-1">Current Balance</p>
                    <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-[28px] font-black text-amber-500 tracking-tight">124.50 g</h2>
+                      <h2 className="text-[28px] font-black text-amber-500 tracking-tight">{goldHoldings.toFixed(2)} g</h2>
                    </div>
-                   <p className="text-[13px] font-bold text-gray-400 mb-6">= ₹8,972.35</p>
+                   <p className="text-[13px] font-bold text-gray-400 mb-6">= ₹{(goldHoldings * goldPrice).toFixed(2)}</p>
                    
                    <p className="text-xs font-bold text-gray-400 mb-1">Status: <span className="text-emerald-500">Full KYC •</span></p>
                    <p className="text-xs font-bold text-gray-400 mb-8">Max Capacity: <span className="text-gray-900">1000 g</span></p>
@@ -521,7 +530,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     <div className="relative z-10 flex justify-between items-end">
                        <div>
                          <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Card Holder</div>
-                         <div className="text-[13px] font-bold tracking-wide">Dharsh</div>
+                         <div className="text-[13px] font-bold tracking-wide">{userName}</div>
                        </div>
                        <div className="text-right">
                          <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Expires</div>
@@ -544,7 +553,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                       <div className="text-[8px] uppercase tracking-wider opacity-80 text-indigo-200">Authorized Signature</div>
                       <div className="w-full h-10 bg-white/95 flex items-center justify-between px-3 text-black font-mono rounded-sm shadow-inner relative overflow-hidden">
                          <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 1px, transparent 10px)" }} />
-                         <span className="relative z-10 font-bold italic text-gray-700 text-[13px] tracking-wide">Dharsh</span>
+                         <span className="relative z-10 font-bold italic text-gray-700 text-[13px] tracking-wide">{userName}</span>
                          <span className="relative z-10 font-bold bg-amber-500 text-white px-2 py-0.5 rounded shadow-sm text-[12px] font-mono tracking-wider">
                            732
                          </span>
@@ -591,30 +600,31 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                  <span onClick={() => setTab("history")} className="text-[11px] font-bold text-purple-600 hover:text-purple-800 cursor-pointer transition-colors">View All</span>
                </div>
                
-               <div className="flex flex-col gap-5">
-                 {[
-                   { title: "Gold Purchase", date: "Today, 10:30 AM", amount: "+ 2.50 g", subAmount: "₹14,250", type: "pos", Icon: Wallet, color: "#eab308", bg: "#fef08a" },
-                   { title: "UPI Payment", date: "Today, 09:15 AM", amount: "- ₹1,250", subAmount: "To Ramesh@upi", type: "neg", Icon: Zap, color: "#10b981", bg: "#d1fae5" },
-                   { title: "Electricity Bill", date: "Yesterday, 07:45 PM", amount: "- ₹850", subAmount: "Paid", type: "neg", Icon: Zap, color: "#3b82f6", bg: "#dbeafe" },
-                   { title: "Added to Vault", date: "Yesterday, 05:30 PM", amount: "+ 5.00 g", subAmount: "₹28,400", type: "pos", Icon: Wallet, color: "#eab308", bg: "#fef08a" },
-                 ].map((t, i) => (
-                   <div key={i} className="flex items-center gap-3">
-                     <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-gray-50/50 shadow-sm" style={{ background: t.bg, color: t.color }}>
-                        <t.Icon size={16} strokeWidth={2.5} />
-                     </div>
-                     <div className="flex-1 min-w-0">
-                        <div className="text-[12px] font-bold text-gray-900 truncate">{t.title}</div>
-                        <div className="text-[10px] font-medium text-gray-400 truncate">{t.date}</div>
-                     </div>
-                     <div className="text-right shrink-0 ml-2">
-                        <div className={`text-[12px] font-bold ${t.type === 'pos' ? 'text-emerald-500' : 'text-gray-900'}`}>{t.amount}</div>
-                        <div className="text-[10px] font-medium text-gray-400">{t.subAmount}</div>
-                     </div>
+               <div className="flex flex-col gap-4">
+                 {recentTransactions.length === 0 ? (
+                   <div className="py-8 text-center text-gray-400 text-xs font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                     No transactions recorded yet
                    </div>
-                 ))}
+                 ) : (
+                   recentTransactions.map((t, i) => (
+                     <div key={i} className="flex items-center gap-3">
+                       <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-gray-50/50 shadow-sm bg-purple-50 text-purple-600">
+                          <Wallet size={16} strokeWidth={2.5} />
+                       </div>
+                       <div className="flex-1 min-w-0">
+                          <div className="text-[12px] font-bold text-gray-900 truncate">{t.source || t.category}</div>
+                          <div className="text-[10px] font-medium text-gray-400 truncate">{new Date(t.date).toLocaleDateString()}</div>
+                       </div>
+                       <div className="text-right shrink-0 ml-2">
+                          <div className={`text-[12px] font-bold ${t.type === 'Buy' ? 'text-emerald-500' : 'text-gray-900'}`}>{t.type === 'Buy' ? '+' : '-'} ₹{t.amount}</div>
+                          <div className="text-[10px] font-medium text-gray-400">{t.status}</div>
+                       </div>
+                     </div>
+                   ))
+                 )}
                </div>
                
-               <button className="mt-1 text-[11px] font-bold text-[#6d28d9] border border-purple-100 rounded-xl py-3 w-full hover:bg-purple-50 transition-colors flex items-center justify-center gap-2 cursor-pointer bg-transparent outline-none">
+               <button onClick={() => setTab("history")} className="mt-1 text-[11px] font-bold text-[#6d28d9] border border-purple-100 rounded-xl py-3 w-full hover:bg-purple-50 transition-colors flex items-center justify-center gap-2 cursor-pointer bg-transparent outline-none">
                   <Download size={14} strokeWidth={2.5} /> Download Statement
                </button>
             </div>

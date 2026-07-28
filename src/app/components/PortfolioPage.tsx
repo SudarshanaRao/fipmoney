@@ -24,25 +24,25 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
   const [goldHoldings, setGoldHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 12.4502 : 0);
+      return saved ? parseFloat(saved) : 0;
     }
-    return 12.4502;
+    return 0;
   });
 
   const [silverHoldings, setSilverHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 340.2005 : 0);
+      return saved ? parseFloat(saved) : 0;
     }
-    return 340.2005;
+    return 0;
   });
 
   const [cashBalance, setCashBalance] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_cash_balance_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : (isDemoUser ? 5250.00 : 0.00);
+      return saved ? parseFloat(saved) : 0;
     }
-    return isDemoUser ? 5250.00 : 0.00;
+    return 0;
   });
 
   // Sell modal states
