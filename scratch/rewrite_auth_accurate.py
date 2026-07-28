@@ -1,4 +1,6 @@
-"use client";
+import sys
+
+content = """\"\"\"use client\"\"\";
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -63,7 +65,7 @@ function OtpBoxes({ value, onChange }: { value: string; onChange: (v: string) =>
     <div className="relative h-14">
       <input
         type="tel" inputMode="numeric" maxLength={6} value={value} autoFocus
-        onChange={e => onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
+        onChange={e => onChange(e.target.value.replace(/\\D/g, "").slice(0, 6))}
         className="absolute inset-0 opacity-0 w-full h-full cursor-text z-10"
       />
       <div className="flex gap-3 pointer-events-none h-full">
@@ -130,7 +132,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const back = (fn: () => void) => { setDir(-1); fn(); };
 
   const handleMobileChange = (raw: string) => {
-    const val = raw.replace(/\D/g,"").slice(0,10);
+    const val = raw.replace(/\\D/g,"").slice(0,10);
     setMobile(val);
     setErr("");
     setRegStatus(null);
@@ -145,7 +147,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   };
 
   const validateMobile = () => {
-    if (!/^[6-9]\d{9}$/.test(mobile)) { setErr("Enter a valid 10-digit mobile number"); return false; }
+    if (!/^[6-9]\\d{9}$/.test(mobile)) { setErr("Enter a valid 10-digit mobile number"); return false; }
     setErr(""); return true;
   };
 
@@ -179,7 +181,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     go(() => setStep("success"));
   };
 
-  const pwStrength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : /[A-Z]/.test(password) && /\d/.test(password) ? 4 : 3;
+  const pwStrength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : /[A-Z]/.test(password) && /\\d/.test(password) ? 4 : 3;
   const pwColors   = ["", "#ef4444", "#f59e0b", "#3b82f6", "#10b981"];
   const pwLabels   = ["", "Weak", "Fair", "Good", "Strong"];
 
@@ -196,8 +198,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
          <div className="relative z-20 flex flex-col h-full p-12 lg:p-16 w-full">
            {/* Top Logo */}
            <div className="flex items-center gap-3 mb-12">
-              <img src={fipMoneyLogo} className="w-16 h-16 object-contain" alt="Logo" />
-              <span className="text-4xl font-black text-[#1e1b4b] tracking-tight">Fipmoney</span>
+              <img src={fipMoneyLogo} className="w-8 h-8 object-contain" alt="Logo" />
+              <span className="text-2xl font-black text-[#1e1b4b] tracking-tight">Fipmoney</span>
            </div>
 
            <div className="max-w-[420px] relative z-20">
@@ -215,8 +217,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <Shield size={24} strokeWidth={2} />
                     </div>
                     <div className="flex flex-col justify-center">
-                       <h3 className="text-[#1e1b4b] font-bold text-[14px] mb-1">100% Insured Storage</h3>
-                       <p className="text-[#64748b] text-[11px] font-medium leading-[1.4]">Your gold & silver is stored in<br/>insured vaults.</p>
+                       <h3 className="text-[#1e1b4b] font-bold text-[16px] mb-1">100% Insured Storage</h3>
+                       <p className="text-[#64748b] text-[13px] font-medium leading-[1.4]">Your gold & silver is stored in<br/>insured vaults.</p>
                     </div>
                  </div>
                  {/* Feature 2 */}
@@ -225,8 +227,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <Coins size={24} strokeWidth={2} />
                     </div>
                     <div className="flex flex-col justify-center">
-                       <h3 className="text-[#1e1b4b] font-bold text-[14px] mb-1">Buy & Sell Anytime</h3>
-                       <p className="text-[#64748b] text-[11px] font-medium leading-[1.4]">Invest, sell or redeem anytime<br/>at live market prices.</p>
+                       <h3 className="text-[#1e1b4b] font-bold text-[16px] mb-1">Buy & Sell Anytime</h3>
+                       <p className="text-[#64748b] text-[13px] font-medium leading-[1.4]">Invest, sell or redeem anytime<br/>at live market prices.</p>
                     </div>
                  </div>
                  {/* Feature 3 */}
@@ -235,15 +237,15 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <BarChart3 size={24} strokeWidth={2} />
                     </div>
                     <div className="flex flex-col justify-center">
-                       <h3 className="text-[#1e1b4b] font-bold text-[14px] mb-1">Real-time Prices</h3>
-                       <p className="text-[#64748b] text-[11px] font-medium leading-[1.4]">Track live gold & silver prices<br/>and market trends.</p>
+                       <h3 className="text-[#1e1b4b] font-bold text-[16px] mb-1">Real-time Prices</h3>
+                       <p className="text-[#64748b] text-[13px] font-medium leading-[1.4]">Track live gold & silver prices<br/>and market trends.</p>
                     </div>
                  </div>
               </div>
            </div>
 
            {/* Vault Image - Placed precisely at Bottom Right */}
-           <div className="absolute bottom-[110px] right-[-20px] w-[500px] z-10 pointer-events-none opacity-100">
+           <div className="absolute bottom-[-20px] right-[-20px] w-[500px] z-10 pointer-events-none opacity-100">
               <img src="/login_image.png" alt="Vault" className="w-full h-auto object-contain object-bottom right" />
            </div>
 
@@ -313,8 +315,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     </div>
 
                     <div className="flex justify-center mb-10">
-                       <div className="w-[140px] h-[140px] rounded-full bg-[#f8f9fa] flex items-center justify-center shadow-inner">
-                          <img src={fipMoneyLogo} className="w-[110px] h-[110px] object-contain drop-shadow-sm" alt="Logo" />
+                       <div className="w-[88px] h-[88px] rounded-full bg-[#f8f9fa] flex items-center justify-center shadow-inner">
+                          <img src={fipMoneyLogo} className="w-[44px] h-[44px] object-contain drop-shadow-sm" alt="Logo" />
                        </div>
                     </div>
 
@@ -355,9 +357,24 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        </p>
                     </div>
 
+                    <div className="flex items-center gap-4 my-8">
+                       <div className="flex-1 h-[1px] bg-gray-100" />
+                       <span className="text-[12px] font-bold text-gray-400 bg-white">OR</span>
+                       <div className="flex-1 h-[1px] bg-gray-100" />
+                    </div>
 
+                    <button className="w-full bg-white border-2 border-gray-100 rounded-xl p-4 flex items-center gap-4 hover:border-[#d89221]/30 hover:bg-[#fffdf5] transition-all cursor-pointer outline-none group h-[72px]">
+                       <div className="w-12 h-12 rounded-xl bg-[#fffef7] border border-[#fef2d6] text-[#d89221] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          <Smartphone size={22} />
+                       </div>
+                       <div className="flex-1 text-left">
+                          <div className="text-[14px] font-bold text-[#1e1b4b] mb-0.5">We'll send you a secure OTP</div>
+                          <div className="text-[12px] font-medium text-gray-500">to verify your mobile number</div>
+                       </div>
+                       <ChevronDown size={18} className="text-[#d89221] -rotate-90" />
+                    </button>
                     
-                    <div className="mt-16 text-center">
+                    <div className="mt-8 text-center">
                        <span className="text-[14px] font-medium text-gray-500">New to Fipmoney? </span>
                        <button onClick={() => {}} className="text-[14px] font-bold text-[#d89221] border-none bg-transparent cursor-pointer hover:underline outline-none">Create an account</button>
                     </div>
@@ -501,3 +518,9 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     </div>
   );
 }
+"""
+
+with open('src/app/components/AuthFlow.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+print("AuthFlow.tsx rewritten with highly accurate layout match.")
