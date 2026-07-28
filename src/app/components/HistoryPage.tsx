@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Calendar, ChevronDown, Download, AlertCircle, 
-  Filter, Clock, CheckCircle2, XCircle, FileText
+  Filter, Clock, CheckCircle2, XCircle, FileText, IndianRupee,
+  Activity, Wifi, Smartphone, Zap, Home, ShieldCheck, AlertTriangle, ChevronRight, CreditCard, Banknote, Landmark
 } from "lucide-react";
 import { getTransactions, Transaction } from "../utils/transactionStorage";
 import { useFipModal } from "./FipModal";
@@ -685,23 +686,20 @@ export default function HistoryPage() {
 
   // Statistics
   const totalVolume = filteredTransactions.reduce((acc, curr) => acc + curr.amount, 0);
-  const totalTxCount = filteredTransactions.length;
-
-  return (
-    <div className="flex-1 h-screen overflow-y-auto bg-[#fcfdfd]">
-      <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-6 pb-24 lg:pb-10">
+  const totalTxCount = filteredTransactions.length;  return (
+    <div className="flex-1 h-screen overflow-y-auto bg-[#f8f9fa]">
+      <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-6 pb-24 lg:pb-10">
         
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Transaction History</h1>
-            <p className="text-xs text-gray-400 font-semibold mt-1">Track and manage your vault & bill payments</p>
+            <h1 className="text-2xl md:text-[28px] font-black text-gray-900 tracking-tight">Transaction History</h1>
+            <p className="text-[13px] text-gray-500 font-semibold mt-1">Track and manage your vault & bill payments</p>
           </div>
           
           <button 
             onClick={handleExport}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-solid font-extrabold text-xs tracking-wide bg-white hover:bg-gray-50 transition-all outline-none cursor-pointer shadow-sm"
-            style={{ borderColor: GOLD.G_DK, color: GOLD.G_DK }}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-purple-200 text-purple-700 font-bold text-xs bg-white hover:bg-purple-50 transition-all outline-none cursor-pointer shadow-sm"
           >
             <Download size={14} strokeWidth={2.5} />
             Export Report
@@ -709,22 +707,36 @@ export default function HistoryPage() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center relative overflow-hidden">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Total Transactions</h3>
-            <h2 className="text-3xl font-black text-gray-900">{totalTxCount}</h2>
-            <div className="absolute right-0 bottom-0 w-20 h-20 bg-gray-50 rounded-tl-full -mr-4 -mb-4 opacity-50 pointer-events-none" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Card 1 */}
+          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+              <Calendar size={20} className="text-purple-600" />
+            </div>
+            <div className="flex flex-col justify-center">
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Total Transactions</span>
+              <span className="text-2xl font-black text-gray-900 leading-tight">{totalTxCount}</span>
+              <span className="text-[11px] font-semibold text-gray-400">Across all time</span>
+            </div>
           </div>
           
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-center relative overflow-hidden">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Total Volume</h3>
-            <h2 className="text-3xl font-black text-gray-900">₹{totalVolume.toLocaleString()}</h2>
-            <div className="absolute right-0 bottom-0 w-20 h-20 bg-gray-50 rounded-tl-full -mr-4 -mb-4 opacity-50 pointer-events-none" />
+          {/* Card 2 */}
+          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 rounded-full border-2 border-emerald-500 flex items-center justify-center">
+                <IndianRupee size={12} className="text-emerald-600" strokeWidth={3} />
+              </div>
+            </div>
+            <div className="flex flex-col justify-center">
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Total Volume</span>
+              <span className="text-2xl font-black text-gray-900 leading-tight">₹{totalVolume.toLocaleString()}</span>
+              <span className="text-[11px] font-semibold text-gray-400">Total amount spent</span>
+            </div>
           </div>
         </div>
 
         {/* Filters Controls Row */}
-        <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.02)] space-y-4">
+        <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
             
             {/* Date Range Picker */}
@@ -735,18 +747,18 @@ export default function HistoryPage() {
                   type="date" 
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-200 rounded-xl outline-none focus:border-[#b87312] transition-colors" 
+                  className="w-full pl-9 pr-3 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all" 
                   placeholder="Start Date"
                 />
               </div>
-              <span className="text-xs text-gray-400 font-bold hidden sm:inline">—</span>
+              <span className="text-gray-300 font-bold hidden sm:inline">—</span>
               <div className="relative w-full">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Calendar size={14} /></span>
                 <input 
                   type="date" 
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-200 rounded-xl outline-none focus:border-[#b87312] transition-colors" 
+                  className="w-full pl-9 pr-3 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all" 
                   placeholder="End Date"
                 />
               </div>
@@ -758,7 +770,7 @@ export default function HistoryPage() {
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full pl-9 pr-8 py-2 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-200 rounded-xl appearance-none outline-none focus:border-[#b87312] transition-colors cursor-pointer"
+                className="w-full pl-9 pr-8 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl appearance-none outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all cursor-pointer"
               >
                 <option value="all">All Statuses</option>
                 <option value="Completed">Completed</option>
@@ -775,52 +787,35 @@ export default function HistoryPage() {
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by Transaction ID..."
-                className="w-full pl-9 pr-4 py-2 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-200 rounded-xl outline-none focus:border-[#b87312] transition-colors"
+                placeholder="Search by Transaction ID, Merchant..."
+                className="w-full pl-9 pr-4 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all"
               />
             </div>
 
           </div>
-
-          {/* Reset Filters button if active */}
-          {(startDate || endDate || searchQuery || statusFilter !== "all") && (
-            <div className="flex justify-end">
-              <button 
-                onClick={() => {
-                  setStartDate("");
-                  setEndDate("");
-                  setStatusFilter("all");
-                  setSearchQuery("");
-                }}
-                className="text-[10px] font-extrabold text-[#b87312] hover:text-[#efb652] transition-colors bg-transparent border-none cursor-pointer flex items-center gap-1"
-              >
-                Clear all filters
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Sub-tabs List */}
-        <div className="flex border-b border-gray-100 overflow-x-auto hide-scrollbar whitespace-nowrap">
+        <div className="flex border-b border-gray-200 overflow-x-auto hide-scrollbar whitespace-nowrap gap-6">
           {[
             { id: "all", label: "All Transactions" },
             { id: "gold", label: "Gold Transactions" },
             { id: "silver", label: "Silver Transactions" },
-            { id: "bills", label: "Bill Transactions" }
+            { id: "bills", label: "Bill Payments" }
           ].map(tab => {
             const active = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-5 py-3.5 font-bold text-xs relative cursor-pointer bg-transparent border-none transition-colors duration-200 outline-none
-                  ${active ? "text-[#b87312]" : "text-gray-400 hover:text-gray-700"}`}
+                className={`pb-3 font-bold text-xs relative cursor-pointer bg-transparent border-none transition-colors duration-200 outline-none
+                  ${active ? "text-purple-600" : "text-gray-400 hover:text-gray-700"}`}
               >
                 {tab.label}
                 {active && (
                   <motion.div 
                     layoutId="activeHistoryTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#b87312]"
+                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-purple-600 rounded-t-full"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -850,94 +845,138 @@ export default function HistoryPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="space-y-6"
+                className="space-y-8"
               >
                 {Object.entries(grouped).map(([dateKey, group]) => (
-                  <div key={dateKey} className="bg-white rounded-3xl border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] overflow-hidden">
+                  <div key={dateKey} className="space-y-3">
                     
-                    {/* Day Header Row styled as a Gold Banner */}
+                    {/* Day Header */}
                     <div 
-                      onClick={() => toggleGroup(dateKey)}
-                      className="px-6 py-4 flex justify-between items-center text-white border-b shadow-sm font-sans cursor-pointer select-none hover:brightness-105 active:brightness-95 transition-all"
-                      style={{ 
-                        background: `linear-gradient(135deg, ${GOLD.G_DK}, ${GOLD.G_LT})`,
-                        borderColor: GOLD.G_DK 
-                      }}
+                      onClick={group.list.length > 1 ? () => toggleGroup(dateKey) : undefined}
+                      className={`flex justify-between items-center select-none px-1 ${group.list.length > 1 ? 'cursor-pointer' : ''}`}
                     >
                       <div className="flex items-center gap-2">
-                        <motion.span
-                          animate={{ rotate: expandedGroups[dateKey] === false ? -90 : 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex items-center justify-center shrink-0"
-                        >
-                          <ChevronDown size={14} className="text-white" strokeWidth={3} />
-                        </motion.span>
-                        <span className="text-xs font-black tracking-wide drop-shadow-sm">{dateKey}</span>
+                        <Calendar size={14} className="text-purple-600" />
+                        <span className="text-xs font-black text-gray-800">{dateKey}</span>
                       </div>
-                      <span className="text-xs font-black drop-shadow-sm">Total: ₹{group.total.toLocaleString()}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-800">Total: ₹{group.total.toLocaleString()}</span>
+                        {group.list.length > 1 && (
+                          <motion.span
+                            animate={{ rotate: expandedGroups[dateKey] === false ? -90 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex items-center justify-center text-gray-400 shrink-0"
+                          >
+                            <ChevronDown size={16} />
+                          </motion.span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Transactions items */}
+                    {/* Transactions list for the day */}
                     {expandedGroups[dateKey] !== false && (
-                      <div className="divide-y divide-gray-100">
+                      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
                       {group.list.map(tx => {
                         const statusColors = 
                           tx.status === "Completed" 
-                            ? { text: "text-emerald-700 bg-emerald-50 border-emerald-200", icon: CheckCircle2 }
+                            ? { text: "text-emerald-700 bg-emerald-50 border-emerald-100" }
                             : tx.status === "Pending"
-                            ? { text: "text-amber-700 bg-amber-50 border-amber-200", icon: Clock }
-                            : { text: "text-rose-700 bg-rose-50 border-rose-200", icon: XCircle };
+                            ? { text: "text-amber-700 bg-amber-50 border-amber-100" }
+                            : { text: "text-rose-700 bg-rose-50 border-rose-100" };
 
-                        const StatusIcon = statusColors.icon;
                         const txTime = new Date(tx.date).toLocaleTimeString("en-US", {
                           hour: "2-digit",
                           minute: "2-digit"
                         });
 
+                        // Determine Icon
+                        let TxIcon = <Banknote size={16} className="text-gray-500" />;
+                        let iconBg = "bg-gray-100";
+                        if (tx.category.toLowerCase() === "gold") {
+                           TxIcon = <span className="text-lg">🪙</span>;
+                           iconBg = "bg-amber-50";
+                        } else if (tx.category.toLowerCase() === "silver") {
+                           TxIcon = <span className="text-lg">🪙</span>; // Silver coin emoji variant not widely supported, using standard
+                           iconBg = "bg-slate-100";
+                        } else if (tx.source.toLowerCase().includes("electricity")) {
+                           TxIcon = <Zap size={16} className="text-purple-600" />;
+                           iconBg = "bg-purple-50";
+                        } else if (tx.source.toLowerCase().includes("recharge")) {
+                           TxIcon = <Smartphone size={16} className="text-purple-600" />;
+                           iconBg = "bg-purple-50";
+                        } else if (tx.source.toLowerCase().includes("fiber") || tx.source.toLowerCase().includes("wifi")) {
+                           TxIcon = <Wifi size={16} className="text-blue-600" />;
+                           iconBg = "bg-blue-50";
+                        } else if (tx.source.toLowerCase().includes("rent") || tx.source.toLowerCase().includes("home")) {
+                           TxIcon = <Home size={16} className="text-purple-600" />;
+                           iconBg = "bg-purple-50";
+                        }
+
+                        // Determine Amount Sign & Color
+                        const isPositive = tx.type === "Buy" || tx.type === "Receive";
+                        const amountColor = isPositive ? "text-emerald-600" : "text-gray-900";
+                        const amountSign = isPositive ? "+" : "-";
+
                         return (
-                          <div key={tx.id} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50/50 transition-colors">
+                          <div 
+                            key={tx.id} 
+                            onClick={() => downloadInvoicePDF(tx)}
+                            className="p-4 flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
                             
+                            {/* Left: Status + Time/ID + Icon + Details */}
                             <div className="flex items-center gap-4 min-w-0 flex-1">
                               {/* Status Badge */}
-                              <div className={`px-2.5 py-1 text-[9px] font-black tracking-wide rounded-md border border-solid flex items-center gap-1 uppercase shrink-0 ${statusColors.text}`}>
-                                <StatusIcon size={10} strokeWidth={3} />
+                              <div className={`px-2 py-1 text-[9px] font-black tracking-wider rounded border flex items-center justify-center uppercase w-16 text-center ${statusColors.text}`}>
                                 {tx.status === "Completed" ? "Success" : tx.status === "Pending" ? "Pending" : "Failed"}
                               </div>
 
                               {/* Time & ID */}
-                              <div className="flex flex-col gap-0.5 shrink-0 text-left">
-                                <span className="text-[11px] font-semibold text-gray-400">{txTime}</span>
-                                <span className="text-xs font-bold text-gray-700 font-mono tracking-tight">{tx.id}</span>
+                              <div className="flex flex-col gap-0.5 text-left w-16 shrink-0">
+                                <span className="text-[10px] font-bold text-gray-500">{txTime}</span>
+                                <span className="text-[9px] font-semibold text-gray-400 font-mono tracking-tight">{tx.id}</span>
+                              </div>
+
+                              {/* Icon */}
+                              <div className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center shrink-0`}>
+                                {TxIcon}
                               </div>
 
                               {/* Channel/Category Detail */}
                               <div className="flex flex-col gap-0.5 min-w-0 text-left">
-                                <span className="text-xs font-bold text-gray-900 truncate">{tx.source}</span>
-                                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{tx.type} {tx.grams ? `(${tx.grams})` : ""}</span>
+                                <span className="text-xs font-extrabold text-gray-900 truncate">{tx.source}</span>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                  {tx.type} {tx.grams ? `(${tx.grams} G)` : ""}
+                                </span>
                               </div>
                             </div>
 
-                            {/* Payment Method & Amount */}
-                            <div className="flex sm:flex-row items-start sm:items-center gap-4 sm:gap-6 justify-between sm:justify-end shrink-0">
-                              <div className="flex flex-col sm:items-end text-left sm:text-right">
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Method</span>
-                                <span className="text-xs font-bold text-gray-700">{tx.paymentMethod}</span>
+                            {/* Right: Method & Amount */}
+                            <div className="flex items-center gap-6 shrink-0">
+                              
+                              <div className="flex items-center gap-2">
+                                <div className="flex flex-col text-right">
+                                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Method</span>
+                                  <span className="text-[11px] font-bold text-gray-700">{tx.paymentMethod}</span>
+                                </div>
+                                <div className="text-gray-400 w-12 flex items-center justify-end">
+                                  {tx.paymentMethod === "UPI" ? (
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" alt="UPI" className="h-4 object-contain" />
+                                  ) : tx.paymentMethod === "Credit Card" ? (
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-5 object-contain" />
+                                  ) : (
+                                    <Landmark size={18} className="text-gray-400" />
+                                  )}
+                                </div>
                               </div>
 
-                              <div className="text-right flex items-center gap-3">
-                                <div className="text-right">
-                                  <span className="text-sm font-black text-gray-900">
-                                    {tx.type === "Sell" ? "-" : "+"} ₹{tx.amount.toLocaleString()}
-                                  </span>
-                                </div>
-                                <button
-                                  onClick={() => downloadInvoicePDF(tx)}
-                                  title="Download PDF Invoice"
-                                  className="w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 cursor-pointer transition-colors outline-none shrink-0"
-                                >
-                                  <FileText size={14} />
-                                </button>
+                              <div className="flex items-center gap-3">
+                                <span className={`text-sm font-black w-20 text-right ${amountColor}`}>
+                                  {amountSign} ₹{tx.amount.toLocaleString()}
+                                </span>
+                                <ChevronRight size={16} className="text-gray-300" />
                               </div>
+
                             </div>
 
                           </div>
@@ -951,6 +990,65 @@ export default function HistoryPage() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* Footer Stats Bar */}
+        <div className="bg-[#f8f9fc] border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+           <div className="flex items-center gap-3 w-full sm:w-auto">
+             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <ShieldCheck size={18} className="text-emerald-500" />
+             </div>
+             <div className="flex flex-col">
+               <span className="text-[10px] font-bold text-gray-500">Successful</span>
+               <span className="text-xs font-black text-gray-900">
+                 {filteredTransactions.filter(t => t.status === "Completed").length} <span className="text-gray-400 text-[10px] font-semibold">({filteredTransactions.length ? Math.round(filteredTransactions.filter(t => t.status === "Completed").length / filteredTransactions.length * 100) : 0}%)</span>
+               </span>
+             </div>
+           </div>
+           
+           <div className="hidden sm:block w-px h-8 bg-gray-200"></div>
+
+           <div className="flex items-center gap-3 w-full sm:w-auto">
+             <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center">
+                <AlertTriangle size={18} className="text-rose-500" />
+             </div>
+             <div className="flex flex-col">
+               <span className="text-[10px] font-bold text-gray-500">Failed</span>
+               <span className="text-xs font-black text-gray-900">
+                 {filteredTransactions.filter(t => t.status === "Failed").length} <span className="text-gray-400 text-[10px] font-semibold">({filteredTransactions.length ? Math.round(filteredTransactions.filter(t => t.status === "Failed").length / filteredTransactions.length * 100) : 0}%)</span>
+               </span>
+             </div>
+           </div>
+
+           <div className="hidden sm:block w-px h-8 bg-gray-200"></div>
+
+           <div className="flex items-center gap-3 w-full sm:w-auto">
+             <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                <Clock size={18} className="text-purple-600" />
+             </div>
+             <div className="flex flex-col">
+               <span className="text-[10px] font-bold text-gray-500">This Month</span>
+               <span className="text-xs font-black text-gray-900">
+                 ₹{filteredTransactions.filter(t => new Date(t.date).getMonth() === new Date().getMonth()).reduce((a, b) => a + b.amount, 0).toLocaleString()}
+                 <span className="text-gray-400 text-[10px] font-semibold block">Total Spent</span>
+               </span>
+             </div>
+           </div>
+
+           <div className="hidden sm:block w-px h-8 bg-gray-200"></div>
+
+           <div className="flex items-center gap-3 w-full sm:w-auto">
+             <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                <Home size={18} className="text-purple-600" />
+             </div>
+             <div className="flex flex-col">
+               <span className="text-[10px] font-bold text-gray-500">Avg. Transaction</span>
+               <span className="text-xs font-black text-gray-900">
+                 ₹{filteredTransactions.length ? Math.round(totalVolume / filteredTransactions.length).toLocaleString() : 0}
+                 <span className="text-gray-400 text-[10px] font-semibold block">Per Transaction</span>
+               </span>
+             </div>
+           </div>
         </div>
 
       </div>

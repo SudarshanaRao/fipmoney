@@ -12,6 +12,8 @@ import { Sidebar, MobileNav, Tab } from "./Navigation";
 import cardBgGold from "../../assets/card_bg_gold.jpg";
 import cardBgSilver from "../../assets/card_bg_silver.jpg";
 import SettingsPage from "./SettingsPage";
+import ComingSoon from "./ComingSoon";
+import HelpSupportPage from "./HelpSupportPage";
 import DigitalGoldSilver from "./DigitalGoldSilver";
 import HistoryPage from "./HistoryPage";
 import BillsPage from "./BillsPage";
@@ -440,6 +442,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <DigitalGoldSilver onNavigate={(target) => setTab(target as Tab)} kycStatus={kycStatus} />
         ) : tab === "history" ? (
           <HistoryPage />
+        ) : tab === "help" ? (
+          <HelpSupportPage />
+        ) : ["banking", "offers"].includes(tab) ? (
+          <ComingSoon tab={tab} />
         ) : (
           <MainDashboard />
         )}

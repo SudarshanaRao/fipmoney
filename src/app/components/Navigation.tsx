@@ -5,14 +5,14 @@ import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings";
+export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings" | "banking" | "offers" | "help";
 
 export const navItems = [
   { id: "home",      Icon: Home,       label: "Dashboard" },
   { id: "portfolio", Icon: Wallet,     label: "Portfolio"  },
   { id: "sip",       Icon: TrendingUp, label: "Digital Gold & Silver"  },
   { id: "bills",     Icon: Zap,        label: "Bills & Recharges"      },
-  { id: "settings",  Icon: Landmark,   label: "Banking Services"   }, // Dummy redirect to settings or just label change
+  { id: "banking",   Icon: Landmark,   label: "Banking Services"   },
   { id: "history",   Icon: Clock,      label: "History"    },
 ];
 
@@ -25,8 +25,8 @@ interface NavProps {
 export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
   <>
   <div className="hidden lg:flex w-64 bg-[#1e1b4b] flex-col py-6 px-4 shrink-0 h-screen sticky top-0 overflow-y-auto hide-scrollbar">
-    <div className="flex items-center gap-3 mb-8 px-2">
-      <img src={fipMoneyLogo} alt="FM" className="w-10 h-10 object-contain hover:scale-105 transition-transform shrink-0" />
+    <div className="flex items-center gap-1.5 mb-8 px-2">
+      <img src={fipMoneyLogo} alt="FM" className="w-16 h-16 object-contain hover:scale-105 transition-transform shrink-0" />
       <span className="text-2xl font-bold text-white tracking-wide">Fipmoney</span>
     </div>
 
@@ -46,15 +46,15 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
         );
       })}
       
-      {/* Dummy Visual Items to match screenshot */}
+      {/* Secondary Items */}
       {[
-        { label: "Offers & Rewards", Icon: Gift },
-        { label: "Settings", Icon: Settings, isSettings: true },
-        { label: "Help & Support", Icon: HelpCircle },
+        { id: "offers", label: "Offers & Rewards", Icon: Gift },
+        { id: "settings", label: "Settings", Icon: Settings },
+        { id: "help", label: "Help & Support", Icon: HelpCircle },
       ].map((item, i) => {
-        const active = item.isSettings && activeTab === "settings";
+        const active = activeTab === item.id;
         return (
-          <button key={i} onClick={() => item.isSettings && onTabChange("settings")}
+          <button key={i} onClick={() => onTabChange(item.id as Tab)}
             className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm outline-none border-none cursor-pointer
               ${active ? 'text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6]' : 'text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent'}`}
             >

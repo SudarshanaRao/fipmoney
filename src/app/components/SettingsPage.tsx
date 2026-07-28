@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   User, CreditCard, ShieldCheck, Heart, Sparkles,
   Trash2, Upload, CheckCircle2, AlertCircle, ChevronRight,
-  Shield, Check, HelpCircle, PhoneOff, Camera, Video, Loader2
+  Shield, Check, HelpCircle, PhoneOff, Camera, Video, Loader2,
+  Save, Landmark, Lock, Trophy, Circle, Eye, Headset
 } from "lucide-react";
 
 import { Input } from "./ui/input";
