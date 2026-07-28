@@ -10,6 +10,8 @@ import {
 import { getTransactions, Transaction } from "../utils/transactionStorage";
 import { useFipModal } from "./FipModal";
 
+import { LoadingSpinner } from "./LottiePlayer";
+
 const GOLD = { G_DK: "#b87312", G_LT: "#efb652", BG: "#fdf8f0" };
 
 // High-fidelity PDF invoice downloader styled after the "Sempurna" template
@@ -576,10 +578,16 @@ export default function HistoryPage() {
   const [endDate, setEndDate] = useState("");
 
   const { showAlert } = useFipModal();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load transactions
   useEffect(() => {
-    setAllTransactions(getTransactions());
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setAllTransactions(getTransactions());
+      setIsLoading(false);
+    }, 400);
+    return () => clearTimeout(timer);
   }, []);
 
   // Filter logic
@@ -646,12 +654,15 @@ export default function HistoryPage() {
       tx.paymentMethod
     ]);
 
-    const csvContent = [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.join(","))
+    ].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `fipmoney_transactions_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute("download", `Fipmoney_Transactions_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -686,7 +697,18 @@ export default function HistoryPage() {
 
   // Statistics
   const totalVolume = filteredTransactions.reduce((acc, curr) => acc + curr.amount, 0);
-  const totalTxCount = filteredTransactions.length;  return (
+  const totalTxCount = filteredTransactions.length;
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#f8f9fa]">
+        <LoadingSpinner size={100} />
+        <p className="text-xs font-bold text-[#6d28d9] mt-3 tracking-wide animate-pulse">Loading transaction history...</p>
+      </div>
+    );
+  }
+  
+  return (
     <div className="flex-1 h-screen overflow-y-auto bg-[#f8f9fa]">
       <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-6 pb-24 lg:pb-10">
         

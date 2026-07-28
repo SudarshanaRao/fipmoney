@@ -5,7 +5,7 @@ import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings" | "banking" | "offers" | "help";
+export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications";
 
 export const navItems = [
   { id: "home",      Icon: Home,       label: "Dashboard" },
@@ -63,6 +63,16 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
           </button>
         )
       })}
+
+      {/* Red Metallic Logout Button below Help & Support */}
+      <button
+        onClick={onLogout}
+        className="mt-2 w-full flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 font-bold text-sm text-white border border-red-400/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_16px_rgba(220,38,38,0.45)] bg-gradient-to-r from-[#dc2626] via-[#ef4444] to-[#991b1b] hover:from-[#ef4444] hover:via-[#f87171] hover:to-[#b91c1c] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_6px_22px_rgba(220,38,38,0.65)] cursor-pointer outline-none active:scale-[0.98] relative overflow-hidden group"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+        <LogOut size={20} className="text-white drop-shadow-sm shrink-0" strokeWidth={2.5} />
+        <span className="tracking-wide">Logout</span>
+      </button>
     </div>
 
     <div className="mt-8 flex flex-col gap-4">
@@ -79,15 +89,7 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-1 mt-2">
-        <div className="flex flex-col gap-0.5">
-           <span className="text-[10px] text-indigo-300">© 2025 Fipmoney</span>
-           <span className="text-[10px] text-indigo-300">All rights reserved.</span>
-        </div>
-        <button className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-indigo-200 hover:bg-white/20 hover:text-white transition-colors border-none cursor-pointer">
-          <ChevronLeft size={14} />
-        </button>
-      </div>
+
     </div>
   </div>
   <style dangerouslySetInnerHTML={{ __html: `

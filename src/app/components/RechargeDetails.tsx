@@ -12,6 +12,7 @@ import { useFipModal } from "./FipModal";
 // @ts-ignore
 import confetti from "canvas-confetti";
 import { addTransaction } from "../utils/transactionStorage";
+import { SuccessTick, LoadingSpinner } from "./LottiePlayer";
 
 const bbpsServices = [
   { label: "Mobile Prepaid", Icon: Smartphone, color: "#d89221", bg: "#fdf8f0" },
@@ -389,176 +390,78 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
     return matchesTab && matchesQuery;
   });
 
-  // RENDER ORDER TRACKING SCREEN IF COMMITTED
+  // RENDER RECHARGE SUCCESSFUL CONFIRMATION SCREEN
   if (showTracking) {
+    const isCompleted = currentStep >= 5;
     return (
       <>
         <div className="flex h-screen bg-[#f8fafc] font-sans overflow-hidden text-gray-800">
           <Sidebar activeTab="bills" onTabChange={(t) => { if (t === 'home') onBack(); }} onLogout={onBack} />
 
-          <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-gray-50/20">
-            <div className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+          <div className="flex-1 flex flex-col min-w-0 overflow-y-auto items-center justify-center p-6 bg-gradient-to-br from-gray-50 via-purple-50/20 to-amber-50/20">
+            <div className="w-full max-w-md bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-2xl text-center space-y-6 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+              
+              {!isCompleted ? (
+                /* Processing State with Lottie Loading Spinner */
+                <div className="py-12 flex flex-col items-center justify-center space-y-4">
+                  <LoadingSpinner size={110} />
+                  <h2 className="text-lg font-black text-gray-900 tracking-tight">Processing Recharge...</h2>
+                  <p className="text-xs font-semibold text-gray-500 max-w-xs">Connecting to BBPS network and confirming your payment details.</p>
+                </div>
+              ) : (
+                /* Recharge Successful State with Lottie Success Green Tick */
+                <div className="space-y-6">
+                  <div className="flex justify-center -mb-4">
+                    <SuccessTick size={190} />
+                  </div>
 
-              {/* Header / Back */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => {
-                    if (currentStep >= 5) {
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Recharge Successful! 🎉</h2>
+                    <p className="text-xs font-medium text-gray-500 mt-1">Your payment of <span className="font-extrabold text-gray-900">₹{amount}</span> has been processed successfully.</p>
+                  </div>
+
+                  {/* Summary Details Card */}
+                  <div className="bg-gray-50/80 rounded-2xl p-5 border border-gray-100 space-y-3 text-left">
+                    <div className="flex justify-between items-center pb-2.5 border-b border-gray-200/60">
+                      <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Service</span>
+                      <span className="text-xs font-extrabold text-gray-900">{billLabel}</span>
+                    </div>
+                    {isMobile ? (
+                      <>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Mobile Number</span>
+                          <span className="text-xs font-extrabold text-gray-900">+91 {mobileNumber}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Operator</span>
+                          <span className="text-xs font-extrabold text-gray-900">{operator || "Standard Provider"}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Account ID</span>
+                        <span className="text-xs font-extrabold text-gray-900">{accountNumber}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-2.5 border-t border-gray-200/60">
+                      <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Paid</span>
+                      <span className="text-base font-black text-emerald-600">₹{amount}</span>
+                    </div>
+                  </div>
+
+                  {/* Back to Dashboard Button */}
+                  <button
+                    onClick={() => {
                       setShowTracking(false);
                       onBack();
-                    } else {
-                      showConfirm(
-                        "Cancel transaction tracking and return to billing?",
-                        () => setShowTracking(false),
-                        { title: "Cancel Transaction?", confirmText: "Yes, Cancel", cancelText: "Keep Tracking" }
-                      );
-                    }
-                  }}
-                  className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 shadow-sm hover:bg-gray-50 cursor-pointer outline-none transition-all"
-                >
-                  <ChevronLeft size={20} className="text-gray-600" />
-                </button>
-                <div>
-                  <h1 className="text-xl font-black text-gray-900 tracking-tight">Order Tracking</h1>
-                  <p className="text-[10px] font-bold text-gray-400">Recharge Transaction ID: FIP{Math.floor(100000 + Math.random() * 900000)}</p>
+                    }}
+                    className="w-full py-4 rounded-xl text-white text-sm font-extrabold shadow-lg hover:shadow-xl transition-all cursor-pointer outline-none border-none bg-gradient-to-r from-[#1e1b4b] via-[#312e81] to-[#4c1d95] hover:from-[#111827] hover:to-[#312e81] active:scale-[0.99] flex items-center justify-center gap-2"
+                  >
+                    Back to Dashboard <ChevronRight size={18} strokeWidth={2.5} />
+                  </button>
                 </div>
-              </div>
-
-              {/* Main Order Status Card */}
-              <div className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] space-y-8">
-
-                {/* Order Quick Details */}
-                <div className="bg-[#fdf8f0] border border-[#fdf8f0] rounded-2xl p-5 flex flex-wrap justify-between items-center gap-4">
-                  <div className="space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-[#b87312] tracking-wider">Service Type</span>
-                    <h3 className="text-xs font-bold text-gray-800">{billLabel}</h3>
-                  </div>
-                  {isMobile ? (
-                    <>
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-extrabold uppercase text-[#b87312] tracking-wider">Mobile Number</span>
-                        <h3 className="text-xs font-bold text-gray-800">+91 {mobileNumber}</h3>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-extrabold uppercase text-[#b87312] tracking-wider">Operator</span>
-                        <h3 className="text-xs font-bold text-gray-800">{operator}</h3>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-extrabold uppercase text-[#b87312] tracking-wider">Account ID</span>
-                      <h3 className="text-xs font-bold text-gray-800">{accountNumber}</h3>
-                    </div>
-                  )}
-                  <div className="space-y-1">
-                    <span className="text-[9px] font-extrabold uppercase text-[#b87312] tracking-wider">Amount Paid</span>
-                    <h3 className="text-xs font-extrabold text-gray-900">₹{amount}</h3>
-                  </div>
-                </div>
-
-                {/* Steps timeline */}
-                <div className="relative pl-2 md:pl-6 space-y-8">
-
-                  {/* Vertical line joining steps */}
-                  <div className="absolute left-[39px] md:left-[55px] top-6 bottom-6 w-0.5 bg-gray-100 z-0">
-                    {/* Active highlight line */}
-                    <div
-                      className="w-full bg-gradient-to-b from-[#b87312] to-[#efb652] transition-all duration-500"
-                      style={{ height: `${Math.min(100, Math.max(0, ((currentStep) / 4) * 100))}%` }}
-                    />
-                  </div>
-
-                  {trackingSteps.map((step, idx) => {
-                    const isCompleted = idx < currentStep;
-                    const isActive = idx === currentStep;
-                    const isPending = idx > currentStep;
-                    const StepIcon = step.icon;
-
-                    return (
-                      <div key={idx} className="relative z-10 flex gap-4 md:gap-6 items-start">
-
-                        {/* Left: Time Stamp */}
-                        <div className="w-16 md:w-20 text-right shrink-0 mt-1 space-y-0.5">
-                          {stepTimes[idx] ? (
-                            <>
-                              <p className="text-xs font-black text-gray-800 font-mono">{stepTimes[idx]}</p>
-                              <p className="text-[9px] font-bold text-gray-400">{stepDates[idx]}</p>
-                            </>
-                          ) : (
-                            <p className="text-xs font-bold text-gray-300 font-mono">--:--</p>
-                          )}
-                        </div>
-
-                        {/* Center: Circle Icon */}
-                        <div className="relative shrink-0">
-                          {isCompleted ? (
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white shadow-md transition-all scale-100"
-                              style={{ background: `linear-gradient(135deg, #b87312, #efb652)` }}>
-                              <StepIcon size={18} strokeWidth={2.5} />
-                            </div>
-                          ) : isActive ? (
-                            <div className="relative">
-                              {/* Pulse waves */}
-                              <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping" />
-                              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-white border-2 border-amber-500 text-[#b87312] shadow-md">
-                                <StepIcon size={18} strokeWidth={2.5} className="animate-pulse" />
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-white border border-gray-150 text-gray-300 shadow-inner">
-                              <StepIcon size={16} strokeWidth={2} />
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Right: Info */}
-                        <div className="space-y-1 flex-1 mt-1.5 md:mt-2">
-                          <h4 className={`text-xs md:text-sm font-extrabold tracking-tight transition-colors duration-300
-                          ${isActive ? "text-amber-600 font-black" : isPending ? "text-gray-400" : "text-gray-800"}`}>
-                            {step.title}
-                          </h4>
-                          <p className={`text-[10px] md:text-xs font-medium leading-relaxed transition-colors duration-300
-                          ${isPending ? "text-gray-300" : "text-gray-550"}`}>
-                            {step.desc}
-                          </p>
-                        </div>
-
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Bottom Action */}
-                <div className="pt-4 border-t border-gray-100 flex flex-col items-center gap-4">
-                  {currentStep >= 5 ? (
-                    <>
-                      <button
-                        onClick={() => {
-                          setShowTracking(false);
-                          onBack();
-                        }}
-                        className="px-8 py-4 rounded-xl text-white text-sm font-extrabold shadow-[0_4px_14px_rgba(184,115,18,0.3)] hover:shadow-[0_6px_20px_rgba(184,115,18,0.4)] hover:-translate-y-0.5 transition-all outline-none border-none cursor-pointer flex items-center justify-center gap-2"
-                        style={{ background: "linear-gradient(135deg, #b87312, #efb652)", width: "240px" }}
-                      >
-                        Back to Dashboard <ChevronRight size={18} strokeWidth={2.5} />
-                      </button>
-                      <p className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
-                        🎉 Recharge completed successfully! Confetti sent.
-                      </p>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-500 border-t-transparent" />
-                        Processing recharge step {currentStep + 1} of 5...
-                      </div>
-                      <p className="text-[10px] font-semibold text-gray-400">Do not close this page or hit back button</p>
-                    </div>
-                  )}
-                </div>
-
-              </div>
-
+              )}
             </div>
           </div>
         </div>

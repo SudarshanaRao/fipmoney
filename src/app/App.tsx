@@ -38,6 +38,7 @@ import RiskDisclosure from "./components/RiskDisclosure";
 import GrievancePolicy from "./components/GrievancePolicy";
 import InvestorCharter from "./components/InvestorCharter";
 import LiveMetalTracker from "./components/LiveMetalTracker";
+import { LoadingSpinner } from "./components/LottiePlayer";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker';
 
@@ -417,7 +418,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="loading-spinner"></div>
+            <LoadingSpinner size={100} />
           </motion.div>
         )}
       </AnimatePresence>

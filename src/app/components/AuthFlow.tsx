@@ -305,16 +305,34 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               {/* ══ STEP 1: MOBILE ══ */}
               {step === "mobile" && (
                  <FormSlide key="mobile" dir={dir}>
-                    <div className="text-center mb-10">
-                       <h2 className="text-[32px] font-black text-[#1e1b4b] mb-2 flex items-center justify-center gap-2 tracking-tight">
-                         Welcome Back! <span className="text-[28px]">👋</span>
-                       </h2>
-                       <p className="text-[#64748b] text-[15px] font-medium">Login to continue to your account</p>
+                    <div className="text-center mb-8">
+                        <h2 className="text-[28px] leading-tight font-black text-[#1e1b4b] mb-2 tracking-tight">
+                          {regStatus === "registered" ? (
+                            <>Welcome Back! <span className="inline-block">👋</span></>
+                          ) : regStatus === "new" ? (
+                            <>Create Your Account <span className="inline-block">✨</span></>
+                          ) : checking ? (
+                            <>Verifying Number... <span className="inline-block animate-pulse">🔍</span></>
+                          ) : (
+                            <>Welcome to Fipmoney <span className="inline-block">👋</span></>
+                          )}
+                        </h2>
+                        <p className="text-[#64748b] text-[14px] font-medium leading-relaxed max-w-[340px] mx-auto">
+                          {regStatus === "registered" ? (
+                            <>Account found for <span className="font-bold text-[#1e1b4b]">+91 {mobile}</span>. Click continue to log in.</>
+                          ) : regStatus === "new" ? (
+                            <>New user detected for <span className="font-bold text-[#1e1b4b]">+91 {mobile}</span>. Click continue to sign up.</>
+                          ) : checking ? (
+                            <>Checking database for registered account...</>
+                          ) : (
+                            <>Enter your mobile number to sign in or create an account</>
+                          )}
+                        </p>
                     </div>
 
-                    <div className="flex justify-center mb-10">
-                       <div className="w-[140px] h-[140px] rounded-full bg-[#f8f9fa] flex items-center justify-center shadow-inner">
-                          <img src={fipMoneyLogo} className="w-[110px] h-[110px] object-contain drop-shadow-sm" alt="Logo" />
+                    <div className="flex justify-center mb-8">
+                       <div className="w-[120px] h-[120px] rounded-full bg-[#f8f9fa] flex items-center justify-center shadow-inner">
+                          <img src={fipMoneyLogo} className="w-[95px] h-[95px] object-contain drop-shadow-sm" alt="Logo" />
                        </div>
                     </div>
 
@@ -336,16 +354,38 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                           {checking && <div className="absolute right-4"><Loader2 size={18} className="animate-spin text-[#d89221]" /></div>}
                        </div>
                        {err && <p className="text-red-500 text-[12px] mt-2 font-semibold">{err}</p>}
-                       {!err && regStatus === "registered" && <p className="text-[#10b981] text-[12px] mt-2 font-bold flex items-center gap-1"><CheckCircle size={14}/> Account found.</p>}
-                       {!err && regStatus === "new" && <p className="text-[#d89221] text-[12px] mt-2 font-bold">New user detected.</p>}
+                       {!err && regStatus === "registered" && (
+                           <p className="text-[#10b981] text-[12px] mt-2 font-bold flex items-center justify-center gap-1 bg-emerald-50 py-1.5 px-3 rounded-lg border border-emerald-200/60">
+                              <CheckCircle size={14}/> Registered Account Found
+                           </p>
+                        )}
+                        {!err && regStatus === "new" && (
+                           <p className="text-[#d89221] text-[12px] mt-2 font-bold flex items-center justify-center gap-1 bg-amber-50 py-1.5 px-3 rounded-lg border border-amber-200/60">
+                              ✨ New User Account Setup
+                           </p>
+                        )}
                     </div>
 
                     <button 
                       onClick={handlePrimaryBtn}
                       disabled={mobile.length !== 10 || checking}
-                      className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${mobile.length !== 10 || checking ? 'bg-[#d89221]/80 hover:bg-[#d89221]/90 opacity-80' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
+                      className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${
+                          mobile.length !== 10 || checking 
+                             ? 'bg-[#d89221]/80 hover:bg-[#d89221]/90 opacity-80 cursor-not-allowed' 
+                             : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg active:scale-[0.99]'
+                       }`}
                     >
-                       Continue
+                        {checking ? (
+                           <span className="flex items-center gap-2">
+                              <Loader2 size={18} className="animate-spin" /> Verifying...
+                           </span>
+                        ) : regStatus === "registered" ? (
+                           "Continue to Login"
+                        ) : regStatus === "new" ? (
+                           "Continue to Register"
+                        ) : (
+                           "Continue"
+                        )}
                     </button>
 
                     <div className="mt-4 flex items-start justify-center gap-2 px-2">
@@ -357,10 +397,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
 
                     
-                    <div className="mt-16 text-center">
-                       <span className="text-[14px] font-medium text-gray-500">New to Fipmoney? </span>
-                       <button onClick={() => {}} className="text-[14px] font-bold text-[#d89221] border-none bg-transparent cursor-pointer hover:underline outline-none">Create an account</button>
-                    </div>
+
                  </FormSlide>
               )}
 
@@ -482,7 +519,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          <CheckCircle size={48} color="white" strokeWidth={2.5} />
                        </motion.div>
                        <h2 className="font-black text-[32px] text-[#1e1b4b] mb-2 tracking-tight">
-                         {isNew ? "Account Created!" : "Welcome back!"}
+                         {isNew ? "Account Created!" : "Welcome to Fipmoney!"}
                        </h2>
                        <p className="text-[15px] mb-10 text-[#64748b] font-medium">Your premium digital gold portfolio awaits.</p>
                        <button 
