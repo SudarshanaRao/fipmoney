@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, authUser, getUsers, getUserById } from '../controllers/userController.js';
+import { checkMobile, authUser, getUsers, getUserById, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -116,5 +116,139 @@ router.get('/', getUsers);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/:id', getUserById);
+
+/**
+ * @swagger
+ * /api/users/vault/summary:
+ *   get:
+ *     summary: Fetch Vault & Portfolio Summary
+ *     description: Retrieves gold holdings, silver holdings, gold vault value, silver vault value, cash balance, portfolio value, and recent vault transactions from MongoDB for a given user mobile number.
+ *     tags:
+ *       - Digital Vault & Portfolio Management
+ *     parameters:
+ *       - in: query
+ *         name: mobile
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "7013302191"
+ *         description: User registered 10-digit mobile number
+ *     responses:
+ *       200:
+ *         description: Vault summary retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
+router.get('/vault/summary', getVaultSummary);
+
+/**
+ * @swagger
+ * /api/users/vault/buy:
+ *   post:
+ *     summary: Buy Gold or Silver
+ *     description: Records a gold/silver purchase in MongoDB, updates the user's gold/silver vault holdings, and returns updated vault and portfolio values. Non-KYC users are permitted.
+ *     tags:
+ *       - Digital Vault & Portfolio Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mobileNumber
+ *               - metal
+ *               - amount
+ *               - grams
+ *             properties:
+ *               mobileNumber: { type: string, example: "7013302191" }
+ *               metal: { type: string, enum: ["GOLD", "SILVER"], example: "GOLD" }
+ *               amount: { type: number, example: 1000 }
+ *               grams: { type: number, example: 0.1557 }
+ *               lockedPrice: { type: number, example: 6420.50, description: "Locked rate for 5-minute price lock window" }
+ *               paymentMethod: { type: string, example: "UPI" }
+ *     responses:
+ *       200:
+ *         description: Gold/Silver purchase successful and saved in database.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
+router.post('/vault/buy', buyGoldOrSilver);
+
+/**
+ * @swagger
+ * /api/users/vault/sell:
+ *   post:
+ *     summary: Sell Gold or Silver
+ *     description: Sells digital gold or silver from the user's vault in MongoDB and credits the cash value to their portfolio balance. Non-KYC users are permitted.
+ *     tags:
+ *       - Digital Vault & Portfolio Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mobileNumber
+ *               - metal
+ *               - amount
+ *               - grams
+ *             properties:
+ *               mobileNumber: { type: string, example: "7013302191" }
+ *               metal: { type: string, enum: ["GOLD", "SILVER"], example: "GOLD" }
+ *               amount: { type: number, example: 1000 }
+ *               grams: { type: number, example: 0.1557 }
+ *               ratePerGram: { type: number, example: 6420.50 }
+ *     responses:
+ *       200:
+ *         description: Gold/Silver sale completed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
+router.post('/vault/sell', sellGoldOrSilver);
+
+/**
+ * @swagger
+ * /api/users/update-profile:
+ *   post:
+ *     summary: Update Profile Details & Enforce 60-Day Username Lock
+ *     description: Updates profile details in MongoDB. Validates username (only alphanumeric + underscore, no spaces) and enforces 60-day edit lock policy.
+ *     tags:
+ *       - User Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mobileNumber
+ *             properties:
+ *               mobileNumber: { type: string, example: "7013302191" }
+ *               username: { type: string, example: "john_doe99", description: "Unique username (alphanumeric & underscore only)" }
+ *               fullName: { type: string, example: "John Doe" }
+ *               email: { type: string, example: "john@example.com" }
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       400:
+ *         description: Invalid username format or 60-day lock active.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/update-profile', updateProfile);
 
 export default router;

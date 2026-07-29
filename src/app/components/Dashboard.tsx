@@ -21,6 +21,8 @@ import BillsPage from "./BillsPage";
 import PortfolioPage from "./PortfolioPage";
 import { getLoggedInUser } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
+import { fetchVaultSummaryApi } from "../utils/vaultApi";
+import React from "react";
 
 type Metal = "gold" | "silver";
 
@@ -68,7 +70,16 @@ const INITIAL_NOTIFICATIONS = [
 ];
 
 export default function Dashboard({ onNavigate }: { onNavigate: (page: string) => void }) {
-  const [tab, setTab] = useState<Tab>("home");
+  const [tab, setTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem("fm_dashboard_tab");
+      if (saved) {
+        sessionStorage.removeItem("fm_dashboard_tab");
+        return saved as Tab;
+      }
+    }
+    return "home";
+  });
   const [metal, setMetal] = useState<Metal>("gold");
   const [showBalance, setShowBalance] = useState(true);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -103,17 +114,35 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
   const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
   
-  const userName = loggedInUser?.fullName || loggedInUser?.firstName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "Guest User" : "Guest User");
+  const savedUsername = (typeof window !== 'undefined' && localStorage.getItem(`fm_username_${loggedInMobile}`)) || loggedInUser?.username || "";
+  const userName = savedUsername ? savedUsername : (loggedInUser?.fullName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "Guest User" : "Guest User"));
   const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
+  const userAvatar = (typeof window !== 'undefined' && localStorage.getItem(`fm_user_avatar_${loggedInMobile}`)) || "https://i.pravatar.cc/150?img=11";
   const kycStatus = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
   
   const goldPrice = 6420.50;
   const silverPrice = 84.20;
   
-  // Zero out all predefined mock balances & holdings
-  const goldHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`) || "0") : 0;
-  const silverHoldings = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`) || "0") : 0;
-  const cashBalance = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_cash_balance_${loggedInMobile}`) || "0") : 0;
+  const [backendVault, setBackendVault] = useState<{ gold: number; silver: number; cash: number } | null>(null);
+
+  useEffect(() => {
+    if (loggedInMobile) {
+      fetchVaultSummaryApi(loggedInMobile).then((data) => {
+        if (data) {
+          setBackendVault({
+            gold: data.goldHoldingsGrams || 0,
+            silver: data.silverHoldingsGrams || 0,
+            cash: data.cashBalance || 0,
+          });
+        }
+      });
+    }
+  }, [loggedInMobile]);
+
+  // Zero out all predefined mock balances & holdings, reading backend or localStorage
+  const goldHoldings = backendVault ? backendVault.gold : (typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`) || "0") : 0);
+  const silverHoldings = backendVault ? backendVault.silver : (typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`) || "0") : 0);
+  const cashBalance = backendVault ? backendVault.cash : (typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_cash_balance_${loggedInMobile}`) || "0") : 0);
   
   const totalGrams = goldHoldings + silverHoldings;
   const portfolioVal = (goldHoldings * goldPrice) + (silverHoldings * silverPrice) + cashBalance;
@@ -298,8 +327,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 )}
               </AnimatePresence>
             </div>
-            <div className="flex items-center gap-3 cursor-pointer group">
-               <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
+            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab("settings")}>
+               <img src={userAvatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
                <div className="flex flex-col hidden sm:flex">
                  <span className="text-[11px] text-gray-500 font-medium">Welcome back,</span>
                  <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors">{userName}</span> <ChevronDown size={14} className="text-gray-400" /></div>
@@ -530,7 +559,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     <div className="relative z-10 flex justify-between items-end">
                        <div>
                          <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Card Holder</div>
-                         <div className="text-[13px] font-bold tracking-wide">{userName}</div>
+                         <div className="text-[13px] font-bold tracking-wide uppercase">{userName}</div>
                        </div>
                        <div className="text-right">
                          <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Expires</div>

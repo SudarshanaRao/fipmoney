@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User, CreditCard, ShieldCheck, Heart, Sparkles,
-  Trash2, Upload, CheckCircle2, AlertCircle, ChevronRight,
+  Trash2, Upload, CheckCircle2, AlertCircle, AlertTriangle, Info, ChevronRight,
   Shield, Check, HelpCircle, PhoneOff, Camera, Video, Loader2,
   Save, Landmark, Lock, Trophy, Circle, Eye, Headset
 } from "lucide-react";
@@ -34,14 +34,40 @@ export default function SettingsPage() {
 
   // Form Fields
   const [fullName, setFullName] = useState(initialName);
-  const [username, setUsername] = useState(initialUsername);
-  const [website, setWebsite] = useState("");
+  const [username, setUsername] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`fm_username_${loggedInMobile}`) || initialUsername || "";
+    }
+    return initialUsername || "";
+  });
   const [email, setEmail] = useState(initialEmail);
   const [mobileNumber, setMobileNumber] = useState(loggedInMobile);
   const [bio, setBio] = useState(initialBio);
   const [jobTitle, setJobTitle] = useState(initialJobTitle);
   const [incomeRange, setIncomeRange] = useState(initialIncomeRange);
   const [sourceOfFunds, setSourceOfFunds] = useState("");
+
+  // Username 60-day lock helper
+  const getUsernameLockStatus = () => {
+    if (typeof window === 'undefined') return { isLocked: false, daysLeft: 0 };
+    const saved = localStorage.getItem(`fm_username_${loggedInMobile}`);
+    const lastUpdated = localStorage.getItem(`fm_username_last_updated_${loggedInMobile}`);
+    if (!saved || !lastUpdated) return { isLocked: false, daysLeft: 0 };
+    const daysPassed = (Date.now() - Number(lastUpdated)) / (1000 * 60 * 60 * 24);
+    if (daysPassed < 60) {
+      return { isLocked: true, daysLeft: Math.ceil(60 - daysPassed) };
+    }
+    return { isLocked: false, daysLeft: 0 };
+  };
+
+  const { isLocked: isUsernameLocked, daysLeft: usernameDaysLeft } = getUsernameLockStatus();
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isUsernameLocked) return;
+    // Allow ONLY letters, numbers, and underscores (_). No spaces, no other special chars.
+    const cleaned = e.target.value.replace(/[^a-zA-Z0-9_]/g, "");
+    setUsername(cleaned);
+  };
 
   // OTP Verification Modal states for email and mobile (current -> new verification flow)
   const [changeFieldType, setChangeFieldType] = useState<"email" | "mobile" | null>(null);
@@ -80,56 +106,91 @@ export default function SettingsPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Profile Avatar
-  const [avatar, setAvatar] = useState("https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&auto=format");
+  const initialSavedAvatar = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_avatar_${loggedInMobile}`) : null;
+  const [avatar, setAvatar] = useState(initialSavedAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&auto=format");
 
-  // Dynamically calculate completion percentage
+  // Dynamically calculate completion percentage based on exact user weights:
+  // Personal & Basic Info: 40%
+  // Job Title & Income Range: 20%
+  // Link Bank Account: 20%
+  // Nominee Verification: 20%
   const getCompletionStats = () => {
+    const personalDone = Boolean(fullName.trim() && username.trim() && (email.trim() || mobileNumber.trim()));
+    const jobDone = Boolean((jobTitle.trim() || sourceOfFunds) && incomeRange);
+    const bankDone = Boolean(bankName.trim() && accountNumber.trim() && ifscCode.trim());
+    const nomineeDone = Boolean(nomineeName.trim() && nomineeDob.trim());
+
     let score = 0;
-    const details = [];
+    if (personalDone) score += 40;
+    if (jobDone) score += 20;
+    if (bankDone) score += 20;
+    if (nomineeDone) score += 20;
 
-    // Personal Details (max 40)
-    if (fullName.trim()) { score += 10; details.push("Full Name added"); }
-    if (username.trim()) { score += 10; details.push("Username added"); }
-    if (email.trim()) { score += 10; details.push("Email verified"); }
-    if (mobileNumber.trim()) { score += 10; details.push("Mobile number verified"); }
-
-    // Professional & Income (max 20)
-    if (incomeRange) { score += 20; details.push("Income range declared"); }
-
-    // Bank Account Link (max 20)
-    if (bankName.trim() && accountNumber.trim() && ifscCode.trim()) {
-      score += 20;
-      details.push("Bank account linked");
-    }
-
-    // Nominee Link (max 20)
-    if (nomineeName.trim() && nomineeDob.trim()) {
-      score += 20;
-      details.push("Nominee declared");
-    }
-
-    return { percentage: score, details };
+    return {
+      percentage: score,
+      personalDone,
+      jobDone,
+      bankDone,
+      nomineeDone,
+    };
   };
 
-  const { percentage } = getCompletionStats();
+  const { percentage, personalDone, jobDone, bankDone, nomineeDone } = getCompletionStats();
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`fm_user_name_${loggedInMobile}`, fullName);
-        localStorage.setItem(`fm_user_email_${loggedInMobile}`, email);
-        localStorage.setItem(`fm_user_mobile_${loggedInMobile}`, mobileNumber);
-        localStorage.setItem(`fm_username_${loggedInMobile}`, username);
-        localStorage.setItem(`fm_bio_${loggedInMobile}`, bio);
-        localStorage.setItem(`fm_job_title_${loggedInMobile}`, jobTitle);
-        localStorage.setItem(`fm_income_range_${loggedInMobile}`, incomeRange);
-        sessionStorage.setItem("fm_logged_in_name", fullName);
+  const handleSave = async () => {
+    if (username.trim()) {
+      const isValidFormat = /^[a-zA-Z0-9_]+$/.test(username.trim());
+      if (!isValidFormat) {
+        showAlert("Username can only contain letters, numbers, and underscores (_). No spaces or special characters allowed.", "warning", "Invalid Username");
+        return;
       }
-      setIsSaving(false);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    }, 1500);
+    }
+
+    const savedUsername = typeof window !== 'undefined' ? localStorage.getItem(`fm_username_${loggedInMobile}`) : "";
+    const isUsernameChanged = username.trim() !== "" && username !== savedUsername;
+
+    if (isUsernameChanged && isUsernameLocked) {
+      showAlert(`Username is fixed and cannot be changed for another ${usernameDaysLeft} days.`, "warning", "Username Locked");
+      return;
+    }
+
+    setIsSaving(true);
+
+    // Sync with backend API
+    try {
+      await fetch("http://localhost:5000/api/users/update-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mobileNumber: loggedInMobile,
+          username: username.trim(),
+          fullName,
+          email,
+          occupation: jobTitle,
+          annualIncome: incomeRange,
+        }),
+      });
+    } catch (err) {
+      console.warn("Backend profile update sync error:", err);
+    }
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`fm_user_name_${loggedInMobile}`, fullName);
+      localStorage.setItem(`fm_user_email_${loggedInMobile}`, email);
+      localStorage.setItem(`fm_user_mobile_${loggedInMobile}`, mobileNumber);
+      if (isUsernameChanged) {
+        localStorage.setItem(`fm_username_${loggedInMobile}`, username.trim());
+        localStorage.setItem(`fm_username_last_updated_${loggedInMobile}`, String(Date.now()));
+      }
+      localStorage.setItem(`fm_bio_${loggedInMobile}`, bio);
+      localStorage.setItem(`fm_job_title_${loggedInMobile}`, jobTitle);
+      localStorage.setItem(`fm_income_range_${loggedInMobile}`, incomeRange);
+      sessionStorage.setItem("fm_logged_in_name", fullName);
+    }
+
+    setIsSaving(false);
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   const handleVerifyCurrentOtp = () => {
@@ -250,16 +311,39 @@ export default function SettingsPage() {
   const handleRemovePhoto = () => {
     showConfirm(
       "Are you sure you want to remove your profile photo?",
-      () => setAvatar(""),
+      () => {
+        setAvatar("");
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(`fm_user_avatar_${loggedInMobile}`);
+        }
+      },
       { title: "Remove Photo", confirmText: "Remove", cancelText: "Keep" }
     );
   };
 
   const handleUploadPhoto = () => {
-    const newUrl = prompt("Enter image URL to update profile avatar:", avatar);
-    if (newUrl) {
-      setAvatar(newUrl);
-    }
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const result = event.target?.result as string;
+          if (result) {
+            setAvatar(result);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(`fm_user_avatar_${loggedInMobile}`, result);
+            }
+            showAlert("Profile photo updated successfully from gallery!", "success");
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    fileInput.click();
   };
 
   return (
@@ -343,45 +427,54 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
+                  {/* User Code Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">User Code</label>
+                      <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Permanent Account Identifier</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <span className="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-black text-indigo-700 bg-indigo-50 border border-indigo-100 font-mono tracking-wider shadow-xs">
+                        #{initialUsername || "FIP0001"}
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Username Row */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Username</label>
+                      <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Letters, numbers & _ only</span>
                     </div>
                     <div className="md:col-span-8">
                       <div className="flex max-w-lg rounded-lg shadow-sm border border-gray-200 overflow-hidden focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-50/55 transition-all">
-                        <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
+                        <span className="bg-gray-50 px-3.5 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
                           fipmoney.com/
                         </span>
                         <input
                           type="text"
                           value={username}
-                          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ""))}
-                          className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"
+                          disabled={isUsernameLocked}
+                          onChange={handleUsernameChange}
+                          placeholder="username_123"
+                          className={`flex-1 px-3.5 py-2.5 text-sm font-medium border-none outline-none ${
+                            isUsernameLocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed select-none' : 'bg-white text-gray-850'
+                          }`}
                         />
                       </div>
+                      {isUsernameLocked ? (
+                        <p className="text-[11px] font-bold text-amber-600 mt-1.5 flex items-center gap-1">
+                          <Lock size={13} /> Username locked. Next editable in {usernameDaysLeft} days (60-day policy).
+                        </p>
+                      ) : (
+                        <p className="text-[11px] font-medium text-gray-400 mt-1.5">
+                          Once set, your username is fixed and cannot be changed for 60 days.
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Website Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Website</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <div className="flex max-w-lg rounded-lg shadow-sm border border-gray-200 overflow-hidden focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-50/55 transition-all">
-                        <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
-                          https://
-                        </span>
-                        <input
-                          type="text"
-                          value={website}
-                          onChange={(e) => setWebsite(e.target.value)}
-                          className="flex-1 px-3.5 py-2.5 text-sm font-medium text-gray-850 bg-white border-none outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
+
 
                   {/* Photo Row */}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
@@ -976,7 +1069,11 @@ export default function SettingsPage() {
                 <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90 overflow-visible">
                   <circle cx="60" cy="60" r="50" stroke="#f1f5f9" strokeWidth="8" fill="transparent" />
                   <circle
-                    cx="60" cy="60" r="50" stroke="#d97706" strokeWidth="8" fill="transparent"
+                    cx="60" cy="60" r="50"
+                    stroke={
+                      percentage <= 20 ? "#ef4444" : percentage <= 40 ? "#f97316" : percentage <= 60 ? "#f59e0b" : percentage <= 80 ? "#3b82f6" : "#10b981"
+                    }
+                    strokeWidth="8" fill="transparent"
                     strokeDasharray={2 * Math.PI * 50}
                     strokeDashoffset={2 * Math.PI * 50 * (1 - percentage / 100)}
                     strokeLinecap="round" className="transition-all duration-500 ease-out"
@@ -988,55 +1085,96 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-2">
-                <h4 className="text-[13px] font-bold text-gray-800">
-                  {percentage === 100 ? "Perfect Profile Score! 🎉" : percentage >= 80 ? "Profile is almost ready!" : "Complete your profile details"}
-                </h4>
-                <p className="text-[11px] font-medium text-gray-500 leading-relaxed px-2">
-                  {percentage === 100
-                    ? "All information is successfully registered."
-                    : "Fill in your Nominee and Bank account details to unlock premium gold vault features and get verified."
-                  }
-                </p>
+              {/* Status Priority Badge */}
+              <div className="mt-5 w-full">
+                {percentage <= 20 && (
+                  <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
+                    <AlertCircle size={16} className="text-red-500 shrink-0 animate-pulse" />
+                    <span>Highest Priority: Action Needed (20%)</span>
+                  </div>
+                )}
+                {percentage === 40 && (
+                  <div className="p-3 rounded-2xl bg-orange-50 border border-orange-200 text-orange-800 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
+                    <AlertTriangle size={16} className="text-orange-500 shrink-0" />
+                    <span>High Priority: Action Needed (40%)</span>
+                  </div>
+                )}
+                {percentage === 60 && (
+                  <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
+                    <AlertTriangle size={16} className="text-amber-500 shrink-0" />
+                    <span>Medium Priority: Complete Profile (60%)</span>
+                  </div>
+                )}
+                {percentage === 80 && (
+                  <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-800 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
+                    <Info size={16} className="text-blue-500 shrink-0" />
+                    <span>Almost Completed (80%)</span>
+                  </div>
+                )}
+                {percentage === 100 && (
+                  <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    <span>100% Profile Complete & Verified 🎉</span>
+                  </div>
+                )}
               </div>
 
               {/* Progress checklist detail items */}
               <div className="w-full mt-6 space-y-3">
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    {personalDone ? (
+                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    ) : percentage <= 20 ? (
+                      <AlertCircle size={16} className="text-red-500 shrink-0" />
+                    ) : (
+                      <AlertTriangle size={16} className="text-orange-500 shrink-0" />
+                    )}
                     <span className="text-gray-700 font-bold text-[13px]">Personal & Basic Info</span>
                   </div>
-                  <span className="text-gray-500 text-xs font-bold">40%</span>
+                  <span className={`text-xs font-black ${personalDone ? "text-emerald-600" : "text-gray-400"}`}>40%</span>
                 </div>
+
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    {jobDone ? (
+                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    ) : percentage <= 20 ? (
+                      <AlertCircle size={16} className="text-red-500 shrink-0" />
+                    ) : (
+                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
+                    )}
                     <span className="text-gray-700 font-bold text-[13px]">Job Title & Income Range</span>
                   </div>
-                  <span className="text-gray-500 text-xs font-bold">20%</span>
+                  <span className={`text-xs font-black ${jobDone ? "text-emerald-600" : "text-gray-400"}`}>20%</span>
                 </div>
+
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
-                    {bankName.trim() && accountNumber.trim() && ifscCode.trim() ? (
+                    {bankDone ? (
                       <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    ) : percentage <= 20 ? (
+                      <AlertCircle size={16} className="text-red-500 shrink-0" />
                     ) : (
-                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
                     )}
                     <span className="text-gray-700 font-bold text-[13px]">Link Bank Account</span>
                   </div>
-                  <span className="text-gray-500 text-xs font-bold">20%</span>
+                  <span className={`text-xs font-black ${bankDone ? "text-emerald-600" : "text-gray-400"}`}>20%</span>
                 </div>
+
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
-                    {nomineeName.trim() && nomineeDob.trim() ? (
+                    {nomineeDone ? (
                       <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    ) : percentage <= 20 ? (
+                      <AlertCircle size={16} className="text-red-500 shrink-0" />
                     ) : (
-                      <Circle size={16} className="text-[#d97706] shrink-0" />
+                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
                     )}
                     <span className="text-gray-700 font-bold text-[13px]">Nominee Verification</span>
                   </div>
-                  <span className="text-gray-500 text-xs font-bold">20%</span>
+                  <span className={`text-xs font-black ${nomineeDone ? "text-emerald-600" : "text-gray-400"}`}>20%</span>
                 </div>
               </div>
             </div>

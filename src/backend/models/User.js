@@ -25,6 +25,15 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    username: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    usernameLastUpdated: {
+      type: Date,
+      default: null,
+    },
     password: {
       type: String,
       default: '',
@@ -148,6 +157,18 @@ const userSchema = new mongoose.Schema(
     isAddressVerified: {
       type: Boolean,
       default: false,
+    },
+    goldHoldingsGrams: {
+      type: Number,
+      default: 0,
+    },
+    silverHoldingsGrams: {
+      type: Number,
+      default: 0,
+    },
+    cashBalance: {
+      type: Number,
+      default: 0,
     },
     walletId: {
       type: mongoose.Schema.Types.ObjectId,

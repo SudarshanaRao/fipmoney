@@ -34,6 +34,11 @@ This API documentation is hosted on an obfuscated secret route (\`/${process.env
 1. Click on **\`GET /api/users/{id}\`** → **Try it out**.
 2. Paste the user \`id\` copied from Step 2 into the parameter field.
 3. Click **Execute** and verify user profile details.
+
+#### **Step 5: Digital Vault & Portfolio Operations**
+1. Expand **Digital Vault & Portfolio Management** tag below.
+2. Click **\`POST /api/users/vault/buy\`** to buy gold/silver and store holdings & transaction log in MongoDB.
+3. Click **GET /api/users/vault/summary?mobile=...** to retrieve gold vault value, silver vault value, cash balance, and portfolio value.
       `,
       contact: {
         name: 'FipMoney API Support Team',

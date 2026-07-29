@@ -8,6 +8,7 @@ import {
   Activity, CircleDollarSign, Percent, X, Check, Search, Bell, Eye, Lock, RefreshCw, BarChart2, Info, ArrowUp, Crown, LineChart, Banknote, Calendar, ChevronDown, Clock
 } from "lucide-react";
 import { addTransaction } from "../utils/transactionStorage";
+import { fetchVaultSummaryApi } from "../utils/vaultApi";
 
 interface PortfolioPageProps {
   onNavigate?: (page: string) => void;
@@ -44,6 +45,18 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
     }
     return 0;
   });
+
+  useEffect(() => {
+    if (loggedInMobile) {
+      fetchVaultSummaryApi(loggedInMobile).then((data) => {
+        if (data) {
+          setGoldHoldings(data.goldHoldingsGrams || 0);
+          setSilverHoldings(data.silverHoldingsGrams || 0);
+          setCashBalance(data.cashBalance || 0);
+        }
+      });
+    }
+  }, [loggedInMobile]);
 
   // Sell modal states
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);

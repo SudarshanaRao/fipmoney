@@ -262,8 +262,8 @@ export default function HelpSupportPage() {
             </div>
             
             <div className="relative w-full">
-              <select className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[13px] font-semibold text-gray-800 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-50 transition-all appearance-none cursor-pointer">
-                <option value="" disabled selected>Select a Category</option>
+              <select defaultValue="" className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[13px] font-semibold text-gray-800 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-50 transition-all appearance-none cursor-pointer">
+                <option value="" disabled>Select a Category</option>
                 <option value="kyc">KYC & Account</option>
                 <option value="payment">Payments & Wallet</option>
                 <option value="gold">Gold & Silver Vault</option>

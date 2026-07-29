@@ -118,6 +118,13 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
     }
   }, []);
 
+  const handleNavTabChange = (t: string) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem("fm_dashboard_tab", t);
+    }
+    onBack();
+  };
+
   const isMobile = billLabel ? billLabel.includes("Mobile") : false;
   const isPostpaid = billLabel ? billLabel.toLowerCase().includes("postpaid") : false;
   const isCcToBank = billLabel ? ["Tuition Fees", "Education Fees", "Rent", "House Rent"].includes(billLabel) : false;
@@ -396,7 +403,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
     return (
       <>
         <div className="flex h-screen bg-[#f8fafc] font-sans overflow-hidden text-gray-800">
-          <Sidebar activeTab="bills" onTabChange={(t) => { if (t === 'home') onBack(); }} onLogout={onBack} />
+          <Sidebar activeTab="bills" onTabChange={handleNavTabChange} onLogout={onBack} />
 
           <div className="flex-1 flex flex-col min-w-0 overflow-y-auto items-center justify-center p-6 bg-gradient-to-br from-gray-50 via-purple-50/20 to-amber-50/20">
             <div className="w-full max-w-md bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-2xl text-center space-y-6 relative overflow-hidden">
@@ -473,7 +480,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
   return (
     <>
     <div className="flex h-screen bg-[#f8fafc] font-sans overflow-hidden text-gray-800">
-      <Sidebar activeTab="bills" onTabChange={(t) => { if (t === 'home') onBack(); }} onLogout={onBack} />
+      <Sidebar activeTab="bills" onTabChange={handleNavTabChange} onLogout={onBack} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <div className="w-full max-w-7xl mx-auto p-4 md:p-8 space-y-6">
@@ -1186,7 +1193,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
         </div>
       </div>
 
-      <MobileNav activeTab="bills" onTabChange={(t) => { if (t === 'home') onBack(); }} />
+      <MobileNav activeTab="bills" onTabChange={handleNavTabChange} />
 
       <style dangerouslySetInnerHTML={{
         __html: `
