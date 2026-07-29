@@ -126,7 +126,7 @@ export const authUser = async (req, res, next) => {
         isBiometricEnabled: false,
         isFaceIdEnabled: false,
         isFingerPrintEnabled: false,
-        isKycCompleted: false,
+        isKycCompleted: true,
         isPanVerified: false,
         isAadhaarVerified: false,
         isBankVerified: false,
@@ -155,7 +155,7 @@ export const authUser = async (req, res, next) => {
         language: 'en',
         theme: 'LIGHT',
         riskCategory: 'LOW',
-        kycLevel: 'MINIMUM',
+        kycLevel: 'FULL',
         consents: {
           termsAccepted: true,
           privacyAccepted: true,
@@ -495,6 +495,58 @@ export const updateProfile = async (req, res, next) => {
       success: true,
       message: 'Profile updated successfully',
       data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const completeKyc = async (req, res, next) => {
+  try {
+    const { mobileNumber } = req.body;
+    if (!mobileNumber) {
+      res.status(400);
+      throw new Error('mobileNumber is required');
+    }
+
+    const user = await User.findOne({ mobileNumber: String(mobileNumber) });
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    user.isKycCompleted = true;
+    user.kycLevel = 'FULL';
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'KYC completed successfully',
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserByMobile = async (req, res, next) => {
+  try {
+    const mobile = req.query.mobile;
+    if (!mobile) {
+      res.status(400);
+      throw new Error('mobile query parameter is required');
+    }
+
+    const user = await User.findOne({ mobileNumber: mobile });
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: [user],
     });
   } catch (error) {
     next(error);

@@ -175,7 +175,7 @@ export function registerOrLoginUser(mobile: string, fullName?: string, email?: s
     isBiometricEnabled: false,
     isFaceIdEnabled: false,
     isFingerPrintEnabled: false,
-    isKycCompleted: false,
+    isKycCompleted: true,
     isPanVerified: false,
     isAadhaarVerified: false,
     isBankVerified: false,
@@ -204,7 +204,7 @@ export function registerOrLoginUser(mobile: string, fullName?: string, email?: s
     language: "en",
     theme: "LIGHT",
     riskCategory: "LOW",
-    kycLevel: "MINIMUM",
+    kycLevel: "FULL",
     consents: {
       termsAccepted: true,
       privacyAccepted: true,

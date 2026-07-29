@@ -8,7 +8,7 @@ import {
   Shield, Coins, BarChart3, Globe, ChevronDown, User, CheckCircle2, ArrowRight
 } from "lucide-react";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
-import { findUserByMobile, registerOrLoginUser, MongoUser } from "../utils/userStorage";
+import { saveLoggedInUser, MongoUser } from "../utils/userStorage";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "success";
@@ -119,27 +119,15 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
         });
         const data = await res.json();
         setChecking(false);
-        if (data.exists && data.data) {
+        if (data.exists) {
           setRegStatus("registered");
-          setCurrentUser(data.data);
-        } else {
-          const localUser = findUserByMobile(val);
-          if (localUser) {
-            setRegStatus("registered");
-            setCurrentUser(localUser);
-          } else {
-            setRegStatus("new");
-          }
-        }
-      } catch (err) {
-        setChecking(false);
-        const localUser = findUserByMobile(val);
-        if (localUser) {
-          setRegStatus("registered");
-          setCurrentUser(localUser);
+          // Optionally fetch user data, but for auth flow we don't strictly need full user yet
         } else {
           setRegStatus("new");
         }
+      } catch (err) {
+        setChecking(false);
+        setErr("Failed to connect to backend server");
       }
     }
   };
@@ -170,16 +158,15 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
         });
         const data = await res.json();
         if (data.success && data.data) {
+          saveLoggedInUser(data.data);
           setCurrentUser(data.data);
+          go(() => setStep("success"));
         } else {
-          const u = registerOrLoginUser(mobile);
-          setCurrentUser(u);
+          setErr("Login failed: " + (data.message || "Unknown error"));
         }
       } catch (e) {
-        const u = registerOrLoginUser(mobile);
-        setCurrentUser(u);
+        setErr("Failed to connect to backend server");
       }
-      go(() => setStep("success"));
     }
   };
 
@@ -193,16 +180,15 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       });
       const data = await res.json();
       if (data.success && data.data) {
+        saveLoggedInUser(data.data);
         setCurrentUser(data.data);
+        go(() => setStep("success"));
       } else {
-        const u = registerOrLoginUser(mobile, panName, "", password);
-        setCurrentUser(u);
+        setErr("Registration failed: " + (data.message || "Unknown error"));
       }
     } catch (e) {
-      const u = registerOrLoginUser(mobile, panName, "", password);
-      setCurrentUser(u);
+      setErr("Failed to connect to backend server");
     }
-    go(() => setStep("success"));
   };
 
   const pwStrength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : /[A-Z]/.test(password) && /\d/.test(password) ? 4 : 3;

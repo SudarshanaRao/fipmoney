@@ -14,6 +14,7 @@ import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
 import { addTransaction } from "../utils/transactionStorage";
 import { fetchLatestMetalPrices } from "../utils/metalPriceApi";
+import BuyMetalModal from "./BuyMetalModal";
 
 interface DigitalGoldSilverProps {
   onNavigate: (page: string) => void;
@@ -115,9 +116,13 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [txSuccess, setTxSuccess] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string>("");
   const [lastTxId, setLastTxId] = useState<string>("");
-  const [activeDelivery, setActiveDelivery] = useState<any | null>(null);
+  // Delivery States
+  const [activeDelivery, setActiveDelivery] = useState<any>(null);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliverySuccess, setDeliverySuccess] = useState(false);
+
+  // Buy Modal State
+  const [showBuyModal, setShowBuyModal] = useState(false);
 
   // Static mock transactions history
   const [transactions, setTransactions] = useState([
@@ -202,26 +207,21 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const isMinKyc = kycStatus.toLowerCase().includes("min");
   const isFullKyc = kycStatus.toLowerCase().includes("full");
 
-  const dailyBuyLimit = isKycPending ? 0 : isMinKyc ? 10000 : 2500000;
-  const dailySellLimit = isKycPending ? 0 : isMinKyc ? 5000 : 1000000;
-  const maxStorage = isKycPending ? 0 : isMinKyc ? 50 : 1000;
+  const dailyBuyLimit = isFullKyc ? 2500000 : 10000;
+  const dailySellLimit = isFullKyc ? 1000000 : 5000;
+  const maxStorage = isFullKyc ? 1000 : 50;
 
   // Visual limits used (mocked used buy limits)
   const buyUsed = 2400; // Mocked amount bought today in rupees
 
   // Handle transaction submit
   const handleTransaction = async () => {
-    if (isKycPending) {
-      showAlert("Verification Pending. Please upgrade your KYC settings to start transacting.", "warning", "KYC Required");
-      return;
-    }
+    // Removed KYC pending hard block to make it optional
 
     const numAmount = Number(amount);
     if (txType === "buy") {
-      if (numAmount + buyUsed > dailyBuyLimit) {
-        showAlert(`This exceeds your daily KYC purchase limit of ₹${dailyBuyLimit.toLocaleString()}.`, "error", "Transaction Blocked");
-        return;
-      }
+      setShowBuyModal(true);
+      return;
     } else {
       if (vaultLocked) return;
       if (Number(grams) > holdings) {
@@ -339,15 +339,15 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
         {/* Dynamic KYC Warning Banner - Kept from original */}
         {isKycPending ? (
-          <div className="bg-red-50 border border-red-200 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+          <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
                 <AlertCircle size={24} className="animate-pulse" />
               </div>
               <div>
-                <p className="text-base font-extrabold text-red-900">KYC Verification Required</p>
-                <p className="text-xs text-red-600/80 mt-1 leading-relaxed">
-                  Your digital assets vault is currently locked. Link your Aadhaar and PAN database under profile configurations to activate purchases, transfers, and physical coin deliveries.
+                <p className="text-base font-extrabold text-amber-900">KYC Verification Recommended</p>
+                <p className="text-xs text-amber-700/80 mt-1 leading-relaxed">
+                  You can start investing up to ₹10,000 without KYC. Link your Aadhaar and PAN under profile configurations to unlock full limits and physical deliveries.
                 </p>
               </div>
             </div>
@@ -907,6 +907,20 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
     </div>
     
     {ModalComponent}
+
+    <BuyMetalModal 
+      isOpen={showBuyModal} 
+      onClose={() => setShowBuyModal(false)}
+      metal={metal}
+      basePrice={activePrice}
+      onSuccess={(finalAmount, finalGrams) => {
+        const txId = "FIP" + Math.floor(100000 + Math.random() * 900000);
+        setLastTxId(txId);
+        if (metal === "gold") setGoldHoldings(prev => prev + finalGrams);
+        else setSilverHoldings(prev => prev + finalGrams);
+        setSuccessMsg(`Successfully bought ${finalGrams.toFixed(4)}g of 24K pure Digital ${label}!`);
+      }}
+    />
 
     <AnimatePresence>
       {activeDelivery && (

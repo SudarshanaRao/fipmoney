@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, authUser, getUsers, getUserById, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile } from '../controllers/userController.js';
+import { checkMobile, authUser, getUsers, getUserById, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -250,5 +250,52 @@ router.post('/vault/sell', sellGoldOrSilver);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/update-profile', updateProfile);
+
+/**
+ * @swagger
+ * /api/users/complete-kyc:
+ *   post:
+ *     summary: Complete KYC for User
+ *     description: Updates the user's KYC status to true and level to FULL in MongoDB.
+ *     tags:
+ *       - User Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mobileNumber
+ *             properties:
+ *               mobileNumber: { type: string, example: "7013302191" }
+ *     responses:
+ *       200:
+ *         description: KYC completed successfully.
+ */
+router.post('/complete-kyc', completeKyc);
+
+/**
+ * @swagger
+ * /api/users/search:
+ *   get:
+ *     summary: Search User Details by Mobile Number
+ *     description: Retrieves a single user record by mobile number.
+ *     tags:
+ *       - User Management
+ *     parameters:
+ *       - in: query
+ *         name: mobile
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User's mobile number
+ *     responses:
+ *       200:
+ *         description: User record found.
+ *       404:
+ *         description: User not found.
+ */
+router.get('/search', getUserByMobile);
 
 export default router;

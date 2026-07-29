@@ -140,7 +140,7 @@ const userSchema = new mongoose.Schema(
     },
     isKycCompleted: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     isPanVerified: {
       type: Boolean,
@@ -250,7 +250,7 @@ const userSchema = new mongoose.Schema(
     },
     kycLevel: {
       type: String,
-      default: 'MINIMUM',
+      default: 'FULL',
     },
     consents: {
       termsAccepted: { type: Boolean, default: true },

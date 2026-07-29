@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User, CreditCard, ShieldCheck, Heart, Sparkles,
@@ -80,6 +80,24 @@ export default function SettingsPage() {
   const [kycStatus, setKycStatus] = useState(initialKyc);
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [videoStep, setVideoStep] = useState<"connecting" | "intro" | "pan" | "verifying" | "done">("connecting");
+
+  useEffect(() => {
+    if (loggedInMobile) {
+      fetch(`http://localhost:5000/api/users/search?mobile=${loggedInMobile}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.length > 0) {
+            const user = data.data[0];
+            const isCompleted = user.isKycCompleted;
+            const level = user.kycLevel;
+            setKycStatus(isCompleted ? "full kyc" : "pending");
+            setAadhaarVerified(isCompleted || level.toLowerCase().includes("min"));
+            setPanVerified(isCompleted || level.toLowerCase().includes("min"));
+          }
+        })
+        .catch(err => console.warn("Failed to fetch user details:", err));
+    }
+  }, [loggedInMobile]);
 
   // Aadhaar & PAN verification states
   const [aadhaarVerified, setAadhaarVerified] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min"));
@@ -254,12 +272,30 @@ export default function SettingsPage() {
     const t1 = setTimeout(() => setVideoStep("intro"), 2500);
     const t2 = setTimeout(() => setVideoStep("pan"), 6500);
     const t3 = setTimeout(() => setVideoStep("verifying"), 11000);
-    const t4 = setTimeout(() => {
+    const t4 = setTimeout(async () => {
       setVideoStep("done");
       if (typeof window !== "undefined") {
         localStorage.setItem(`fm_user_kyc_${loggedInMobile}`, "full kyc");
       }
       setKycStatus("full kyc");
+
+      try {
+        await fetch("http://localhost:5000/api/users/complete-kyc", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobileNumber: loggedInMobile })
+        });
+        
+        const storedUser = localStorage.getItem("fm_current_logged_in_user");
+        if (storedUser) {
+          const userObj = JSON.parse(storedUser);
+          userObj.isKycCompleted = true;
+          userObj.kycLevel = "FULL";
+          localStorage.setItem("fm_current_logged_in_user", JSON.stringify(userObj));
+        }
+      } catch (err) {
+        console.warn("Backend KYC update sync error:", err);
+      }
     }, 15000);
 
     (window as any)._kycTimers = [t1, t2, t3, t4];

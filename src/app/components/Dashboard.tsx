@@ -118,7 +118,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const userName = savedUsername ? savedUsername : (loggedInUser?.fullName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "Guest User" : "Guest User"));
   const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
   const userAvatar = (typeof window !== 'undefined' && localStorage.getItem(`fm_user_avatar_${loggedInMobile}`)) || "https://i.pravatar.cc/150?img=11";
-  const kycStatus = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
+  const [kycStatus, setKycStatus] = useState(loggedInUser?.isKycCompleted ? "full kyc" : "pending");
   
   const goldPrice = 6420.50;
   const silverPrice = 84.20;
@@ -136,6 +136,26 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           });
         }
       });
+      // Fetch latest user KYC state
+      fetch(`http://localhost:5000/api/users/search?mobile=${loggedInMobile}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.length > 0) {
+            const user = data.data[0];
+            const isCompleted = user.isKycCompleted;
+            const level = user.kycLevel;
+            setKycStatus(isCompleted ? "full kyc" : "pending");
+            
+            const storedUser = localStorage.getItem("fm_current_logged_in_user");
+            if (storedUser) {
+              const userObj = JSON.parse(storedUser);
+              userObj.isKycCompleted = isCompleted;
+              userObj.kycLevel = level;
+              localStorage.setItem("fm_current_logged_in_user", JSON.stringify(userObj));
+            }
+          }
+        })
+        .catch(err => console.warn("Failed to fetch user details:", err));
     }
   }, [loggedInMobile]);
 
