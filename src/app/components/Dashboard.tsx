@@ -137,7 +137,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         }
       });
       // Fetch latest user KYC state
-      fetch(`http://localhost:5000/api/users/search?mobile=${loggedInMobile}`)
+      fetch(`https://prod-server.fipmoney.com/api/users/search?mobile=${loggedInMobile}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data && data.data.length > 0) {

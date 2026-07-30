@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api/users/vault';
+const API_BASE_URL = 'https://prod-server.fipmoney.com/api/users/vault';
 
 export interface VaultSummary {
   mobileNumber: string;

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "deploy": "npm run build && node deploy.js"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -71,6 +72,7 @@
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
     "dotenv": "^17.4.2",
+    "ftp-deploy": "^2.4.7",
     "mime-types": "^3.0.2",
     "tailwindcss": "4.1.12",
     "vite": "6.3.5"
