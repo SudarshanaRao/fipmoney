@@ -9,18 +9,33 @@ import {
   Coins, 
   ArrowRight, 
   ShieldCheck, 
-  Zap,
-  Award,
   ArrowUpRight,
-  Clock,
   CheckCircle2,
-  Scale
+  Scale,
+  Award,
+  Lock,
+  Landmark,
+  Clock,
+  ShoppingCart,
+  Activity
 } from "lucide-react";
 import { fetchLatestMetalPrices, ParsedMetalPrices } from "../utils/metalPriceApi";
 
 interface MiniMetalTrackerProps {
   onNavigate?: (page: string) => void;
 }
+
+const SparklineGold = () => (
+  <svg width="60" height="24" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 18L12 12L22 15L35 6L45 10L59 2" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const SparklineSilver = () => (
+  <svg width="60" height="24" viewBox="0 0 60 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1 18L12 12L22 15L35 6L45 10L59 2" stroke="#64748b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) {
   const [data, setData] = useState<ParsedMetalPrices | null>(null);
@@ -58,399 +73,348 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-amber-50/40 via-white to-slate-50/60 border-y border-amber-100/60 relative overflow-hidden" id="live-prices-mini">
-      
-      {/* Background ambient lighting aura */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-80 bg-gradient-to-b from-amber-200/20 via-yellow-100/10 to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-400/5 blur-3xl pointer-events-none" />
-
-      <div className="container mx-auto px-6 md:px-8 max-w-7xl relative z-10 space-y-10">
+    <section className="py-16 bg-[#fcfcfc] relative overflow-hidden" id="live-prices-mini">
+      <div className="container mx-auto px-6 md:px-8 max-w-[1200px] relative z-10 space-y-8">
         
-        {/* Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 bg-amber-100/70 border border-amber-300/60 text-amber-900 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
-              </span>
-              ⚡ Live Bullion Market Exchange
+        {/* Top Section */}
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
+          {/* Left: Title Area */}
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 bg-white rounded-full px-3 py-1.5 border border-slate-100 shadow-sm text-[11px] font-bold text-orange-600 tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-orange-500" />
+              LIVE BULLION MARKET EXCHANGE
             </div>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-              Live Market Rates <span className="bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-600 bg-clip-text text-transparent">& Interactive Price Tracker</span>
+            <h2 className="text-4xl md:text-[44px] font-black text-slate-900 leading-[1.1] tracking-tight">
+              Live Market Rates & <br />
+              <span className="text-[#c77a1e]">Interactive Price Tracker</span>
             </h2>
-            <p className="text-sm md:text-base font-semibold text-slate-600 max-w-2xl leading-relaxed">
+            <p className="text-slate-600 max-w-md font-medium text-sm leading-relaxed">
               Real-time 24K, 22K, 18K Gold and 99.9% Pure Silver benchmark prices updated directly from verified bullion markets.
             </p>
           </div>
-
-          {/* Controls: Segmented Metal Switcher & Actions */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            {/* Metal Type Switcher */}
-            <div className="bg-slate-100/90 border border-slate-200/80 p-1.5 rounded-2xl flex items-center gap-1 shadow-inner">
-              <button
-                onClick={() => setActiveMetal("gold")}
-                className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all duration-300 cursor-pointer ${
-                  activeMetal === "gold"
-                    ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/25"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
-                }`}
-              >
-                <Coins className="w-4 h-4" />
-                <span>Digital Gold</span>
-              </button>
-              <button
-                onClick={() => setActiveMetal("silver")}
-                className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all duration-300 cursor-pointer ${
-                  activeMetal === "silver"
-                    ? "bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-md shadow-slate-800/25"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
-                }`}
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Digital Silver</span>
-              </button>
+          
+          {/* Right: Quick Stats & Controls */}
+          <div className="flex flex-col gap-5 lg:items-end w-full">
+            
+            {/* Quick Cards */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+              <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center gap-4 flex-1 min-w-max">
+                <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 bg-amber-200 rounded text-amber-600 flex items-center justify-center"><Coins className="w-5 h-5"/></div>
+                </div>
+                <div className="flex-1 min-w-0 pr-2">
+                  <div className="text-[10px] font-bold text-amber-700 tracking-wider whitespace-nowrap">24K PURE GOLD</div>
+                  <div className="text-xl font-black text-slate-900 flex items-baseline gap-0.5 whitespace-nowrap">
+                    {data ? formatINR(data.gold.perGram24K) : "₹12,365"} <span className="text-[10px] text-slate-500 font-medium">/ g</span>
+                  </div>
+                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5 mt-0.5 whitespace-nowrap">
+                    <TrendingUp className="w-3 h-3 shrink-0" /> 0.48% (Today)
+                  </div>
+                </div>
+                <div className="hidden sm:block shrink-0">
+                  <SparklineGold />
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 flex items-center gap-4 flex-1 min-w-max">
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 bg-slate-200 rounded text-slate-600 flex items-center justify-center"><Sparkles className="w-5 h-5"/></div>
+                </div>
+                <div className="flex-1 min-w-0 pr-2">
+                  <div className="text-[10px] font-bold text-slate-500 tracking-wider whitespace-nowrap">99.9% PURE SILVER</div>
+                  <div className="text-xl font-black text-slate-900 flex items-baseline gap-0.5 whitespace-nowrap">
+                    {data ? formatINR(data.silver.perGram, 2) : "₹76.54"} <span className="text-[10px] text-slate-500 font-medium">/ g</span>
+                  </div>
+                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5 mt-0.5 whitespace-nowrap">
+                    <TrendingUp className="w-3 h-3 shrink-0" /> 0.08% (Today)
+                  </div>
+                </div>
+                <div className="hidden sm:block shrink-0">
+                  <SparklineSilver />
+                </div>
+              </div>
             </div>
 
-            {/* Refresh Button */}
-            <button
-              onClick={() => loadData(true)}
-              disabled={loading}
-              className="p-3 bg-white hover:bg-amber-50/60 border border-slate-200 text-slate-700 hover:text-amber-600 rounded-2xl transition-all cursor-pointer shadow-sm hover:shadow"
-              title="Refresh Live Rates"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-amber-600" : ""}`} />
-            </button>
-
-            {/* Full Analytics Button */}
-            <button
-              onClick={() => onNavigate?.('live-metal-tracker')}
-              className="inline-flex items-center gap-2 px-5 py-3 text-xs font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 rounded-2xl transition-all shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 hover:scale-[1.02] cursor-pointer"
-            >
-              <span>Full Analytics Tracker</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
+            {/* Controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="bg-white border border-slate-200 p-1 rounded-xl flex items-center shadow-sm">
+                <button 
+                  onClick={() => setActiveMetal("gold")}
+                  className={`px-4 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${activeMetal === 'gold' ? 'bg-[#ef961e] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  <Coins className="w-3.5 h-3.5" /> Digital Gold
+                </button>
+                <button 
+                  onClick={() => setActiveMetal("silver")}
+                  className={`px-4 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${activeMetal === 'silver' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Digital Silver
+                </button>
+              </div>
+              <button onClick={() => loadData(true)} className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 shadow-sm cursor-pointer">
+                <RefreshCw className={`w-4 h-4 text-slate-600 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+              <button onClick={() => onNavigate?.('live-metal-tracker')} className="px-5 py-2.5 bg-[#0f172a] text-white rounded-xl text-[11px] font-bold flex items-center gap-1.5 hover:bg-slate-800 shadow-sm cursor-pointer">
+                Full Analytics Tracker <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Quick Weight Selector Pills */}
-        <div className="flex flex-wrap items-center gap-2 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm w-fit">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mr-2 pl-2">
-            <Scale className="w-3.5 h-3.5 text-amber-500" />
-            <span>Select Weight:</span>
+        {/* Weight Selector Bar */}
+        <div className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+            <div className="flex items-center gap-2 text-slate-900 font-bold text-sm bg-amber-50/50 px-4 py-2 rounded-full">
+              <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center">
+                <Scale className="w-3.5 h-3.5 text-amber-600" /> 
+              </div>
+              Select Weight
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {([1, 8, 10, 100] as const).map(wt => (
+                <button
+                  key={wt}
+                  onClick={() => setSelectedWeight(wt)}
+                  className={`px-4 py-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                    selectedWeight === wt 
+                      ? 'border-amber-300 bg-[#fef8eb] text-amber-700' 
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {wt} Gram{wt > 1 ? 's' : ''}
+                </button>
+              ))}
+            </div>
           </div>
-          {([1, 8, 10, 100] as const).map((wt) => (
-            <button
-              key={wt}
-              onClick={() => setSelectedWeight(wt)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                selectedWeight === wt
-                  ? "bg-amber-100 text-amber-800 border border-amber-300/80 shadow-sm"
-                  : "bg-slate-50 text-slate-600 border border-slate-100 hover:bg-slate-100"
-              }`}
-            >
-              {wt} Grams
-            </button>
-          ))}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100 shrink-0">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            </div>
+            <div className="text-left">
+              <div className="text-[11px] font-bold text-emerald-700">100% Transparent Pricing</div>
+              <div className="text-[10px] font-medium text-slate-500">Live rates from verified sources</div>
+            </div>
+          </div>
         </div>
 
-        {/* Live Cards Grid */}
+        {/* Live Cards */}
         <AnimatePresence mode="wait">
           {activeMetal === "gold" ? (
             <motion.div 
               key="gold-cards"
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
               className="grid grid-cols-1 md:grid-cols-3 gap-6"
             >
-              {/* 24K Pure Gold Hero Card */}
-              <motion.div 
-                whileHover={{ y: -6, scale: 1.015 }}
-                transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="relative bg-gradient-to-br from-[#fffdf5] via-white to-[#fffbeb] border-2 border-amber-300/90 rounded-3xl p-7 flex flex-col justify-between shadow-[0_12px_35px_rgba(245,158,11,0.12)] hover:shadow-[0_20px_45px_rgba(245,158,11,0.22)] transition-all group overflow-hidden"
-              >
-                {/* Gold Top Accent Line */}
-                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600" />
-                
-                <div>
-                  {/* Card Header Badges */}
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="inline-flex items-center gap-1.5 bg-amber-500 text-slate-950 text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-sm tracking-wider">
-                      <Award className="w-3.5 h-3.5 text-slate-950" /> 24K 99.99% Pure
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg shadow-xs">
-                      <TrendingUp className="w-3.5 h-3.5" /> +0.48% Today
-                    </span>
+              {/* 24K Card */}
+              <div className="bg-white rounded-3xl border-2 border-amber-300 shadow-[0_8px_30px_rgba(245,158,11,0.08)] p-7 flex flex-col h-full relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-300 to-amber-500" />
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 bg-[#fef8eb] px-3 py-1.5 rounded-full text-[10px] font-bold text-amber-700">
+                    <Award className="w-3.5 h-3.5" /> 24K 99.99% PURE
                   </div>
-
-                  <div className="text-xs font-extrabold uppercase tracking-wider text-amber-700 mb-1">
-                    Bullion Benchmark
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900 group-hover:text-amber-700 transition-colors">
-                    24K Pure Gold
-                  </h3>
-
-                  {/* Dynamic Calculated Price Tag */}
-                  <div className="mt-6 space-y-1">
-                    <div className="text-4xl font-black text-slate-900 tracking-tight">
-                      {data ? formatINR(data.gold.perGram24K * selectedWeight) : "₹7,650"}
-                      <span className="text-xs font-bold text-slate-500 tracking-normal ml-1">
-                        / {selectedWeight} Gram{selectedWeight > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 pt-3 border-t border-amber-200/60 mt-3">
-                      <span>Rate per Gram:</span>
-                      <span className="text-amber-700 font-extrabold text-sm">
-                        {data ? formatINR(data.gold.perGram24K) : "₹7,650"}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    <TrendingUp className="w-3 h-3" /> 0.48% Today
                   </div>
                 </div>
-
-                {/* Action CTA Button */}
+                <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1">BULLION BENCHMARK</div>
+                <h3 className="text-[22px] font-black text-slate-900 mb-5">24K Pure Gold</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-[32px] font-black text-slate-900 tracking-tight">{data ? formatINR(data.gold.perGram24K * selectedWeight) : "₹12,365"}</span>
+                  <span className="text-[11px] font-bold text-slate-500">/ Gram</span>
+                </div>
+                <div className="border-t border-dashed border-slate-200 my-4" />
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[11px]">
+                    <Activity className="w-4 h-4 text-amber-500" /> Rate per Gram
+                  </div>
+                  <div className="font-bold text-amber-700 text-sm">{data ? formatINR(data.gold.perGram24K) : "₹12,365"}</div>
+                </div>
                 <button 
                   onClick={() => onNavigate?.('login')}
-                  className="mt-8 w-full py-3.5 px-4 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-amber-300 hover:shadow-lg hover:shadow-amber-400 cursor-pointer flex items-center justify-center gap-2 group-hover:scale-[1.01]"
+                  className="mt-auto w-full py-4 bg-[#e68200] hover:bg-[#cc7200] text-white rounded-xl font-bold text-[11px] flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
                 >
-                  <span>Buy 24K Gold Now</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" /> BUY 24K GOLD NOW <ArrowRight className="w-4 h-4" />
                 </button>
-              </motion.div>
+              </div>
 
-              {/* 22K Gold Card */}
-              <motion.div 
-                whileHover={{ y: -6, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="relative bg-white border border-slate-200/90 hover:border-amber-300/80 rounded-3xl p-7 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all group overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-amber-400" />
-                
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black uppercase px-3 py-1 rounded-full tracking-wider">
-                      91.6% Jewelry Standard
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg">
-                      22K Standard
-                    </span>
+              {/* 22K Card */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] p-7 flex flex-col h-full">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 bg-[#fffaf0] border border-amber-100 px-3 py-1.5 rounded-full text-[10px] font-bold text-amber-700">
+                    <Award className="w-3.5 h-3.5 text-amber-500" /> 91.6% PURITY
                   </div>
-
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Jewelry Standard Rate
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900">
-                    22K Gold
-                  </h3>
-
-                  {/* Dynamic Price Tag */}
-                  <div className="mt-6 space-y-1">
-                    <div className="text-4xl font-black text-slate-900 tracking-tight">
-                      {data ? formatINR(data.gold.perGram22K * selectedWeight) : "₹7,012"}
-                      <span className="text-xs font-bold text-slate-500 tracking-normal ml-1">
-                        / {selectedWeight} Gram{selectedWeight > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 pt-3 border-t border-slate-100 mt-3">
-                      <span>Rate per Gram:</span>
-                      <span className="text-slate-900 font-extrabold text-sm">
-                        {data ? formatINR(data.gold.perGram22K) : "₹7,012"}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1 bg-slate-50 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    22K Standard
                   </div>
                 </div>
-
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">JEWELRY STANDARD RATE</div>
+                <h3 className="text-[22px] font-black text-slate-900 mb-5">22K Gold</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-[32px] font-black text-slate-900 tracking-tight">{data ? formatINR(data.gold.perGram22K * selectedWeight) : "₹11,335"}</span>
+                  <span className="text-[11px] font-bold text-slate-500">/ Gram</span>
+                </div>
+                <div className="border-t border-dashed border-slate-200 my-4" />
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[11px]">
+                    <Activity className="w-4 h-4 text-slate-400" /> Rate per Gram
+                  </div>
+                  <div className="font-bold text-slate-900 text-sm">{data ? formatINR(data.gold.perGram22K) : "₹11,335"}</div>
+                </div>
                 <button 
                   onClick={() => onNavigate?.('login')}
-                  className="mt-8 w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2"
+                  className="mt-auto w-full py-4 bg-[#0f172a] hover:bg-slate-800 text-white rounded-xl font-bold text-[11px] flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
                 >
-                  <span>Buy 22K Gold</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" /> BUY 22K GOLD <ArrowRight className="w-4 h-4" />
                 </button>
-              </motion.div>
+              </div>
 
-              {/* 18K Gold Card */}
-              <motion.div 
-                whileHover={{ y: -6, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="relative bg-white border border-slate-200/90 hover:border-slate-300 rounded-3xl p-7 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all group overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-slate-300" />
-                
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-black uppercase px-3 py-1 rounded-full tracking-wider">
-                      75.0% Purity
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg">
-                      18K Standard
-                    </span>
+              {/* 18K Card */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] p-7 flex flex-col h-full">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-600">
+                    <Award className="w-3.5 h-3.5 text-slate-400" /> 75.0% PURITY
                   </div>
-
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Affordable Gold Rate
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900">
-                    18K Gold
-                  </h3>
-
-                  {/* Dynamic Price Tag */}
-                  <div className="mt-6 space-y-1">
-                    <div className="text-4xl font-black text-slate-900 tracking-tight">
-                      {data ? formatINR(data.gold.perGram18K * selectedWeight) : "₹5,738"}
-                      <span className="text-xs font-bold text-slate-500 tracking-normal ml-1">
-                        / {selectedWeight} Gram{selectedWeight > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 pt-3 border-t border-slate-100 mt-3">
-                      <span>Rate per Gram:</span>
-                      <span className="text-slate-900 font-extrabold text-sm">
-                        {data ? formatINR(data.gold.perGram18K) : "₹5,738"}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1 bg-slate-50 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    18K Standard
                   </div>
                 </div>
-
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">AFFORDABLE GOLD RATE</div>
+                <h3 className="text-[22px] font-black text-slate-900 mb-5">18K Gold</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-[32px] font-black text-slate-900 tracking-tight">{data ? formatINR(data.gold.perGram18K * selectedWeight) : "₹9,274"}</span>
+                  <span className="text-[11px] font-bold text-slate-500">/ Gram</span>
+                </div>
+                <div className="border-t border-dashed border-slate-200 my-4" />
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[11px]">
+                    <Activity className="w-4 h-4 text-slate-400" /> Rate per Gram
+                  </div>
+                  <div className="font-bold text-slate-900 text-sm">{data ? formatINR(data.gold.perGram18K) : "₹9,274"}</div>
+                </div>
                 <button 
                   onClick={() => onNavigate?.('login')}
-                  className="mt-8 w-full py-3.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer border border-slate-200 flex items-center justify-center gap-2"
+                  className="mt-auto w-full py-4 bg-[#f1f5f9] hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-[11px] flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>Buy 18K Gold</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" /> BUY 18K GOLD <ArrowRight className="w-4 h-4" />
                 </button>
-              </motion.div>
+              </div>
             </motion.div>
           ) : (
             <motion.div 
               key="silver-cards"
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
               className="grid grid-cols-1 md:grid-cols-2 gap-6"
             >
-              {/* Pure Silver per Gram Hero Card */}
-              <motion.div 
-                whileHover={{ y: -6, scale: 1.015 }}
-                transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="relative bg-gradient-to-br from-slate-50 via-white to-slate-100/60 border-2 border-slate-300 rounded-3xl p-7 flex flex-col justify-between shadow-[0_12px_35px_rgba(15,23,42,0.06)] hover:shadow-xl transition-all group overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-slate-400 via-slate-200 to-slate-600" />
-                
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="inline-flex items-center gap-1.5 bg-slate-800 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full tracking-wider shadow-sm">
-                      <Sparkles className="w-3.5 h-3.5 text-slate-200" /> 99.9% Fine Silver
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
-                      <TrendingUp className="w-3.5 h-3.5" /> Live
-                    </span>
+              {/* Silver Gram Card */}
+              <div className="bg-white rounded-3xl border-2 border-slate-300 shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-7 flex flex-col h-full relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-slate-400 to-slate-600" />
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-700">
+                    <Sparkles className="w-3.5 h-3.5 text-slate-500" /> 99.9% FINE SILVER
                   </div>
-
-                  <div className="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-1">
-                    Micro Investment Benchmark
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900 group-hover:text-slate-700 transition-colors">
-                    Digital Silver (Gram Rate)
-                  </h3>
-
-                  {/* Dynamic Price Tag */}
-                  <div className="mt-6 space-y-1">
-                    <div className="text-4xl font-black text-slate-900 tracking-tight">
-                      {data ? formatINR(data.silver.perGram * selectedWeight, 2) : "₹92.50"}
-                      <span className="text-xs font-bold text-slate-500 tracking-normal ml-1">
-                        / {selectedWeight} Gram{selectedWeight > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 pt-3 border-t border-slate-200/80 mt-3">
-                      <span>Rate per Gram:</span>
-                      <span className="text-slate-900 font-extrabold text-sm">
-                        {data ? formatINR(data.silver.perGram, 2) : "₹92.50"}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    <TrendingUp className="w-3 h-3" /> 0.08% Today
                   </div>
                 </div>
-
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">MICRO INVESTMENT BENCHMARK</div>
+                <h3 className="text-[22px] font-black text-slate-900 mb-5">Digital Silver (Gram Rate)</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-[32px] font-black text-slate-900 tracking-tight">{data ? formatINR(data.silver.perGram * selectedWeight, 2) : "₹76.54"}</span>
+                  <span className="text-[11px] font-bold text-slate-500">/ Gram</span>
+                </div>
+                <div className="border-t border-dashed border-slate-200 my-4" />
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[11px]">
+                    <Activity className="w-4 h-4 text-slate-400" /> Rate per Gram
+                  </div>
+                  <div className="font-bold text-slate-900 text-sm">{data ? formatINR(data.silver.perGram, 2) : "₹76.54"}</div>
+                </div>
                 <button 
                   onClick={() => onNavigate?.('login')}
-                  className="mt-8 w-full py-3.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 group-hover:scale-[1.01]"
+                  className="mt-auto w-full py-4 bg-[#0f172a] hover:bg-slate-800 text-white rounded-xl font-bold text-[11px] flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
                 >
-                  <span>Buy Digital Silver</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" /> BUY DIGITAL SILVER <ArrowRight className="w-4 h-4" />
                 </button>
-              </motion.div>
+              </div>
 
-              {/* Pure Silver 1 KG Card */}
-              <motion.div 
-                whileHover={{ y: -6, scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="relative bg-white border border-slate-200/90 hover:border-slate-300 rounded-3xl p-7 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all group overflow-hidden"
-              >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-slate-400" />
-                
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-black uppercase px-3 py-1 rounded-full tracking-wider">
-                      Bulk Bullion Rate
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg">
-                      1 KG Vault Bar
-                    </span>
+              {/* Silver KG Card */}
+              <div className="bg-white rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] p-7 flex flex-col h-full">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-600">
+                    <Landmark className="w-3.5 h-3.5 text-slate-400" /> BULK BULLION RATE
                   </div>
-
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                    Institutional Bullion Rate
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900">
-                    Digital Silver (1 KG Bar)
-                  </h3>
-
-                  {/* Price Tag */}
-                  <div className="mt-6 space-y-1">
-                    <div className="text-4xl font-black text-slate-900 tracking-tight">
-                      {data ? formatINR(data.silver.perKg, 0) : "₹92,500"}
-                      <span className="text-xs font-bold text-slate-500 tracking-normal ml-1">/ 1 KG</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-600 pt-3 border-t border-slate-100 mt-3">
-                      <span>Vault Storage:</span>
-                      <span className="text-emerald-700 font-extrabold text-xs">
-                        100% Bank Grade Insured
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1 bg-slate-50 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    1 KG Vault Bar
                   </div>
                 </div>
-
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">INSTITUTIONAL BULLION RATE</div>
+                <h3 className="text-[22px] font-black text-slate-900 mb-5">Digital Silver (1 KG Bar)</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-[32px] font-black text-slate-900 tracking-tight">{data ? formatINR(data.silver.perKg, 0) : "₹76,540"}</span>
+                  <span className="text-[11px] font-bold text-slate-500">/ 1 KG</span>
+                </div>
+                <div className="border-t border-dashed border-slate-200 my-4" />
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[11px]">
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" /> Vault Storage
+                  </div>
+                  <div className="font-bold text-emerald-700 text-xs">100% Bank Grade Insured</div>
+                </div>
                 <button 
                   onClick={() => onNavigate?.('login')}
-                  className="mt-8 w-full py-3.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer border border-slate-200 flex items-center justify-center gap-2"
+                  className="mt-auto w-full py-4 bg-[#f1f5f9] hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-[11px] flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>Buy Silver Bars</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" /> BUY SILVER BARS <ArrowRight className="w-4 h-4" />
                 </button>
-              </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Trust Badges Footer Bar */}
-        <div className="pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-6 text-xs font-bold text-slate-600">
-          <div className="flex flex-wrap items-center gap-6">
-            <div className="flex items-center gap-2 text-amber-800 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl">
-              <ShieldCheck className="w-4 h-4 text-amber-600" />
-              <span>24K 99.99% BIS Hallmarked Purity</span>
+        {/* Footer Features */}
+        <div className="bg-white border border-slate-100 rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0 border border-amber-100">
+              <ShieldCheck className="w-5 h-5 text-amber-500" />
             </div>
-            <div className="flex items-center gap-2 text-slate-700">
-              <Zap className="w-4 h-4 text-amber-500" />
-              <span>Instant Buy, Sell & Physical Doorstep Delivery</span>
+            <div>
+              <div className="text-[11px] font-bold text-slate-900 mb-0.5">Live & Accurate</div>
+              <div className="text-[10px] text-slate-500 leading-tight">Real-time market prices you can trust</div>
             </div>
           </div>
-          {lastRefreshed && (
-            <div className="flex items-center gap-1.5 text-slate-500 font-semibold text-[11px]">
-              <Clock className="w-3.5 h-3.5 text-slate-400" />
-              <span>Market rates updated: {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0 border border-amber-100">
+              <Lock className="w-5 h-5 text-amber-500" />
             </div>
-          )}
+            <div>
+              <div className="text-[11px] font-bold text-slate-900 mb-0.5">100% Transparent</div>
+              <div className="text-[10px] text-slate-500 leading-tight">No hidden charges, what you see is what you pay</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0 border border-amber-100">
+              <Landmark className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <div className="text-[11px] font-bold text-slate-900 mb-0.5">Verified Sources</div>
+              <div className="text-[10px] text-slate-500 leading-tight">Rates from MCX, IIBX & global bullion markets</div>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0 border border-amber-100">
+              <Clock className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <div className="text-[11px] font-bold text-slate-900 mb-0.5">Auto Refresh</div>
+              <div className="text-[10px] text-slate-500 leading-tight">Prices update every 30 seconds</div>
+            </div>
+          </div>
         </div>
 
       </div>

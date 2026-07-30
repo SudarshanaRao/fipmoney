@@ -17,29 +17,59 @@ import securityIllustration from "../../assets/security_banner_illustration.png"
 export default function PlatformTrustSection() {
   const cards = [
     {
-      title: "Bank-Grade Security",
-      desc: "Your data and transactions are protected with advanced encryption and security protocols.",
-      icon: Shield,
+      title: "Bank-Grade\nSecurity",
+      desc: "Your data and transactions are protected with advanced encryption and multi-layered security protocols.",
+      icon: Lock,
+      bg: "bg-amber-100/50",
+      glow: "bg-amber-200/40",
+      text: "text-amber-600",
+      border: "border-amber-100",
+      buttonBg: "bg-amber-50",
+      buttonHover: "group-hover:bg-amber-100",
     },
     {
       title: "Lightning Fast",
-      desc: "Experience instant payments and smooth transactions every time, every where.",
+      desc: "Experience instant payments and smooth transactions every time, everywhere.",
       icon: Zap,
+      bg: "bg-emerald-100/50",
+      glow: "bg-emerald-200/40",
+      text: "text-emerald-500",
+      border: "border-emerald-100",
+      buttonBg: "bg-emerald-50",
+      buttonHover: "group-hover:bg-emerald-100",
     },
     {
       title: "Reliable & Efficient",
-      desc: "Our robust infrastructure ensures high availability and uninterrupted services.",
+      desc: "Our robust infrastructure ensures high availability and uninterrupted services you can rely on.",
       icon: Award,
+      bg: "bg-blue-100/50",
+      glow: "bg-blue-200/40",
+      text: "text-blue-500",
+      border: "border-blue-100",
+      buttonBg: "bg-blue-50",
+      buttonHover: "group-hover:bg-blue-100",
     },
     {
-      title: "Always Here for You",
-      desc: "Our dedicated support team is available round the clock to assist you.",
+      title: "Always Here\nfor You",
+      desc: "Our dedicated support team is available 24/7 to assist you whenever you need.",
       icon: Headphones,
+      bg: "bg-purple-100/50",
+      glow: "bg-purple-200/40",
+      text: "text-purple-500",
+      border: "border-purple-100",
+      buttonBg: "bg-purple-50",
+      buttonHover: "group-hover:bg-purple-100",
     },
     {
-      title: "Built for Simplicity",
-      desc: "A clean, intuitive and easy-to-use experience designed for everyone.",
+      title: "Built for\nSimplicity",
+      desc: "A clean, intuitive and easy-to-use experience designed to make finance simple for everyone.",
       icon: Smartphone,
+      bg: "bg-orange-100/50",
+      glow: "bg-orange-200/40",
+      text: "text-orange-500",
+      border: "border-orange-100",
+      buttonBg: "bg-orange-50",
+      buttonHover: "group-hover:bg-orange-100",
     },
   ];
 
@@ -51,67 +81,112 @@ export default function PlatformTrustSection() {
   ];
 
   return (
-    <section className="py-16 bg-white overflow-hidden">
+    <section className="py-20 bg-[#fafafa] overflow-hidden relative">
       <div className="container mx-auto px-6 md:px-8 max-w-7xl space-y-16">
         
         {/* TOP SECTION: A Platform You Can Count On */}
-        <div className="space-y-12">
-          {/* Section Header */}
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <div className="space-y-16 relative">
+          
+          {/* Subtle Background Dotted Grids */}
+          <div className="absolute top-0 left-0 w-24 h-24 bg-[radial-gradient(#d1d5db_1.5px,transparent_1.5px)] [background-size:12px_12px] opacity-40" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[radial-gradient(#d1d5db_1.5px,transparent_1.5px)] [background-size:12px_12px] opacity-40" />
+          
+          {/* Swoosh SVG Background */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1400px] h-full pointer-events-none opacity-20 hidden md:block">
+            <svg viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto text-amber-500">
+              <path d="M0,160 C320,300 420,0 720,160 C1020,320 1120,20 1440,160" stroke="currentColor" strokeWidth="1" strokeDasharray="4 4" />
+            </svg>
+          </div>
+
+          {/* Header Area with 3D Illustrations */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 max-w-[1100px] mx-auto relative z-10">
+            {/* Left 3D Shield (Hidden on mobile) */}
             <motion.div 
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#fdfaf2] border border-[#f5ebd0] text-[#c59325] text-xs font-black tracking-wider uppercase shadow-sm"
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              className="hidden lg:flex flex-1 justify-center items-center"
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
             >
-              <Shield className="w-3.5 h-3.5 fill-[#c59325]/10" />
-              SECURE, RELIABLE & ALWAYS WITH YOU
+              <img src="/sheild.png" alt="Secure Shield" className="w-48 xl:w-56 h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
             </motion.div>
-            
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-              A Platform You Can Count On
-            </h2>
-            
-            <p className="text-sm md:text-base font-semibold text-slate-500 leading-relaxed max-w-2xl mx-auto">
-              We combine technology, security and innovation to deliver
-              a seamless financial experience you can trust.
-            </p>
+
+            {/* Center Content */}
+            <div className="text-center space-y-5 flex-[2] bg-white/40 backdrop-blur-sm p-4 rounded-3xl">
+              <motion.div 
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-amber-100 text-amber-500 text-[10px] font-black tracking-widest uppercase shadow-sm"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <Shield className="w-3.5 h-3.5 fill-amber-50 text-amber-500" />
+                SECURE, RELIABLE & ALWAYS WITH YOU
+              </motion.div>
+              
+              <h2 className="text-4xl md:text-[44px] lg:text-5xl font-black tracking-tight text-[#1a202c] leading-[1.2]">
+                A Platform <span className="bg-gradient-to-r from-orange-400 via-amber-500 to-orange-500 bg-clip-text text-transparent drop-shadow-sm">You Can Count On</span>
+              </h2>
+              
+              <div className="flex items-center justify-center gap-4 py-1 opacity-40">
+                <div className="h-px bg-amber-500 w-12"></div>
+                <Shield className="w-4 h-4 text-amber-500" />
+                <div className="h-px bg-amber-500 w-12"></div>
+              </div>
+
+              <p className="text-[13px] md:text-[15px] font-medium text-slate-500 leading-relaxed max-w-lg mx-auto">
+                We combine technology, security and innovation to deliver
+                a seamless financial experience you can trust.
+              </p>
+            </div>
+
+            {/* Right 3D Phone (Hidden on mobile) */}
+            <motion.div 
+              className="hidden lg:flex flex-1 justify-center items-center"
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <img src="/mobile.png" alt="Mobile Platform" className="w-48 xl:w-56 h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+            </motion.div>
           </div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 max-w-[1100px] mx-auto pt-6">
             {cards.map((card, idx) => {
               const IconComponent = card.icon;
               return (
                 <motion.div
                   key={idx}
-                  className="bg-white border border-slate-100 rounded-[2rem] p-6 flex flex-col justify-between items-center text-center hover:shadow-xl hover:border-amber-100/50 transition-all duration-300 group"
-                  whileHover={{ y: -6 }}
-                  initial={{ opacity: 0, y: 30 }}
+                  className="bg-white border border-slate-100 rounded-3xl p-6 flex flex-col justify-between items-center text-center shadow-[0_4px_25px_rgba(0,0,0,0.02)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.06)] hover:-translate-y-1.5 transition-all duration-400 group relative overflow-hidden"
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center z-10 w-full">
                     {/* Icon Container */}
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-b from-[#fffbeb] to-[#fef3c7] flex items-center justify-center text-[#c59325] mb-6 shadow-inner group-hover:scale-110 transition-transform duration-300">
-                      <IconComponent className="w-7 h-7 stroke-[2]" />
+                    <div className="relative mb-6 mt-2">
+                      {/* Blurred Glow Background */}
+                      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full blur-[20px] ${card.glow} opacity-80 group-hover:scale-125 transition-transform duration-500`} />
+                      
+                      {/* Solid Icon Circle */}
+                      <div className={`relative w-16 h-16 rounded-full ${card.bg} border-[3px] border-white flex items-center justify-center ${card.text} shadow-sm group-hover:scale-110 transition-transform duration-300 z-10`}>
+                        <IconComponent className="w-7 h-7 stroke-[1.75]" />
+                      </div>
                     </div>
 
-                    {/* Title */}
-                    <h3 className="text-lg font-black text-slate-900 mb-3">
+                    <h3 className="text-[15px] font-black text-slate-900 mb-3 leading-tight px-1 whitespace-pre-line">
                       {card.title}
                     </h3>
                     
-                    {/* Description */}
-                    <p className="text-xs font-semibold text-slate-500 leading-relaxed mb-6">
+                    <p className="text-[11px] font-medium text-slate-400 leading-relaxed mb-6 px-1">
                       {card.desc}
                     </p>
                   </div>
 
-                  {/* Arrow Button */}
-                  <div className="w-9 h-9 rounded-full bg-[#fdfdfd] border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#fff9e6] group-hover:border-[#ffeebf] group-hover:text-[#c59325] transition-all duration-300 cursor-pointer shadow-sm">
-                    <ArrowRight className="w-4 h-4" />
+                  <div className={`w-8 h-8 rounded-full ${card.buttonBg} ${card.text} flex items-center justify-center ${card.buttonHover} transition-colors duration-300 cursor-pointer shadow-sm z-10`}>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </div>
                 </motion.div>
               );
@@ -121,7 +196,7 @@ export default function PlatformTrustSection() {
 
         {/* BOTTOM SECTION: Secure Transactions Banner */}
         <motion.div
-          className="rounded-[2.5rem] bg-gradient-to-r from-[#fdfaf2] via-[#fdfbf7] to-white border border-[#f5ebd0]/60 p-8 md:p-12 relative overflow-hidden"
+          className="rounded-[2.5rem] bg-gradient-to-r from-[#fdfaf2] via-[#fdfbf7] to-white border border-[#f5ebd0]/60 p-8 md:p-12 relative overflow-hidden shadow-sm"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

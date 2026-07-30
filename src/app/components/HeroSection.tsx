@@ -6,34 +6,6 @@ import { Button } from "./ui/button";
 import { Coins, Sparkles, TrendingUp } from "lucide-react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-const FloatingCoin = ({ delay = 0, x = 0, y = 0, type = "gold" }) => {
-  let gradient = "bg-gradient-to-br from-[#ffbf00] to-[#ffd152]";
-  if (type === "silver") {
-    gradient = "bg-gradient-to-br from-[#4f46e5] to-[#7c3aed]";
-  } else if (type === "bill") {
-    gradient = "bg-gradient-to-br from-[#0ea5e9] to-[#2563eb]";
-  }
-
-  return (
-    <motion.div
-      className={`absolute w-8 h-8 ${gradient} rounded-full flex items-center justify-center shadow-lg`}
-      style={{ left: `${x}%`, top: `${y}%` }}
-      animate={{
-        y: [0, -20, 0],
-        rotate: [0, 180, 360],
-      }}
-      transition={{
-        duration: 3,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    >
-      <Coins className="w-4 h-4 text-white" />
-    </motion.div>
-  );
-};
-
 const carouselData = [
   {
     id: "gold",
@@ -116,13 +88,6 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
           transition={{ duration: 4, repeat: Infinity, delay: 2 }}
         />
       </div>
-
-      {/* Floating Coins */}
-      <FloatingCoin delay={0} x={10} y={20} type={currentData.floatingCoins} />
-      <FloatingCoin delay={0.5} x={85} y={15} type={currentData.floatingCoins} />
-      <FloatingCoin delay={1} x={15} y={60} type={currentData.floatingCoins} />
-      <FloatingCoin delay={1.5} x={80} y={70} type={currentData.floatingCoins} />
-      <FloatingCoin delay={2} x={50} y={10} type={currentData.floatingCoins} />
 
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
