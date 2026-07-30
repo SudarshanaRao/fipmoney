@@ -83,7 +83,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (loggedInMobile) {
-      fetch(`https://prod-server.fipmoney.com/api/users/search?mobile=${loggedInMobile}`)
+      fetch(`http://localhost:5000/api/users/search?mobile=${loggedInMobile}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data && data.data.length > 0) {
@@ -176,7 +176,7 @@ export default function SettingsPage() {
 
     // Sync with backend API
     try {
-      await fetch("https://prod-server.fipmoney.com/api/users/update-profile", {
+      await fetch("http://localhost:5000/api/users/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -280,7 +280,7 @@ export default function SettingsPage() {
       setKycStatus("full kyc");
 
       try {
-        await fetch("https://prod-server.fipmoney.com/api/users/complete-kyc", {
+        await fetch("http://localhost:5000/api/users/complete-kyc", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobileNumber: loggedInMobile })

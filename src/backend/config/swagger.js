@@ -47,7 +47,7 @@ This API documentation is hosted on an obfuscated secret route (\`/${process.env
     },
     servers: [
       {
-        url: 'https://prod-server.fipmoney.com',
+        url: 'http://localhost:5000',
         description: 'Development Local Server',
       },
     ],

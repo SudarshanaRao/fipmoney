@@ -112,7 +112,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     if (val.length === 10) {
       setChecking(true);
       try {
-        const res = await fetch("https://prod-server.fipmoney.com/api/users/check-mobile", {
+        const res = await fetch("http://localhost:5000/api/users/check-mobile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: val })
@@ -151,7 +151,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     } else {
       markRegistered(mobile);
       try {
-        const res = await fetch("https://prod-server.fipmoney.com/api/users/auth", {
+        const res = await fetch("http://localhost:5000/api/users/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile })
@@ -173,7 +173,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const handleCreateAccount = async () => {
     markRegistered(mobile);
     try {
-      const res = await fetch("https://prod-server.fipmoney.com/api/users/auth", {
+      const res = await fetch("http://localhost:5000/api/users/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mobile, fullName: panName, password })
