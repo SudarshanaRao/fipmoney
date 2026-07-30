@@ -22,7 +22,9 @@ async function sendSmsOtp(mobile, otpCode) {
     Text: messageText,
     Number: `91${mobile}`,
     SenderId: senderId,
-    Tool: "API"
+    Tool: "API",
+    TemplateId: "1277178522852542862",
+    DLT_TE_ID: "1277178522852542862" // Some endpoints use this key for DLT
   };
 
   try {
