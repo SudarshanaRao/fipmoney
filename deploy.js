@@ -32,8 +32,8 @@ const config = {
     // If your FTP account is already set to public_html, this should just be "/"
     remoteRoot: "/",
     
-    // Upload everything in the localRoot
-    include: ["*", "**/*"],      
+    // Upload everything in the localRoot including .htaccess
+    include: ["*", "**/*", ".htaccess"],      
     
     // Set to true if you want to wipe the remote folder before uploading
     deleteRemote: false,
