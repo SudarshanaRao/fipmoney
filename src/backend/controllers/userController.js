@@ -1,6 +1,46 @@
 import crypto from 'crypto';
 import User from '../models/User.js';
 import VaultTransaction from '../models/VaultTransaction.js';
+import Otp from '../models/Otp.js';
+
+async function sendSmsOtp(mobile, otpCode) {
+  const authKey = process.env.SMSCOUNTRY_AUTH_KEY;
+  const authToken = process.env.SMSCOUNTRY_AUTH_TOKEN;
+  const senderId = process.env.SMSCOUNTRY_SENDER_ID || "FIPMNY";
+  
+  if (!authKey || !authToken) {
+    console.log(`[SMS Mock] OTP for ${mobile} is ${otpCode}`);
+    return;
+  }
+
+  const credentials = Buffer.from(`${authKey}:${authToken}`).toString('base64');
+  const endpoint = `https://restapi.smscountry.com/v0.1/Accounts/${authKey}/SMSes/`;
+  
+  const messageText = `Dear User, Your Fipmoney verification code is ${otpCode} . Valid for 10 minutes. Never share this OTP with anyone. - Finpages Tech`;
+
+  const payload = {
+    Text: messageText,
+    Number: `91${mobile}`,
+    SenderId: senderId,
+    Tool: "API"
+  };
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${credentials}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    console.log(`[SMSCountry] Send response:`, result);
+  } catch (err) {
+    console.error(`[SMSCountry Error] Failed to send SMS:`, err.message);
+  }
+}
 
 // 256-bit SSL/TLS Encryption helper for password
 const AES_SECRET_KEY = process.env.AES_SECRET_KEY || 'fipmoney_256bit_ssl_encryption_key_32b'; // 32 bytes = 256 bits
@@ -48,6 +88,65 @@ export const checkMobile = async (req, res, next) => {
         message: 'New user - mobile number not registered yet',
       });
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Generate and send OTP
+// @route   POST /api/users/send-otp
+export const sendOtp = async (req, res, next) => {
+  try {
+    const { mobile } = req.body;
+    if (!mobile) {
+      res.status(400);
+      throw new Error('Mobile number is required');
+    }
+
+    const cleanMobile = String(mobile).trim();
+    
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    await Otp.findOneAndUpdate(
+      { mobileNumber: cleanMobile },
+      { otp: generatedOtp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+    
+    await sendSmsOtp(cleanMobile, generatedOtp);
+    
+    return res.status(200).json({ success: true, message: 'OTP sent successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP
+// @route   POST /api/users/verify-otp
+export const verifyOtp = async (req, res, next) => {
+  try {
+    const { mobile, otp } = req.body;
+    if (!mobile || !otp) {
+      res.status(400);
+      throw new Error('Mobile number and OTP are required');
+    }
+
+    const cleanMobile = String(mobile).trim();
+
+    const otpRecord = await Otp.findOne({ mobileNumber: cleanMobile });
+    if (!otpRecord) {
+      res.status(400);
+      throw new Error('OTP expired or not found. Please request a new one.');
+    }
+
+    if (otpRecord.otp !== String(otp).trim()) {
+      res.status(400);
+      throw new Error('Invalid OTP code.');
+    }
+
+    // Delete OTP after successful verification so it can't be reused
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    return res.status(200).json({ success: true, message: 'OTP verified successfully' });
   } catch (error) {
     next(error);
   }

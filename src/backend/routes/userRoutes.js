@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, authUser, getUsers, getUserById, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile } from '../controllers/userController.js';
+import { checkMobile, sendOtp, verifyOtp, authUser, getUsers, getUserById, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -24,6 +24,53 @@ const router = express.Router();
  *         description: Checked existence status.
  */
 router.post('/check-mobile', checkMobile);
+
+/**
+ * @swagger
+ * /api/users/send-otp:
+ *   post:
+ *     summary: Send OTP
+ *     description: Generates and sends OTP to the mobile number.
+ *     tags:
+ *       - User Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mobile: { type: string }
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully.
+ */
+router.post('/send-otp', sendOtp);
+
+/**
+ * @swagger
+ * /api/users/verify-otp:
+ *   post:
+ *     summary: Verify OTP
+ *     description: Verifies the OTP sent to the user's mobile number.
+ *     tags:
+ *       - User Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mobile: { type: string }
+ *               otp: { type: string }
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully.
+ *       400:
+ *         description: Invalid or expired OTP.
+ */
+router.post('/verify-otp', verifyOtp);
 
 /**
  * @swagger

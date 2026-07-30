@@ -19,9 +19,11 @@ const app = express();
 // Middlewares
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5000',
   'https://fipmoney.com',
   'https://www.fipmoney.com',
-  'https://test.fipmoney.com'
+  'https://test.fipmoney.com',
+  'https://prod-server.fipmoney.com' // Allow Swagger UI to make requests to itself
 ];
 
 app.use(cors({

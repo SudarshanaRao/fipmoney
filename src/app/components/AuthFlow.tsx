@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import { saveLoggedInUser, MongoUser } from "../utils/userStorage";
+import { toast } from "react-hot-toast";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "success";
@@ -128,6 +129,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       } catch (err) {
         setChecking(false);
         setErr("Failed to connect to backend server");
+        toast.error("Failed to connect to backend server");
       }
     }
   };
@@ -139,18 +141,51 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
   const isNew        = regStatus === "new";
 
-  const handlePrimaryBtn = () => {
+  const handlePrimaryBtn = async () => {
     if (!validateMobile()) return;
-    reset();
-    go(() => setStep("otp"));
+    
+    const loadingToast = toast.loading("Sending OTP...");
+    try {
+      const res = await fetch("http://localhost:5000/api/users/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile })
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        toast.success("OTP Sent!", { id: loadingToast });
+        reset();
+        go(() => setStep("otp"));
+      } else {
+        toast.error(data.message || "Failed to send OTP", { id: loadingToast });
+      }
+    } catch (e) {
+      toast.error("Network error. Please try again.", { id: loadingToast });
+    }
   };
 
   const handleOtpVerify = async () => {
-    if (isNew) {
-      go(() => setStep("profile"));
-    } else {
-      markRegistered(mobile);
-      try {
+    try {
+      setErr("");
+      // Verify OTP first
+      const verifyRes = await fetch("http://localhost:5000/api/users/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile, otp })
+      });
+      const verifyData = await verifyRes.json();
+      
+      if (!verifyRes.ok || !verifyData.success) {
+        setErr(verifyData.message || "Invalid OTP code.");
+        toast.error(verifyData.message || "Invalid OTP code.", { position: "top-center" });
+        return;
+      }
+
+      if (isNew) {
+        go(() => setStep("profile"));
+      } else {
+        markRegistered(mobile);
         const res = await fetch("http://localhost:5000/api/users/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -160,13 +195,16 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
         if (data.success && data.data) {
           saveLoggedInUser(data.data);
           setCurrentUser(data.data);
+          toast.success("Welcome back!", { position: "top-center" });
           go(() => setStep("success"));
         } else {
           setErr("Login failed: " + (data.message || "Unknown error"));
+          toast.error(data.message || "Unknown error", { position: "top-center" });
         }
-      } catch (e) {
-        setErr("Failed to connect to backend server");
       }
+    } catch (e) {
+      setErr("Failed to connect to backend server");
+      toast.error("Failed to connect to backend server", { position: "top-center" });
     }
   };
 
@@ -182,12 +220,15 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       if (data.success && data.data) {
         saveLoggedInUser(data.data);
         setCurrentUser(data.data);
+        toast.success("Account created successfully!", { position: "top-center" });
         go(() => setStep("success"));
       } else {
         setErr("Registration failed: " + (data.message || "Unknown error"));
+        toast.error(data.message || "Registration failed", { position: "top-center" });
       }
     } catch (e) {
       setErr("Failed to connect to backend server");
+      toast.error("Failed to connect to backend server", { position: "top-center" });
     }
   };
 
@@ -429,9 +470,19 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     </div>
 
                     <div className="space-y-6">
-                       <OtpBoxes value={otp} onChange={setOtp} />
+                       <div>
+                         <OtpBoxes value={otp} onChange={(v) => { setOtp(v); setErr(""); }} />
+                         {err && (
+                           <motion.p 
+                             initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} 
+                             className="text-red-500 text-[13px] font-semibold text-center mt-3 bg-red-50 py-2 rounded-lg border border-red-100"
+                           >
+                             {err}
+                           </motion.p>
+                         )}
+                       </div>
                        
-                       <div className="text-[14px] font-medium text-gray-500">
+                       <div className="text-[14px] font-medium text-gray-500 text-center">
                          {canResend
                            ? <button onClick={reset} className="flex items-center gap-1.5 border-none bg-transparent cursor-pointer font-bold text-[#d89221] outline-none hover:underline">
                                <RefreshCw size={14} /> Resend OTP
