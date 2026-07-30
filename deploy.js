@@ -29,8 +29,8 @@ const config = {
     localRoot: path.join(__dirname, "dist"),
     
     // The target folder on Hostinger where the files should go
-    // For primary domains, this is usually /public_html/
-    remoteRoot: "/public_html/",
+    // If your FTP account is already set to public_html, this should just be "/"
+    remoteRoot: "/",
     
     // Upload everything in the localRoot
     include: ["*", "**/*"],      
