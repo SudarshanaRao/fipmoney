@@ -16,6 +16,43 @@ if (!function_exists('getallheaders')) {
     }
 }
 
+// Check if someone is trying to access the API directly via browser (direct navigation sends text/html)
+$is_browser = false;
+foreach (getallheaders() as $name => $value) {
+    if (strtolower($name) === 'accept' && strpos(strtolower($value), 'text/html') !== false) {
+        $is_browser = true;
+        break;
+    }
+}
+
+// If it's a direct browser hit, show the funny counter punch page!
+if ($is_browser) {
+    http_response_code(403);
+    header("Content-Type: text/html");
+    echo '<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nice Try! 🕵️‍♂️</title>
+    <style>
+        body { font-family: "Courier New", monospace; background-color: #0f172a; color: #10b981; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        .container { border: 2px solid #10b981; padding: 40px; border-radius: 12px; background: #1e293b; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+        h1 { color: #fbbf24; font-size: 2rem; margin-bottom: 20px; }
+        p { font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛑 Unauthorized Access</h1>
+        <p>It\'s a secret to know all the things...</p>
+        <p>Get back to work! 💻🥊</p>
+    </div>
+</body>
+</html>';
+    exit;
+}
+
 // Define the target backend URL
 $target_base = 'https://prod-server.fipmoney.com';
 
