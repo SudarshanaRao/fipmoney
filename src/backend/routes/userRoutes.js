@@ -133,36 +133,6 @@ router.post('/auth', authUser);
  */
 router.get('/', getUsers);
 
-/**
- * @swagger
- * /api/users/{id}:
- *   get:
- *     summary: Fetch User Details by ID
- *     description: Retrieves a single user record by MongoDB ObjectId.
- *     tags:
- *       - User Management
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: MongoDB ObjectId of the target user
- *     responses:
- *       200:
- *         description: User record found.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ApiResponse'
- *       404:
- *         description: User not found.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- */
-router.get('/:id', getUserById);
 
 /**
  * @swagger
@@ -344,5 +314,36 @@ router.post('/complete-kyc', completeKyc);
  *         description: User not found.
  */
 router.get('/search', getUserByMobile);
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Fetch User Details by ID
+ *     description: Retrieves a single user record by MongoDB ObjectId.
+ *     tags:
+ *       - User Management
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ObjectId of the target user
+ *     responses:
+ *       200:
+ *         description: User record found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       404:
+ *         description: User not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/:id', getUserById);
 
 export default router;
