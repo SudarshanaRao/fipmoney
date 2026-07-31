@@ -10,6 +10,7 @@ import {
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import { saveLoggedInUser, MongoUser } from "../utils/userStorage";
 import { toast } from "react-hot-toast";
+import { API_BASE_URL } from "../utils/apiConfig";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "success";
@@ -113,7 +114,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     if (val.length === 10) {
       setChecking(true);
       try {
-        const res = await fetch("http://localhost:5000/api/users/check-mobile", {
+        const res = await fetch(`${API_BASE_URL}/users/check-mobile`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: val })
@@ -146,7 +147,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     
     const loadingToast = toast.loading("Sending OTP...");
     try {
-      const res = await fetch("http://localhost:5000/api/users/send-otp", {
+      const res = await fetch(`${API_BASE_URL}/users/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mobile })
@@ -169,7 +170,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     try {
       setErr("");
       // Verify OTP first
-      const verifyRes = await fetch("http://localhost:5000/api/users/verify-otp", {
+      const verifyRes = await fetch(`${API_BASE_URL}/users/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mobile, otp })
@@ -186,7 +187,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
         go(() => setStep("profile"));
       } else {
         markRegistered(mobile);
-        const res = await fetch("http://localhost:5000/api/users/auth", {
+        const res = await fetch(`${API_BASE_URL}/users/auth`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile })
@@ -211,7 +212,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const handleCreateAccount = async () => {
     markRegistered(mobile);
     try {
-      const res = await fetch("http://localhost:5000/api/users/auth", {
+      const res = await fetch(`${API_BASE_URL}/users/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mobile, fullName: panName, password })

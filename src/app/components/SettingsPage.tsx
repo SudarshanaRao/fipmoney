@@ -11,7 +11,7 @@ import {
 
 import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
-
+import { API_BASE_URL } from "../utils/apiConfig";
 import { getLoggedInUser } from "../utils/userStorage";
 
 type SettingsTab = "profile" | "bank" | "nominee" | "security";
@@ -83,7 +83,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (loggedInMobile) {
-      fetch(`http://localhost:5000/api/users/search?mobile=${loggedInMobile}`)
+      fetch(`${API_BASE_URL}/users/search?mobile=${loggedInMobile}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data && data.data.length > 0) {
@@ -176,7 +176,7 @@ export default function SettingsPage() {
 
     // Sync with backend API
     try {
-      await fetch("http://localhost:5000/api/users/update-profile", {
+      await fetch(`${API_BASE_URL}/users/update-profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -280,7 +280,7 @@ export default function SettingsPage() {
       setKycStatus("full kyc");
 
       try {
-        await fetch("http://localhost:5000/api/users/complete-kyc", {
+        await fetch(`${API_BASE_URL}/users/complete-kyc`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobileNumber: loggedInMobile })

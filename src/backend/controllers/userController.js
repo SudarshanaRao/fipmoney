@@ -114,7 +114,7 @@ export const sendOtp = async (req, res, next) => {
       { upsert: true, new: true }
     );
     
-    await sendSmsOtp(cleanMobile, generatedOtp);
+    sendSmsOtp(cleanMobile, generatedOtp).catch(err => console.error('[SMS error]', err));
     
     return res.status(200).json({ success: true, message: 'OTP sent successfully' });
   } catch (error) {

@@ -2,6 +2,7 @@
 // Notification drawer updated
 
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../utils/apiConfig";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Wallet, Zap, Eye, Send, Plus, CreditCard, ChevronRight,
@@ -137,7 +138,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         }
       });
       // Fetch latest user KYC state
-      fetch(`http://localhost:5000/api/users/search?mobile=${loggedInMobile}`)
+      fetch(`${API_BASE_URL}/users/search?mobile=${loggedInMobile}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data && data.data.length > 0) {

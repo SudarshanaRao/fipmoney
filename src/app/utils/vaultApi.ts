@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:5000/api/users/vault';
+import { API_BASE_URL as BASE_API } from './apiConfig';
+const API_BASE_URL = `${BASE_API}/users/vault`;
 
 export interface VaultSummary {
   mobileNumber: string;
