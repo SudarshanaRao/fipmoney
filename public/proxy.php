@@ -1,7 +1,8 @@
 <?php
 // Provide a fallback for getallheaders if not using Apache mod_php
 if (!function_exists('getallheaders')) {
-    function getallheaders() {
+    function getallheaders()
+    {
         $headers = [];
         foreach ($_SERVER as $name => $value) {
             if (substr($name, 0, 5) == 'HTTP_') {
@@ -28,28 +29,240 @@ foreach (getallheaders() as $name => $value) {
 // If it's a direct browser hit, show the funny counter punch page!
 if ($is_browser) {
     http_response_code(403);
-    header("Content-Type: text/html");
-    echo '<!DOCTYPE html>
+    header("Content-Type: text/html; charset=UTF-8");
+
+    echo <<<HTML
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nice Try! 🕵️‍♂️</title>
-    <style>
-        body { font-family: "Courier New", monospace; background-color: #0f172a; color: #10b981; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
-        .container { border: 2px solid #10b981; padding: 40px; border-radius: 12px; background: #1e293b; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
-        h1 { color: #fbbf24; font-size: 2rem; margin-bottom: 20px; }
-        p { font-size: 1.2rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>403 • Access Denied</title>
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:'Space Grotesk',sans-serif;
+background:
+radial-gradient(circle at top,#132238,#050816 70%);
+color:#fff;
+}
+
+body:before{
+content:"";
+position:fixed;
+inset:0;
+background:
+radial-gradient(circle at 20% 20%,rgba(0,255,170,.18),transparent 30%),
+radial-gradient(circle at 80% 70%,rgba(0,180,255,.15),transparent 35%);
+animation:bgMove 8s ease-in-out infinite alternate;
+}
+
+@keyframes bgMove{
+from{transform:scale(1);}
+to{transform:scale(1.15);}
+}
+
+.card{
+
+position:relative;
+z-index:2;
+
+width:min(760px,92%);
+padding:60px;
+
+border-radius:24px;
+
+background:rgba(255,255,255,.05);
+
+backdrop-filter:blur(18px);
+
+border:1px solid rgba(255,255,255,.08);
+
+box-shadow:
+0 25px 60px rgba(0,0,0,.4),
+0 0 60px rgba(0,255,170,.15);
+
+text-align:center;
+
+}
+
+.badge{
+
+display:inline-block;
+padding:8px 18px;
+border-radius:50px;
+background:#ef4444;
+font-weight:bold;
+letter-spacing:2px;
+font-size:13px;
+margin-bottom:25px;
+
+}
+
+.icon{
+
+font-size:72px;
+margin-bottom:25px;
+animation:pulse 2s infinite;
+
+}
+
+@keyframes pulse{
+0%,100%{transform:scale(1);}
+50%{transform:scale(1.08);}
+}
+
+h1{
+
+font-size:52px;
+margin-bottom:20px;
+
+background:linear-gradient(90deg,#00ffb7,#38bdf8);
+
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+}
+
+.desc{
+
+font-size:20px;
+line-height:1.8;
+color:#d1d5db;
+margin-bottom:35px;
+
+}
+
+.terminal{
+
+text-align:left;
+
+background:#08111d;
+
+border-left:4px solid #00ffb7;
+
+padding:25px;
+
+border-radius:14px;
+
+font-family:'JetBrains Mono',monospace;
+
+font-size:14px;
+
+line-height:1.9;
+
+color:#7dd3fc;
+
+margin-bottom:35px;
+
+}
+
+.footer{
+
+font-size:15px;
+
+color:#94a3b8;
+
+}
+
+.footer strong{
+
+color:#00ffb7;
+
+}
+
+.warning{
+
+margin-top:30px;
+
+font-size:13px;
+
+font-family:'JetBrains Mono',monospace;
+
+color:#64748b;
+
+}
+
+</style>
+
 </head>
+
 <body>
-    <div class="container">
-        <h1>🛑 Unauthorized Access</h1>
-        <p>It\'s a secret to know all the things...</p>
-        <p>Get back to work! 💻🥊</p>
-    </div>
+
+<div class="card">
+
+<div class="badge">
+403 • ACCESS DENIED
+</div>
+
+<div class="icon">
+🛡️
+</div>
+
+<h1>
+Nice Try.
+</h1>
+
+<div class="desc">
+
+You've reached a door reserved for authorized personnel.<br><br>
+
+<strong>Curiosity unlocked this page.</strong><br>
+<strong>Authorization unlocks everything else.</strong>
+
+</div>
+
+<div class="terminal">
+
+&gt; Initializing security protocol...<br>
+&gt; Identity verification............. FAILED<br>
+&gt; Permission level.................. NONE<br>
+&gt; Vault access...................... DENIED<br>
+&gt; Secret discovery.................. 0%<br><br>
+
+<strong>Counter Message:</strong><br>
+
+"You found the gate.<br>
+The key wasn't included."
+
+</div>
+
+<div class="footer">
+
+🚀 <strong>Fipmoney Secure Infrastructure</strong><br><br>
+
+Every request tells a story.<br>
+This one simply ends here.
+
+</div>
+
+<div class="warning">
+
+No secrets were exposed.<br>
+Our firewall appreciates your curiosity.
+
+</div>
+
+</div>
+
 </body>
-</html>';
+</html>
+HTML;
+
     exit;
 }
 
@@ -77,7 +290,8 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 $headers = array();
 foreach (getallheaders() as $name => $value) {
     // Skip Host header to avoid mismatch on target server
-    if (strtolower($name) === 'host') continue;
+    if (strtolower($name) === 'host')
+        continue;
     $headers[] = "$name: $value";
 }
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
