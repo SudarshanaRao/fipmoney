@@ -80,8 +80,7 @@ export const checkMobile = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         exists: true,
-        message: 'User exists in database',
-        data: user,
+        message: 'User exists in database'
       });
     } else {
       return res.status(200).json({
