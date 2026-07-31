@@ -37,226 +37,148 @@ if ($is_browser) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>403 • Access Denied</title>
+<title>403 • Restricted Area</title>
 
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
-height:100vh;
-overflow:hidden;
-display:flex;
-justify-content:center;
-align-items:center;
-font-family:'Space Grotesk',sans-serif;
-background:
-radial-gradient(circle at top,#132238,#050816 70%);
-color:#fff;
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: #0f172a; /* Fipmoney Dark Slate */
+    background-image: radial-gradient(circle at top right, #1e293b, #0f172a 80%);
+    color: #f8fafc;
+    overflow: hidden;
+    padding: 20px;
 }
 
-body:before{
-content:"";
-position:fixed;
-inset:0;
-background:
-radial-gradient(circle at 20% 20%,rgba(0,255,170,.18),transparent 30%),
-radial-gradient(circle at 80% 70%,rgba(0,180,255,.15),transparent 35%);
-animation:bgMove 8s ease-in-out infinite alternate;
+.card {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    padding: 50px 40px;
+    background: #1e293b;
+    border-radius: 20px;
+    border: 1px solid rgba(245, 158, 11, 0.2); /* Fipmoney Gold subtle border */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(245, 158, 11, 0.4);
+    text-align: center;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(30px);
+    opacity: 0;
 }
 
-@keyframes bgMove{
-from{transform:scale(1);}
-to{transform:scale(1.15);}
+@keyframes slideUp {
+    to { transform: translateY(0); opacity: 1; }
 }
 
-.card{
-
-position:relative;
-z-index:2;
-
-width:min(760px,92%);
-padding:60px;
-
-border-radius:24px;
-
-background:rgba(255,255,255,.05);
-
-backdrop-filter:blur(18px);
-
-border:1px solid rgba(255,255,255,.08);
-
-box-shadow:
-0 25px 60px rgba(0,0,0,.4),
-0 0 60px rgba(0,255,170,.15);
-
-text-align:center;
-
+.badge {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
 }
 
-.badge{
-
-display:inline-block;
-padding:8px 18px;
-border-radius:50px;
-background:#ef4444;
-font-weight:bold;
-letter-spacing:2px;
-font-size:13px;
-margin-bottom:25px;
-
+h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: #f59e0b; /* Fipmoney Gold */
+    margin-bottom: 20px;
+    font-weight: 700;
+    letter-spacing: -1px;
 }
 
-.icon{
-
-font-size:72px;
-margin-bottom:25px;
-animation:pulse 2s infinite;
-
+.attitude-box {
+    background: #0f172a;
+    border-left: 4px solid #f59e0b;
+    padding: 25px;
+    border-radius: 8px;
+    margin: 30px 0;
+    text-align: left;
 }
 
-@keyframes pulse{
-0%,100%{transform:scale(1);}
-50%{transform:scale(1.08);}
+.attitude-box p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+    margin-bottom: 15px;
 }
 
-h1{
-
-font-size:52px;
-margin-bottom:20px;
-
-background:linear-gradient(90deg,#00ffb7,#38bdf8);
-
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-
+.attitude-box p:last-child {
+    margin-bottom: 0;
 }
 
-.desc{
-
-font-size:20px;
-line-height:1.8;
-color:#d1d5db;
-margin-bottom:35px;
-
+.punchline {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #f8fafc;
 }
 
-.terminal{
-
-text-align:left;
-
-background:#08111d;
-
-border-left:4px solid #00ffb7;
-
-padding:25px;
-
-border-radius:14px;
-
-font-family:'JetBrains Mono',monospace;
-
-font-size:14px;
-
-line-height:1.9;
-
-color:#7dd3fc;
-
-margin-bottom:35px;
-
+.branding {
+    margin-top: 40px;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+.branding span {
+    color: #f59e0b;
 }
 
-.footer{
-
-font-size:15px;
-
-color:#94a3b8;
-
+/* Warning pulses */
+.card::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    background: linear-gradient(45deg, #f59e0b, transparent, #ef4444);
+    z-index: -1;
+    border-radius: 22px;
+    opacity: 0.15;
+    animation: pulseBorder 3s infinite alternate;
 }
 
-.footer strong{
-
-color:#00ffb7;
-
+@keyframes pulseBorder {
+    0% { opacity: 0.1; }
+    100% { opacity: 0.3; }
 }
 
-.warning{
-
-margin-top:30px;
-
-font-size:13px;
-
-font-family:'JetBrains Mono',monospace;
-
-color:#64748b;
-
+@media (max-width: 480px) {
+    .card { padding: 40px 25px; }
+    .attitude-box { padding: 20px 15px; }
 }
-
 </style>
-
 </head>
-
 <body>
 
 <div class="card">
-
-<div class="badge">
-403 • ACCESS DENIED
-</div>
-
-<div class="icon">
-🛡️
-</div>
-
-<h1>
-Nice Try.
-</h1>
-
-<div class="desc">
-
-You've reached a door reserved for authorized personnel.<br><br>
-
-<strong>Curiosity unlocked this page.</strong><br>
-<strong>Authorization unlocks everything else.</strong>
-
-</div>
-
-<div class="terminal">
-
-&gt; Initializing security protocol...<br>
-&gt; Identity verification............. FAILED<br>
-&gt; Permission level.................. NONE<br>
-&gt; Vault access...................... DENIED<br>
-&gt; Secret discovery.................. 0%<br><br>
-
-<strong>Counter Message:</strong><br>
-
-"You found the gate.<br>
-The key wasn't included."
-
-</div>
-
-<div class="footer">
-
-🚀 <strong>Fipmoney Secure Infrastructure</strong><br><br>
-
-Every request tells a story.<br>
-This one simply ends here.
-
-</div>
-
-<div class="warning">
-
-No secrets were exposed.<br>
-Our firewall appreciates your curiosity.
-
-</div>
-
+    <div class="badge">Error 403 • Access Denied</div>
+    
+    <h1>Are you lost?</h1>
+    
+    <div class="attitude-box">
+        <p>What exactly are you trying to accomplish by poking around our backend APIs in your browser?</p>
+        <p>This is highly restricted, private infrastructure. It's not a playground for your curiosity.</p>
+        <p class="punchline">Unless you suddenly gained clearance (which you haven't), I highly suggest you close this tab and get back to where you belong.</p>
+    </div>
+    
+    <div class="branding">
+        Protected by <span>Fipmoney</span> Security
+    </div>
 </div>
 
 </body>
