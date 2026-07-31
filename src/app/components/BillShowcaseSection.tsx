@@ -2,8 +2,7 @@
 
 import { motion } from "framer-motion";
 import { 
-  Smartphone, Zap, Tv, GraduationCap, Home, FileText, Flame, 
-  Droplets, Wifi, Car, Gift, Play, ArrowRight, ShieldCheck, CreditCard
+  Smartphone, Zap, Tv, Droplets, PhoneCall, Wifi, Shield, Landmark, CarFront, Flame, CreditCard, GraduationCap, Building2, TrainTrack, ArrowRight, ShieldCheck
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -12,20 +11,26 @@ interface BillShowcaseSectionProps {
 }
 
 const billsList = [
-  { label: "Mobile Prepaid", desc: "Instant recharge on Jio, Airtel, VI, etc.", Icon: Smartphone, color: "#8b5cf6", bg: "#f3e8ff" },
-  { label: "Electricity Bill", desc: "Pay electricity bills to 50+ state boards.", Icon: Zap, color: "#eab308", bg: "#fef08a" },
-  { label: "DTH Connection", desc: "Recharge Tata Play, Dish TV, Airtel DTH.", Icon: Tv, color: "#f59e0b", bg: "#fef3c7" },
-  { label: "Tuition Fees", desc: "Pay tuition fees using Credit Card.", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
-  { label: "Education Fees", desc: "Pay school/college fees from Credit Card.", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff" },
-  { label: "House Rent", desc: "Transfer rent directly from CC to landlord's Bank.", Icon: Home, color: "#14b8a6", bg: "#ccfbf1" },
-  { label: "Broadband Bill", desc: "Settlements for ACT, Airtel, Excitel, BSNL.", Icon: Wifi, color: "#06b6d4", bg: "#cffafe" },
-  { label: "Credit Card Rent", desc: "Pay any card dues securely via BBPS.", Icon: CreditCard, color: "#ef4444", bg: "#fee2e2" },
+  { label: "Mobile Prepaid", desc: "Instant recharge on Jio, Airtel, VI, etc.", Icon: Smartphone, color: "#8b5cf6", bg: "#f3e8ff", hasPayNow: true },
+  { label: "Electricity Bill", desc: "Pay electricity bills to 50+ state boards.", Icon: Zap, color: "#eab308", bg: "#fef08a", hasPayNow: true },
+  { label: "DTH Connection", desc: "Recharge Tata Play, Dish TV, Airtel DTH.", Icon: Tv, color: "#f59e0b", bg: "#fef3c7", hasPayNow: true },
+  { label: "Water & Piped Gas", desc: "Utility payments for water and gas.", Icon: Droplets, color: "#0ea5e9", bg: "#e0f2fe", hasPayNow: false },
+  { label: "Mobile Postpaid & Landline", desc: "Pay postpaid and landline bills.", Icon: PhoneCall, color: "#8b5cf6", bg: "#f3e8ff", hasPayNow: false },
+  { label: "Broadband", desc: "Pay your internet broadband bills.", Icon: Wifi, color: "#06b6d4", bg: "#cffafe", hasPayNow: false },
+  { label: "Insurance Premium", desc: "Pay your insurance premiums securely.", Icon: Shield, color: "#10b981", bg: "#d1fae5", hasPayNow: false },
+  { label: "Loan EMI Repayment", desc: "Pay EMIs for your ongoing loans.", Icon: Landmark, color: "#6366f1", bg: "#e0e7ff", hasPayNow: false },
+  { label: "FASTag Recharge", desc: "Recharge FASTag for toll payments.", Icon: CarFront, color: "#14b8a6", bg: "#ccfbf1", hasPayNow: false },
+  { label: "LPG Cylinder Booking", desc: "Book your LPG cylinder easily.", Icon: Flame, color: "#f97316", bg: "#ffedd5", hasPayNow: false },
+  { label: "Credit Card Bill Payment", desc: "Pay any card dues securely.", Icon: CreditCard, color: "#ef4444", bg: "#fee2e2", hasPayNow: false },
+  { label: "Education Fee Payment", desc: "Pay school and college fees.", Icon: GraduationCap, color: "#6366f1", bg: "#e0e7ff", hasPayNow: false },
+  { label: "Municipal Taxes", desc: "Pay municipal taxes and services.", Icon: Building2, color: "#64748b", bg: "#f1f5f9", hasPayNow: false },
+  { label: "Metro Card Recharge", desc: "Recharge your smart metro card.", Icon: TrainTrack, color: "#ec4899", bg: "#fce7f3", hasPayNow: false },
 ];
 
 export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionProps) {
   return (
     <section className="pt-2 pb-20 bg-white" id="bills-showcase">
-      <div className="container mx-auto px-6 md:px-8 max-w-7xl space-y-16">
+      <div className="container mx-auto px-6 md:px-8 max-w-[1400px] space-y-16">
         
         {/* Section Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -62,8 +67,12 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
                 <p className="text-xs text-slate-500 font-semibold mt-2 leading-relaxed">{item.desc}</p>
               </div>
 
-              <div className="flex items-center gap-1 text-[10px] font-black text-amber-600 uppercase tracking-widest mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                Pay Now <ArrowRight size={12} strokeWidth={3} />
+              <div className={`flex items-center gap-1 text-[10px] font-black text-amber-600 uppercase tracking-widest mt-6 transition-opacity ${item.hasPayNow ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'}`}>
+                {item.hasPayNow && (
+                  <>
+                    Pay Now <ArrowRight size={12} strokeWidth={3} />
+                  </>
+                )}
               </div>
             </motion.div>
           ))}

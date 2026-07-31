@@ -38,6 +38,8 @@ import RiskDisclosure from "./components/RiskDisclosure";
 import GrievancePolicy from "./components/GrievancePolicy";
 import InvestorCharter from "./components/InvestorCharter";
 import LiveMetalTracker from "./components/LiveMetalTracker";
+import HomeFAQs from "./components/HomeFAQs";
+import MandatoryDisclosures from "./components/MandatoryDisclosures";
 import { LoadingSpinner } from "./components/LottiePlayer";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker';
@@ -304,10 +306,10 @@ export default function App() {
               {/* Hero Section */}
               <HeroSection onNavigate={navigateToPage} />
 
-              {isLoggedOut ? (
-                /* Bill Showcase Section */
-                <BillShowcaseSection onNavigate={navigateToPage} />
-              ) : (
+              {/* Mini Live Metal Rates Tracker */}
+              <MiniMetalTracker onNavigate={navigateToPage} />
+
+              {!isLoggedOut && (
                 <>
                   {/* Benefits Section */}
                   <BenefitsSection />
@@ -317,17 +319,20 @@ export default function App() {
 
                   {/* Features Section */}
                   <FeaturesSection onNavigateToCalculator={() => navigateToPage('gold-loan-calculator')} />
-
-                  {/* Bill Showcase Section */}
-                  <BillShowcaseSection onNavigate={navigateToPage} />
                 </>
               )}
 
-              {/* Mini Live Metal Rates Tracker */}
-              <MiniMetalTracker onNavigate={navigateToPage} />
-
               {/* Platform Trust Section */}
               <PlatformTrustSection />
+
+              {/* Bill Showcase Section (Recharge & Pay Bills) */}
+              <BillShowcaseSection onNavigate={navigateToPage} />
+
+              {/* FAQs Section */}
+              <HomeFAQs />
+
+              {/* Mandatory Disclosures */}
+              <MandatoryDisclosures />
             </main>
 
             {/* Scroll Progress Indicator */}

@@ -342,8 +342,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
             </div>
             
             <div className="flex items-center gap-3">
-               <button onClick={() => onNavigate("home")} className="lg:hidden flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full bg-gray-100 text-gray-600 border-none">
-                 <ArrowLeft size={14} /> Home
+               <button onClick={() => onNavigate("home")} className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer outline-none shadow-sm">
+                 <ArrowLeft size={14} /> Back to Home
                </button>
                <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white shadow-sm text-sm font-semibold text-[#1e1b4b] hover:bg-gray-50 transition-colors cursor-pointer outline-none">
                  <Globe size={16} className="text-gray-500" />
