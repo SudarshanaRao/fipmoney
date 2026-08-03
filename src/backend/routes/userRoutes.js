@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, sendOtp, verifyOtp, authUser, getUsers, getUserById, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile } from '../controllers/userController.js';
+import { checkMobile, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -107,6 +107,20 @@ router.post('/verify-otp', verifyOtp);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/auth', authUser);
+
+/**
+ * @swagger
+ * /api/users/card:
+ *   get:
+ *     summary: Get user encrypted virtual card
+ *     description: Returns the AES-256 encrypted virtual card for the logged-in user.
+ *     tags:
+ *       - User Management
+ *     responses:
+ *       200:
+ *         description: Encrypted Virtual Card.
+ */
+router.get('/card', getUserCard);
 
 /**
  * @swagger

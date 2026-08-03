@@ -62,6 +62,38 @@ export function encryptPassword256(plainPassword) {
   }
 }
 
+export function encryptData256(plainText) {
+  if (!plainText) return '';
+  try {
+    const iv = crypto.randomBytes(16);
+    const key = Buffer.from(AES_SECRET_KEY.padEnd(32).slice(0, 32));
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(String(plainText), 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return `enc256:${iv.toString('hex')}:${encrypted}`;
+  } catch (err) {
+    console.error('Encryption error:', err);
+    return '';
+  }
+}
+
+export function decryptData256(encryptedText) {
+  if (!encryptedText || !encryptedText.startsWith('enc256:')) return encryptedText;
+  try {
+    const parts = encryptedText.split(':');
+    const iv = Buffer.from(parts[1], 'hex');
+    const encryptedData = parts[2];
+    const key = Buffer.from(AES_SECRET_KEY.padEnd(32).slice(0, 32));
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (err) {
+    console.error('Decryption error:', err);
+    return '';
+  }
+}
+
 // @desc    Check if mobile number exists in database
 // @route   POST /api/users/check-mobile
 export const checkMobile = async (req, res, next) => {
@@ -175,7 +207,28 @@ export const authUser = async (req, res, next) => {
       if (password) {
         user.password = encryptPassword256(password);
       }
+
+      // Retroactively generate virtual card if missing
+      if (!user.virtualCard || !user.virtualCard.isGenerated) {
+        const generatedCardNumber = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join('');
+        const generatedCvv = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)).join('');
+        const currentYear = new Date().getFullYear();
+        const expiry = `12/${String(currentYear + 5).slice(-2)}`;
+        const nameOnCard = user.fullName || "Fipmoney User";
+        
+        user.virtualCard = {
+          cardNumber: encryptData256(generatedCardNumber),
+          expiry: encryptData256(expiry),
+          nameOnCard: encryptData256(nameOnCard),
+          cvv: encryptData256(generatedCvv),
+          balance: 0,
+          isGenerated: true
+        };
+      }
+
       await user.save();
+
+      res.cookie('fm_userid', user.userId, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
 
       return res.status(200).json({
         success: true,
@@ -194,6 +247,12 @@ export const authUser = async (req, res, next) => {
       const lastName = nameParts.slice(1).join(' ') || '';
 
       const encryptedPassword = encryptPassword256(password || 'defaultSecuredPassword123');
+
+      const generatedCardNumber = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join('');
+      const generatedCvv = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)).join('');
+      const currentYear = new Date().getFullYear();
+      const expiry = `12/${String(currentYear + 5).slice(-2)}`;
+      const nameOnCard = fullName || "Fipmoney User";
 
       user = await User.create({
         userId: generatedUserId,
@@ -262,9 +321,19 @@ export const authUser = async (req, res, next) => {
           marketingConsent: false,
           accountAggregatorConsent: false,
         },
+        virtualCard: {
+          cardNumber: encryptData256(generatedCardNumber),
+          expiry: encryptData256(expiry),
+          nameOnCard: encryptData256(nameOnCard),
+          cvv: encryptData256(generatedCvv),
+          balance: 0,
+          isGenerated: true
+        },
         createdBy: 'SYSTEM',
         updatedBy: 'SYSTEM',
       });
+
+      res.cookie('fm_userid', user.userId, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
 
       return res.status(201).json({
         success: true,
@@ -306,6 +375,28 @@ export const getUserById = async (req, res, next) => {
       res.status(404);
       throw new Error('User not found');
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get user's encrypted virtual card
+// @route   GET /api/users/card
+export const getUserCard = async (req, res, next) => {
+  try {
+    const userId = req.cookies.fm_userid || req.query.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    const user = await User.findOne({ userId });
+    if (!user || !user.virtualCard || !user.virtualCard.isGenerated) {
+      return res.status(404).json({ success: false, message: 'Virtual card not found' });
+    }
+    
+    const payload = JSON.stringify(user.virtualCard);
+    const encryptedBlob = encryptData256(payload);
+
+    return res.status(200).json({ success: true, encryptedData: encryptedBlob });
   } catch (error) {
     next(error);
   }

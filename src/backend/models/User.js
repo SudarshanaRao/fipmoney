@@ -258,6 +258,14 @@ const userSchema = new mongoose.Schema(
       marketingConsent: { type: Boolean, default: false },
       accountAggregatorConsent: { type: Boolean, default: false },
     },
+    virtualCard: {
+      cardNumber: { type: String, default: '' },
+      expiry: { type: String, default: '' },
+      nameOnCard: { type: String, default: '' },
+      cvv: { type: String, default: '' },
+      balance: { type: Number, default: 0 },
+      isGenerated: { type: Boolean, default: false }
+    },
     createdBy: {
       type: String,
       default: 'SYSTEM',
