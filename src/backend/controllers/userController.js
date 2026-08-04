@@ -207,6 +207,28 @@ export const verifyOtp = async (req, res, next) => {
   }
 };
 
+const getSafeUser = (userDoc) => {
+  const obj = userDoc.toObject ? userDoc.toObject() : userDoc;
+  return {
+    userId: obj.userId,
+    userCode: obj.userCode,
+    username: obj.username,
+    firstName: obj.firstName,
+    lastName: obj.lastName,
+    fullName: obj.fullName,
+    mobileNumber: obj.mobileNumber,
+    email: obj.email,
+    profileImage: obj.profileImage,
+    isKycCompleted: obj.isKycCompleted,
+    kycLevel: obj.kycLevel,
+    status: obj.status,
+    isMobileVerified: obj.isMobileVerified,
+    isEmailVerified: obj.isEmailVerified,
+    notificationPreferences: obj.notificationPreferences,
+    lastLoginAt: obj.lastLoginAt
+  };
+};
+
 // @desc    Register or Login User
 // @route   POST /api/users/auth
 export const authUser = async (req, res, next) => {
@@ -259,7 +281,7 @@ export const authUser = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         message: 'User authenticated successfully',
-        data: user,
+        data: getSafeUser(user),
       });
     } else {
       // Auto-generate userCode starting from #FIP0001 series based on DB count
@@ -380,7 +402,7 @@ export const authUser = async (req, res, next) => {
       return res.status(201).json({
         success: true,
         message: 'New user created successfully with 256-bit encrypted password, userCode and UUID userId',
-        data: user,
+        data: getSafeUser(user),
       });
     }
   } catch (error) {
@@ -779,7 +801,7 @@ export const getUserByMobile = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      data: [user],
+      data: [getSafeUser(user)],
     });
   } catch (error) {
     next(error);

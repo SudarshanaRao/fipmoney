@@ -39,7 +39,8 @@ if ($is_browser) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>403 • Restricted Area</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
 <style>
 * {
@@ -61,11 +62,11 @@ body {
     padding: 20px;
 }
 
-.card {
+.container {
     position: relative;
     width: 100%;
-    max-width: 600px;
-    padding: 50px 40px;
+    max-width: 550px;
+    padding: 40px;
     background: #1e293b;
     border-radius: 20px;
     border: 1px solid rgba(245, 158, 11, 0.2); /* Fipmoney Gold subtle border */
@@ -74,78 +75,104 @@ body {
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transform: translateY(30px);
     opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 @keyframes slideUp {
     to { transform: translateY(0); opacity: 1; }
 }
 
-.badge {
-    display: inline-block;
-    padding: 8px 16px;
-    background-color: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 30px;
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
-h1 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    color: #f59e0b; /* Fipmoney Gold */
-    margin-bottom: 20px;
-    font-weight: 700;
+.fm-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(to bottom right, #fbbf24, #d97706);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.fm-icon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+    opacity: 0.2;
+    mix-blend-mode: overlay;
+}
+
+.fm-text {
+    font-size: 20px;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: -1px;
+    font-style: italic;
+    z-index: 10;
+}
+
+.fipmoney-text {
+    font-size: 24px;
+    font-weight: 900;
+    background: linear-gradient(to right, #ffffff, #e0e7ff, #c7d2fe);
+    -webkit-background-clip: text;
+    color: transparent;
     letter-spacing: -1px;
 }
 
-.attitude-box {
-    background: #0f172a;
-    border-left: 4px solid #f59e0b;
-    padding: 25px;
-    border-radius: 8px;
-    margin: 30px 0;
-    text-align: left;
+#lottie-container {
+    width: 250px;
+    height: 250px;
+    margin: 10px auto 10px auto;
 }
 
-.attitude-box p {
-    font-size: 1.1rem;
-    line-height: 1.7;
-    color: #cbd5e1;
+h1 {
+    font-size: 2rem;
+    color: #f59e0b; /* Fipmoney Gold */
     margin-bottom: 15px;
+    font-weight: 700;
 }
 
-.attitude-box p:last-child {
-    margin-bottom: 0;
+p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #cbd5e1;
+    margin-bottom: 30px;
 }
 
-.punchline {
-    font-size: 1.25rem;
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: linear-gradient(to right, #6366f1, #4f46e5);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
     font-weight: 600;
-    color: #f8fafc;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.branding {
-    margin-top: 40px;
-    font-size: 14px;
-    color: #64748b;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-.branding span {
-    color: #f59e0b;
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
 }
 
-/* Warning pulses */
-.card::before {
+.container::before {
     content: '';
     position: absolute;
     top: -2px; left: -2px; right: -2px; bottom: -2px;
-    background: linear-gradient(45deg, #f59e0b, transparent, #ef4444);
+    background: linear-gradient(45deg, #f59e0b, transparent, #6366f1);
     z-index: -1;
     border-radius: 22px;
     opacity: 0.15;
@@ -158,29 +185,38 @@ h1 {
 }
 
 @media (max-width: 480px) {
-    .card { padding: 40px 25px; }
-    .attitude-box { padding: 20px 15px; }
+    .container { padding: 30px 20px; }
+    h1 { font-size: 1.75rem; }
 }
 </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="badge">Error 403 • Access Denied</div>
-    
-    <h1>Are you lost?</h1>
-    
-    <div class="attitude-box">
-        <p>What exactly are you trying to accomplish by poking around our backend APIs in your browser?</p>
-        <p>This is highly restricted, private infrastructure. It's not a playground for your curiosity.</p>
-        <p class="punchline">Unless you suddenly gained clearance (which you haven't), I highly suggest you close this tab and get back to where you belong.</p>
+<div class="container">
+    <div class="logo-container">
+        <div class="fm-icon">
+            <span class="fm-text">FM</span>
+        </div>
+        <div class="fipmoney-text">Fipmoney</div>
     </div>
     
-    <div class="branding">
-        Protected by <span>Fipmoney</span> Security
-    </div>
+    <div id="lottie-container"></div>
+    
+    <h1>Restricted Access</h1>
+    <p>Oops! It looks like you've wandered into a restricted area of our infrastructure. If you're looking for our main website, you can safely head back home.</p>
+    
+    <a href="/" class="btn">Return to Fipmoney</a>
 </div>
 
+<script>
+    var animation = lottie.loadAnimation({
+        container: document.getElementById('lottie-container'),
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: '/error_page.json'
+    });
+</script>
 </body>
 </html>
 HTML;
