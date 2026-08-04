@@ -24,10 +24,11 @@ export default function SettingsPage() {
   const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
   const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
 
-  const initialName = loggedInUser?.fullName || loggedInUser?.firstName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "" : "");
+  const initialName = "";
   const initialKyc = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
   const initialEmail = loggedInUser?.email || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || "" : "");
-  const initialUsername = loggedInUser?.userCode || "";
+  const initialUserCode = loggedInUser?.userCode || "";
+  const initialUsername = loggedInUser?.username || "";
   const initialBio = "";
   const initialJobTitle = loggedInUser?.occupation || "";
   const initialIncomeRange = loggedInUser?.annualIncome ? String(loggedInUser.annualIncome) : "";
@@ -471,7 +472,7 @@ export default function SettingsPage() {
                     </div>
                     <div className="md:col-span-8">
                       <span className="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-black text-indigo-700 bg-indigo-50 border border-indigo-100 font-mono tracking-wider shadow-xs">
-                        #{initialUsername || "FIP0001"}
+                        #{initialUserCode || "FIP0001"}
                       </span>
                     </div>
                   </div>
@@ -522,8 +523,8 @@ export default function SettingsPage() {
                       {avatar ? (
                         <img src={avatar} alt="Avatar" className="w-14 h-14 rounded-full object-cover border border-gray-100 shadow-sm" />
                       ) : (
-                        <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg border border-amber-100 shadow-sm">
-                          {fullName.charAt(0)}
+                        <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg border border-amber-100 shadow-sm uppercase">
+                          {(username || "F").charAt(0)}
                         </div>
                       )}
                       <div className="flex gap-4">

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, CheckCircle, RefreshCw,
-  ShieldCheck, Smartphone, Eye, EyeOff, Loader2,
+  ShieldCheck, Smartphone, Eye, EyeOff, Loader2, XCircle,
   Shield, Coins, BarChart3, Globe, ChevronDown, User, CheckCircle2, ArrowRight
 } from "lucide-react";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
@@ -13,7 +13,7 @@ import { toast } from "react-hot-toast";
 import { API_BASE_URL } from "../utils/apiConfig";
 
 const ease = [0.22, 1, 0.36, 1] as const;
-type Step = "mobile" | "otp" | "profile" | "success";
+type Step = "mobile" | "otp" | "profile" | "tpin" | "success";
 
 const REG_KEY = (m: string) => `fm_registered_${m}`;
 const isRegistered  = (m: string) => {
@@ -91,11 +91,41 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [checking,    setChecking]    = useState(false);
   const [regStatus,   setRegStatus]   = useState<"registered" | "new" | null>(null);
 
-  const [panName,  setPanName]  = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<'checking' | 'available' | 'taken' | null>(null);
+  const [showTpin, setShowTpin] = useState(false);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
+  const [tpin, setTpin] = useState("");
   const [password, setPassword] = useState("");
   const [confirm,  setConfirm]  = useState("");
   const [showPw,   setShowPw]   = useState(false);
   const [showCp,   setShowCp]   = useState(false);
+
+  useEffect(() => {
+    if (!username || username.length < 3) {
+      setUsernameStatus(null);
+      return;
+    }
+    setUsernameStatus('checking');
+    const timerId = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/users/check-username`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username })
+        });
+        const data = await res.json();
+        if (data.available) {
+          setUsernameStatus('available');
+        } else {
+          setUsernameStatus('taken');
+        }
+      } catch (err) {
+        setUsernameStatus(null);
+      }
+    }, 500);
+    return () => clearTimeout(timerId);
+  }, [username]);
 
   const { timer, canResend, reset } = useResendTimer(30);
 
@@ -209,13 +239,17 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     }
   };
 
+  const handleProfileContinue = () => {
+    go(() => setStep("tpin"));
+  };
+
   const handleCreateAccount = async () => {
     markRegistered(mobile);
     try {
       const res = await fetch(`${API_BASE_URL}/users/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile, fullName: panName, password })
+        body: JSON.stringify({ mobile, username, password, tpin })
       });
       const data = await res.json();
       if (data.success && data.data) {
@@ -355,6 +389,33 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
          {/* Form Container */}
          <div className="flex-1 flex flex-col justify-center max-w-[400px] mx-auto w-full px-6 relative z-10 overflow-y-auto hide-scrollbar">
+            
+            {/* ══ STEPPER UI (Only for setup steps) ══ */}
+            <AnimatePresence>
+              {(step === "profile" || step === "tpin") && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="mb-8 w-full max-w-[300px] mx-auto">
+                  <div className="flex items-center justify-between relative">
+                    <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gray-200 -z-10 -translate-y-1/2" />
+                    <motion.div className="absolute top-1/2 left-0 h-[2px] bg-[#d89221] -z-10 -translate-y-1/2" 
+                      initial={{ width: "0%" }}
+                      animate={{ width: step === "tpin" ? "100%" : "0%" }}
+                      transition={{ duration: 0.4 }}
+                    />
+                    
+                    <div className="flex flex-col items-center gap-1.5 bg-white px-2">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "profile" || step === "tpin" ? "bg-[#d89221] text-white border-2 border-white shadow-amber-500/30" : "bg-gray-100 text-gray-400"}`}>1</div>
+                      <span className={`text-[10px] font-bold ${step === "profile" || step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>Profile</span>
+                    </div>
+                    
+                    <div className="flex flex-col items-center gap-1.5 bg-white px-2">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "tpin" ? "bg-[#d89221] text-white border-2 border-white shadow-amber-500/30" : "bg-gray-100 text-gray-400"}`}>2</div>
+                      <span className={`text-[10px] font-bold ${step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>Security</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <AnimatePresence mode="wait" custom={dir}>
               {/* ══ STEP 1: MOBILE ══ */}
               {step === "mobile" && (
@@ -517,11 +578,22 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
                     <div className="space-y-5">
                        <div>
-                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Full Name (as per PAN)</label>
-                         <input type="text" value={panName} onChange={e => setPanName(e.target.value.toUpperCase())}
-                           placeholder="RAHUL KUMAR SHARMA"
-                           className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none font-bold uppercase tracking-wide text-[14px] text-[#1e1b4b] px-4 focus:border-[#d89221] transition-all bg-white"
-                         />
+                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Username</label>
+                         <div className="relative">
+                           <input type="text" value={username} 
+                             onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 16))}
+                             placeholder="Enter your username"
+                             className={`w-full h-[56px] rounded-xl border-2 outline-none font-bold text-[14px] text-[#1e1b4b] px-4 pr-12 transition-all bg-white
+                                ${usernameStatus === 'taken' ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
+                           />
+                           <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                              {usernameStatus === 'checking' && <Loader2 size={18} className="animate-spin text-gray-400" />}
+                              {usernameStatus === 'available' && <CheckCircle size={18} className="text-emerald-500" />}
+                              {usernameStatus === 'taken' && <XCircle size={18} className="text-red-500" />}
+                           </div>
+                         </div>
+                         {usernameStatus === 'taken' && <p className="text-red-500 text-[12px] mt-2 font-semibold">Username is already taken. Please choose another.</p>}
+                         {username && usernameStatus !== 'taken' && username.length < 3 && <p className="text-gray-400 text-[12px] mt-2 font-medium">Minimum 3 characters required.</p>}
                        </div>
                        <div>
                          <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Create Password</label>
@@ -562,11 +634,81 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        </div>
                        
                        <button 
-                         onClick={handleCreateAccount}
-                         disabled={!panName || password.length < 8 || password !== confirm}
-                         className={`w-full h-[56px] mt-2 rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${(!panName || password.length < 8 || password !== confirm) ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
+                         onClick={handleProfileContinue}
+                         disabled={usernameStatus !== 'available' || password.length < 8 || password !== confirm}
+                         className={`w-full h-[56px] mt-2 rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${(usernameStatus !== 'available' || password.length < 8 || password !== confirm) ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
                        >
-                         Create Account
+                         Continue
+                       </button>
+
+                       <div className="text-center mt-4">
+                         <button onClick={() => setShowGuidelinesModal(true)} className="text-[12px] text-[#d89221] font-bold bg-transparent border-none outline-none cursor-pointer hover:underline">
+                            Read username & security instructions - Click here
+                         </button>
+                       </div>
+                    </div>
+                 </FormSlide>
+              )}
+
+              {/* ══ STEP 3.5: T-PIN SETUP ══ */}
+              {step === "tpin" && (
+                 <FormSlide key="tpin" dir={dir}>
+                    <div className="mb-8">
+                       <button onClick={() => back(() => setStep("profile"))} className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors bg-white cursor-pointer outline-none mb-6">
+                          <ArrowLeft size={18} />
+                       </button>
+                       <h2 className="text-[28px] font-black text-[#1e1b4b] mb-2 tracking-tight">
+                         Set Secure T-PIN
+                       </h2>
+                       <p className="text-[#64748b] text-[14px] font-medium leading-relaxed">
+                         Create a 4-digit Transactional PIN.<br/>Keep this safe; we encrypt it one-way for your security.
+                       </p>
+                    </div>
+
+                    <div className="space-y-6">
+                       <div className="flex justify-center flex-col items-center gap-4">
+                         <div className="relative h-14 w-full max-w-[240px]">
+                           <input
+                             type="tel" inputMode="numeric" maxLength={4} value={tpin} autoFocus
+                             onChange={e => setTpin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                             className="absolute inset-0 opacity-0 w-full h-full cursor-text z-10"
+                           />
+                           <div className="flex gap-4 pointer-events-none h-full">
+                             {[0,1,2,3].map(i => {
+                               const char = tpin[i] || "";
+                               const isActive = tpin.length === i;
+                               return (
+                                 <motion.div key={i} animate={{ scale: char ? 1.05 : 1 }}
+                                   className={`flex items-center justify-center text-2xl font-black flex-1 rounded-xl transition-all border-2
+                                     ${isActive ? 'border-[#d89221] shadow-[0_0_0_4px_rgba(216,146,33,0.1)] bg-white' : char ? 'border-[#d89221]/40 bg-[#d89221]/5 text-[#1e1b4b]' : 'border-gray-200 bg-gray-50 text-gray-300'}
+                                   `}
+                                 >
+                                   {char ? (showTpin ? char : "•") : (isActive
+                                     ? <motion.div className="w-0.5 h-6 rounded-full bg-[#d89221]"
+                                         animate={{ opacity: [0,1,0] }} transition={{ duration: 1, repeat: Infinity }} />
+                                     : "·")}
+                                 </motion.div>
+                               );
+                             })}
+                           </div>
+                         </div>
+                         <button onClick={() => setShowTpin(!showTpin)} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer text-[13px] font-bold">
+                            {showTpin ? <EyeOff size={16}/> : <Eye size={16}/>} {showTpin ? "Hide" : "Show"} PIN
+                         </button>
+                         <div className="mt-1 flex items-start gap-2 bg-emerald-50 border border-emerald-100 rounded-lg p-3">
+                           <ShieldCheck size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                           <p className="text-[11px] font-medium text-emerald-700 m-0 leading-relaxed">
+                             Your secure T-PIN is stored in an encrypted format using military-grade <strong className="font-black">SHA-256 one-way cryptographic hashing</strong> to ensure complete privacy.
+                           </p>
+                         </div>
+                       </div>
+                       
+                       <button 
+                         onClick={handleCreateAccount}
+                         disabled={tpin.length !== 4}
+                         className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer mt-4 ${tpin.length !== 4 ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
+                       >
+                         Complete Setup
                        </button>
                     </div>
                  </FormSlide>
@@ -614,6 +756,52 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
             </AnimatePresence>
          </div>
       </div>
+      {/* ── GUIDELINES MODAL ── */}
+      <AnimatePresence>
+        {showGuidelinesModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#1e1b4b]/40 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl w-full max-w-[400px] shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                 <h3 className="text-[20px] font-black text-[#1e1b4b]">Security Guidelines</h3>
+                 <button onClick={() => setShowGuidelinesModal(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 border-none cursor-pointer">
+                   <XCircle size={18} />
+                 </button>
+              </div>
+              <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
+                 <div>
+                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><User size={16} className="text-[#d89221]"/> Username Instructions</h4>
+                    <ul className="text-[13px] text-gray-600 space-y-1.5 list-disc pl-5 m-0">
+                       <li>Must be unique and not already taken.</li>
+                       <li>Maximum 16 characters long.</li>
+                       <li>Only alphabets, numbers, and underscores (_) are allowed.</li>
+                       <li>Spaces and special characters (@, #, etc.) are strictly prohibited.</li>
+                    </ul>
+                 </div>
+                 <div>
+                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><ShieldCheck size={16} className="text-[#d89221]"/> Password Strength</h4>
+                    <ul className="text-[13px] text-gray-600 space-y-1.5 list-disc pl-5 m-0">
+                       <li>Must be at least 8 characters long.</li>
+                       <li>Include at least one uppercase letter and one number for a "Strong" rating.</li>
+                    </ul>
+                 </div>
+                 <div>
+                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><Shield size={16} className="text-[#d89221]"/> T-PIN Security</h4>
+                    <p className="text-[13px] text-gray-600 m-0 leading-relaxed">
+                       Your 4-digit Transactional PIN is highly sensitive. We do not store the actual numbers in our database. Instead, it is secured using <strong>SHA-256 one-way cryptographic hashing</strong>. This means even our database administrators cannot see or decrypt your PIN.
+                    </p>
+                 </div>
+              </div>
+              <div className="p-4 border-t border-gray-100">
+                 <button onClick={() => setShowGuidelinesModal(false)} className="w-full py-3 rounded-xl bg-[#1e1b4b] text-white font-bold text-[14px] border-none cursor-pointer hover:bg-[#2e2b60]">
+                   I Understand
+                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

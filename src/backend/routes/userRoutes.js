@@ -1,7 +1,29 @@
 import express from 'express';
-import { checkMobile, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile } from '../controllers/userController.js';
+import { checkMobile, checkUsername, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData } from '../controllers/userController.js';
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/users/check-username:
+ *   post:
+ *     summary: Check Username Availability
+ *     description: Checks if a username is available in the dev_users MongoDB table.
+ *     tags:
+ *       - User Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username: { type: string }
+ *     responses:
+ *       200:
+ *         description: Checked availability status.
+ */
+router.post('/check-username', checkUsername);
 
 /**
  * @swagger
@@ -328,6 +350,37 @@ router.post('/complete-kyc', completeKyc);
  *         description: User not found.
  */
 router.get('/search', getUserByMobile);
+
+/**
+ * @swagger
+ * /api/users/dashboard:
+ *   get:
+ *     summary: Fetch Dashboard Data
+ *     description: Retrieves unified dashboard data including vault estimates, KYC status, encrypted premium card details, and recent top 3 transactions.
+ *     tags:
+ *       - User Management
+ *     parameters:
+ *       - in: query
+ *         name: mobile
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: User's mobile number
+ *       - in: query
+ *         name: userId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: User's UUID
+ *     responses:
+ *       200:
+ *         description: Dashboard data retrieved successfully.
+ *       400:
+ *         description: Missing mobile number or userId.
+ *       404:
+ *         description: User not found.
+ */
+router.get('/dashboard', getDashboardData);
 
 /**
  * @swagger

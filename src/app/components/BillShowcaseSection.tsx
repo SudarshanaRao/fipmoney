@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { 
   Smartphone, Zap, Tv, Droplets, PhoneCall, Wifi, Shield, Landmark, CarFront, Flame, CreditCard, GraduationCap, Building2, TrainTrack, ArrowRight, ShieldCheck
@@ -28,6 +29,9 @@ const billsList = [
 ];
 
 export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionProps) {
+  const [showAll, setShowAll] = useState(false);
+  const displayedBills = showAll ? billsList : billsList.slice(0, 8);
+
   return (
     <section className="pt-2 pb-20 bg-white" id="bills-showcase">
       <div className="container mx-auto px-6 md:px-8 max-w-[1400px] space-y-16">
@@ -47,7 +51,7 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
 
         {/* Showcase Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {billsList.map((item, idx) => (
+          {displayedBills.map((item, idx) => (
             <motion.div 
               key={idx}
               className="bg-slate-50/50 border border-slate-100 rounded-3xl p-6 flex flex-col justify-between hover:bg-white hover:border-amber-200 hover:shadow-xl hover:shadow-slate-100 transition-all group cursor-pointer"
@@ -67,15 +71,24 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
                 <p className="text-xs text-slate-500 font-semibold mt-2 leading-relaxed">{item.desc}</p>
               </div>
 
-              <div className={`flex items-center gap-1 text-[10px] font-black text-amber-600 uppercase tracking-widest mt-6 transition-opacity ${item.hasPayNow ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'}`}>
-                {item.hasPayNow && (
-                  <>
-                    Pay Now <ArrowRight size={12} strokeWidth={3} />
-                  </>
-                )}
+              <div className="flex items-center gap-1 text-[10px] font-black text-amber-600 uppercase tracking-widest mt-6 transition-opacity opacity-0 group-hover:opacity-100">
+                <>
+                  Pay Now <ArrowRight size={12} strokeWidth={3} />
+                </>
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* View All Button */}
+        <div className="flex justify-center mt-8">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowAll(!showAll)}
+            className="rounded-full px-8 py-6 font-bold border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
+          >
+            {showAll ? "View Less Services" : "View All Services"}
+          </Button>
         </div>
 
         {/* bottom secure guarantee banner */}

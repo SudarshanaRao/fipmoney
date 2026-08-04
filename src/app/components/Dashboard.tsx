@@ -23,6 +23,7 @@ import PortfolioPage from "./PortfolioPage";
 import { getLoggedInUser } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
+import { decryptData256 } from "../utils/cryptoUtils";
 import React from "react";
 
 type Metal = "gold" | "silver";
@@ -120,6 +121,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
   const userAvatar = (typeof window !== 'undefined' && localStorage.getItem(`fm_user_avatar_${loggedInMobile}`)) || "https://i.pravatar.cc/150?img=11";
   const [kycStatus, setKycStatus] = useState(loggedInUser?.isKycCompleted ? "full kyc" : "pending");
+  const [virtualCard, setVirtualCard] = useState<{ cardNumber: string, expiry: string, cvv: string, nameOnCard: string } | null>(null);
+  const [isLoadingCard, setIsLoadingCard] = useState(true);
   
   const goldPrice = 6420.50;
   const silverPrice = 84.20;
@@ -157,6 +160,32 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           }
         })
         .catch(err => console.warn("Failed to fetch user details:", err));
+
+      // Fetch dashboard data for premium card
+      fetch(`${API_BASE_URL}/users/dashboard?mobile=${loggedInMobile}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.premiumCardEncrypted) {
+            try {
+              const decryptedString = decryptData256(data.data.premiumCardEncrypted);
+              if (decryptedString) {
+                const cardObj = JSON.parse(decryptedString);
+                setVirtualCard({
+                  cardNumber: decryptData256(cardObj.cardNumber),
+                  expiry: decryptData256(cardObj.expiry),
+                  cvv: decryptData256(cardObj.cvv),
+                  nameOnCard: decryptData256(cardObj.nameOnCard)
+                });
+              }
+            } catch (err) {
+              console.error("Failed to decrypt card details", err);
+            }
+          }
+        })
+        .catch(err => console.warn("Failed to fetch dashboard data:", err))
+        .finally(() => setIsLoadingCard(false));
+    } else {
+      setIsLoadingCard(false);
     }
   }, [loggedInMobile]);
 
@@ -358,6 +387,33 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
          </div>
        </div>
 
+       {kycStatus !== "full kyc" && (
+         <div className="px-6 lg:px-8 pt-5 md:pt-6 max-w-[1600px] mx-auto w-full">
+           <div className="bg-gradient-to-r from-[#1e1b4b] via-[#2e2b74] to-[#1e1b4b] text-white p-5 md:p-6 rounded-[20px] flex flex-col md:flex-row items-center justify-between gap-5 shadow-lg shadow-indigo-900/10 relative overflow-hidden border border-indigo-500/15">
+             {/* Decorative background shapes */}
+             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-400/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+             <div className="absolute bottom-0 left-10 w-40 h-40 bg-amber-500/10 rounded-full blur-xl translate-y-1/3 pointer-events-none"></div>
+             <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 pointer-events-none"></div>
+             
+             <div className="flex items-center gap-4 relative z-10">
+               <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-[#1e1b4b] shadow-md shadow-amber-500/30 shrink-0 transform -rotate-3 border border-amber-300">
+                 <AlertCircle size={24} strokeWidth={2.5} />
+               </div>
+               <div>
+                 <h3 className="text-[17px] md:text-[19px] font-extrabold mb-0.5 tracking-tight text-white drop-shadow-sm">Unlock Your Full Potential! 🚀</h3>
+                 <p className="text-indigo-100/90 text-[13px] md:text-[14px] font-medium m-0 max-w-xl leading-snug">
+                   Your profile is incomplete. Finish your KYC setup to access seamless transactions, rewards, and all Fipmoney services.
+                 </p>
+               </div>
+             </div>
+             
+             <button onClick={() => setTab("settings")} className="relative z-10 w-full md:w-auto whitespace-nowrap text-[14px] font-bold bg-amber-500 hover:bg-amber-400 text-[#1e1b4b] px-6 py-2.5 rounded-xl border-none cursor-pointer transition-all transform hover:-translate-y-0.5 shadow-md shadow-amber-500/20 shrink-0 flex items-center justify-center gap-1.5">
+               Complete Profile <ChevronRight size={16} strokeWidth={3} />
+             </button>
+           </div>
+         </div>
+       )}
+
        <div className="flex-1 p-6 lg:p-8 flex flex-col lg:flex-row gap-8 pb-24 lg:pb-10 max-w-[1600px] mx-auto w-full">
          
          {/* LEFT COLUMN */}
@@ -393,8 +449,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                  <h3 className="text-xs font-bold text-emerald-900/60 mb-3">KYC Status</h3>
                  <h2 className="text-[26px] font-black text-gray-900 mb-1 tracking-tight relative z-10">{kycStatus === "full kyc" ? "Verified" : "Pending"}</h2>
                  <p className="text-xs font-bold text-gray-500 relative z-10">{kycStatus === "full kyc" ? "Full KYC Completed" : "KYC Pending"}</p>
-                 <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-[#10b981] rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
-                    <Check size={28} strokeWidth={3} />
+                 <div className={`absolute right-4 bottom-4 w-[52px] h-[52px] rounded-full flex items-center justify-center text-white shadow-lg ${kycStatus === "full kyc" ? "bg-[#10b981] shadow-emerald-500/30" : "bg-red-500 shadow-red-500/30"}`}>
+                    {kycStatus === "full kyc" ? <Check size={28} strokeWidth={3} /> : <X size={28} strokeWidth={3} />}
                  </div>
                </div>
             </div>
@@ -415,8 +471,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                    </div>
                    <p className="text-[13px] font-bold text-gray-400 mb-6">= ₹{(goldHoldings * goldPrice).toFixed(2)}</p>
                    
-                   <p className="text-xs font-bold text-gray-400 mb-1">Status: <span className="text-emerald-500">Full KYC •</span></p>
-                   <p className="text-xs font-bold text-gray-400 mb-8">Max Capacity: <span className="text-gray-900">1000 g</span></p>
+                   <p className="text-xs font-bold text-gray-400 mb-1">Status: <span className={kycStatus === "full kyc" ? "text-emerald-500" : "text-amber-500"}>{kycStatus === "full kyc" ? "Full KYC" : "Pending KYC"} •</span></p>
+                   <p className="text-xs font-bold text-gray-400 mb-8">Max Capacity: <span className="text-gray-900">{kycStatus === "full kyc" ? "1000 g" : "0.00 g"}</span></p>
                    
                    <div className="flex gap-4">
                      <button onClick={() => setTab("sip")} className="flex-1 bg-[#6d28d9] text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2 border-none outline-none cursor-pointer hover:bg-[#5b21b6] transition-colors"><Plus size={18}/> Buy Gold</button>
@@ -552,6 +608,15 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-600/30 blur-3xl rounded-full pointer-events-none" />
                     <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-600/30 blur-3xl rounded-full pointer-events-none" />
                     
+                    {isLoadingCard && (
+                      <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-xl bg-[#1e1b4b]/50">
+                        <div className="text-center animate-pulse">
+                          <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                          <p className="text-sm font-bold text-white tracking-wide">Card Details Loading...!</p>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="relative z-10 flex justify-between items-center">
                        <span className="font-bold text-sm tracking-wide">Fipmoney Premium</span>
                        <div className="flex items-center gap-2">
@@ -573,18 +638,18 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                           <div className="absolute inset-y-0 w-[1px] left-[65%] bg-yellow-700/40" />
                        </div>
                        <div className="font-mono text-[22px] tracking-[0.15em] mb-1 opacity-90 drop-shadow-md">
-                         {showCardDetails ? "4289 7523 9012 8834" : "**** **** **** 8834"}
+                         {showCardDetails ? (virtualCard ? virtualCard.cardNumber.replace(/(.{4})/g, '$1 ').trim() : "**** **** **** ****") : (virtualCard ? "**** **** **** " + virtualCard.cardNumber.slice(-4) : "**** **** **** ****")}
                        </div>
                     </div>
                     
                     <div className="relative z-10 flex justify-between items-end">
                        <div>
                          <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Card Holder</div>
-                         <div className="text-[13px] font-bold tracking-wide uppercase">{userName}</div>
+                         <div className="text-[13px] font-bold tracking-wide uppercase">{virtualCard ? virtualCard.nameOnCard : ""}</div>
                        </div>
                        <div className="text-right">
                          <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Expires</div>
-                         <div className="text-[13px] font-bold tracking-wide">08/28</div>
+                         <div className="text-[13px] font-bold tracking-wide">{virtualCard ? virtualCard.expiry : "**/**"}</div>
                        </div>
                        <Wifi className="rotate-90 opacity-60 ml-2 mb-1" size={24} />
                     </div>
@@ -597,15 +662,24 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-600/30 blur-3xl rounded-full pointer-events-none" />
                     <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-600/30 blur-3xl rounded-full pointer-events-none" />
                     
+                    {isLoadingCard && (
+                      <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-xl bg-[#1e1b4b]/50">
+                        <div className="text-center animate-pulse">
+                          <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                          <p className="text-sm font-bold text-white tracking-wide">Card Details Loading...!</p>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="w-full h-12 bg-black/85 relative z-10 mt-6 shadow-md" />
                     
                     <div className="px-6 mt-5 relative z-10 flex flex-col gap-1.5">
                       <div className="text-[8px] uppercase tracking-wider opacity-80 text-indigo-200">Authorized Signature</div>
                       <div className="w-full h-10 bg-white/95 flex items-center justify-between px-3 text-black font-mono rounded-sm shadow-inner relative overflow-hidden">
                          <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 1px, transparent 10px)" }} />
-                         <span className="relative z-10 font-bold italic text-gray-700 text-[13px] tracking-wide">{userName}</span>
+                         <span className="relative z-10 font-bold italic text-gray-700 text-[13px] tracking-wide">{virtualCard ? virtualCard.nameOnCard : ""}</span>
                          <span className="relative z-10 font-bold bg-amber-500 text-white px-2 py-0.5 rounded shadow-sm text-[12px] font-mono tracking-wider">
-                           732
+                           {virtualCard ? virtualCard.cvv : "***"}
                          </span>
                       </div>
                     </div>

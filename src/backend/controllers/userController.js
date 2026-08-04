@@ -1,7 +1,9 @@
 import crypto from 'crypto';
 import User from '../models/User.js';
+import VirtualCard from '../models/VirtualCard.js';
 import VaultTransaction from '../models/VaultTransaction.js';
 import Otp from '../models/Otp.js';
+import { generateUniqueCardDetails } from '../utils/cardGenerator.js';
 
 async function sendSmsOtp(mobile, otpCode) {
   const authKey = process.env.SMSCOUNTRY_AUTH_KEY;
@@ -93,6 +95,26 @@ export function decryptData256(encryptedText) {
     return '';
   }
 }
+
+export function hashData256(plainText) {
+  if (!plainText) return '';
+  return crypto.createHash('sha256').update(String(plainText)).digest('hex');
+}
+
+// @desc    Check if username is taken
+// @route   POST /api/users/check-username
+export const checkUsername = async (req, res, next) => {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ success: false, message: 'Username is required' });
+    }
+    const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
+    return res.status(200).json({ success: true, available: !user });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Check if mobile number exists in database
 // @route   POST /api/users/check-mobile
@@ -189,7 +211,7 @@ export const verifyOtp = async (req, res, next) => {
 // @route   POST /api/users/auth
 export const authUser = async (req, res, next) => {
   try {
-    const { mobile, fullName, email, password } = req.body;
+    const { mobile, username, fullName, tpin, email, password } = req.body;
 
     if (!mobile) {
       res.status(400);
@@ -209,21 +231,25 @@ export const authUser = async (req, res, next) => {
       }
 
       // Retroactively generate virtual card if missing
-      if (!user.virtualCard || !user.virtualCard.isGenerated) {
-        const generatedCardNumber = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join('');
-        const generatedCvv = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)).join('');
-        const currentYear = new Date().getFullYear();
-        const expiry = `12/${String(currentYear + 5).slice(-2)}`;
+      if (!user.vid) {
+        const cardDetails = await generateUniqueCardDetails();
         const nameOnCard = user.fullName || "Fipmoney User";
         
-        user.virtualCard = {
-          cardNumber: encryptData256(generatedCardNumber),
-          expiry: encryptData256(expiry),
+        const generatedVid = crypto.randomUUID();
+        await VirtualCard.create({
+          vid: generatedVid,
+          userId: user.userId,
+          cardNumber: encryptData256(cardDetails.cardNumber),
+          cardHash: cardDetails.cardHash,
+          detailsHash: cardDetails.detailsHash,
+          expiry: encryptData256(cardDetails.expiry),
           nameOnCard: encryptData256(nameOnCard),
-          cvv: encryptData256(generatedCvv),
+          cvv: encryptData256(cardDetails.cvv),
           balance: 0,
           isGenerated: true
-        };
+        });
+
+        user.vid = generatedVid;
       }
 
       await user.save();
@@ -242,25 +268,40 @@ export const authUser = async (req, res, next) => {
       const generatedUserCode = `FIP${String(nextIndex).padStart(4, '0')}`;
       const generatedUserId = crypto.randomUUID();
 
-      const nameParts = (fullName || '').trim().split(' ');
+      const finalName = username || fullName || '';
+      const nameParts = finalName.trim().split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
       const encryptedPassword = encryptPassword256(password || 'defaultSecuredPassword123');
 
-      const generatedCardNumber = Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join('');
-      const generatedCvv = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)).join('');
-      const currentYear = new Date().getFullYear();
-      const expiry = `12/${String(currentYear + 5).slice(-2)}`;
-      const nameOnCard = fullName || "Fipmoney User";
+      const cardDetails = await generateUniqueCardDetails();
+      const nameOnCard = finalName || "Fipmoney User";
+
+      const generatedVid = crypto.randomUUID();
+
+      await VirtualCard.create({
+        vid: generatedVid,
+        userId: generatedUserId,
+        cardNumber: encryptData256(cardDetails.cardNumber),
+        cardHash: cardDetails.cardHash,
+        detailsHash: cardDetails.detailsHash,
+        expiry: encryptData256(cardDetails.expiry),
+        nameOnCard: encryptData256(nameOnCard),
+        cvv: encryptData256(cardDetails.cvv),
+        balance: 0,
+        isGenerated: true
+      });
 
       user = await User.create({
         userId: generatedUserId,
         userCode: generatedUserCode,
+        vid: generatedVid,
         mobileNumber: cleanMobile,
         email: email || '',
         password: encryptedPassword,
-        fullName: fullName || '',
+        username: finalName,
+        fullName: '',
         firstName,
         lastName,
         profileImage: '',
@@ -281,11 +322,12 @@ export const authUser = async (req, res, next) => {
         isMobileVerified: true,
         isEmailVerified: false,
         isPasswordSet: true,
-        isPinSet: false,
+        tpin: tpin ? hashData256(tpin) : '',
+        isPinSet: !!tpin,
         isBiometricEnabled: false,
         isFaceIdEnabled: false,
         isFingerPrintEnabled: false,
-        isKycCompleted: true,
+        isKycCompleted: false,
         isPanVerified: false,
         isAadhaarVerified: false,
         isBankVerified: false,
@@ -322,10 +364,10 @@ export const authUser = async (req, res, next) => {
           accountAggregatorConsent: false,
         },
         virtualCard: {
-          cardNumber: encryptData256(generatedCardNumber),
-          expiry: encryptData256(expiry),
+          cardNumber: encryptData256(cardDetails.cardNumber),
+          expiry: encryptData256(cardDetails.expiry),
           nameOnCard: encryptData256(nameOnCard),
-          cvv: encryptData256(generatedCvv),
+          cvv: encryptData256(cardDetails.cvv),
           balance: 0,
           isGenerated: true
         },
@@ -388,12 +430,12 @@ export const getUserCard = async (req, res, next) => {
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
-    const user = await User.findOne({ userId });
-    if (!user || !user.virtualCard || !user.virtualCard.isGenerated) {
+    const virtualCard = await VirtualCard.findOne({ userId });
+    if (!virtualCard || !virtualCard.isGenerated) {
       return res.status(404).json({ success: false, message: 'Virtual card not found' });
     }
     
-    const payload = JSON.stringify(user.virtualCard);
+    const payload = JSON.stringify(virtualCard);
     const encryptedBlob = encryptData256(payload);
 
     return res.status(200).json({ success: true, encryptedData: encryptedBlob });
@@ -738,6 +780,109 @@ export const getUserByMobile = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: [user],
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get dashboard data (vault values, KYC, encrypted card, recent txns)
+// @route   GET /api/users/dashboard
+export const getDashboardData = async (req, res, next) => {
+  try {
+    const mobile = req.query.mobile || req.params.mobile;
+    const userId = (req.cookies && req.cookies.fm_userid) || req.query.userId;
+
+    if (!mobile && !userId) {
+      res.status(400);
+      throw new Error('mobile number or userId is required');
+    }
+
+    let user;
+    if (mobile) {
+      user = await User.findOne({ mobileNumber: String(mobile).trim() });
+    } else if (userId) {
+      user = await User.findOne({ userId });
+    }
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    // 1. Vault Values
+    const goldPrice = 6420.50; // Mock current price
+    const silverPrice = 84.20; // Mock current price
+
+    const goldGrams = user.goldHoldingsGrams || 0;
+    const silverGrams = user.silverHoldingsGrams || 0;
+    const cashBalance = user.cashBalance || 0;
+
+    const goldVaultValue = Number((goldGrams * goldPrice).toFixed(2));
+    const silverVaultValue = Number((silverGrams * silverPrice).toFixed(2));
+    const estimatedVaultValue = Number((goldVaultValue + silverVaultValue + cashBalance).toFixed(2));
+
+    // 2. KYC Status
+    const kycStatus = {
+      isKycCompleted: user.isKycCompleted,
+      kycLevel: user.kycLevel,
+    };
+
+    // 3. Encrypted Premium Card Details
+    let encryptedCardDetails = null;
+    if (user.userId) {
+      let virtualCard = await VirtualCard.findOne({ userId: user.userId });
+      
+      // Retroactively generate if missing
+      if (!virtualCard || !user.vid) {
+        const cardDetails = await generateUniqueCardDetails();
+        const nameOnCard = user.fullName || "Fipmoney User";
+        
+        const generatedVid = crypto.randomUUID();
+        virtualCard = await VirtualCard.create({
+          vid: generatedVid,
+          userId: user.userId,
+          cardNumber: encryptData256(cardDetails.cardNumber),
+          cardHash: cardDetails.cardHash,
+          detailsHash: cardDetails.detailsHash,
+          expiry: encryptData256(cardDetails.expiry),
+          nameOnCard: encryptData256(nameOnCard),
+          cvv: encryptData256(cardDetails.cvv),
+          balance: 0,
+          isGenerated: true
+        });
+        
+        user.vid = generatedVid;
+        await user.save();
+      }
+
+      if (virtualCard && virtualCard.isGenerated) {
+        const payload = JSON.stringify(virtualCard);
+        encryptedCardDetails = encryptData256(payload);
+      }
+    }
+
+    // 4. Recent Top 3 Transactions
+    const recentTransactions = await VaultTransaction.find({ mobileNumber: user.mobileNumber })
+      .sort({ createdAt: -1 })
+      .limit(3);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Dashboard data retrieved successfully',
+      data: {
+        vault: {
+          goldHoldingsGrams: goldGrams,
+          silverHoldingsGrams: silverGrams,
+          goldVaultValue,
+          silverVaultValue,
+          cashBalance,
+          estimatedVaultValue,
+        },
+        kycStatus,
+        premiumCardEncrypted: encryptedCardDetails,
+        recentTransactions,
+      },
     });
   } catch (error) {
     next(error);
