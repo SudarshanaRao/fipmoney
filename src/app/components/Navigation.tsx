@@ -5,7 +5,7 @@ import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications";
+export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn";
 
 export const navItems = [
   { id: "home",      Icon: Home,       label: "Dashboard" },
@@ -79,17 +79,17 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout }: NavProps) => (
       {/* Invite & Earn Card */}
       <div className="bg-gradient-to-br from-[#4c1d95] to-[#312e81] rounded-2xl p-4 border border-white/10 shadow-xl relative overflow-hidden">
         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-        <h4 className="text-white font-bold text-sm mb-1 relative z-10">Invite & Earn</h4>
+        <h4 className="text-white font-bold text-sm mb-1 relative z-10">Refer and Earn ₹50 worth Gold</h4>
         <p className="text-indigo-200 text-xs mb-4 relative z-10 leading-relaxed">Refer your friends and earn exciting rewards!</p>
         <div className="flex justify-between items-end relative z-10">
-          <button className="bg-white text-[#4c1d95] text-xs font-bold py-1.5 px-3 rounded-lg shadow-md hover:bg-gray-50 transition-colors border-none cursor-pointer">
-            Invite Now
+          <button 
+            onClick={() => onTabChange('refer-and-earn' as Tab)}
+            className="bg-white text-[#4c1d95] text-xs font-bold py-1.5 px-3 rounded-lg shadow-md hover:bg-gray-50 transition-colors border-none cursor-pointer">
+            Refer Now
           </button>
           <Gift size={32} className="text-indigo-300 opacity-80" strokeWidth={1.5} />
         </div>
       </div>
-
-
     </div>
   </div>
   <style dangerouslySetInnerHTML={{ __html: `

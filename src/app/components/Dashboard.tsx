@@ -20,6 +20,7 @@ import DigitalGoldSilver from "./DigitalGoldSilver";
 import HistoryPage from "./HistoryPage";
 import BillsPage from "./BillsPage";
 import PortfolioPage from "./PortfolioPage";
+import ReferAndEarn from "./ReferAndEarn";
 import { getLoggedInUser } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
@@ -864,6 +865,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <NotificationsPage />
         ) : ["banking", "offers"].includes(tab) ? (
           <ComingSoon tab={tab} />
+        ) : tab === "refer-and-earn" ? (
+          <ReferAndEarn onNavigate={() => setTab("home")} />
         ) : (
           <MainDashboard />
         )}

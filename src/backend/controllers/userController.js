@@ -223,9 +223,7 @@ const getSafeUser = (userDoc) => {
     kycLevel: obj.kycLevel,
     status: obj.status,
     isMobileVerified: obj.isMobileVerified,
-    isEmailVerified: obj.isEmailVerified,
-    notificationPreferences: obj.notificationPreferences,
-    lastLoginAt: obj.lastLoginAt
+    isEmailVerified: obj.isEmailVerified
   };
 };
 
