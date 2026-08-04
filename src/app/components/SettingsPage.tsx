@@ -84,21 +84,35 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (loggedInMobile) {
-      fetch(`${API_BASE_URL}/users/search?mobile=${loggedInMobile}`)
+      fetch(`${API_BASE_URL}/users/profile-settings?mobile=${loggedInMobile}`)
         .then(res => res.json())
         .then(data => {
-          if (data.success && data.data && data.data.length > 0) {
-            const user = data.data[0];
+          if (data.success && data.data) {
+            // data.data is an object now, not an array
+            const user = data.data;
             const isCompleted = user.isKycCompleted;
             const level = user.kycLevel;
             setKycStatus(isCompleted ? "full kyc" : "pending");
-            setAadhaarVerified(isCompleted || level.toLowerCase().includes("min"));
-            setPanVerified(isCompleted || level.toLowerCase().includes("min"));
+            
+            // Assuming these states exist, set them carefully (using optional chaining)
+            if (typeof setAadhaarVerified === 'function') {
+              setAadhaarVerified(isCompleted || (level && level.toLowerCase().includes("min")));
+            }
+            if (typeof setPanVerified === 'function') {
+              setPanVerified(isCompleted || (level && level.toLowerCase().includes("min")));
+            }
+
+            // Populate profile fields directly from API
+            if (user.fullName) setFullName(user.fullName);
+            if (user.email) setEmail(user.email);
+            if (user.occupation) setJobTitle(user.occupation);
+            if (user.annualIncome) setIncomeRange(String(user.annualIncome));
+            if (user.username && !isUsernameLocked) setUsername(user.username);
           }
         })
         .catch(err => console.warn("Failed to fetch user details:", err));
     }
-  }, [loggedInMobile]);
+  }, [loggedInMobile, isUsernameLocked]);
 
   // Aadhaar & PAN verification states
   const [aadhaarVerified, setAadhaarVerified] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min"));

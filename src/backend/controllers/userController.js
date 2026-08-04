@@ -879,15 +879,33 @@ export const getDashboardData = async (req, res, next) => {
       }
 
       if (virtualCard && virtualCard.isGenerated) {
-        const payload = JSON.stringify(virtualCard);
+        const safeVirtualCard = {
+          cardNumber: virtualCard.cardNumber,
+          expiry: virtualCard.expiry,
+          nameOnCard: virtualCard.nameOnCard,
+          cvv: virtualCard.cvv,
+          balance: virtualCard.balance
+        };
+        const payload = JSON.stringify(safeVirtualCard);
         encryptedCardDetails = encryptData256(payload);
       }
     }
 
     // 4. Recent Top 3 Transactions
-    const recentTransactions = await VaultTransaction.find({ mobileNumber: user.mobileNumber })
+    const recentTransactionsRaw = await VaultTransaction.find({ mobileNumber: user.mobileNumber })
       .sort({ createdAt: -1 })
       .limit(3);
+    
+    const recentTransactions = recentTransactionsRaw.map(tx => ({
+      id: tx._id,
+      type: tx.type,
+      metalType: tx.metalType,
+      metalAmount: tx.metalAmount,
+      amount: tx.amount,
+      status: tx.status,
+      description: tx.description,
+      createdAt: tx.createdAt
+    }));
 
     return res.status(200).json({
       success: true,
@@ -905,6 +923,65 @@ export const getDashboardData = async (req, res, next) => {
         premiumCardEncrypted: encryptedCardDetails,
         recentTransactions,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+// @desc    Get user profile settings data
+// @route   GET /api/users/profile-settings
+export const getProfileSettings = async (req, res, next) => {
+  try {
+    const mobile = req.query.mobile || req.params.mobile;
+    const userId = (req.cookies && req.cookies.fm_userid) || req.query.userId;
+    
+    if (!mobile && !userId) {
+      res.status(400);
+      throw new Error('mobile number or userId is required');
+    }
+
+    let user;
+    if (mobile) {
+      user = await User.findOne({ mobileNumber: String(mobile).trim() });
+    } else if (userId) {
+      user = await User.findOne({ userId });
+    }
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    // Return only profile-specific data needed for Settings page
+    const profileData = {
+      userId: user.userId,
+      userCode: user.userCode,
+      mobileNumber: user.mobileNumber,
+      email: user.email,
+      username: user.username,
+      fullName: user.fullName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profileImage: user.profileImage,
+      occupation: user.occupation,
+      annualIncome: user.annualIncome,
+      maritalStatus: user.maritalStatus,
+      motherName: user.motherName,
+      fatherName: user.fatherName,
+      countryCode: user.countryCode,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      isKycCompleted: user.isKycCompleted,
+      kycLevel: user.kycLevel,
+      isMobileVerified: user.isMobileVerified,
+      isEmailVerified: user.isEmailVerified,
+      status: user.status
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile settings retrieved successfully',
+      data: profileData,
     });
   } catch (error) {
     next(error);

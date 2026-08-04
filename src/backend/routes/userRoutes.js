@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData } from '../controllers/userController.js';
+import { checkMobile, checkUsername, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -266,6 +266,20 @@ router.post('/vault/buy', buyGoldOrSilver);
  *               $ref: '#/components/schemas/ApiResponse'
  */
 router.post('/vault/sell', sellGoldOrSilver);
+
+/**
+ * @swagger
+ * /api/users/profile-settings:
+ *   get:
+ *     summary: Get profile settings data
+ *     description: Retrieves the specific user data needed for the profile settings page.
+ *     tags:
+ *       - User Management
+ *     responses:
+ *       200:
+ *         description: Profile settings data retrieved successfully.
+ */
+router.get('/profile-settings', getProfileSettings);
 
 /**
  * @swagger
