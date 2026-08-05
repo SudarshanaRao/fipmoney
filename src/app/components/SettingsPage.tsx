@@ -111,6 +111,12 @@ export default function SettingsPage() {
             if (user.annualIncome) setIncomeRange(String(user.annualIncome));
             if (user.username && !isUsernameLocked) setUsername(user.username);
             if (user.referralCode) setReferralCode(user.referralCode);
+            if (user.profileImage) {
+              setAvatar(user.profileImage);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem(`fm_user_avatar_${loggedInMobile}`, user.profileImage);
+              }
+            }
           }
         })
         .catch(err => console.warn("Failed to fetch user details:", err));
@@ -379,22 +385,39 @@ export default function SettingsPage() {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/*";
-    fileInput.onchange = (e: Event) => {
+    fileInput.onchange = async (e: Event) => {
       const target = e.target as HTMLInputElement;
       const file = target.files?.[0];
       if (file) {
+        // Show loading state temporarily
         const reader = new FileReader();
         reader.onload = (event) => {
           const result = event.target?.result as string;
-          if (result) {
-            setAvatar(result);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem(`fm_user_avatar_${loggedInMobile}`, result);
-            }
-            showAlert("Profile photo updated successfully from gallery!", "success");
-          }
+          if (result) setAvatar(result); // Optimistic UI update
         };
         reader.readAsDataURL(file);
+
+        try {
+          const formData = new FormData();
+          formData.append("image", file);
+          formData.append("mobile", loggedInMobile);
+
+          const response = await fetch(`${API_BASE_URL}/users/profile-image`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+          if (data.success && data.imageUrl) {
+            setAvatar(data.imageUrl);
+            showAlert("Profile photo updated successfully!", "success");
+          } else {
+            showAlert(data.message || "Failed to upload photo", "error");
+          }
+        } catch (error) {
+          console.error("Image upload error:", error);
+          showAlert("An error occurred during upload", "error");
+        }
       }
     };
     fileInput.click();

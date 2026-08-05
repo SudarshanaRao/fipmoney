@@ -100,11 +100,10 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [showTpin, setShowTpin] = useState(false);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
   const [tpin, setTpin] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm,  setConfirm]  = useState("");
-  const [showPw,   setShowPw]   = useState(false);
-  const [showCp,   setShowCp]   = useState(false);
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [referredBy, setReferredBy] = useState("");
+  const [referredByStatus, setReferredByStatus] = useState<'checking' | 'valid' | 'invalid' | null>(null);
+  const [referrerName, setReferrerName] = useState("");
 
   useEffect(() => {
     if (!username || username.length < 3) {
@@ -131,6 +130,36 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     }, 500);
     return () => clearTimeout(timerId);
   }, [username]);
+
+  useEffect(() => {
+    if (!referredBy || referredBy.length !== 6) {
+      setReferredByStatus(null);
+      setReferrerName("");
+      return;
+    }
+    setReferredByStatus('checking');
+    const timerId = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/users/check-referral`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referralCode: referredBy })
+        });
+        const data = await res.json();
+        if (data.success && data.valid) {
+          setReferredByStatus('valid');
+          setReferrerName(data.referrerName);
+        } else {
+          setReferredByStatus('invalid');
+          setReferrerName("");
+        }
+      } catch (err) {
+        setReferredByStatus(null);
+        setReferrerName("");
+      }
+    }, 500);
+    return () => clearTimeout(timerId);
+  }, [referredBy]);
 
   const { timer, canResend, reset } = useResendTimer(30);
 
@@ -254,7 +283,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       const res = await fetch(`${API_BASE_URL}/users/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile, username, password, tpin, referredBy })
+        body: JSON.stringify({ mobile, username, dateOfBirth, tpin, referredBy })
       });
       const data = await res.json();
       if (data.success && data.data) {
@@ -272,9 +301,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     }
   };
 
-  const pwStrength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : /[A-Z]/.test(password) && /\d/.test(password) ? 4 : 3;
-  const pwColors   = ["", "#ef4444", "#f59e0b", "#3b82f6", "#10b981"];
-  const pwLabels   = ["", "Weak", "Fair", "Good", "Strong"];
+  // Removed password strength calculation
 
   return (
     <div className="w-full min-h-screen flex font-sans bg-white overflow-hidden">
@@ -407,8 +434,13 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
             {/* ══ STEPPER UI (Only for setup steps) ══ */}
             <AnimatePresence>
               {(step === "profile" || step === "tpin") && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="mb-8 w-full max-w-[300px] mx-auto">
-                  <div className="flex items-center justify-between relative">
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="mb-6 w-full flex items-center relative">
+                  
+                  <button onClick={() => back(() => setStep(step === "tpin" ? "profile" : "otp"))} className="absolute left-0 w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors bg-white cursor-pointer outline-none z-10 shrink-0 shadow-sm">
+                     <ArrowLeft size={18} />
+                  </button>
+
+                  <div className="flex items-center justify-between relative w-full max-w-[220px] mx-auto">
                     <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gray-200 -z-10 -translate-y-1/2" />
                     <motion.div className="absolute top-1/2 left-0 h-[2px] bg-[#d89221] -z-10 -translate-y-1/2" 
                       initial={{ width: "0%" }}
@@ -580,10 +612,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               {/* ══ STEP 3: PROFILE (new users only) ══ */}
               {step === "profile" && (
                  <FormSlide key="profile" dir={dir}>
-                    <div className="mb-8">
-                       <button onClick={() => back(() => setStep("otp"))} className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors bg-white cursor-pointer outline-none mb-6">
-                          <ArrowLeft size={18} />
-                       </button>
+                    <div className="mb-6">
                        <h2 className="text-[28px] font-black text-[#1e1b4b] mb-2 tracking-tight">
                          {t.completeProfile}
                        </h2>
@@ -610,55 +639,35 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          {username && usernameStatus !== 'taken' && username.length < 3 && <p className="text-gray-400 text-[12px] mt-2 font-medium">{t.min3chars}</p>}
                        </div>
                        <div>
-                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.createPassword}</label>
-                         <div className="relative">
-                           <input type={showPw ? "text" : "password"} value={password}
-                             onChange={e => setPassword(e.target.value)} placeholder={t.passwordPlaceholder}
-                             className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none text-[14px] font-medium text-[#1e1b4b] px-4 pr-12 focus:border-[#d89221] transition-all bg-white"
-                           />
-                           <button onClick={() => setShowPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent cursor-pointer text-gray-400 outline-none">
-                             {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                           </button>
-                         </div>
-                         {password && (
-                           <div className="mt-2.5">
-                             <div className="flex gap-1.5 mb-1.5">
-                               {[1,2,3,4].map(i => (
-                                 <div key={i} className="h-1.5 flex-1 rounded-full"
-                                   style={{ background: i <= pwStrength ? pwColors[pwStrength] : "#f3f4f6", transition: "background 0.3s" }} />
-                               ))}
-                             </div>
-                             <p className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: pwColors[pwStrength] }}>{pwLabels[pwStrength]}</p>
-                           </div>
-                         )}
-                       </div>
-                       <div>
-                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.confirmPassword}</label>
-                         <div className="relative">
-                           <input type={showCp ? "text" : "password"} value={confirm}
-                             onChange={e => setConfirm(e.target.value)} placeholder={t.confirmPasswordPlaceholder}
-                             className={`w-full h-[56px] rounded-xl border-2 outline-none text-[14px] font-medium text-[#1e1b4b] px-4 pr-12 transition-all bg-white
-                               ${confirm && password !== confirm ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
-                           />
-                           <button onClick={() => setShowCp(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent cursor-pointer text-gray-400 outline-none">
-                             {showCp ? <EyeOff size={18} /> : <Eye size={18} />}
-                           </button>
-                         </div>
-                         {confirm && password !== confirm && <p className="text-red-500 text-[12px] mt-2 font-semibold">{t.passwordsDontMatch}</p>}
+                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Date of Birth</label>
+                         <input type="date" value={dateOfBirth}
+                           onChange={e => setDateOfBirth(e.target.value)}
+                           className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none text-[14px] font-medium text-[#1e1b4b] px-4 focus:border-[#d89221] transition-all bg-white"
+                         />
                        </div>
 
                        <div>
                          <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.referralCode}</label>
-                         <input type="text" value={referredBy}
-                           onChange={e => setReferredBy(e.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase())} placeholder={t.referralPlaceholder}
-                           className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none text-[14px] font-bold text-[#1e1b4b] px-4 transition-all bg-white focus:border-[#d89221] uppercase"
-                         />
+                         <div className="relative">
+                           <input type="text" value={referredBy}
+                             onChange={e => setReferredBy(e.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 6))} placeholder={t.referralPlaceholder}
+                             className={`w-full h-[56px] rounded-xl border-2 outline-none text-[14px] font-bold text-[#1e1b4b] px-4 pr-12 transition-all bg-white uppercase
+                                ${referredByStatus === 'invalid' ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
+                           />
+                           <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                              {referredByStatus === 'checking' && <Loader2 size={18} className="animate-spin text-gray-400" />}
+                              {referredByStatus === 'valid' && <CheckCircle size={18} className="text-emerald-500" />}
+                              {referredByStatus === 'invalid' && <XCircle size={18} className="text-red-500" />}
+                           </div>
+                         </div>
+                         {referredByStatus === 'invalid' && <p className="text-red-500 text-[12px] mt-2 font-semibold">Invalid referral code.</p>}
+                         {referredByStatus === 'valid' && <p className="text-emerald-500 text-[12px] mt-2 font-semibold flex items-center gap-1"><CheckCircle size={14}/> Found: {referrerName}</p>}
                        </div>
                        
                        <button 
                          onClick={handleProfileContinue}
-                         disabled={usernameStatus !== 'available' || password.length < 8 || password !== confirm}
-                         className={`w-full h-[56px] mt-2 rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${(usernameStatus !== 'available' || password.length < 8 || password !== confirm) ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
+                         disabled={usernameStatus !== 'available' || !dateOfBirth || referredByStatus === 'invalid'}
+                         className={`w-full h-[56px] mt-2 rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${(usernameStatus !== 'available' || !dateOfBirth || referredByStatus === 'invalid') ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
                        >
                          {t.continueBtn}
                        </button>
@@ -675,10 +684,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               {/* ══ STEP 3.5: T-PIN SETUP ══ */}
               {step === "tpin" && (
                  <FormSlide key="tpin" dir={dir}>
-                    <div className="mb-8">
-                       <button onClick={() => back(() => setStep("profile"))} className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors bg-white cursor-pointer outline-none mb-6">
-                          <ArrowLeft size={18} />
-                       </button>
+                    <div className="mb-6">
                        <h2 className="text-[28px] font-black text-[#1e1b4b] mb-2 tracking-tight">
                          {t.setupSecurity}
                        </h2>

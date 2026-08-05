@@ -124,13 +124,38 @@ const faqs: FAQ[] = [
     question: "Can I withdraw my gold as cash on weekends?",
     answer: "Yes, you can sell your gold and request a withdrawal 24/7, including weekends and public holidays. The amount will be credited to your bank account.",
     category: "withdrawal-issues"
+  },
+  {
+    id: "19",
+    question: "When will I receive my referral bonus?",
+    answer: "You will receive your ₹50 digital gold referral bonus within 24-48 hours after your friend successfully completes a digital gold purchase of at least ₹250 within 30 days of creating their account.",
+    category: "referral-program"
+  },
+  {
+    id: "20",
+    question: "Is there a limit to how many friends I can refer?",
+    answer: "No, there is no limit! You can refer as many friends as you want and keep earning the ₹50 digital gold bonus for every successful referral.",
+    category: "referral-program"
+  },
+  {
+    id: "21",
+    question: "What happens if my friend purchases gold after 30 days?",
+    answer: "The referral reward is only applicable if the referee completes their first ₹250+ digital gold purchase within 30 days of account creation.",
+    category: "referral-program"
+  },
+  {
+    id: "22",
+    question: "How do I share my referral link?",
+    answer: "You can copy your unique referral link from the dashboard or use the social share buttons to send it directly via WhatsApp, SMS, or Email.",
+    category: "referral-program"
   }
 ];
 
 const categories = [
   { id: "fipmoney-app", name: "FipMoney App" },
   { id: "digital-gold", name: "Digital Gold" },
-  { id: "withdrawal-issues", name: "Withdrawal Issues" }
+  { id: "withdrawal-issues", name: "Withdrawal Issues" },
+  { id: "referral-program", name: "Referral Program" }
 ];
 
 export default function HomeFAQs() {

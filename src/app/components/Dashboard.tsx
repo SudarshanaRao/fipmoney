@@ -122,7 +122,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const savedUsername = (typeof window !== 'undefined' && localStorage.getItem(`fm_username_${loggedInMobile}`)) || loggedInUser?.username || "";
   const userName = savedUsername ? savedUsername : (loggedInUser?.fullName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "Guest User" : "Guest User"));
   const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
-  const userAvatar = (typeof window !== 'undefined' && localStorage.getItem(`fm_user_avatar_${loggedInMobile}`)) || "https://i.pravatar.cc/150?img=11";
+  const [userAvatar, setUserAvatar] = useState((typeof window !== 'undefined' && localStorage.getItem(`fm_user_avatar_${loggedInMobile}`)) || "https://i.pravatar.cc/150?img=11");
   const [kycStatus, setKycStatus] = useState(loggedInUser?.isKycCompleted ? "full kyc" : "pending");
   const [virtualCard, setVirtualCard] = useState<{ cardNumber: string, expiry: string, cvv: string, nameOnCard: string } | null>(null);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
@@ -159,6 +159,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               userObj.isKycCompleted = isCompleted;
               userObj.kycLevel = level;
               localStorage.setItem("fm_current_logged_in_user", JSON.stringify(userObj));
+            }
+            if (user.profileImage) {
+              setUserAvatar(user.profileImage);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem(`fm_user_avatar_${loggedInMobile}`, user.profileImage);
+              }
             }
           }
         })

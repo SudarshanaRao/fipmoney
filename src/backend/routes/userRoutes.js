@@ -1,5 +1,8 @@
 import express from 'express';
-import { checkMobile, checkUsername, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking } from '../controllers/userController.js';
+import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, uploadProfileImage, getPendingDues } from '../controllers/userController.js';
+import multer from 'multer';
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -24,6 +27,28 @@ const router = express.Router();
  *         description: Checked availability status.
  */
 router.post('/check-username', checkUsername);
+
+/**
+ * @swagger
+ * /api/users/check-referral:
+ *   post:
+ *     summary: Check Referral Code Validity
+ *     description: Checks if a referral code exists in the dev_users MongoDB table.
+ *     tags:
+ *       - User Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               referralCode: { type: string }
+ *     responses:
+ *       200:
+ *         description: Checked validity status.
+ */
+router.post('/check-referral', checkReferral);
 
 /**
  * @swagger
@@ -398,23 +423,66 @@ router.get('/dashboard', getDashboardData);
 
 /**
  * @swagger
- * /api/users/referrals/{userId}:
+ * /api/users/referrals:
  *   get:
  *     summary: Get Referral Tracking
- *     description: Fetch users referred by a specific user.
+ *     description: Returns stats about referred users.
  *     tags:
- *       - User Management
+ *       - Profile & Dashboard
  *     parameters:
- *       - in: path
- *         name: userId
+ *       - in: query
+ *         name: mobile
  *         required: true
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Success
+ *         description: Referral tracking data.
  */
-router.get('/referrals/:userId', getReferralsTracking);
+router.get('/referrals', getReferralsTracking);
+
+/**
+ * @swagger
+ * /api/users/profile-image:
+ *   post:
+ *     summary: Upload Profile Image
+ *     description: Uploads a user's profile image to S3 and updates MongoDB.
+ *     tags:
+ *       - Profile & Dashboard
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mobile: { type: string }
+ *               image: { type: string, format: binary }
+ *     responses:
+ *       200:
+ *         description: Profile image uploaded successfully.
+ */
+router.post('/profile-image', upload.single('image'), uploadProfileImage);
+
+/**
+ * @swagger
+ * /api/users/pending-dues:
+ *   get:
+ *     summary: Get Pending Dues
+ *     description: Returns pending due bills for a user.
+ *     tags:
+ *       - Profile & Dashboard
+ *     parameters:
+ *       - in: query
+ *         name: mobile
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Pending dues list.
+ */
+router.get('/pending-dues', getPendingDues);
 
 /**
  * @swagger

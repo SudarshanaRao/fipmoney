@@ -34,6 +34,7 @@ import AuthFlow from "./components/AuthFlow";
 import Dashboard from "./components/Dashboard";
 import RechargeDetails from "./components/RechargeDetails";
 import BillShowcaseSection from "./components/BillShowcaseSection";
+import ReferralProgramSection from "./components/ReferralProgramSection";
 import RiskDisclosure from "./components/RiskDisclosure";
 import GrievancePolicy from "./components/GrievancePolicy";
 import InvestorCharter from "./components/InvestorCharter";
@@ -327,6 +328,9 @@ export default function App() {
 
               {/* Bill Showcase Section (Recharge & Pay Bills) */}
               <BillShowcaseSection onNavigate={navigateToPage} />
+
+              {/* Referral Program Section */}
+              <ReferralProgramSection />
 
               {/* FAQs Section */}
               <HomeFAQs />

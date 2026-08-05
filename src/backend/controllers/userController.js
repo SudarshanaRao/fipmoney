@@ -4,6 +4,7 @@ import VirtualCard from '../models/VirtualCard.js';
 import VaultTransaction from '../models/VaultTransaction.js';
 import Otp from '../models/Otp.js';
 import { generateUniqueCardDetails } from '../utils/cardGenerator.js';
+import { uploadProfileImageToS3 } from '../utils/s3Uploader.js';
 
 async function sendSmsOtp(mobile, otpCode) {
   const authKey = process.env.SMSCOUNTRY_AUTH_KEY;
@@ -111,6 +112,25 @@ export const checkUsername = async (req, res, next) => {
     }
     const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
     return res.status(200).json({ success: true, available: !user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Check if referral code is valid
+// @route   POST /api/users/check-referral
+export const checkReferral = async (req, res, next) => {
+  try {
+    const { referralCode } = req.body;
+    if (!referralCode || referralCode.length !== 6) {
+      return res.status(400).json({ success: false, message: 'Invalid referral code' });
+    }
+    const user = await User.findOne({ referralCode: new RegExp(`^${referralCode}$`, 'i') });
+    if (user) {
+      return res.status(200).json({ success: true, valid: true, referrerName: user.username || user.fullName || 'User' });
+    } else {
+      return res.status(200).json({ success: true, valid: false });
+    }
   } catch (error) {
     next(error);
   }
@@ -245,7 +265,7 @@ const generateUniqueReferralCode = async (User) => {
 // @route   POST /api/users/auth
 export const authUser = async (req, res, next) => {
   try {
-    const { mobile, username, fullName, tpin, email, password, referredBy } = req.body;
+    const { mobile, username, fullName, tpin, email, dateOfBirth, referredBy } = req.body;
 
     if (!mobile) {
       res.status(400);
@@ -260,8 +280,8 @@ export const authUser = async (req, res, next) => {
       user.lastLoginAt = new Date();
       user.lastActiveAt = new Date();
       user.loginCount = (user.loginCount || 0) + 1;
-      if (password) {
-        user.password = encryptPassword256(password);
+      if (dateOfBirth) {
+        user.dateOfBirth = dateOfBirth;
       }
 
       // Generate a random unique referral code if missing
@@ -312,8 +332,7 @@ export const authUser = async (req, res, next) => {
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
 
-      const encryptedPassword = encryptPassword256(password || 'defaultSecuredPassword123');
-
+      // No password generated as we are removing passwords
       const cardDetails = await generateUniqueCardDetails();
       const nameOnCard = finalName || "Fipmoney User";
 
@@ -338,14 +357,13 @@ export const authUser = async (req, res, next) => {
         vid: generatedVid,
         mobileNumber: cleanMobile,
         email: email || '',
-        password: encryptedPassword,
         username: finalName,
         fullName: '',
         firstName,
         lastName,
         profileImage: '',
         gender: '',
-        dateOfBirth: null,
+        dateOfBirth: dateOfBirth || null,
         countryCode: '+91',
         nationality: '',
         occupation: '',
@@ -469,6 +487,7 @@ export const getUserCard = async (req, res, next) => {
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
+
     const virtualCard = await VirtualCard.findOne({ userId });
     if (!virtualCard || !virtualCard.isGenerated) {
       return res.status(404).json({ success: false, message: 'Virtual card not found' });
@@ -1061,6 +1080,60 @@ export const getReferralsTracking = async (req, res, next) => {
       success: true,
       message: 'Referrals tracking fetched successfully',
       data: trackingData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Upload Profile Image
+// @route   POST /api/users/profile-image
+export const uploadProfileImage = async (req, res, next) => {
+  try {
+    const { mobile } = req.body;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image provided' });
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({ mobileNumber: cleanMobile });
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Upload to S3
+    const fileBuffer = req.file.buffer;
+    const mimeType = req.file.mimetype;
+    const imageUrl = await uploadProfileImageToS3(fileBuffer, mimeType, user.userId);
+
+    // Update MongoDB
+    user.profileImage = imageUrl;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile image uploaded successfully',
+      imageUrl: imageUrl
+    });
+  } catch (error) {
+    console.error('Profile image upload error:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload profile image', error: error.message, stack: error.stack });
+  }
+};
+
+// @desc    Get Pending Dues
+// @route   GET /api/users/pending-dues
+export const getPendingDues = async (req, res, next) => {
+  try {
+    const dues = [];
+    res.status(200).json({
+      success: true,
+      data: dues
     });
   } catch (error) {
     next(error);
