@@ -223,15 +223,29 @@ const getSafeUser = (userDoc) => {
     kycLevel: obj.kycLevel,
     status: obj.status,
     isMobileVerified: obj.isMobileVerified,
-    isEmailVerified: obj.isEmailVerified
+    isEmailVerified: obj.isEmailVerified,
+    referralCode: obj.referralCode // Added referralCode here
   };
+};
+
+const generateUniqueReferralCode = async (User) => {
+  let isUnique = false;
+  let code = '';
+  while (!isUnique) {
+    code = crypto.randomBytes(3).toString('hex').toUpperCase(); // Random 6 character string
+    const existing = await User.findOne({ referralCode: code });
+    if (!existing) {
+      isUnique = true;
+    }
+  }
+  return code;
 };
 
 // @desc    Register or Login User
 // @route   POST /api/users/auth
 export const authUser = async (req, res, next) => {
   try {
-    const { mobile, username, fullName, tpin, email, password } = req.body;
+    const { mobile, username, fullName, tpin, email, password, referredBy } = req.body;
 
     if (!mobile) {
       res.status(400);
@@ -248,6 +262,11 @@ export const authUser = async (req, res, next) => {
       user.loginCount = (user.loginCount || 0) + 1;
       if (password) {
         user.password = encryptPassword256(password);
+      }
+
+      // Generate a random unique referral code if missing
+      if (!user.referralCode || user.referralCode.startsWith('FIP0')) {
+        user.referralCode = await generateUniqueReferralCode(User);
       }
 
       // Retroactively generate virtual card if missing
@@ -334,8 +353,8 @@ export const authUser = async (req, res, next) => {
         maritalStatus: '',
         motherName: '',
         fatherName: '',
-        referralCode: '',
-        referredBy: '',
+        referralCode: await generateUniqueReferralCode(User),
+        referredBy: referredBy || '',
         status: 'ACTIVE',
         userType: 'CUSTOMER',
         accountLevel: 'LEVEL_1',
@@ -969,6 +988,7 @@ export const getProfileSettings = async (req, res, next) => {
       countryCode: user.countryCode,
       gender: user.gender,
       dateOfBirth: user.dateOfBirth,
+      referralCode: user.referralCode,
       isKycCompleted: user.isKycCompleted,
       kycLevel: user.kycLevel,
       isMobileVerified: user.isMobileVerified,
@@ -980,6 +1000,67 @@ export const getProfileSettings = async (req, res, next) => {
       success: true,
       message: 'Profile settings retrieved successfully',
       data: profileData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Referrals Tracking
+// @route   GET /api/users/referrals/:userId
+export const getReferralsTracking = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findOne({ 
+      $or: [
+        { userId: userId },
+        { userCode: userId },
+        { mobileNumber: userId }
+      ]
+    });
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    if (!user.referralCode) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    // Find all users who were referred by this user
+    const referredUsers = await User.find({ referredBy: user.referralCode });
+
+    // For each user, check if they have a successful gold purchase >= 250
+    const trackingData = await Promise.all(referredUsers.map(async (referred) => {
+      const purchases = await VaultTransaction.find({
+        mobileNumber: referred.mobileNumber,
+        type: 'BUY',
+        metal: 'GOLD',
+        status: 'SUCCESS'
+      });
+
+      const totalPurchased = purchases.reduce((sum, tx) => sum + tx.amount, 0);
+      const hasPurchasedGold = totalPurchased >= 250;
+
+      return {
+        id: referred.userId,
+        name: referred.firstName ? `${referred.firstName} ${referred.lastName || ''}`.trim() : (referred.username || 'User'),
+        mobileMasked: referred.mobileNumber ? referred.mobileNumber.replace(/.(?=.{4})/g, '*') : '******',
+        signupDate: referred.createdAt || new Date(),
+        isKycCompleted: referred.isKycCompleted || false,
+        hasPurchasedGold,
+        rewardCredited: hasPurchasedGold // Since this is a simple tracker, we assume reward is credited if purchase matches.
+      };
+    }));
+
+    // Sort by signup date descending
+    trackingData.sort((a, b) => new Date(b.signupDate) - new Date(a.signupDate));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Referrals tracking fetched successfully',
+      data: trackingData,
     });
   } catch (error) {
     next(error);

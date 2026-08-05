@@ -1,12 +1,84 @@
-import React from "react";
-import { Copy, Gift, Clock, Users, Trophy, ArrowRight, Share2, MessageCircle, Send, Facebook, Twitter, MoreHorizontal, UserPlus, Wallet } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Copy, Gift, Clock, Users, Trophy, ArrowRight, Share2, MessageCircle, Send, Facebook, Twitter, MoreHorizontal, UserPlus, Wallet, FileText, Maximize2, ThumbsUp, ThumbsDown, ChevronDown } from "lucide-react";
+import { getLoggedInUser } from "../utils/userStorage";
+import { API_BASE_URL } from "../utils/apiConfig";
 
 interface ReferAndEarnProps {
   onNavigate: (page: string) => void;
 }
 
 export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
-  
+  const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+  // Use user.userId or userCode as UUID
+  const userId = loggedInUser?.userId || loggedInUser?.userCode || loggedInUser?.mobileNumber || "guest";
+  const userReferralCode = loggedInUser?.referralCode || loggedInUser?.userCode || "DHARSH123";
+
+  const [faqStats, setFaqStats] = useState<Record<string, { likes: number, dislikes: number }>>({});
+  const [userSelections, setUserSelections] = useState<Record<string, string>>({});
+  const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
+  const [referralsTracked, setReferralsTracked] = useState<any[]>([]);
+  const [expandedReferralId, setExpandedReferralId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!userId || userId === "guest") return;
+    fetch(`${API_BASE_URL}/faqs/feedback?userId=${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setFaqStats(data.stats || {});
+          setUserSelections(data.userSelections || {});
+        }
+      })
+      .catch(console.error);
+
+    // Fetch Referral Tracking
+    fetch(`${API_BASE_URL}/users/referrals/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setReferralsTracked(data.data || []);
+        }
+      })
+      .catch(console.error);
+  }, [userId]);
+
+  const handleFeedback = async (faqId: string, action: string) => {
+    if (!userId || userId === "guest") return;
+    const prevSelection = userSelections[faqId];
+    if (prevSelection === action) action = 'none'; // Toggle off
+
+    setUserSelections(prev => ({ ...prev, [faqId]: action }));
+    
+    setFaqStats(prev => {
+      const stats = prev[faqId] || { likes: 0, dislikes: 0 };
+      let { likes, dislikes } = stats;
+      if (prevSelection === 'like') likes = Math.max(0, likes - 1);
+      if (prevSelection === 'dislike') dislikes = Math.max(0, dislikes - 1);
+      if (action === 'like') likes++;
+      if (action === 'dislike') dislikes++;
+      return { ...prev, [faqId]: { likes, dislikes } };
+    });
+
+    try {
+      await fetch(`${API_BASE_URL}/faqs/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ faqId, userId, action })
+      });
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+    }
+  };
+
+  const referralFaqs = [
+    { id: "faq1", question: "When will I receive my referral bonus?", answer: "You will receive your ₹50 digital gold referral bonus within 24-48 hours after your friend successfully completes a digital gold purchase of at least ₹250 within 30 days of creating their account." },
+    { id: "faq2", question: "Is there a limit to how many friends I can refer?", answer: "No, there is no limit! You can refer as many friends as you want and keep earning the ₹50 digital gold bonus for every successful referral." },
+    { id: "faq3", question: "What happens if my friend purchases gold after 30 days?", answer: "The referral reward is only applicable if the referee completes their first ₹250+ digital gold purchase within 30 days of account creation." },
+    { id: "faq4", question: "Can I withdraw the digital gold?", answer: "Yes, you can sell your digital gold at any time and withdraw the cash to your linked bank account." },
+    { id: "faq5", question: "How do I share my referral link?", answer: "You can copy your unique referral link from the dashboard or use the social share buttons to send it directly via WhatsApp, SMS, or Email." },
+    { id: "faq6", question: "Where can I track my referrals?", answer: "You can track the status of all your referrals and pending earnings directly in the 'Your Earnings Summary' section." }
+  ];
+
   const mockTopReferrers = [
     { rank: 1, name: "Rohit Sharma", amount: "₹12,450", referrals: 124, avatar: "https://i.pravatar.cc/150?img=11" },
     { rank: 2, name: "Priya Mehta", amount: "₹8,750", referrals: 86, avatar: "https://i.pravatar.cc/150?img=5" },
@@ -23,7 +95,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
         <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-4">
           
           {/* Left Column (Main Content) */}
-          <div className="space-y-4">
+          <div className="flex flex-col space-y-4 h-full">
             
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
@@ -51,7 +123,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
               </div>
               
               <div className="flex flex-col sm:flex-row items-center gap-3 bg-slate-50/50 p-1.5 pl-3 rounded-xl border border-slate-200 mb-4">
-                <span className="flex-1 text-slate-500 font-medium text-sm truncate w-full sm:w-auto">https://fipmoney.com/ref/DHARSH123</span>
+                <span className="flex-1 text-slate-500 font-medium text-sm truncate w-full sm:w-auto">https://fipmoney.com/ref/{userReferralCode}</span>
                 <button className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5 text-sm whitespace-nowrap cursor-pointer border-none outline-none">
                   <Copy size={16} />
                   Copy Link
@@ -96,8 +168,8 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                 {[
                   { step: 1, title: "Share your link", desc: "Invite your friends using your unique referral link", icon: Share2, color: "text-emerald-500", bg: "bg-emerald-50" },
                   { step: 2, title: "They join & verify", desc: "Your friend signs up and completes KYC", icon: UserPlus, color: "text-amber-500", bg: "bg-amber-50" },
-                  { step: 3, title: "They do first transaction", desc: "When your friend completes their first transaction", icon: Wallet, color: "text-blue-500", bg: "bg-blue-50" },
-                  { step: 4, title: "You both earn rewards", desc: "You get rewards and your friend gets benefits too!", icon: Gift, color: "text-purple-500", bg: "bg-purple-50" }
+                  { step: 3, title: "Purchase Digital Gold", desc: "Friend purchases ₹250 worth of digital gold within 30 days", icon: Wallet, color: "text-blue-500", bg: "bg-blue-50" },
+                  { step: 4, title: "You both earn rewards", desc: "You both get ₹50 worth of digital gold as earnings", icon: Gift, color: "text-purple-500", bg: "bg-purple-50" }
                 ].map((item, idx) => (
                   <div key={idx} className="flex flex-row md:flex-col items-center md:text-center gap-3 w-full md:w-1/4 relative bg-white">
                     <div className={`w-10 h-10 rounded-full ${item.bg} ${item.color} flex items-center justify-center border-4 border-white shadow-sm shrink-0`}>
@@ -111,6 +183,33 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Mini Terms and Conditions Section */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 relative group flex flex-col flex-1">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <FileText size={18} className="text-indigo-600" />
+                  <h3 className="font-bold text-slate-800 text-base">Terms & Conditions Apply</h3>
+                </div>
+                <button onClick={() => onNavigate("referral-terms")} className="text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer bg-transparent border-none outline-none">
+                  <Maximize2 size={18} />
+                </button>
+              </div>
+              <ul className="list-disc pl-5 text-sm text-slate-600 space-y-2">
+                <li>Referral bonus is credited only when your friend completes a minimum digital gold purchase of ₹250 within 30 days of registration.</li>
+                <li>Both the referrer and the referee will receive ₹50 worth of digital gold.</li>
+                <li>There is absolutely no limit to the number of friends you can refer and the rewards you can earn!</li>
+                <li>The referral reward will be added directly to your vault balance.</li>
+                <li>You can withdraw the referral reward directly to your linked bank account at any time.</li>
+                <li>Any misuse of the referral program or suspicious activity will result in immediate disqualification.</li>
+                <li>The referral link shared with the referee has a 30-day expiry from the day of creation.</li>
+                <li>Fipmoney referral program for members is automatically terminated upon account closure or bankruptcy.</li>
+                <li>Fipmoney at its discretion may terminate or close the referral program without prior notice.</li>
+              </ul>
+              <button onClick={() => onNavigate("referral-terms")} className="text-xs text-indigo-600 font-bold hover:underline mt-4 cursor-pointer bg-transparent border-none outline-none">
+                Read Full T&Cs
+              </button>
             </div>
             
           </div>
@@ -165,38 +264,111 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
               </div>
             </div>
 
-            {/* Top Referrers */}
+            {/* My Referrals Tracking */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-slate-800 text-base">Top Referrers</h3>
+                <h3 className="font-bold text-slate-800 text-base">My Referrals</h3>
                 <button className="text-indigo-600 text-xs font-bold bg-transparent border-none outline-none cursor-pointer hover:underline">
                   View All
                 </button>
               </div>
               
-              <div className="space-y-2">
-                {mockTopReferrers.map((user) => (
-                  <div key={user.rank} className={`flex items-center gap-3 p-2 rounded-xl transition-colors ${user.isYou ? 'bg-indigo-50/50 border border-indigo-100/50' : 'hover:bg-slate-50'}`}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0
-                      ${user.rank === 1 ? 'bg-amber-100 text-amber-700' : 
-                        user.rank === 2 ? 'bg-slate-200 text-slate-700' : 
-                        user.rank === 3 ? 'bg-orange-100 text-orange-700' : 
-                        'bg-slate-100 text-slate-500'}`}
-                    >
-                      {user.rank}
+              {referralsTracked.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-sm text-slate-500 font-medium">No referrals yet.</p>
+                  <p className="text-xs text-slate-400 mt-1">Share your link to start earning!</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  {referralsTracked.map((user, idx) => (
+                    <div key={user.id || idx} className="border border-slate-100 rounded-xl overflow-hidden transition-all duration-200 bg-white shadow-xs">
+                      <div 
+                        onClick={() => setExpandedReferralId(expandedReferralId === user.id ? null : user.id)}
+                        className="flex items-center gap-3 p-3 bg-slate-50 cursor-pointer hover:bg-slate-100/70 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 uppercase">
+                          {user.name.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-bold text-slate-800 truncate flex items-center gap-2">
+                            {user.name}
+                            {user.rewardCredited && (
+                              <span className="bg-emerald-100 text-emerald-700 text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider">Credited</span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-slate-500 flex justify-between mt-0.5">
+                            <span>Joined: {new Date(user.signupDate).toLocaleDateString()}</span>
+                            <span className={user.hasPurchasedGold ? "text-emerald-600 font-semibold" : "text-amber-500 font-medium"}>
+                              {user.hasPurchasedGold ? "Gold Purchased ✅" : "Purchase Pending"}
+                            </span>
+                          </div>
+                        </div>
+                        <ChevronDown 
+                          size={16} 
+                          className={`text-slate-400 shrink-0 transition-transform duration-200 ${expandedReferralId === user.id ? 'rotate-180 text-indigo-500' : ''}`} 
+                        />
+                      </div>
+                      
+                      {/* Expanded Tracking Details */}
+                      <div className={`transition-all duration-300 ease-in-out ${expandedReferralId === user.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                        <div className="p-5 border-t border-slate-100 bg-slate-50/50">
+                          
+                          {/* Horizontal Progress Bar */}
+                          <div className="relative max-w-sm mx-auto mt-2">
+                            {/* Background Track */}
+                            <div className="absolute top-5 left-8 right-8 h-[3px] bg-slate-200 rounded-full"></div>
+                            {/* Active Track */}
+                            <div className="absolute top-5 left-8 h-[3px] bg-emerald-500 rounded-full transition-all duration-700 ease-out" 
+                                 style={{ width: user.hasPurchasedGold ? 'calc(100% - 2rem)' : user.isKycCompleted ? '50%' : '0%' }}></div>
+                            
+                            <div className="relative flex justify-between">
+                              {/* Step 1: Shared/Joined */}
+                              <div className="flex flex-col items-center gap-2 w-16">
+                                <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border-[3px] border-white shadow-sm z-10 relative">
+                                  <UserPlus size={16} />
+                                </div>
+                                <div className="text-[10px] font-bold text-center text-slate-700 leading-tight">Joined</div>
+                                <div className="text-[9px] text-slate-400 text-center whitespace-nowrap -mt-1">{new Date(user.signupDate).toLocaleDateString()}</div>
+                              </div>
+
+                              {/* Step 2: KYC */}
+                              <div className="flex flex-col items-center gap-2 w-16">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] border-white shadow-sm z-10 relative transition-colors duration-500 ${user.isKycCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-white text-slate-300'}`}>
+                                  <FileText size={16} />
+                                </div>
+                                <div className={`text-[10px] font-bold text-center leading-tight ${user.isKycCompleted ? 'text-slate-700' : 'text-slate-400'}`}>KYC Done</div>
+                              </div>
+
+                              {/* Step 3: Purchase */}
+                              <div className="flex flex-col items-center gap-2 w-16">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] border-white shadow-sm z-10 relative transition-colors duration-500 ${user.hasPurchasedGold ? 'bg-emerald-50 text-emerald-600' : 'bg-white text-slate-300'}`}>
+                                  <Wallet size={16} />
+                                </div>
+                                <div className={`text-[10px] font-bold text-center leading-tight ${user.hasPurchasedGold ? 'text-slate-700' : 'text-slate-400'}`}>₹250+ Gold</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Reward Status Banner */}
+                          <div className={`mt-6 rounded-xl p-3 flex items-center gap-3 border ${user.hasPurchasedGold ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'}`}>
+                             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${user.hasPurchasedGold ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-500'}`}>
+                               <Gift size={16} />
+                             </div>
+                             <div>
+                               <div className={`text-[11px] font-bold ${user.hasPurchasedGold ? 'text-emerald-800' : 'text-amber-800'}`}>
+                                 {user.hasPurchasedGold ? 'Reward Unlocked!' : 'Reward Pending'}
+                               </div>
+                               <div className={`text-[10px] ${user.hasPurchasedGold ? 'text-emerald-600' : 'text-amber-600'} leading-tight mt-0.5`}>
+                                 {user.hasPurchasedGold ? '₹50 Digital Gold has been credited to you.' : 'Waiting for friend to purchase digital gold.'}
+                               </div>
+                             </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full bg-slate-200 border border-white shadow-sm" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-bold text-slate-800 truncate">{user.name}</div>
-                      <div className="text-[11px] text-slate-500 leading-none">{user.amount}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-black text-slate-700 leading-none mb-0.5">{user.referrals}</div>
-                      <div className="text-[10px] text-slate-400 font-medium">Referrals</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Referral Rewards Banner */}
@@ -230,6 +402,60 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                   backgroundPosition: "right center" 
                 }}
               />
+            </div>
+
+            {/* Referral FAQs Section */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <MessageCircle size={18} className="text-indigo-600" />
+                <h3 className="font-bold text-slate-800 text-base">Referral FAQs</h3>
+              </div>
+              <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                {referralFaqs.map(faq => (
+                  <div key={faq.id} className="border border-slate-100 rounded-xl overflow-hidden transition-all duration-200 bg-white shadow-xs">
+                    <button 
+                      onClick={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+                      className="w-full flex items-center justify-between p-3.5 text-left bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer border-none outline-none"
+                    >
+                      <h4 className="text-sm font-bold text-slate-700 pr-4">{faq.question}</h4>
+                      <ChevronDown 
+                        size={16} 
+                        className={`text-slate-400 shrink-0 transition-transform duration-200 ${expandedFaq === faq.id ? 'rotate-180 text-indigo-500' : ''}`} 
+                      />
+                    </button>
+                    
+                    {/* Dropdown Content */}
+                    <div 
+                      className={`transition-all duration-300 ease-in-out ${expandedFaq === faq.id ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
+                    >
+                      <div className="p-3.5 pt-2 border-t border-slate-50">
+                        <p className="text-xs text-slate-500 mb-3 leading-relaxed">{faq.answer}</p>
+                        
+                        {/* Feedback Buttons */}
+                        <div className="flex items-center gap-4 bg-slate-50/50 p-2 rounded-lg w-fit">
+                          <span className="text-[10px] text-slate-400 font-medium">Was this helpful?</span>
+                          <div className="flex items-center gap-3">
+                            <button 
+                              onClick={() => handleFeedback(faq.id, 'like')}
+                              className={`flex items-center gap-1 text-[11px] cursor-pointer bg-transparent border-none outline-none transition-colors ${userSelections[faq.id] === 'like' ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-indigo-500'}`}
+                            >
+                              <ThumbsUp size={12} className={userSelections[faq.id] === 'like' ? 'fill-indigo-100' : ''} />
+                              <span>{faqStats[faq.id]?.likes || 0}</span>
+                            </button>
+                            <button 
+                              onClick={() => handleFeedback(faq.id, 'dislike')}
+                              className={`flex items-center gap-1 text-[11px] cursor-pointer bg-transparent border-none outline-none transition-colors ${userSelections[faq.id] === 'dislike' ? 'text-red-500 font-bold' : 'text-slate-400 hover:text-red-500'}`}
+                            >
+                              <ThumbsDown size={12} className={userSelections[faq.id] === 'dislike' ? 'fill-red-100' : ''} />
+                              <span>{faqStats[faq.id]?.dislikes || 0}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
           </div>

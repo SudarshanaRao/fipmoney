@@ -11,6 +11,7 @@ import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import { saveLoggedInUser, MongoUser } from "../utils/userStorage";
 import { toast } from "react-hot-toast";
 import { API_BASE_URL } from "../utils/apiConfig";
+import { authTranslations, Language } from "../utils/translations";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "tpin" | "success";
@@ -80,6 +81,9 @@ function OtpBoxes({ value, onChange }: { value: string; onChange: (v: string) =>
 }
 
 export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) => void }) {
+  const [lang, setLang] = useState<Language>("en");
+  const t = authTranslations[lang];
+
   const [step,     setStep]     = useState<Step>("mobile");
   const [dir,      setDir]      = useState(1);
   const [mobile,   setMobile]   = useState("");
@@ -100,6 +104,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [confirm,  setConfirm]  = useState("");
   const [showPw,   setShowPw]   = useState(false);
   const [showCp,   setShowCp]   = useState(false);
+  const [referredBy, setReferredBy] = useState("");
 
   useEffect(() => {
     if (!username || username.length < 3) {
@@ -249,7 +254,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       const res = await fetch(`${API_BASE_URL}/users/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile, username, password, tpin })
+        body: JSON.stringify({ mobile, username, password, tpin, referredBy })
       });
       const data = await res.json();
       if (data.success && data.data) {
@@ -369,26 +374,35 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       {/* ── RIGHT PANEL ── */}
       <div className="flex-1 flex flex-col relative bg-white h-screen">
          {/* Top right language dropdown & mobile logo */}
-         <div className="absolute top-8 left-8 right-8 lg:left-auto flex justify-between lg:justify-end items-center z-20">
+         <div className="w-full p-6 lg:p-8 flex justify-between lg:justify-end items-center z-20 shrink-0">
             <div className="flex lg:hidden items-center gap-2">
               <img src={fipMoneyLogo} alt="FipMoney" className="h-7 object-contain" />
               <span className="font-black text-xl text-[#1e1b4b]">Fipmoney</span>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 relative group">
                <button onClick={() => onNavigate("home")} className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer outline-none shadow-sm">
-                 <ArrowLeft size={14} /> Back to Home
+                 <ArrowLeft size={14} /> {t.backToHome}
                </button>
-               <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white shadow-sm text-sm font-semibold text-[#1e1b4b] hover:bg-gray-50 transition-colors cursor-pointer outline-none">
-                 <Globe size={16} className="text-gray-500" />
-                 English
-                 <ChevronDown size={14} className="text-gray-500" />
-               </button>
+               
+               <div className="relative">
+                 <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white shadow-sm text-sm font-semibold text-[#1e1b4b] hover:bg-gray-50 transition-colors cursor-pointer outline-none group">
+                   <Globe size={16} className="text-gray-500" />
+                   {lang === 'en' ? 'English' : lang === 'te' ? 'Telugu' : 'Hindi'}
+                   <ChevronDown size={14} className="text-gray-500" />
+                 </button>
+                 {/* Dropdown menu */}
+                 <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                    <button onClick={() => setLang('en')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'en' ? 'text-[#d89221] bg-amber-50/50' : 'text-gray-700'}`}>English</button>
+                    <button onClick={() => setLang('te')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'te' ? 'text-[#d89221] bg-amber-50/50' : 'text-gray-700'}`}>Telugu (తెలుగు)</button>
+                    <button onClick={() => setLang('hi')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'hi' ? 'text-[#d89221] bg-amber-50/50' : 'text-gray-700'}`}>Hindi (हिंदी)</button>
+                 </div>
+               </div>
             </div>
          </div>
 
          {/* Form Container */}
-         <div className="flex-1 flex flex-col justify-center max-w-[400px] mx-auto w-full px-6 relative z-10 overflow-y-auto hide-scrollbar">
+         <div className="flex-1 flex flex-col justify-center max-w-[400px] mx-auto w-full px-6 relative z-10 overflow-y-auto hide-scrollbar pb-10">
             
             {/* ══ STEPPER UI (Only for setup steps) ══ */}
             <AnimatePresence>
@@ -404,12 +418,12 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     
                     <div className="flex flex-col items-center gap-1.5 bg-white px-2">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "profile" || step === "tpin" ? "bg-[#d89221] text-white border-2 border-white shadow-amber-500/30" : "bg-gray-100 text-gray-400"}`}>1</div>
-                      <span className={`text-[10px] font-bold ${step === "profile" || step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>Profile</span>
+                      <span className={`text-[10px] font-bold ${step === "profile" || step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>{t.profile}</span>
                     </div>
                     
                     <div className="flex flex-col items-center gap-1.5 bg-white px-2">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "tpin" ? "bg-[#d89221] text-white border-2 border-white shadow-amber-500/30" : "bg-gray-100 text-gray-400"}`}>2</div>
-                      <span className={`text-[10px] font-bold ${step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>Security</span>
+                      <span className={`text-[10px] font-bold ${step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>{t.security}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -423,24 +437,24 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     <div className="text-center mb-8">
                         <h2 className="text-[28px] leading-tight font-black text-[#1e1b4b] mb-2 tracking-tight">
                           {regStatus === "registered" ? (
-                            <>Welcome Back! <span className="inline-block">👋</span></>
+                            <>{t.welcomeBack}</>
                           ) : regStatus === "new" ? (
-                            <>Create Your Account <span className="inline-block">✨</span></>
+                            <>{t.createAccount}</>
                           ) : checking ? (
-                            <>Verifying Number... <span className="inline-block animate-pulse">🔍</span></>
+                            <>{t.verifyingNumber}</>
                           ) : (
-                            <>Welcome to Fipmoney <span className="inline-block">👋</span></>
+                            <>{t.welcomeToFipmoney}</>
                           )}
                         </h2>
                         <p className="text-[#64748b] text-[14px] font-medium leading-relaxed max-w-[340px] mx-auto">
                           {regStatus === "registered" ? (
-                            <>Account found for <span className="font-bold text-[#1e1b4b]">+91 {mobile}</span>. Click continue to log in.</>
+                            <>{t.accountFound.replace('{mobile}', mobile)}</>
                           ) : regStatus === "new" ? (
-                            <>New user detected for <span className="font-bold text-[#1e1b4b]">+91 {mobile}</span>. Click continue to sign up.</>
+                            <>{t.newUserDetected.replace('{mobile}', mobile)}</>
                           ) : checking ? (
-                            <>Checking database for registered account...</>
+                            <>{t.checkingDatabase}</>
                           ) : (
-                            <>Enter your mobile number to sign in or create an account</>
+                            <>{t.enterMobileText}</>
                           )}
                         </p>
                     </div>
@@ -452,7 +466,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     </div>
 
                     <div className="mb-6">
-                       <label className="block text-[14px] font-bold text-[#1e1b4b] mb-2.5">Enter your mobile number</label>
+                       <label className="block text-[14px] font-bold text-[#1e1b4b] mb-2.5">{t.enterMobileNumber}</label>
                        <div className={`flex items-center rounded-xl border-2 ${err ? 'border-red-400' : 'border-gray-200'} focus-within:border-[#d89221] transition-all bg-white h-[56px] relative`}>
                           <div className="flex items-center gap-2 px-4 border-r-2 border-gray-200 cursor-pointer h-full rounded-l-xl hover:bg-gray-50 transition-colors">
                              <span className="text-[18px]">🇮🇳</span>
@@ -462,7 +476,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                           <input 
                              type="tel" inputMode="numeric" maxLength={10} value={mobile} autoFocus
                              onChange={e => handleMobileChange(e.target.value)}
-                             placeholder="Enter mobile number"
+                             placeholder={t.mobilePlaceholder}
                              className="flex-1 min-w-0 border-none outline-none bg-transparent px-4 text-[15px] font-bold text-[#1e1b4b] placeholder:font-medium placeholder:text-gray-400 h-full"
                           />
                           
@@ -471,12 +485,12 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        {err && <p className="text-red-500 text-[12px] mt-2 font-semibold">{err}</p>}
                        {!err && regStatus === "registered" && (
                            <p className="text-[#10b981] text-[12px] mt-2 font-bold flex items-center justify-center gap-1 bg-emerald-50 py-1.5 px-3 rounded-lg border border-emerald-200/60">
-                              <CheckCircle size={14}/> Registered Account Found
+                              <CheckCircle size={14}/> {t.registeredAccountFound}
                            </p>
                         )}
                         {!err && regStatus === "new" && (
                            <p className="text-[#d89221] text-[12px] mt-2 font-bold flex items-center justify-center gap-1 bg-amber-50 py-1.5 px-3 rounded-lg border border-amber-200/60">
-                              ✨ New User Account Setup
+                              {t.newUserSetup}
                            </p>
                         )}
                     </div>
@@ -492,21 +506,21 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     >
                         {checking ? (
                            <span className="flex items-center gap-2">
-                              <Loader2 size={18} className="animate-spin" /> Verifying...
+                              <Loader2 size={18} className="animate-spin" /> {t.verifying}
                            </span>
                         ) : regStatus === "registered" ? (
-                           "Continue to Login"
+                           t.continueToLogin
                         ) : regStatus === "new" ? (
-                           "Continue to Register"
+                           t.continueToRegister
                         ) : (
-                           "Continue"
+                           t.continueBtn
                         )}
                     </button>
 
                     <div className="mt-4 flex items-start justify-center gap-2 px-2">
                        <ShieldCheck size={16} className="text-gray-400 shrink-0 mt-0.5" />
                        <p className="text-[12px] font-medium text-gray-500 text-center leading-[1.5]">
-                          By continuing, you agree to our <span className="text-[#d89221] font-bold cursor-pointer hover:underline">Terms of Service</span><br/>and <span className="text-[#d89221] font-bold cursor-pointer hover:underline">Privacy Policy</span>
+                          {t.byContinuing} <span className="text-[#d89221] font-bold cursor-pointer hover:underline">{t.termsOfService}</span><br/>{t.and} <span className="text-[#d89221] font-bold cursor-pointer hover:underline">{t.privacyPolicy}</span>
                        </p>
                     </div>
 
@@ -524,10 +538,10 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                           <ArrowLeft size={18} />
                        </button>
                        <h2 className="text-[28px] font-black text-[#1e1b4b] mb-2 tracking-tight">
-                         Verify Mobile
+                         {t.verifyMobile}
                        </h2>
                        <p className="text-[#64748b] text-[14px] font-medium">
-                         Secure code sent to <span className="font-bold text-[#1e1b4b]">+91 {mobile}</span>
+                         {t.secureCodeSent.replace('{mobile}', mobile)}
                        </p>
                     </div>
 
@@ -547,9 +561,9 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <div className="text-[14px] font-medium text-gray-500 text-center">
                          {canResend
                            ? <button onClick={reset} className="flex items-center gap-1.5 border-none bg-transparent cursor-pointer font-bold text-[#d89221] outline-none hover:underline">
-                               <RefreshCw size={14} /> Resend OTP
+                               <RefreshCw size={14} /> {t.resendOtp}
                              </button>
-                           : <span>Resend in <strong className="text-[#1e1b4b]">0:{timer.toString().padStart(2,"0")}</strong></span>}
+                           : <span>{t.resendIn}<strong className="text-[#1e1b4b]">0:{timer.toString().padStart(2,"0")}</strong></span>}
                        </div>
                        
                        <button 
@@ -557,7 +571,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          disabled={otp.length !== 6}
                          className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${otp.length !== 6 ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
                        >
-                         {isNew ? "Verify & Continue" : "Verify & Login"}
+                         {isNew ? t.verifyAndContinue : t.verifyAndLogin}
                        </button>
                     </div>
                  </FormSlide>
@@ -571,18 +585,18 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                           <ArrowLeft size={18} />
                        </button>
                        <h2 className="text-[28px] font-black text-[#1e1b4b] mb-2 tracking-tight">
-                         Complete Profile
+                         {t.completeProfile}
                        </h2>
-                       <p className="text-[#64748b] text-[14px] font-medium">Almost there — just a few details.</p>
+                       <p className="text-[#64748b] text-[14px] font-medium">{t.almostThere}</p>
                     </div>
 
                     <div className="space-y-5">
                        <div>
-                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Username</label>
+                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.username}</label>
                          <div className="relative">
                            <input type="text" value={username} 
                              onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 16))}
-                             placeholder="Enter your username"
+                             placeholder={t.usernamePlaceholder}
                              className={`w-full h-[56px] rounded-xl border-2 outline-none font-bold text-[14px] text-[#1e1b4b] px-4 pr-12 transition-all bg-white
                                 ${usernameStatus === 'taken' ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
                            />
@@ -592,14 +606,14 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                               {usernameStatus === 'taken' && <XCircle size={18} className="text-red-500" />}
                            </div>
                          </div>
-                         {usernameStatus === 'taken' && <p className="text-red-500 text-[12px] mt-2 font-semibold">Username is already taken. Please choose another.</p>}
-                         {username && usernameStatus !== 'taken' && username.length < 3 && <p className="text-gray-400 text-[12px] mt-2 font-medium">Minimum 3 characters required.</p>}
+                         {usernameStatus === 'taken' && <p className="text-red-500 text-[12px] mt-2 font-semibold">{t.usernameTaken}</p>}
+                         {username && usernameStatus !== 'taken' && username.length < 3 && <p className="text-gray-400 text-[12px] mt-2 font-medium">{t.min3chars}</p>}
                        </div>
                        <div>
-                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Create Password</label>
+                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.createPassword}</label>
                          <div className="relative">
                            <input type={showPw ? "text" : "password"} value={password}
-                             onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters"
+                             onChange={e => setPassword(e.target.value)} placeholder={t.passwordPlaceholder}
                              className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none text-[14px] font-medium text-[#1e1b4b] px-4 pr-12 focus:border-[#d89221] transition-all bg-white"
                            />
                            <button onClick={() => setShowPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent cursor-pointer text-gray-400 outline-none">
@@ -619,10 +633,10 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          )}
                        </div>
                        <div>
-                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Confirm Password</label>
+                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.confirmPassword}</label>
                          <div className="relative">
                            <input type={showCp ? "text" : "password"} value={confirm}
-                             onChange={e => setConfirm(e.target.value)} placeholder="Re-enter password"
+                             onChange={e => setConfirm(e.target.value)} placeholder={t.confirmPasswordPlaceholder}
                              className={`w-full h-[56px] rounded-xl border-2 outline-none text-[14px] font-medium text-[#1e1b4b] px-4 pr-12 transition-all bg-white
                                ${confirm && password !== confirm ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
                            />
@@ -630,7 +644,15 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                              {showCp ? <EyeOff size={18} /> : <Eye size={18} />}
                            </button>
                          </div>
-                         {confirm && password !== confirm && <p className="text-red-500 text-[12px] mt-2 font-semibold">Passwords don't match</p>}
+                         {confirm && password !== confirm && <p className="text-red-500 text-[12px] mt-2 font-semibold">{t.passwordsDontMatch}</p>}
+                       </div>
+
+                       <div>
+                         <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.referralCode}</label>
+                         <input type="text" value={referredBy}
+                           onChange={e => setReferredBy(e.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase())} placeholder={t.referralPlaceholder}
+                           className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none text-[14px] font-bold text-[#1e1b4b] px-4 transition-all bg-white focus:border-[#d89221] uppercase"
+                         />
                        </div>
                        
                        <button 
@@ -638,7 +660,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          disabled={usernameStatus !== 'available' || password.length < 8 || password !== confirm}
                          className={`w-full h-[56px] mt-2 rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${(usernameStatus !== 'available' || password.length < 8 || password !== confirm) ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
                        >
-                         Continue
+                         {t.continueBtn}
                        </button>
 
                        <div className="text-center mt-4">
@@ -658,10 +680,10 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                           <ArrowLeft size={18} />
                        </button>
                        <h2 className="text-[28px] font-black text-[#1e1b4b] mb-2 tracking-tight">
-                         Set Secure T-PIN
+                         {t.setupSecurity}
                        </h2>
                        <p className="text-[#64748b] text-[14px] font-medium leading-relaxed">
-                         Create a 4-digit Transactional PIN.<br/>Keep this safe; we encrypt it one-way for your security.
+                         {t.secureYourApp}
                        </p>
                     </div>
 
@@ -708,7 +730,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          disabled={tpin.length !== 4}
                          className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer mt-4 ${tpin.length !== 4 ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
                        >
-                         Complete Setup
+                         {t.continueBtn}
                        </button>
                     </div>
                  </FormSlide>

@@ -5,7 +5,7 @@ import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn";
+export type Tab = "home" | "portfolio" | "sip" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms";
 
 export const navItems = [
   { id: "home",      Icon: Home,       label: "Dashboard" },

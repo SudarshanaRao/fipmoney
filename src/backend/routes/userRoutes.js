@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings } from '../controllers/userController.js';
+import { checkMobile, checkUsername, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -395,6 +395,26 @@ router.get('/search', getUserByMobile);
  *         description: User not found.
  */
 router.get('/dashboard', getDashboardData);
+
+/**
+ * @swagger
+ * /api/users/referrals/{userId}:
+ *   get:
+ *     summary: Get Referral Tracking
+ *     description: Fetch users referred by a specific user.
+ *     tags:
+ *       - User Management
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.get('/referrals/:userId', getReferralsTracking);
 
 /**
  * @swagger

@@ -28,6 +28,7 @@ export default function SettingsPage() {
   const initialKyc = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
   const initialEmail = loggedInUser?.email || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || "" : "");
   const initialUserCode = loggedInUser?.userCode || "";
+  const initialReferralCode = loggedInUser?.referralCode || "";
   const initialUsername = loggedInUser?.username || "";
   const initialBio = "";
   const initialJobTitle = loggedInUser?.occupation || "";
@@ -41,6 +42,7 @@ export default function SettingsPage() {
     }
     return initialUsername || "";
   });
+  const [referralCode, setReferralCode] = useState(initialReferralCode);
   const [email, setEmail] = useState(initialEmail);
   const [mobileNumber, setMobileNumber] = useState(loggedInMobile);
   const [bio, setBio] = useState(initialBio);
@@ -108,6 +110,7 @@ export default function SettingsPage() {
             if (user.occupation) setJobTitle(user.occupation);
             if (user.annualIncome) setIncomeRange(String(user.annualIncome));
             if (user.username && !isUsernameLocked) setUsername(user.username);
+            if (user.referralCode) setReferralCode(user.referralCode);
           }
         })
         .catch(err => console.warn("Failed to fetch user details:", err));
@@ -487,6 +490,19 @@ export default function SettingsPage() {
                     <div className="md:col-span-8">
                       <span className="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-black text-indigo-700 bg-indigo-50 border border-indigo-100 font-mono tracking-wider shadow-xs">
                         #{initialUserCode || "FIP0001"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Referral Code Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                    <div className="md:col-span-4">
+                      <label className="text-sm font-semibold text-gray-700">Referral Code</label>
+                      <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Share this to earn rewards</span>
+                    </div>
+                    <div className="md:col-span-8">
+                      <span className="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-black text-emerald-700 bg-emerald-50 border border-emerald-100 font-mono tracking-wider shadow-xs">
+                        {referralCode || "FIP12345"}
                       </span>
                     </div>
                   </div>

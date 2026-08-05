@@ -7,6 +7,7 @@ import swaggerSpec from './config/swagger.js';
 import { getSwaggerLoginHtml } from './config/swaggerLoginHtml.js';
 import healthRoutes from './routes/healthRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import faqRoutes from './routes/faqRoutes.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -159,6 +160,7 @@ app.use(
 // API Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/faqs', faqRoutes);
 
 // Error Handling Middleware
 app.use(notFound);

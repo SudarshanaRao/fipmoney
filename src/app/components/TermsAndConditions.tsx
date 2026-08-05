@@ -726,6 +726,32 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
             </div>
           </section>
 
+          {/* Section 21: Referral Program FAQs */}
+          <section id="referral-faqs" className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <FileText className="w-6 h-6 mr-3 text-[#ffbf00]" />
+              21. REFERRAL PROGRAM FAQS
+            </h2>
+            <div className="space-y-6 text-gray-700">
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <h4 className="font-bold text-gray-900 mb-2">Q: When will I receive my referral bonus?</h4>
+                <p>A: You will receive your ₹50 digital gold referral bonus within 24-48 hours after your friend successfully completes a digital gold purchase of at least ₹250 within 30 days of creating their account.</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <h4 className="font-bold text-gray-900 mb-2">Q: Is there a limit to how many friends I can refer?</h4>
+                <p>A: No, there is no limit! You can refer as many friends as you want and keep earning the ₹50 digital gold bonus for every successful referral.</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <h4 className="font-bold text-gray-900 mb-2">Q: What happens if my friend purchases gold after 30 days?</h4>
+                <p>A: The referral reward is only applicable if the referee completes their first ₹250+ digital gold purchase within 30 days of account creation. Purchases made after this period will not qualify for the referral bonus.</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <h4 className="font-bold text-gray-900 mb-2">Q: Where can I see my referral earnings?</h4>
+                <p>A: Your referral earnings will be credited directly to your digital gold vault. You can view the transaction details in your 'History' or 'Portfolio' section.</p>
+              </div>
+            </div>
+          </section>
+
           {/* Contact Information */}
           <div className="mt-12 p-8 bg-gradient-to-r from-[#fff8dc] to-[#ffbf00] rounded-2xl">
             <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Contact Information</h3>

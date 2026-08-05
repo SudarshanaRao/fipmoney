@@ -21,6 +21,8 @@ import HistoryPage from "./HistoryPage";
 import BillsPage from "./BillsPage";
 import PortfolioPage from "./PortfolioPage";
 import ReferAndEarn from "./ReferAndEarn";
+import TermsAndConditions from "./TermsAndConditions";
+import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
 import { getLoggedInUser } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
@@ -866,7 +868,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         ) : ["banking", "offers"].includes(tab) ? (
           <ComingSoon tab={tab} />
         ) : tab === "refer-and-earn" ? (
-          <ReferAndEarn onNavigate={() => setTab("home")} />
+          <ReferAndEarn onNavigate={(target) => setTab(target as Tab)} />
+        ) : tab === "terms" ? (
+          <TermsAndConditions onBack={() => setTab("refer-and-earn")} />
+        ) : tab === "referral-terms" ? (
+          <ReferralTermsAndConditions onBack={() => setTab("refer-and-earn")} />
         ) : (
           <MainDashboard />
         )}
