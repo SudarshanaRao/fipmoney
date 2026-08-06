@@ -61,12 +61,12 @@ const providersData: Record<Provider, { name: string; subtitle: string; priceDif
 
 const generateChartData = (base: number) => {
   return [
-    { time: "12 AM", price: 11980 },
-    { time: "4 AM", price: 12220 },
-    { time: "8 AM", price: 12150 },
+    { time: "12 AM", price: base * 0.98 },
+    { time: "4 AM", price: base * 0.988 },
+    { time: "8 AM", price: base * 0.985 },
     { time: "12 PM", price: base },
-    { time: "4 PM", price: 12280 },
-    { time: "8 PM", price: 12410 },
+    { time: "4 PM", price: base * 0.991 },
+    { time: "8 PM", price: base * 0.997 },
     { time: "12 AM", price: base * 1.002 }
   ];
 };
@@ -82,6 +82,10 @@ export default function BuyMetalModal({
   initialMode
 }: BuyMetalModalProps) {
   const [step, setStep] = useState<Step>("input");
+
+  // Dynamic metal strings
+  const metalName = metal === "gold" ? "Gold" : "Silver";
+  const metalPurity = metal === "gold" ? "24K 99.99% Pure Digital Gold" : "99.9% Fine Pure Digital Silver";
 
   // Stable Fixed Locked Rate
   const [lockedRate, setLockedRate] = useState<number>(basePrice);
@@ -107,8 +111,8 @@ export default function BuyMetalModal({
 
   // Chart Data
   const chartData = useMemo(() => generateChartData(lockedRate), [lockedRate]);
-  const lowPrice = 12203.79;
-  const highPrice = 12526.88;
+  const lowPrice = useMemo(() => Math.min(...chartData.map(d => d.price)), [chartData]);
+  const highPrice = useMemo(() => Math.max(...chartData.map(d => d.price)), [chartData]);
 
   // Calculations
   const calculatedGrams = useMemo(() => {
@@ -272,17 +276,17 @@ export default function BuyMetalModal({
 
           {/* Top Modal Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 shrink-0">
-            {/* Left: Title & Subtitle */}
+            {/* Left: Dynamic Title & Subtitle */}
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-full bg-amber-100/80 text-amber-600 flex items-center justify-center shrink-0">
                 <Sparkles size={18} strokeWidth={2.5} />
               </div>
               <div>
                 <h1 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">
-                  Buy Digital Gold
+                  Buy Digital {metalName}
                 </h1>
                 <p className="text-[10px] font-semibold text-slate-400">
-                  24K 99.99% Pure Digital Gold
+                  {metalPurity}
                 </p>
               </div>
             </div>
@@ -375,7 +379,7 @@ export default function BuyMetalModal({
                     </div>
                   </div>
 
-                  {/* Spacious Oval Pill Timer Gauge */}
+                  {/* Oval Pill Gauge */}
                   <div className={`px-4 py-2 rounded-2xl border-2 flex flex-col items-center justify-center shadow-xs shrink-0 min-w-[96px] ${
                     timeLeft <= 60 ? "border-rose-500 bg-rose-50/80 animate-pulse" : "border-emerald-500 bg-[#ECFDF5]"
                   }`}>
@@ -412,13 +416,13 @@ export default function BuyMetalModal({
                 </div>
               </div>
 
-              {/* 2. LIVE GOLD PRICE Chart Box */}
+              {/* 2. LIVE PRICE Chart Box */}
               <div className="bg-[#FAFAFC] border border-slate-200/60 rounded-xl p-3 relative flex-1 flex flex-col justify-between">
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">
-                        LIVE GOLD PRICE (₹/G)
+                        LIVE {metalName.toUpperCase()} PRICE (₹/G)
                       </span>
                       <span className="bg-emerald-500 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-1">
                         ● LIVE
@@ -467,8 +471,7 @@ export default function BuyMetalModal({
                       </defs>
                       <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 9, fontWeight: 700 }} dy={2} />
                       <YAxis
-                        domain={[11800, 12600]}
-                        ticks={[11800, 12200, 12600]}
+                        domain={["auto", "auto"]}
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: "#94a3b8", fontSize: 9, fontWeight: 700 }}
@@ -495,7 +498,7 @@ export default function BuyMetalModal({
                 <div className="flex items-center justify-between border-t border-slate-200/60 pt-1 mt-1 text-[10px] font-semibold text-slate-500">
                   <div className="flex items-center gap-1">
                     <ShieldCheck size={12} className="text-[#6D28D9]" />
-                    <span>Gold prices update in real-time based on live market rates</span>
+                    <span>{metalName} prices update in real-time based on live market rates</span>
                   </div>
                   <div className="flex items-center gap-1 text-slate-400 font-bold">
                     <span>Last updated: 10:30:45 AM</span>
@@ -513,7 +516,7 @@ export default function BuyMetalModal({
                   <div>
                     <h4 className="text-xs font-black text-white leading-tight">100% Secure & Insured Vaults</h4>
                     <p className="text-[9px] text-indigo-200/80 font-medium">
-                      Your gold is stored in insured vaults. We never store your gold physically.
+                      Your {metalName.toLowerCase()} is stored in insured vaults. We never store your {metalName.toLowerCase()} physically.
                     </p>
                   </div>
                 </div>
@@ -525,7 +528,7 @@ export default function BuyMetalModal({
                   </div>
                   <div className="flex items-center gap-1">
                     <Sparkles size={13} className="text-amber-400" />
-                    <span>99.99% Pure</span>
+                    <span>Pure {metalName}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock size={13} className="text-amber-400" />
@@ -670,7 +673,7 @@ export default function BuyMetalModal({
               <div className="border-t border-slate-100 pt-2 space-y-1 text-xs">
                 <h3 className="text-xs font-black text-slate-800 mb-1">Order Summary</h3>
                 <div className="flex justify-between items-center text-[11px]">
-                  <span className="font-semibold text-slate-500">Live Gold Rate (per gram)</span>
+                  <span className="font-semibold text-slate-500">Live {metalName} Rate (per gram)</span>
                   <span className="font-black text-slate-900">
                     ₹{currentLockedPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
@@ -716,7 +719,7 @@ export default function BuyMetalModal({
                   }`}
                 >
                   <Lock size={15} />
-                  <span>Buy Gold Securely</span>
+                  <span>Buy {metalName} Securely</span>
                   <ArrowRight size={17} />
                 </button>
 
