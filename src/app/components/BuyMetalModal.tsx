@@ -153,7 +153,6 @@ export default function BuyMetalModal({
       setIsTimedOut(false);
       setStep("input");
 
-      // Determine target mode: respect initialMode if given, else check non-zero values
       let targetMode: "amount" | "grams" = "amount";
       if (initialMode) {
         targetMode = initialMode;
@@ -185,18 +184,21 @@ export default function BuyMetalModal({
     return () => clearInterval(interval);
   }, [isOpen, isTimedOut]);
 
-  // Countdown timer effect
+  // Smooth live 1-second countdown timer
   useEffect(() => {
     if (!isOpen || isTimedOut || step === "processing" || step === "success") return;
-    if (timeLeft <= 0) {
-      setIsTimedOut(true);
-      return;
-    }
     const interval = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsTimedOut(true);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isOpen, timeLeft, isTimedOut, step]);
+  }, [isOpen, isTimedOut, step]);
 
   const formatTimer = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -217,7 +219,6 @@ export default function BuyMetalModal({
     }, 2500);
   };
 
-  // Live market rate comparison against frozen locked rate
   const isMarketHigherOrEqual = liveMarketRate >= lockedRate;
   const marketDiff = (liveMarketRate - lockedRate).toFixed(2);
 
@@ -286,13 +287,12 @@ export default function BuyMetalModal({
               </div>
             </div>
 
-            {/* Middle: Live Market Rate (RUPEES RATE ITSELF IS GREEN OR RED) */}
+            {/* Middle: Live Market Rate */}
             <div className="flex items-center gap-2.5 bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-100">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                 LIVE MARKET RATE
               </span>
               <div className="flex items-baseline gap-1">
-                {/* Rate itself is colored Green if >= lockedRate, Red if lower */}
                 <span className={`text-base sm:text-lg font-black tracking-tight ${
                   isMarketHigherOrEqual ? "text-emerald-600" : "text-rose-600"
                 }`}>
@@ -325,7 +325,7 @@ export default function BuyMetalModal({
             </div>
           </div>
 
-          {/* Time Ticking Urgent Warning Banner (Triggers when < 90 seconds remaining) */}
+          {/* Time Ticking Urgent Warning Banner */}
           <AnimatePresence>
             {timeLeft <= 90 && (
               <motion.div
@@ -354,10 +354,9 @@ export default function BuyMetalModal({
             {/* LEFT COLUMN (Width: 7 cols) */}
             <div className="lg:col-span-7 flex flex-col justify-between space-y-2.5 h-full">
 
-              {/* 1. RATE LOCKED Info Box (Spacious Oval Pill Timer Gauge - Fits 100% Perfectly) */}
+              {/* 1. RATE LOCKED Info Box */}
               <div className="bg-[#F9F8FF] border border-[#ECE7FE] rounded-xl p-3 relative shadow-2xs">
                 <div className="flex items-center justify-between gap-2">
-                  {/* Lock Title & Fixed Locked Rate */}
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-1.5">
                       <div className="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
@@ -376,7 +375,7 @@ export default function BuyMetalModal({
                     </div>
                   </div>
 
-                  {/* Spacious Oval Pill Timer Gauge (Zero Overlap & Fits 100% Perfectly) */}
+                  {/* Spacious Oval Pill Timer Gauge */}
                   <div className={`px-4 py-2 rounded-2xl border-2 flex flex-col items-center justify-center shadow-xs shrink-0 min-w-[96px] ${
                     timeLeft <= 60 ? "border-rose-500 bg-rose-50/80 animate-pulse" : "border-emerald-500 bg-[#ECFDF5]"
                   }`}>
@@ -435,7 +434,6 @@ export default function BuyMetalModal({
                     </div>
                   </div>
 
-                  {/* Timeframe selector */}
                   <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-lg border border-slate-200/70">
                     {(["1H", "24H", "7D", "1M", "1Y"] as Timeframe[]).map((tf) => (
                       <button
@@ -453,9 +451,7 @@ export default function BuyMetalModal({
                   </div>
                 </div>
 
-                {/* Area Chart */}
                 <div className="h-26 sm:h-28 w-full pt-1 relative">
-                  {/* Floating Peak Tooltip Callout */}
                   <div className="absolute top-1 left-[48%] -translate-x-1/2 bg-white border border-slate-200 rounded-lg px-2.5 py-1 shadow-xs text-center z-10">
                     <span className="text-[11px] font-black text-slate-900 block leading-tight">₹{lockedRate.toFixed(2)}</span>
                     <span className="text-[8px] font-bold text-slate-400 block">Today, 10:30 AM</span>
@@ -496,7 +492,6 @@ export default function BuyMetalModal({
                   </ResponsiveContainer>
                 </div>
 
-                {/* Chart Footer Sub-bar */}
                 <div className="flex items-center justify-between border-t border-slate-200/60 pt-1 mt-1 text-[10px] font-semibold text-slate-500">
                   <div className="flex items-center gap-1">
                     <ShieldCheck size={12} className="text-[#6D28D9]" />
