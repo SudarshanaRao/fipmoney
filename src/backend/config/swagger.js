@@ -47,8 +47,8 @@ This API documentation is hosted on an obfuscated secret route (\`/${process.env
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: 'Development Local Server',
+        url: '/',
+        description: 'Current Server',
       },
     ],
     components: {

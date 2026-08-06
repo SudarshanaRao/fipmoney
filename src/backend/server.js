@@ -14,6 +14,9 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// Try loading from current working directory (usually root)
+dotenv.config();
+// Also explicitly load from the backend directory
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Connect to Database
