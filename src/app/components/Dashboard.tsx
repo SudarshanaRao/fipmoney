@@ -23,6 +23,7 @@ import PortfolioPage from "./PortfolioPage";
 import ReferAndEarn from "./ReferAndEarn";
 import TermsAndConditions from "./TermsAndConditions";
 import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
+import SavingsPage from "./SavingsPage";
 import { clearUserSession, getLoggedInUser } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
@@ -865,6 +866,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <SettingsPage />
         ) : tab === "sip" ? (
           <DigitalGoldSilver onNavigate={(target) => setTab(target as Tab)} kycStatus={kycStatus} />
+        ) : tab === "savings" ? (
+          <SavingsPage onNavigate={(target) => setTab(target as Tab)} />
         ) : tab === "history" ? (
           <HistoryPage />
         ) : tab === "help" ? (

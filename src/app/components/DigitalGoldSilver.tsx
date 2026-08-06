@@ -15,6 +15,7 @@ import { useFipModal } from "./FipModal";
 import { addTransaction } from "../utils/transactionStorage";
 import { fetchLatestMetalPrices } from "../utils/metalPriceApi";
 import BuyMetalModal from "./BuyMetalModal";
+import SellMetalModal from "./SellMetalModal";
 
 interface DigitalGoldSilverProps {
   onNavigate: (page: string) => void;
@@ -121,8 +122,9 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliverySuccess, setDeliverySuccess] = useState(false);
 
-  // Buy Modal State
+  // Buy/Sell Modal State
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [showSellModal, setShowSellModal] = useState(false);
 
   // Static mock transactions history
   const [transactions, setTransactions] = useState([
@@ -183,8 +185,12 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const label = metal === "gold" ? "Gold" : "Silver";
   const metalName = label;
 
+  // Last input type edited by user
+  const [lastInputType, setLastInputType] = useState<"amount" | "grams">("amount");
+
   // Handle input conversions
   const handleAmountChange = (val: string) => {
+    setLastInputType("amount");
     setAmount(val);
     if (!val || isNaN(Number(val))) {
       setGrams("");
@@ -194,6 +200,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   };
 
   const handleGramsChange = (val: string) => {
+    setLastInputType("grams");
     setGrams(val);
     if (!val || isNaN(Number(val))) {
       setAmount("");
@@ -232,15 +239,12 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
         showAlert(`This exceeds your daily KYC sell limit of ₹${dailySellLimit.toLocaleString()}.`, "error", "Transaction Blocked");
         return;
       }
+      setShowSellModal(true);
+      return;
     }
+  };
 
-    setIsProcessing(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-
-    const txId = "FIP" + Math.floor(100000 + Math.random() * 900000);
-    setLastTxId(txId);
-
+  const finalizeTransaction = () => {
     if (txType === "buy") {
       if (metal === "gold") setGoldHoldings(prev => prev + Number(grams));
       else setSilverHoldings(prev => prev + Number(grams));
@@ -908,11 +912,31 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
     
     {ModalComponent}
 
+    <SellMetalModal 
+      isOpen={showSellModal} 
+      onClose={() => setShowSellModal(false)}
+      metal={metal}
+      basePrice={activePrice}
+      initialAmount={amount}
+      initialGrams={grams}
+      onSuccess={(finalAmount, finalGrams) => {
+        const txId = "FIP" + Math.floor(100000 + Math.random() * 900000);
+        setLastTxId(txId);
+        if (metal === "gold") setGoldHoldings(prev => prev - finalGrams);
+        else setSilverHoldings(prev => prev - finalGrams);
+        setSuccessMsg(`Successfully sold ${finalGrams.toFixed(4)}g of 24K pure Digital ${metal === 'gold' ? 'Gold' : 'Silver'}! Funds will reflect in your bank account shortly.`);
+        setTxSuccess(true);
+      }}
+    />
+
     <BuyMetalModal 
       isOpen={showBuyModal} 
       onClose={() => setShowBuyModal(false)}
       metal={metal}
       basePrice={activePrice}
+      initialAmount={amount}
+      initialGrams={grams}
+      initialMode={lastInputType}
       onSuccess={(finalAmount, finalGrams) => {
         const txId = "FIP" + Math.floor(100000 + Math.random() * 900000);
         setLastTxId(txId);
