@@ -28,7 +28,7 @@ const referralSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: 'dev_referrals',
+    collection: 'referrals',
   }
 );
 

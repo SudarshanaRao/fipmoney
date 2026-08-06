@@ -52,7 +52,7 @@ const vaultTransactionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: 'dev_vault_transactions',
+    collection: 'vaulttransactions',
   }
 );
 
