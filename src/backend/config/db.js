@@ -13,9 +13,16 @@ const FALLBACK_MONGO_URI_DEV = 'mongodb+srv://fipmoneyofficial_db_user:VluteSMvx
 const connectDB = async () => {
   try {
     const isProd = process.env.NODE_ENV === 'production';
-    const mongoUri = isProd 
-      ? (process.env.MONGO_URI_PROD || process.env.MONGO_URI) 
+    let mongoUri = isProd 
+      ? (process.env.MONGO_URI_PROD || process.env.MONGO_URI || FALLBACK_MONGO_URI_DEV) 
       : (process.env.MONGO_URI_DEV || process.env.MONGO_URI || FALLBACK_MONGO_URI_DEV);
+      
+    // Force the correct database name based on environment
+    if (isProd && mongoUri.includes('fipmoney-dev')) {
+      mongoUri = mongoUri.replace('fipmoney-dev', 'fipmoney-prod');
+    } else if (!isProd && mongoUri.includes('fipmoney-prod')) {
+      mongoUri = mongoUri.replace('fipmoney-prod', 'fipmoney-dev');
+    }
       
     const conn = await mongoose.connect(mongoUri);
     console.log(`[MongoDB] Connected successfully to host: ${conn.connection.host}`);
