@@ -330,7 +330,7 @@ export default function App() {
               <BillShowcaseSection onNavigate={navigateToPage} />
 
               {/* Referral Program Section */}
-              <ReferralProgramSection />
+              <ReferralProgramSection onNavigate={navigateToPage} />
 
               {/* FAQs Section */}
               <HomeFAQs />

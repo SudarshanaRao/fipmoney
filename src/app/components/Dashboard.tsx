@@ -23,7 +23,7 @@ import PortfolioPage from "./PortfolioPage";
 import ReferAndEarn from "./ReferAndEarn";
 import TermsAndConditions from "./TermsAndConditions";
 import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
-import { getLoggedInUser } from "../utils/userStorage";
+import { clearUserSession, getLoggedInUser } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
 import { decryptData256 } from "../utils/cryptoUtils";
@@ -849,7 +849,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
     <div className="flex h-screen bg-[#fcfdfd] font-sans overflow-hidden text-gray-800">
       <Sidebar activeTab={tab} onTabChange={setTab} onLogout={() => {
         if (typeof window !== 'undefined') {
-          sessionStorage.removeItem("fm_logged_in_mobile");
+          clearUserSession();
           sessionStorage.removeItem("fm_logged_in_name");
         }
         onNavigate("home");
