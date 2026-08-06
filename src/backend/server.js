@@ -31,7 +31,11 @@ const allowedOrigins = [
   'https://fipmoney.com',
   'https://www.fipmoney.com',
   'https://test.fipmoney.com',
-  'https://prod-server.fipmoney.com' // Allow Swagger UI to make requests to itself
+  'http://test.fipmoney.com',
+  'https://dev-server.fipmoney.com',
+  'http://dev-server.fipmoney.com',
+  'https://prod-server.fipmoney.com',
+  'http://prod-server.fipmoney.com'
 ];
 
 app.use(cors({
