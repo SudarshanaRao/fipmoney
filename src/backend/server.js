@@ -1,5 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import connectDB from './config/db.js';
@@ -10,7 +12,9 @@ import userRoutes from './routes/userRoutes.js';
 import faqRoutes from './routes/faqRoutes.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Connect to Database
 connectDB();
