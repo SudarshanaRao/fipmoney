@@ -17,6 +17,12 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
   const [userSelections, setUserSelections] = useState<Record<string, string>>({});
   const [expandedFaq, setExpandedFaq] = useState<string | null>(null);
   const [referralsTracked, setReferralsTracked] = useState<any[]>([]);
+  const [summaryData, setSummaryData] = useState({
+    totalEarnings: 0,
+    pendingEarnings: 0,
+    successfulReferrals: 0,
+    availableBalance: 0
+  });
   const [expandedReferralId, setExpandedReferralId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,11 +38,26 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
       .catch(console.error);
 
     // Fetch Referral Tracking
-    fetch(`${API_BASE_URL}/users/referrals/${userId}`)
+    fetch(`${API_BASE_URL}/users/referrals?mobile=${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setReferralsTracked(data.data || []);
+        }
+      })
+      .catch(console.error);
+
+    // Fetch Referral Summary
+    fetch(`${API_BASE_URL}/users/referrals/summary?mobile=${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSummaryData(data.data || {
+            totalEarnings: 0,
+            pendingEarnings: 0,
+            successfulReferrals: 0,
+            availableBalance: 0
+          });
         }
       })
       .catch(console.error);
@@ -225,21 +246,21 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                 <div className="bg-[#faf5ff] rounded-xl p-3 border border-purple-50">
                   <div className="text-[11px] font-semibold text-purple-600 mb-1 leading-tight">Total Earnings</div>
                   <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-lg font-black text-purple-900">₹1,250</span>
+                    <span className="text-lg font-black text-purple-900">₹{summaryData.totalEarnings.toLocaleString()}</span>
                     <Wallet size={14} className="text-purple-400 ml-auto" />
                   </div>
                 </div>
                 <div className="bg-[#fffbeb] rounded-xl p-3 border border-amber-50">
                   <div className="text-[11px] font-semibold text-amber-600 mb-1 leading-tight">Pending Earnings</div>
                   <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-lg font-black text-amber-900">₹450</span>
+                    <span className="text-lg font-black text-amber-900">₹{summaryData.pendingEarnings.toLocaleString()}</span>
                     <Clock size={14} className="text-amber-400 ml-auto" />
                   </div>
                 </div>
                 <div className="bg-[#f0fdf4] rounded-xl p-3 border border-emerald-50">
                   <div className="text-[11px] font-semibold text-emerald-600 mb-1 leading-tight">Successful Referrals</div>
                   <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-lg font-black text-emerald-900">12</span>
+                    <span className="text-lg font-black text-emerald-900">{summaryData.successfulReferrals}</span>
                     <Users size={14} className="text-emerald-400 ml-auto" />
                   </div>
                 </div>
@@ -252,7 +273,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                   </div>
                   <div>
                     <div className="text-[11px] font-bold text-slate-500">Available Balance</div>
-                    <div className="text-base font-black text-slate-800">₹800</div>
+                    <div className="text-base font-black text-slate-800">₹{summaryData.availableBalance.toLocaleString()}</div>
                   </div>
                 </div>
                 <button className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold py-2 px-3.5 rounded-md text-xs transition-colors flex items-center gap-1 border-none outline-none cursor-pointer shadow-sm">

@@ -132,7 +132,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   }, [username]);
 
   useEffect(() => {
-    if (!referredBy || referredBy.length !== 6) {
+    if (!referredBy || referredBy.trim().length < 5) {
       setReferredByStatus(null);
       setReferrerName("");
       return;

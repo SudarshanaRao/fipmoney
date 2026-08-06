@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import VirtualCard from '../models/VirtualCard.js';
 import VaultTransaction from '../models/VaultTransaction.js';
 import Otp from '../models/Otp.js';
+import Referral from '../models/Referral.js';
 import { generateUniqueCardDetails } from '../utils/cardGenerator.js';
 import { uploadProfileImageToS3 } from '../utils/s3Uploader.js';
 
@@ -122,10 +123,19 @@ export const checkUsername = async (req, res, next) => {
 export const checkReferral = async (req, res, next) => {
   try {
     const { referralCode } = req.body;
-    if (!referralCode || referralCode.length !== 6) {
+    if (!referralCode || referralCode.length < 5) {
       return res.status(400).json({ success: false, message: 'Invalid referral code' });
     }
-    const user = await User.findOne({ referralCode: new RegExp(`^${referralCode}$`, 'i') });
+    
+    const cleanCode = String(referralCode).trim();
+    const user = await User.findOne({ 
+      $or: [
+        { referralCode: new RegExp(`^${cleanCode}$`, 'i') },
+        { userCode: new RegExp(`^${cleanCode}$`, 'i') },
+        { username: new RegExp(`^${cleanCode}$`, 'i') }
+      ]
+    });
+    
     if (user) {
       return res.status(200).json({ success: true, valid: true, referrerName: user.username || user.fullName || 'User' });
     } else {
@@ -338,6 +348,23 @@ export const authUser = async (req, res, next) => {
 
       const generatedVid = crypto.randomUUID();
 
+      let finalReferredBy = '';
+      let referrerMobile = '';
+      if (referredBy) {
+        const cleanRefCode = String(referredBy).trim();
+        const referrer = await User.findOne({
+          $or: [
+            { referralCode: new RegExp(`^${cleanRefCode}$`, 'i') },
+            { userCode: new RegExp(`^${cleanRefCode}$`, 'i') },
+            { username: new RegExp(`^${cleanRefCode}$`, 'i') }
+          ]
+        });
+        if (referrer) {
+          finalReferredBy = referrer.referralCode;
+          referrerMobile = referrer.mobileNumber;
+        }
+      }
+
       await VirtualCard.create({
         vid: generatedVid,
         userId: generatedUserId,
@@ -372,7 +399,7 @@ export const authUser = async (req, res, next) => {
         motherName: '',
         fatherName: '',
         referralCode: await generateUniqueReferralCode(User),
-        referredBy: referredBy || '',
+        referredBy: finalReferredBy,
         status: 'ACTIVE',
         userType: 'CUSTOMER',
         accountLevel: 'LEVEL_1',
@@ -431,6 +458,15 @@ export const authUser = async (req, res, next) => {
         createdBy: 'SYSTEM',
         updatedBy: 'SYSTEM',
       });
+
+      if (finalReferredBy && referrerMobile) {
+        await Referral.create({
+          referrerMobile: referrerMobile,
+          refereeMobile: cleanMobile,
+          referralCodeUsed: finalReferredBy,
+          status: 'JOINED'
+        });
+      }
 
       res.cookie('fm_userid', user.userId, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
 
@@ -620,6 +656,60 @@ export const buyGoldOrSilver = async (req, res, next) => {
 
     const goldPrice = 6420.50;
     const silverPrice = 84.20;
+
+    // --- Referral Bonus Logic ---
+    if (numAmount >= 250 && user.referredBy) {
+      const existingBonus = await VaultTransaction.findOne({
+        mobileNumber: cleanMobile,
+        type: 'REFERRAL_BONUS'
+      });
+
+      if (!existingBonus) {
+        const referrer = await User.findOne({ referralCode: user.referredBy });
+        if (referrer) {
+          const bonusAmount = 50;
+          const bonusGrams = Number((bonusAmount / goldPrice).toFixed(4));
+          
+          // Credit Referee
+          user.goldHoldingsGrams = Number(((user.goldHoldingsGrams || 0) + bonusGrams).toFixed(4));
+          await VaultTransaction.create({
+            txId: 'FIP' + Math.floor(100000 + Math.random() * 900000),
+            mobileNumber: cleanMobile,
+            type: 'REFERRAL_BONUS',
+            metal: 'GOLD',
+            amount: bonusAmount,
+            grams: bonusGrams,
+            ratePerGram: goldPrice,
+            status: 'COMPLETED',
+            source: 'Referral Reward',
+          });
+
+          // Credit Referrer
+          referrer.goldHoldingsGrams = Number(((referrer.goldHoldingsGrams || 0) + bonusGrams).toFixed(4));
+          await referrer.save();
+          await VaultTransaction.create({
+            txId: 'FIP' + Math.floor(100000 + Math.random() * 900000),
+            mobileNumber: referrer.mobileNumber,
+            type: 'REFERRAL_BONUS',
+            metal: 'GOLD',
+            amount: bonusAmount,
+            grams: bonusGrams,
+            ratePerGram: goldPrice,
+            status: 'COMPLETED',
+            source: 'Referral Reward',
+          });
+          
+          await Referral.findOneAndUpdate(
+            { refereeMobile: cleanMobile },
+            { status: 'REWARD_CREDITED', rewardAmount: bonusAmount * 2 }
+          );
+        }
+      }
+    }
+    
+    // Save user again in case referral bonus was added
+    await user.save();
+
     const goldVaultValue = Number(((user.goldHoldingsGrams || 0) * goldPrice).toFixed(2));
     const silverVaultValue = Number(((user.silverHoldingsGrams || 0) * silverPrice).toFixed(2));
     const portfolioValue = Number((goldVaultValue + silverVaultValue + (user.cashBalance || 0)).toFixed(2));
@@ -810,6 +900,11 @@ export const completeKyc = async (req, res, next) => {
     user.kycLevel = 'FULL';
 
     await user.save();
+
+    await Referral.findOneAndUpdate(
+      { refereeMobile: user.mobileNumber, status: 'JOINED' },
+      { status: 'KYC_COMPLETED' }
+    );
 
     return res.status(200).json({
       success: true,
@@ -1026,54 +1121,35 @@ export const getProfileSettings = async (req, res, next) => {
 };
 
 // @desc    Get Referrals Tracking
-// @route   GET /api/users/referrals/:userId
+// @route   GET /api/users/referrals
 export const getReferralsTracking = async (req, res, next) => {
   try {
-    const { userId } = req.params;
+    const { mobile } = req.query;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'mobile is required' });
+    }
 
-    const user = await User.findOne({ 
-      $or: [
-        { userId: userId },
-        { userCode: userId },
-        { mobileNumber: userId }
-      ]
-    });
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({ mobileNumber: cleanMobile });
     if (!user) {
-      res.status(404);
-      throw new Error('User not found');
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    if (!user.referralCode) {
-      return res.status(200).json({ success: true, data: [] });
-    }
+    const referrals = await Referral.find({ referrerMobile: user.mobileNumber });
 
-    // Find all users who were referred by this user
-    const referredUsers = await User.find({ referredBy: user.referralCode });
-
-    // For each user, check if they have a successful gold purchase >= 250
-    const trackingData = await Promise.all(referredUsers.map(async (referred) => {
-      const purchases = await VaultTransaction.find({
-        mobileNumber: referred.mobileNumber,
-        type: 'BUY',
-        metal: 'GOLD',
-        status: 'SUCCESS'
-      });
-
-      const totalPurchased = purchases.reduce((sum, tx) => sum + tx.amount, 0);
-      const hasPurchasedGold = totalPurchased >= 250;
-
+    const trackingData = await Promise.all(referrals.map(async (ref) => {
+      const referee = await User.findOne({ mobileNumber: ref.refereeMobile });
       return {
-        id: referred.userId,
-        name: referred.firstName ? `${referred.firstName} ${referred.lastName || ''}`.trim() : (referred.username || 'User'),
-        mobileMasked: referred.mobileNumber ? referred.mobileNumber.replace(/.(?=.{4})/g, '*') : '******',
-        signupDate: referred.createdAt || new Date(),
-        isKycCompleted: referred.isKycCompleted || false,
-        hasPurchasedGold,
-        rewardCredited: hasPurchasedGold // Since this is a simple tracker, we assume reward is credited if purchase matches.
+        id: referee ? referee.userId : ref._id,
+        name: referee ? (referee.firstName ? `${referee.firstName} ${referee.lastName || ''}`.trim() : (referee.username || 'User')) : 'User',
+        mobileMasked: ref.refereeMobile.replace(/.(?=.{4})/g, '*'),
+        signupDate: ref.createdAt,
+        isKycCompleted: ref.status === 'KYC_COMPLETED' || ref.status === 'GOLD_PURCHASED' || ref.status === 'REWARD_CREDITED',
+        hasPurchasedGold: ref.status === 'GOLD_PURCHASED' || ref.status === 'REWARD_CREDITED',
+        rewardCredited: ref.status === 'REWARD_CREDITED'
       };
     }));
 
-    // Sort by signup date descending
     trackingData.sort((a, b) => new Date(b.signupDate) - new Date(a.signupDate));
 
     return res.status(200).json({
@@ -1135,6 +1211,56 @@ export const getPendingDues = async (req, res, next) => {
       success: true,
       data: dues
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Referral Summary Data
+// @route   GET /api/users/referrals/summary
+export const getReferralSummary = async (req, res, next) => {
+  try {
+    const { mobile } = req.query;
+    if (!mobile) {
+      res.status(400);
+      throw new Error('Mobile number is required');
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({ mobileNumber: cleanMobile });
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const referrals = await Referral.find({ referrerMobile: user.mobileNumber });
+    
+    let successfulReferrals = 0;
+    
+    for (const ref of referrals) {
+      if (ref.status === 'REWARD_CREDITED' || ref.status === 'GOLD_PURCHASED') {
+        successfulReferrals++;
+      }
+    }
+
+    const pendingReferrals = referrals.length - successfulReferrals;
+    
+    const totalEarnings = successfulReferrals * 50;
+    const pendingEarnings = pendingReferrals * 50;
+
+    const availableBalance = totalEarnings; 
+
+    return res.status(200).json({
+      success: true,
+      message: 'Referral summary fetched successfully',
+      data: {
+        totalEarnings,
+        pendingEarnings,
+        successfulReferrals,
+        availableBalance
+      }
+    });
+
   } catch (error) {
     next(error);
   }

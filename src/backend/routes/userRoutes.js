@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, uploadProfileImage, getPendingDues } from '../controllers/userController.js';
+import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues } from '../controllers/userController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -440,6 +440,26 @@ router.get('/dashboard', getDashboardData);
  *         description: Referral tracking data.
  */
 router.get('/referrals', getReferralsTracking);
+
+/**
+ * @swagger
+ * /api/users/referrals/summary:
+ *   get:
+ *     summary: Get Referral Summary
+ *     description: Returns aggregated earnings and referrals data.
+ *     tags:
+ *       - Profile & Dashboard
+ *     parameters:
+ *       - in: query
+ *         name: mobile
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Referral summary data.
+ */
+router.get('/referrals/summary', getReferralSummary);
 
 /**
  * @swagger

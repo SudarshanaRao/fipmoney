@@ -16,7 +16,7 @@ const vaultTransactionSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['BUY', 'SELL'],
+      enum: ['BUY', 'SELL', 'REFERRAL_BONUS'],
       required: true,
     },
     metal: {
