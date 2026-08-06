@@ -37,8 +37,11 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
       })
       .catch(console.error);
 
+    const mobileNumber = loggedInUser?.mobileNumber;
+    if (!mobileNumber) return;
+
     // Fetch Referral Tracking
-    fetch(`${API_BASE_URL}/users/referrals?mobile=${userId}`)
+    fetch(`${API_BASE_URL}/users/referrals?mobile=${mobileNumber}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -48,7 +51,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
       .catch(console.error);
 
     // Fetch Referral Summary
-    fetch(`${API_BASE_URL}/users/referrals/summary?mobile=${userId}`)
+    fetch(`${API_BASE_URL}/users/referrals/summary?mobile=${mobileNumber}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -307,8 +310,12 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                         onClick={() => setExpandedReferralId(expandedReferralId === user.id ? null : user.id)}
                         className="flex items-center gap-3 p-3 bg-slate-50 cursor-pointer hover:bg-slate-100/70 transition-colors"
                       >
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 uppercase">
-                          {user.name.charAt(0)}
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 uppercase overflow-hidden">
+                          {user.profileImage ? (
+                            <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            user.name.charAt(0)
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-bold text-slate-800 truncate flex items-center gap-2">
@@ -320,7 +327,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                           <div className="text-[11px] text-slate-500 flex justify-between mt-0.5">
                             <span>Joined: {new Date(user.signupDate).toLocaleDateString()}</span>
                             <span className={user.hasPurchasedGold ? "text-emerald-600 font-semibold" : "text-amber-500 font-medium"}>
-                              {user.hasPurchasedGold ? "Gold Purchased ✅" : "Purchase Pending"}
+                              {user.hasPurchasedGold ? "Gold Purchased ✅" : (user.isKycCompleted ? "Purchase Pending" : "KYC Pending")}
                             </span>
                           </div>
                         </div>

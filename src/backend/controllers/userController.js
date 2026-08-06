@@ -1146,7 +1146,8 @@ export const getReferralsTracking = async (req, res, next) => {
         signupDate: ref.createdAt,
         isKycCompleted: ref.status === 'KYC_COMPLETED' || ref.status === 'GOLD_PURCHASED' || ref.status === 'REWARD_CREDITED',
         hasPurchasedGold: ref.status === 'GOLD_PURCHASED' || ref.status === 'REWARD_CREDITED',
-        rewardCredited: ref.status === 'REWARD_CREDITED'
+        rewardCredited: ref.status === 'REWARD_CREDITED',
+        profileImage: referee ? referee.profileImage : null
       };
     }));
 

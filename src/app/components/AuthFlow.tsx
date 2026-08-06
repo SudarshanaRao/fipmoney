@@ -650,7 +650,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">{t.referralCode}</label>
                          <div className="relative">
                            <input type="text" value={referredBy}
-                             onChange={e => setReferredBy(e.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 6))} placeholder={t.referralPlaceholder}
+                             onChange={e => setReferredBy(e.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase())} placeholder={t.referralPlaceholder}
                              className={`w-full h-[56px] rounded-xl border-2 outline-none text-[14px] font-bold text-[#1e1b4b] px-4 pr-12 transition-all bg-white uppercase
                                 ${referredByStatus === 'invalid' ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
                            />
