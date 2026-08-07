@@ -36,8 +36,8 @@ function BannerTag({ text, color = "#6D28D9" }: { text: string; color?: string }
 const savingsPlans = [
   {
     id: "daily",
-    type: "Daily SIP",
-    amount: "₹100 / day",
+    type: "Daily Savings",
+    amount: "₹10 / day",
     desc: "Micro-savings that build huge wealth over time.",
     tag: "MOST POPULAR",
     tagColorHex: "#6D28D9",
@@ -46,7 +46,7 @@ const savingsPlans = [
     pillText: "text-[#6D28D9]",
     suggestedBoxBg: "bg-[#F7F5FF] border-[#EDE9FE]",
     amountColor: "text-[#6D28D9]",
-    projected: "₹36,500/yr",
+    projected: "₹3,650/yr",
     image: "/daily_savings.png",
     subIcon: Layers,
     subIconBg: "bg-purple-100/70 text-[#6D28D9]",
@@ -56,7 +56,7 @@ const savingsPlans = [
   },
   {
     id: "weekly",
-    type: "Weekly SIP",
+    type: "Weekly Savings",
     amount: "₹1,000 / week",
     desc: "Perfect for matching your steady weekly expenses.",
     tag: "STEADY GROWTH",
@@ -76,7 +76,7 @@ const savingsPlans = [
   },
   {
     id: "monthly",
-    type: "Monthly SIP",
+    type: "Monthly Savings",
     amount: "₹5,000 / month",
     desc: "Serious wealth building directly from your salary.",
     tag: "WEALTH BUILDER",
