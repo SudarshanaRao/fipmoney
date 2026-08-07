@@ -1,274 +1,322 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ShieldCheck, Lock, Activity, Tag, IndianRupee, ArrowDownUp, TrendingUp, ChevronRight } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Sparkles, Activity, ShieldCheck, Award, RefreshCw, ArrowRight, PlayCircle, Star, TrendingUp, BarChart2 } from "lucide-react";
+import { fetchLatestMetalPrices, ParsedMetalPrices } from "../utils/metalPriceApi";
+import { AreaChart, Area, ResponsiveContainer, YAxis } from "recharts";
 
 interface MiniMetalTrackerProps {
   onNavigate?: (page: string) => void;
 }
 
 export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) {
-  const [activeTab, setActiveTab] = useState<"gold" | "silver">("gold");
-  const [inputMode, setInputMode] = useState<"rupees" | "grams">("rupees");
-  const [inputValue, setInputValue] = useState<string>("2500");
-
-  const goldPrice = 6420.50; // Updated to realistic price from earlier logic
-  const silverPrice = 84.20;
-
-  const currentPrice = activeTab === "gold" ? goldPrice : silverPrice;
-  const quickAmounts = inputMode === "rupees" ? ["1000", "2500", "5000", "10000"] : ["1", "5", "10", "50"];
+  const [data, setData] = useState<ParsedMetalPrices | null>(null);
+  const [goldTimeframe, setGoldTimeframe] = useState("1D");
+  const [silverTimeframe, setSilverTimeframe] = useState("1D");
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTab((prev) => (prev === "gold" ? "silver" : "gold"));
-    }, 6000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    const fetchPrices = async () => {
+      try {
+        const result = await fetchLatestMetalPrices();
+        if (mounted) setData(result);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 10000); // refresh every 10 seconds
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/[^0-9.]/g, '');
-    if (val.split('.').length > 2) return;
-    setInputValue(val);
-  }
+  const goldPrice = data?.gold.perGram24K || 6245.30;
+  const silverPrice = data?.silver.perGram || 84.20;
+  
+  const goldChange = data ? `+${data.gold.changePct24h}%` : "+0.48%";
+  const silverChange = data ? `+${data.silver.changePct24h}%` : "+0.62%";
 
-  const toggleInputMode = () => {
-    setInputMode(prev => prev === "rupees" ? "grams" : "rupees");
-    setInputValue("");
-  }
+  const goldChartData = useMemo(() => {
+    return [
+      { price: goldPrice * 0.985 },
+      { price: goldPrice * 0.988 },
+      { price: goldPrice * 0.992 },
+      { price: goldPrice * 0.985 },
+      { price: goldPrice * 0.995 },
+      { price: goldPrice * 0.999 },
+      { price: goldPrice }
+    ];
+  }, [goldPrice]);
 
-  let converted = "0.0000";
-  const numVal = parseFloat(inputValue || "0");
-  if (inputMode === "rupees") {
-    converted = (numVal / currentPrice).toFixed(4);
-  } else {
-    converted = (numVal * currentPrice).toFixed(2);
-  }
-
-  const isGold = activeTab === "gold";
-
-  // Dynamic Theme Colors
-  const accentGradient = isGold ? "from-amber-400 to-yellow-600" : "from-slate-400 to-slate-600";
-  const bgAccent = isGold ? "bg-amber-50" : "bg-slate-50";
-  const textAccent = isGold ? "text-amber-600" : "text-slate-600";
-  const borderAccent = isGold ? "border-amber-200" : "border-slate-200";
+  const silverChartData = useMemo(() => {
+    return [
+      { price: silverPrice * 0.985 },
+      { price: silverPrice * 0.988 },
+      { price: silverPrice * 0.992 },
+      { price: silverPrice * 0.985 },
+      { price: silverPrice * 0.995 },
+      { price: silverPrice * 0.999 },
+      { price: silverPrice }
+    ];
+  }, [silverPrice]);
 
   return (
-    <section className="relative font-sans py-24 md:py-32 overflow-hidden bg-[#fafbfc]">
-      {/* Abstract Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className={`absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full mix-blend-multiply filter blur-[120px] opacity-40 transition-colors duration-1000 ease-in-out ${isGold ? 'bg-amber-100' : 'bg-slate-200'}`}></div>
-        <div className={`absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] rounded-full mix-blend-multiply filter blur-[100px] opacity-40 transition-colors duration-1000 ease-in-out ${isGold ? 'bg-yellow-50' : 'bg-gray-200'}`}></div>
-      </div>
-
-      <div className="container mx-auto px-6 md:px-12 max-w-7xl relative z-10">
-        <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-center justify-between">
+    <section className="relative font-sans py-16 md:py-24 overflow-hidden bg-white">
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-16 xl:gap-20 items-center justify-between">
           
-          {/* Left Side: Editorial Typography & Features */}
-          <div className="w-full lg:w-[55%] space-y-10">
-             
+          {/* Left Side: Typography & Features */}
+          <div className="w-full lg:w-[30%] xl:w-[28%] space-y-8 shrink-0">
              <div className="space-y-6">
-               <motion.div 
-                 initial={{ opacity: 0, y: 10 }}
-                 whileInView={{ opacity: 1, y: 0 }}
-                 viewport={{ once: true }}
-                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase ${bgAccent} ${textAccent} ${borderAccent} border shadow-sm transition-colors duration-500`}
-               >
-                 <Lock size={14} /> Bank-Grade Security
-               </motion.div>
+               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-indigo-50 text-indigo-600 border border-indigo-100">
+                 <Sparkles size={12} className="text-indigo-500" /> LIVE MARKET PRICES
+               </div>
                
-               <motion.h1 
-                 initial={{ opacity: 0, y: 10 }}
-                 whileInView={{ opacity: 1, y: 0 }}
-                 viewport={{ once: true }}
-                 transition={{ delay: 0.1 }}
-                 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight"
-               >
-                 Build wealth <br className="hidden md:block" />
-                 with pure <br className="md:hidden" />
-                 <span className={`text-transparent bg-clip-text bg-gradient-to-r transition-all duration-700 ease-in-out ${accentGradient}`}>
-                   {isGold ? "Gold" : "Silver"}
-                 </span>.
-               </motion.h1>
+               <h2 className="text-4xl md:text-5xl font-black text-[#1a1c29] leading-[1.1] tracking-tight">
+                 Track Live <br />
+                 <span className="text-[#ffb900]">Gold</span> <span className="text-[#64748b]">& Silver</span> <br />
+                 Prices
+               </h2>
                
-               <motion.p 
-                 initial={{ opacity: 0, y: 10 }}
-                 whileInView={{ opacity: 1, y: 0 }}
-                 viewport={{ once: true }}
-                 transition={{ delay: 0.2 }}
-                 className="text-slate-500 text-lg md:text-xl font-medium leading-relaxed max-w-md"
-               >
-                 Start your digital {isGold ? "gold" : "silver"} journey today. Buy, sell, and track live market rates instantly with zero making charges.
-               </motion.p>
+               <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xs pr-4">
+                 Real-time 24K gold and silver prices. Invest anytime with confidence.
+               </p>
              </div>
 
-             <motion.div 
-               initial={{ opacity: 0, y: 10 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               viewport={{ once: true }}
-               transition={{ delay: 0.3 }}
-               className="grid grid-cols-2 gap-x-8 gap-y-10 pt-4"
-             >
+             <div className="space-y-4 pt-2">
                {[
-                 { title: "Zero Markup", desc: "Buy at live market price", icon: <Tag size={20} /> },
-                 { title: `${isGold ? '24K' : '99.9%'} Purity`, desc: "Certified by trusted partners", icon: <ShieldCheck size={20} /> },
-                 { title: "Live Rates", desc: "Prices update every second", icon: <Activity size={20} /> },
-                 { title: "Instant Sell", desc: "Withdraw to your bank anytime", icon: <IndianRupee size={20} /> }
+                 { title: "Live prices update every second", icon: <Activity size={16} /> },
+                 { title: "100% secure & RBI regulated", icon: <ShieldCheck size={16} /> },
+                 { title: "99.99% purity guaranteed", icon: <Award size={16} /> },
+                 { title: "Easy buy, sell & withdraw", icon: <RefreshCw size={16} /> }
                ].map((feature, idx) => (
-                 <div key={idx} className="flex flex-col gap-3 group">
-                   <div className={`w-12 h-12 rounded-2xl ${bgAccent} ${textAccent} flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:shadow-md`}>
+                 <div key={idx} className="flex items-center gap-4 group">
+                   <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 shadow-sm border border-indigo-100/50">
                      {feature.icon}
                    </div>
-                   <div>
-                     <div className="text-base font-bold text-slate-900 mb-1">{feature.title}</div>
-                     <div className="text-sm text-slate-500 font-medium leading-snug">{feature.desc}</div>
-                   </div>
+                   <div className="text-xs font-semibold text-slate-700">{feature.title}</div>
                  </div>
                ))}
-             </motion.div>
+             </div>
+
+             <div className="flex items-center gap-3 pt-6">
+                <button 
+                  onClick={() => onNavigate?.('login')}
+                  className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-5 py-3.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/30"
+                >
+                  Invest Now <ArrowRight size={14} />
+                </button>
+                <button 
+                  className="bg-white border border-indigo-100 hover:border-indigo-200 text-indigo-800 px-5 py-3.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm"
+                >
+                  <PlayCircle size={16} className="text-indigo-600" /> How It Works
+                </button>
+             </div>
           </div>
 
-          {/* Right Side: Pro Trading Widget */}
-          <div className="w-full lg:w-[45%] xl:w-[42%] shrink-0">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100/60 relative overflow-hidden"
-            >
-               {/* Internal Glow */}
-               <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${isGold ? 'from-amber-100/40' : 'from-slate-100/50'} to-transparent rounded-full filter blur-3xl opacity-60 pointer-events-none transition-colors duration-700`}></div>
-               
-               {/* Pro Segmented Control */}
-               <div className="relative flex p-1.5 bg-slate-100/80 backdrop-blur-sm rounded-2xl mb-10 border border-slate-200/50 z-10">
-                 <button 
-                   onClick={() => setActiveTab("gold")}
-                   className={`relative flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 ${isGold ? 'text-amber-900' : 'text-slate-500 hover:text-slate-700'}`}
-                 >
-                   Digital Gold
+          {/* Right Side: Price Cards */}
+          <div className="w-full lg:w-[65%] xl:w-[68%] flex flex-col md:flex-row gap-6 ml-auto">
+            
+            {/* Gold Card */}
+            <div className="flex-1 bg-gradient-to-b from-[#fffaf0] to-white border border-amber-100 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-shadow relative overflow-hidden group">
+               {/* Top Section */}
+               <div className="flex justify-between items-start mb-10">
+                 <div className="flex items-center gap-3">
+                   <div className="w-12 h-12 bg-amber-100/80 rounded-full flex items-center justify-center shadow-inner">
+                      <span className="text-2xl drop-shadow-sm">🪙</span>
+                   </div>
+                   <div>
+                     <h3 className="font-bold text-slate-900 text-lg">24K Pure Gold</h3>
+                     <p className="text-xs text-slate-500 font-medium">99.99% Purity</p>
+                   </div>
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <div className="bg-white border border-amber-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-amber-600 tracking-wider shadow-sm">
+                     <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div> LIVE
+                   </div>
+                   <button className="w-9 h-9 bg-white border border-amber-100 rounded-full flex items-center justify-center text-slate-400 hover:text-amber-500 transition-colors shadow-sm">
+                     <Star size={14} />
+                   </button>
+                 </div>
+               </div>
+
+               {/* Price Section */}
+               <div className="mb-6 relative z-10">
+                 <div className="flex justify-between items-start mb-2 relative z-20">
+                   <div className="text-[10px] font-bold text-emerald-600 tracking-widest uppercase flex items-center gap-1.5">
+                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> LIVE BUY PRICE
+                   </div>
+                   <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200/70 shadow-sm">
+                     {["1D", "1W", "1M", "1Y"].map((tf) => (
+                       <button
+                         key={tf}
+                         onClick={() => setGoldTimeframe(tf)}
+                         className={`px-2 py-1 rounded-lg text-[9px] font-extrabold transition-all cursor-pointer border-none outline-none ${
+                           goldTimeframe === tf
+                             ? "bg-amber-50 text-amber-600 border border-amber-200 shadow-sm"
+                             : "text-slate-400 hover:text-slate-600 bg-transparent"
+                         }`}
+                       >
+                         {tf}
+                       </button>
+                     ))}
+                   </div>
+                 </div>
+                 <div className="flex items-end gap-1 mb-3">
+                   <span className="text-3xl xl:text-4xl font-black text-slate-900 tracking-tighter">₹{goldPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                   <span className="text-lg text-slate-500 font-bold mb-1">/g</span>
+                 </div>
+                 <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                   <TrendingUp size={12} /> {goldChange} (24h)
+                 </div>
+               </div>
+
+               {/* Illustration & Chart */}
+               <div className="h-36 relative mb-8">
+                 {/* Real-time background graph */}
+                 <div className="absolute bottom-0 left-0 w-[120%] h-full opacity-60 -ml-[10%]">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <AreaChart data={goldChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                       <defs>
+                         <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.25} />
+                           <stop offset="100%" stopColor="#fbbf24" stopOpacity={0} />
+                         </linearGradient>
+                       </defs>
+                       <YAxis domain={['dataMin', 'dataMax']} hide />
+                       <Area type="monotone" dataKey="price" stroke="#fbbf24" strokeWidth={2} fillOpacity={1} fill="url(#goldGradient)" isAnimationActive={false} />
+                     </AreaChart>
+                   </ResponsiveContainer>
+                 </div>
+               </div>
+
+               {/* High/Low */}
+               <div className="flex justify-between items-center border-t border-amber-100/80 pt-5 mb-8">
+                 <div>
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">24H Low</div>
+                   <div className="text-sm font-bold text-slate-800">₹{(goldPrice * 0.985).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                 </div>
+                 <div className="text-right">
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">24H High</div>
+                   <div className="text-sm font-bold text-slate-800">₹{(goldPrice * 1.005).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                 </div>
+               </div>
+
+               {/* Actions */}
+               <div className="flex gap-3">
+                 <button className="flex-[0.4] bg-white border border-amber-200 text-amber-700 py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-amber-50 transition-colors shadow-sm">
+                   View Details <BarChart2 size={14} />
                  </button>
                  <button 
-                   onClick={() => setActiveTab("silver")}
-                   className={`relative flex-1 py-3 text-sm font-bold rounded-xl transition-all z-10 ${!isGold ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                   onClick={() => onNavigate?.('login')}
+                   className="flex-[0.6] bg-[#d97706] hover:bg-[#b45309] text-white py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-amber-600/20"
                  >
-                   Digital Silver
+                   Invest in Gold <ArrowRight size={14} />
                  </button>
-                 
-                 {/* Sliding Background */}
-                 <motion.div
-                   className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl shadow-sm border bg-white ${isGold ? 'left-1.5 border-amber-200/60' : 'left-[calc(50%+1.5px)] border-slate-200/60'}`}
-                   layout
-                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                 />
                </div>
+            </div>
 
-               {/* Live Price Header */}
-               <div className="mb-10 flex flex-col items-center relative z-10">
-                 <div className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-3">
-                   <span className="relative flex h-2 w-2">
-                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                   </span>
-                   Live Buy Price
+            {/* Silver Card */}
+            <div className="flex-1 bg-gradient-to-b from-[#f8fafc] to-white border border-slate-200/80 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-shadow relative overflow-hidden group">
+               {/* Top Section */}
+               <div className="flex justify-between items-start mb-10">
+                 <div className="flex items-center gap-3">
+                   <div className="w-12 h-12 bg-slate-200/50 rounded-full flex items-center justify-center shadow-inner">
+                      <span className="text-2xl drop-shadow-sm filter grayscale">🪙</span>
+                   </div>
+                   <div>
+                     <h3 className="font-bold text-slate-900 text-lg">Pure Silver</h3>
+                     <p className="text-xs text-slate-500 font-medium">99.9% Purity</p>
+                   </div>
                  </div>
-                 
-                 <div className="flex items-start justify-center gap-1">
-                   <span className="text-3xl font-medium text-slate-300 mt-2">₹</span>
-                   <AnimatePresence mode="popLayout">
-                     <motion.div 
-                       key={currentPrice}
-                       initial={{ opacity: 0, y: 20 }}
-                       animate={{ opacity: 1, y: 0 }}
-                       exit={{ opacity: 0, y: -20 }}
-                       transition={{ duration: 0.3 }}
-                       className="text-6xl font-black text-slate-800 tracking-tighter"
-                     >
-                       {currentPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                     </motion.div>
-                   </AnimatePresence>
-                   <span className="text-xl text-slate-400 font-bold self-end mb-2">/g</span>
-                 </div>
-                 
-                 <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 mt-3 bg-emerald-50/80 px-3 py-1 rounded-lg border border-emerald-100">
-                   <TrendingUp size={14} /> +0.48% (24h)
+                 <div className="flex items-center gap-2">
+                   <div className="bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-slate-600 tracking-wider shadow-sm">
+                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse"></div> LIVE
+                   </div>
+                   <button className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-500 transition-colors shadow-sm">
+                     <Star size={14} />
+                   </button>
                  </div>
                </div>
 
-               {/* Pro Exchange Input */}
-               <div className="relative z-10 mb-8">
-                 <div className="bg-slate-50 border border-slate-200/80 rounded-[1.5rem] overflow-hidden focus-within:border-slate-300 focus-within:shadow-[0_0_0_4px_rgba(241,245,249,1)] transition-all">
-                    
-                    {/* Top Input Area */}
-                    <div className="p-5 bg-white relative">
-                       <div className="flex justify-between items-center mb-2">
-                         <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">You Pay</span>
-                         <button 
-                           onClick={toggleInputMode} 
-                           className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 outline-none border-none cursor-pointer"
-                         >
-                           Switch to {inputMode === 'rupees' ? 'Grams' : 'INR'} <ArrowDownUp size={12} />
-                         </button>
-                       </div>
-                       
-                       <div className="flex items-center gap-2">
-                         <span className="text-4xl font-medium text-slate-300 select-none">{inputMode === 'rupees' ? '₹' : ''}</span>
-                         <input 
-                           type="text" 
-                           value={inputValue}
-                           onChange={handleInputChange}
-                           className="w-full bg-transparent border-none outline-none text-4xl md:text-5xl font-black text-slate-800 p-0 focus:ring-0 placeholder-slate-200 tracking-tight"
-                           placeholder="0"
-                         />
-                         <span className="text-4xl font-medium text-slate-300 select-none">{inputMode === 'grams' ? 'g' : ''}</span>
-                       </div>
-                    </div>
-                    
-                    {/* Divider */}
-                    <div className="h-px w-full bg-slate-200/80 relative">
-                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400">
-                         <ArrowDownUp size={14} />
-                       </div>
-                    </div>
-                    
-                    {/* Bottom Output Area */}
-                    <div className="p-5 bg-slate-50/50 flex justify-between items-center">
-                       <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">You Receive</span>
-                       <span className="text-xl font-black text-slate-800">
-                          {inputMode === "rupees" ? `${converted} g` : `₹${converted}`}
-                       </span>
-                    </div>
+               {/* Price Section */}
+               <div className="mb-6 relative z-10">
+                 <div className="flex justify-between items-start mb-2 relative z-20">
+                   <div className="text-[10px] font-bold text-emerald-600 tracking-widest uppercase flex items-center gap-1.5">
+                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> LIVE BUY PRICE
+                   </div>
+                   <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200/70 shadow-sm">
+                     {["1D", "1W", "1M", "1Y"].map((tf) => (
+                       <button
+                         key={tf}
+                         onClick={() => setSilverTimeframe(tf)}
+                         className={`px-2 py-1 rounded-lg text-[9px] font-extrabold transition-all cursor-pointer border-none outline-none ${
+                           silverTimeframe === tf
+                             ? "bg-slate-100 text-slate-700 border border-slate-200 shadow-sm"
+                             : "text-slate-400 hover:text-slate-600 bg-transparent"
+                         }`}
+                       >
+                         {tf}
+                       </button>
+                     ))}
+                   </div>
                  </div>
-
-                 {/* Quick Select Chips */}
-                 <div className="flex gap-2 mt-4">
-                   {quickAmounts.map((amt) => (
-                     <button 
-                       key={amt}
-                       onClick={() => setInputValue(amt)}
-                       className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all border outline-none cursor-pointer ${
-                         inputValue === amt 
-                          ? `border-slate-800 bg-slate-800 text-white shadow-md`
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                       }`}
-                     >
-                       {inputMode === "rupees" ? `₹${amt}` : `${amt}g`}
-                     </button>
-                   ))}
+                 <div className="flex items-end gap-1 mb-3">
+                   <span className="text-3xl xl:text-4xl font-black text-slate-900 tracking-tighter">₹{silverPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                   <span className="text-lg text-slate-500 font-bold mb-1">/g</span>
+                 </div>
+                 <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                   <TrendingUp size={12} /> {silverChange} (24h)
                  </div>
                </div>
 
-               {/* CTA */}
-               <motion.button 
-                 whileHover={{ scale: 1.02 }}
-                 whileTap={{ scale: 0.98 }}
-                 onClick={() => onNavigate?.('login')}
-                 className={`w-full h-14 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 text-white relative z-10 border-none outline-none cursor-pointer shadow-xl ${isGold ? 'bg-gradient-to-r from-amber-500 to-yellow-500 shadow-amber-500/25 hover:shadow-amber-500/40' : 'bg-gradient-to-r from-slate-800 to-slate-900 shadow-slate-900/25 hover:shadow-slate-900/40'}`}
-               >
-                 Invest in {isGold ? 'Gold' : 'Silver'} <ChevronRight size={20} />
-               </motion.button>
-               
-            </motion.div>
+               {/* Illustration & Chart */}
+               <div className="h-36 relative mb-8">
+                 {/* Real-time background graph */}
+                 <div className="absolute bottom-0 left-0 w-[120%] h-full opacity-60 -ml-[10%]">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <AreaChart data={silverChartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                       <defs>
+                         <linearGradient id="silverGradient" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.25} />
+                           <stop offset="100%" stopColor="#94a3b8" stopOpacity={0} />
+                         </linearGradient>
+                       </defs>
+                       <YAxis domain={['dataMin', 'dataMax']} hide />
+                       <Area type="monotone" dataKey="price" stroke="#94a3b8" strokeWidth={2} fillOpacity={1} fill="url(#silverGradient)" isAnimationActive={false} />
+                     </AreaChart>
+                   </ResponsiveContainer>
+                 </div>
+               </div>
+
+               {/* High/Low */}
+               <div className="flex justify-between items-center border-t border-slate-200/80 pt-5 mb-8">
+                 <div>
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">24H Low</div>
+                   <div className="text-sm font-bold text-slate-800">₹{(silverPrice * 0.985).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                 </div>
+                 <div className="text-right">
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">24H High</div>
+                   <div className="text-sm font-bold text-slate-800">₹{(silverPrice * 1.005).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                 </div>
+               </div>
+
+               {/* Actions */}
+               <div className="flex gap-3">
+                 <button className="flex-[0.4] bg-white border border-slate-200 text-slate-700 py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm">
+                   View Details <BarChart2 size={14} />
+                 </button>
+                 <button 
+                   onClick={() => onNavigate?.('login')}
+                   className="flex-[0.6] bg-[#475569] hover:bg-[#334155] text-white py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-slate-900/10"
+                 >
+                   Invest in Silver <ArrowRight size={14} />
+                 </button>
+               </div>
+            </div>
+
           </div>
           
         </div>

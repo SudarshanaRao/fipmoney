@@ -30,7 +30,7 @@ const billsList = [
 
 export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionProps) {
   const [showAll, setShowAll] = useState(false);
-  const displayedBills = showAll ? billsList : billsList.slice(0, 8);
+  const displayedBills = showAll ? billsList : billsList.slice(0, 10);
 
   return (
     <section className="pt-2 pb-20 bg-white" id="bills-showcase">
@@ -50,30 +50,30 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
         </div>
 
         {/* Showcase Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
           {displayedBills.map((item, idx) => (
             <motion.div 
               key={idx}
-              className="bg-slate-50/50 border border-slate-100 rounded-3xl p-6 flex flex-col justify-between hover:bg-white hover:border-amber-200 hover:shadow-xl hover:shadow-slate-100 transition-all group cursor-pointer"
-              whileHover={{ y: -5 }}
+              className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between hover:bg-white hover:border-amber-200 hover:shadow-xl hover:shadow-slate-100 transition-all group cursor-pointer"
+              whileHover={{ y: -3 }}
               onClick={() => onNavigate?.('login')}
             >
               <div>
                 {/* Icon Circle */}
                 <div 
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform duration-300"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner shrink-0 group-hover:scale-110 transition-transform duration-300"
                   style={{ background: item.bg, color: item.color }}
                 >
-                  <item.Icon size={20} strokeWidth={2.5} />
+                  <item.Icon size={18} strokeWidth={2.5} />
                 </div>
                 
-                <h3 className="text-base font-extrabold text-slate-800 mt-5 group-hover:text-amber-600 transition-colors">{item.label}</h3>
-                <p className="text-xs text-slate-500 font-semibold mt-2 leading-relaxed">{item.desc}</p>
+                <h3 className="text-sm font-extrabold text-slate-800 mt-3 group-hover:text-amber-600 transition-colors leading-tight">{item.label}</h3>
+                <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold mt-1.5 leading-relaxed line-clamp-2">{item.desc}</p>
               </div>
 
-              <div className="flex items-center gap-1 text-[10px] font-black text-amber-600 uppercase tracking-widest mt-6 transition-opacity opacity-0 group-hover:opacity-100">
+              <div className="flex items-center gap-1 text-[9px] font-black text-amber-600 uppercase tracking-widest mt-4 transition-opacity opacity-0 group-hover:opacity-100">
                 <>
-                  Pay Now <ArrowRight size={12} strokeWidth={3} />
+                  Pay Now <ArrowRight size={10} strokeWidth={3} />
                 </>
               </div>
             </motion.div>
