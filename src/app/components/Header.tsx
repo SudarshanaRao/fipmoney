@@ -176,7 +176,7 @@ export default function Header({ onNavigate }: HeaderProps) {
               <AnimatePresence>
                 {activeDropdown === 'features' && (
                   <motion.div
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[540px] bg-white rounded-2xl shadow-2xl border border-gray-150 p-6 z-50 grid grid-cols-3 gap-6"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[720px] bg-white rounded-2xl shadow-2xl border border-gray-150 p-6 z-50 grid grid-cols-4 gap-6"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -208,7 +208,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                           onClick={() => handleDropdownItemClick(() => onNavigate?.('live-metal-tracker'))}
                           className="w-full text-left text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-100/50 p-2 rounded-lg transition-all duration-200 flex items-center justify-between"
                         >
-                          <span>Live Metal Rates (API)</span>
+                          <span>Live Metal Rates</span>
                           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         </button>
                       </div>
@@ -261,14 +261,57 @@ export default function Header({ onNavigate }: HeaderProps) {
                             {b.name}
                           </button>
                         ))}
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('recharge-details'))}
+                          className="w-full text-left text-xs font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1.5 rounded-lg transition-all duration-200"
+                        >
+                          View More →
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Savings Section */}
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2 border-b border-gray-100 pb-2">
+                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                          <PiggyBank className="w-4 h-4" />
+                        </div>
+                        <span className="font-bold text-gray-900 text-sm">Gold Savings</span>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50/50 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
+                        >
+                          <span>Daily Savings</span>
+                          <span className="text-[9px] bg-purple-100 text-purple-700 font-extrabold px-1.5 py-0.5 rounded">₹100/d</span>
+                        </button>
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50/50 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
+                        >
+                          <span>Weekly Savings</span>
+                          <span className="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-1.5 py-0.5 rounded">₹1k/wk</span>
+                        </button>
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50/50 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
+                        >
+                          <span>Monthly Savings</span>
+                          <span className="text-[9px] bg-amber-100 text-amber-700 font-extrabold px-1.5 py-0.5 rounded">₹5k/mo</span>
+                        </button>
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
+                          className="w-full text-left text-xs font-bold text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-1.5 rounded-lg transition-all duration-200 mt-1"
+                        >
+                          View Savings Page →
+                        </button>
                       </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            
-
 
             <DropdownMenu
               title="Help"
@@ -353,6 +396,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                     <div className="pl-4 flex flex-col space-y-2">
                       <button onClick={() => handleDropdownItemClick(() => onNavigate?.('buy-gold'))} className="text-left text-xs text-gray-600 hover:text-amber-500 py-1 font-semibold bg-transparent border-none">Buy Digital Gold</button>
                       <button onClick={() => handleDropdownItemClick(() => onNavigate?.('sell-gold'))} className="text-left text-xs text-gray-600 hover:text-amber-500 py-1 font-semibold bg-transparent border-none">Sell Digital Gold</button>
+                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))} className="text-left text-xs text-purple-700 hover:text-purple-900 py-1 font-bold bg-transparent border-none">Gold Savings (SIP)</button>
                     </div>
                   </div>
 

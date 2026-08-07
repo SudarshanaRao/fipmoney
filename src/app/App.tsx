@@ -23,11 +23,14 @@ import FAQs from "./components/FAQs";
 import BuyGold from "./components/BuyGold";
 import SellGold from "./components/SellGold";
 import DailySavings from "./components/DailySavings";
+import SavingsPage from "./components/SavingsPage";
+import PublicSavingsLandingPage from "./components/PublicSavingsLandingPage";
 import DigitalGold from "./components/DigitalGold";
 import DigitalSilver from "./components/DigitalSilver";
 import RoundOff from "./components/RoundOff";
 import Loans from "./components/Loans";
 import MiniMetalTracker from "./components/MiniMetalTracker";
+import HomeSavingsSection from "./components/HomeSavingsSection";
 import HowTos from "./components/HowTos";
 import GuideReader from "./components/GuideReader";
 import AuthFlow from "./components/AuthFlow";
@@ -43,7 +46,7 @@ import HomeFAQs from "./components/HomeFAQs";
 import MandatoryDisclosures from "./components/MandatoryDisclosures";
 import { LoadingSpinner } from "./components/LottiePlayer";
 
-type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker';
+type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker';
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -247,7 +250,15 @@ export default function App() {
       case 'sell-gold':
         return <SellGold onBack={navigateToHome} />;
       case 'daily-savings':
-        return <DailySavings onBack={navigateToHome} />;
+      case 'weekly-savings':
+      case 'monthly-savings':
+      case 'savings':
+        return (
+          <>
+            <Header onNavigate={navigateToPage} />
+            <PublicSavingsLandingPage onNavigate={navigateToPage} />
+          </>
+        );
       case 'digital-gold':
         return <DigitalGold onBack={navigateToHome} />;
       case 'digital-silver':
@@ -307,30 +318,20 @@ export default function App() {
               {/* Hero Section */}
               <HeroSection onNavigate={navigateToPage} />
 
-              {/* Mini Live Metal Rates Tracker */}
+              {/* Mini Live Metal Rates & Calculator */}
               <MiniMetalTracker onNavigate={navigateToPage} />
 
-              {!isLoggedOut && (
-                <>
-                  {/* Benefits Section */}
-                  <BenefitsSection />
-
-                  {/* How It Works Section */}
-                  <HowItWorksSection />
-
-                  {/* Features Section */}
-                  <FeaturesSection onNavigateToCalculator={() => navigateToPage('gold-loan-calculator')} />
-                </>
-              )}
-
-              {/* Platform Trust Section */}
-              <PlatformTrustSection />
+              {/* Gold Savings Section (Daily, Weekly & Monthly) */}
+              <HomeSavingsSection onNavigate={navigateToPage} />
 
               {/* Bill Showcase Section (Recharge & Pay Bills) */}
               <BillShowcaseSection onNavigate={navigateToPage} />
 
               {/* Referral Program Section */}
               <ReferralProgramSection onNavigate={navigateToPage} />
+
+              {/* Platform Trust & Partnerships Section */}
+              <PlatformTrustSection />
 
               {/* FAQs Section */}
               <HomeFAQs />
