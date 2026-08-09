@@ -44,9 +44,12 @@ import InvestorCharter from "./components/InvestorCharter";
 import LiveMetalTracker from "./components/LiveMetalTracker";
 import HomeFAQs from "./components/HomeFAQs";
 import MandatoryDisclosures from "./components/MandatoryDisclosures";
+import AdminDashboard from "./components/AdminDashboard";
+import AdminAuthFlow from "./components/AdminAuthFlow";
+import { OBFUSCATED_ADMIN_PATH } from "./utils/adminStorage";
 import { LoadingSpinner } from "./components/LottiePlayer";
 
-type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker';
+type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin';
 
 const PageTransition = ({ children }) => (
   <motion.div
@@ -122,7 +125,7 @@ export default function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const homeScrollPosition = useRef(0);
   const isLoggedOut = typeof window !== 'undefined' ? !sessionStorage.getItem("fm_logged_in_mobile") : true;
-
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('fm_admin_logged_in') === 'true' : false);
 
   useEffect(() => {
     // Add smooth scrolling behavior
@@ -214,7 +217,87 @@ export default function App() {
   const navigateToHowTos = () => navigateToPage('jar-how-tos');
 
   const renderMainContent = () => {
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname.slice(1) : String(currentPage);
+
+    if (currentPath === 'dashboard' || currentPath.startsWith('dashboard/')) {
+      return <Dashboard onNavigate={navigateToPage} />;
+    }
+
+    if (currentPath === 'admin/signup') {
+      return (
+        <AdminAuthFlow
+          mode="signup"
+          onSuccess={() => setIsAdminLoggedIn(true)}
+          onNavigateToSecretCode={(code) => {
+            window.history.pushState({}, '', `/admin/${code}`);
+            setCurrentPage(`admin/${code}` as any);
+          }}
+          onBackToMainSite={navigateToHome}
+        />
+      );
+    }
+
+    if (currentPath.startsWith('admin/')) {
+      const secretCodeFromUrl = currentPath.split('/')[1] || '2787';
+      if (/^\d{4}$/.test(secretCodeFromUrl)) {
+        return isAdminLoggedIn ? (
+          <AdminDashboard secretCode={secretCodeFromUrl} onBackToMainSite={navigateToHome} />
+        ) : (
+          <AdminAuthFlow
+            mode="login_by_code"
+            secretCodeFromUrl={secretCodeFromUrl}
+            onSuccess={() => setIsAdminLoggedIn(true)}
+            onNavigateToSecretCode={(code) => {
+              window.history.pushState({}, '', `/admin/${code}`);
+              setCurrentPage(`admin/${code}` as any);
+            }}
+            onBackToMainSite={navigateToHome}
+          />
+        );
+      }
+    }
+
     switch (currentPage) {
+      case 'portal-sec-9f8a3d7b2c':
+        return isAdminLoggedIn ? (
+          <AdminDashboard secretCode="2787" onBackToMainSite={navigateToHome} />
+        ) : (
+          <AdminAuthFlow
+            mode="login_by_code"
+            secretCodeFromUrl="2787"
+            onSuccess={() => {
+              setIsAdminLoggedIn(true);
+              navigateToPage('portal-sec-9f8a3d7b2c' as PageType);
+            }}
+            onNavigateToSecretCode={(code) => {
+              window.history.pushState({}, '', `/admin/${code}`);
+              setCurrentPage(`admin/${code}` as any);
+            }}
+            onBackToMainSite={navigateToHome}
+          />
+        );
+
+      // Plain /admin without 4-digit secret code returns 404
+      case 'admin':
+      case 'admin-login':
+      case 'admin-panel':
+      case 'super-admin':
+        return (
+          <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col items-center justify-center p-6 text-center font-sans">
+            <div className="text-7xl font-black text-[#7C3AED] mb-2 font-mono">404</div>
+            <h1 className="text-2xl font-black mb-2 text-slate-900">Access Denied / Not Found</h1>
+            <p className="text-xs text-slate-500 max-w-sm mb-6 font-semibold">
+              Administrative access requires a valid 4-digit secret code URL (e.g. /admin/2787).
+            </p>
+            <button
+              onClick={navigateToHome}
+              className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black text-xs px-6 py-3 rounded-full cursor-pointer outline-none shadow-md"
+            >
+              Back to Homepage
+            </button>
+          </div>
+        );
+
       case 'login':
       case 'signup':
         return <AuthFlow onNavigate={navigateToPage} />;
@@ -409,8 +492,10 @@ export default function App() {
                 {renderMainContent()}
               </div>
 
-              {/* Footer — hidden on auth and dashboard pages */}
-              {!['login','signup','dashboard','recharge-details'].includes(currentPage) && (
+              {/* Footer — hidden on auth, user dashboard and all admin pages */}
+              {!['login','signup','dashboard','recharge-details'].includes(currentPage) && 
+               !currentPage.startsWith('admin') && 
+               !currentPage.startsWith('portal-sec') && (
                 <Footer onNavigate={navigateToPage} />
               )}
             </div>

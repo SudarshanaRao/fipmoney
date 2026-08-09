@@ -75,17 +75,82 @@ const INITIAL_NOTIFICATIONS = [
   }
 ];
 
+const tabSlugMap: Record<string, string> = {
+  home: "dashboard",
+  savings: "dashboard/savings",
+  history: "dashboard/transactions",
+  bills: "dashboard/bills",
+  refer: "dashboard/referrals",
+  settings: "dashboard/settings",
+  "buy-gold": "dashboard/buy-gold",
+  "sell-gold": "dashboard/sell-gold",
+  "instant-loan": "dashboard/loans"
+};
+
+const getInitialUserTab = (): Tab => {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname.slice(1);
+    if (path.startsWith("dashboard/")) {
+      const subPath = path.replace("dashboard/", "");
+      const slugMap: Record<string, Tab> = {
+        overview: "home",
+        savings: "savings",
+        transactions: "history",
+        bills: "bills",
+        referrals: "refer",
+        settings: "settings",
+        "buy-gold": "buy-gold",
+        "sell-gold": "sell-gold",
+        loans: "instant-loan"
+      };
+      if (slugMap[subPath]) return slugMap[subPath];
+    } else if (path === "savings") return "savings";
+    else if (path === "history" || path === "transactions") return "history";
+    else if (path === "bills") return "bills";
+    else if (path === "refer") return "refer";
+    else if (path === "settings") return "settings";
+
+    const saved = sessionStorage.getItem("fm_dashboard_tab");
+    if (saved) return saved as Tab;
+  }
+  return "home";
+};
+
 export default function Dashboard({ onNavigate }: { onNavigate: (page: string) => void }) {
-  const [tab, setTab] = useState<Tab>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem("fm_dashboard_tab");
-      if (saved) {
-        sessionStorage.removeItem("fm_dashboard_tab");
-        return saved as Tab;
-      }
+  const [tab, setTabState] = useState<Tab>(() => getInitialUserTab());
+
+  const setTab = (newTab: Tab) => {
+    setTabState(newTab);
+    sessionStorage.setItem("fm_dashboard_tab", newTab);
+    const slug = tabSlugMap[newTab] || `dashboard/${newTab}`;
+    const newUrl = `/${slug}`;
+    if (typeof window !== 'undefined' && window.location.pathname !== newUrl) {
+      window.history.pushState({ tab: newTab }, '', newUrl);
     }
-    return "home";
-  });
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname.slice(1);
+      if (path.startsWith("dashboard/")) {
+        const subPath = path.replace("dashboard/", "");
+        const slugMap: Record<string, Tab> = {
+          overview: "home",
+          savings: "savings",
+          transactions: "history",
+          bills: "bills",
+          referrals: "refer",
+          settings: "settings",
+          "buy-gold": "buy-gold",
+          "sell-gold": "sell-gold",
+          loans: "instant-loan"
+        };
+        if (slugMap[subPath]) setTabState(slugMap[subPath]);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   const [metal, setMetal] = useState<Metal>("gold");
   const [showBalance, setShowBalance] = useState(true);
   const [isFlipped, setIsFlipped] = useState(false);

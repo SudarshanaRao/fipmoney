@@ -6,6 +6,8 @@ import Otp from '../models/Otp.js';
 import Referral from '../models/Referral.js';
 import { generateUniqueCardDetails } from '../utils/cardGenerator.js';
 import { uploadProfileImageToS3 } from '../utils/s3Uploader.js';
+import { initializeUserAml, updateKycAmlScore, evaluateTransactionAml } from '../utils/amlEvaluator.js';
+import { sendTemplatedEmail } from '../utils/emailService.js';
 
 async function sendSmsOtp(mobile, otpCode) {
   const authKey = process.env.SMSCOUNTRY_AUTH_KEY;
@@ -254,7 +256,13 @@ const getSafeUser = (userDoc) => {
     status: obj.status,
     isMobileVerified: obj.isMobileVerified,
     isEmailVerified: obj.isEmailVerified,
-    referralCode: obj.referralCode // Added referralCode here
+    referralCode: obj.referralCode,
+    amlScore: obj.amlScore !== undefined ? obj.amlScore : (obj.amtScore !== undefined ? obj.amtScore : (obj.isKycCompleted ? 85 : 45)),
+    amlStatus: obj.amlStatus || obj.amtStatus || (obj.isKycCompleted ? 'Low Risk' : 'Moderate Risk'),
+    amlFlaggedReasons: obj.amlFlaggedReasons || obj.amtFlaggedReasons || [],
+    amtScore: obj.amlScore !== undefined ? obj.amlScore : (obj.amtScore !== undefined ? obj.amtScore : (obj.isKycCompleted ? 85 : 45)),
+    amtStatus: obj.amlStatus || obj.amtStatus || (obj.isKycCompleted ? 'Low Risk' : 'Moderate Risk'),
+    amtFlaggedReasons: obj.amlFlaggedReasons || obj.amtFlaggedReasons || []
   };
 };
 
@@ -378,6 +386,8 @@ export const authUser = async (req, res, next) => {
         isGenerated: true
       });
 
+      const initialAml = initializeUserAml(false);
+
       user = await User.create({
         userId: generatedUserId,
         userCode: generatedUserCode,
@@ -405,6 +415,12 @@ export const authUser = async (req, res, next) => {
         accountLevel: 'LEVEL_1',
         isMobileVerified: true,
         isEmailVerified: false,
+        amlScore: initialAml.amlScore,
+        amlStatus: initialAml.amlStatus,
+        amlFlaggedReasons: initialAml.amlFlaggedReasons,
+        amtScore: initialAml.amlScore,
+        amtStatus: initialAml.amlStatus,
+        amtFlaggedReasons: initialAml.amlFlaggedReasons,
         isPasswordSet: true,
         tpin: tpin ? hashData256(tpin) : '',
         isPinSet: !!tpin,
@@ -467,6 +483,17 @@ export const authUser = async (req, res, next) => {
           status: 'JOINED'
         });
       }
+
+      // Trigger Signup Welcome Email
+      sendTemplatedEmail({
+        toEmail: user.email || `${cleanMobile}@fipmoney.com`,
+        templateId: 'WELCOME_SIGNUP',
+        variables: {
+          userName: user.fullName || user.username || 'Valued Member',
+          mobileNumber: cleanMobile,
+          referralCode: user.referralCode,
+        },
+      }).catch((err) => console.error('[Signup Email Dispatch Error]', err));
 
       res.cookie('fm_userid', user.userId, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
 
@@ -638,6 +665,17 @@ export const buyGoldOrSilver = async (req, res, next) => {
       user.silverHoldingsGrams = Number(((user.silverHoldingsGrams || 0) + numGrams).toFixed(4));
     }
 
+    const amlResult = evaluateTransactionAml(user, 'BUY', numAmount, numGrams);
+    user.amlScore = amlResult.amlScore;
+    user.amlStatus = amlResult.amlStatus;
+    user.amlFlaggedReasons = amlResult.amlFlaggedReasons;
+    user.amtScore = amlResult.amlScore;
+    user.amtStatus = amlResult.amlStatus;
+    user.amtFlaggedReasons = amlResult.amlFlaggedReasons;
+    user.lastTxnTimestamp = amlResult.lastTxnTimestamp;
+    user.lastTxnType = amlResult.lastTxnType;
+    user.recentTxnTimes = amlResult.recentTxnTimes;
+
     await user.save();
 
     const txId = 'FIP' + Math.floor(100000 + Math.random() * 900000);
@@ -771,6 +809,18 @@ export const sellGoldOrSilver = async (req, res, next) => {
     }
 
     user.cashBalance = Number(((user.cashBalance || 0) + numAmount).toFixed(2));
+
+    const amlResult = evaluateTransactionAml(user, 'SELL', numAmount, numGrams);
+    user.amlScore = amlResult.amlScore;
+    user.amlStatus = amlResult.amlStatus;
+    user.amlFlaggedReasons = amlResult.amlFlaggedReasons;
+    user.amtScore = amlResult.amlScore;
+    user.amtStatus = amlResult.amlStatus;
+    user.amtFlaggedReasons = amlResult.amlFlaggedReasons;
+    user.lastTxnTimestamp = amlResult.lastTxnTimestamp;
+    user.lastTxnType = amlResult.lastTxnType;
+    user.recentTxnTimes = amlResult.recentTxnTimes;
+
     await user.save();
 
     const txId = 'FIP' + Math.floor(100000 + Math.random() * 900000);
@@ -898,6 +948,11 @@ export const completeKyc = async (req, res, next) => {
 
     user.isKycCompleted = true;
     user.kycLevel = 'FULL';
+
+    const amtResult = updateKycAmtScore(user, true);
+    user.amtScore = amtResult.amtScore;
+    user.amtStatus = amtResult.amtStatus;
+    user.amtFlaggedReasons = amtResult.amtFlaggedReasons;
 
     await user.save();
 
@@ -1262,6 +1317,194 @@ export const getReferralSummary = async (req, res, next) => {
       }
     });
 
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get AMT Score and Risk details for a particular user
+// @route   GET /api/users/:userId/amt-score
+export const getUserAmtScore = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      res.status(400);
+      throw new Error('userId or mobile number parameter is required');
+    }
+
+    const cleanIdentifier = String(userId).trim();
+    const user = await User.findOne({
+      $or: [
+        { userId: cleanIdentifier },
+        { mobileNumber: cleanIdentifier },
+        { userCode: cleanIdentifier }
+      ]
+    });
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    const amlScore = user.amlScore !== undefined ? user.amlScore : (user.amtScore !== undefined ? user.amtScore : (user.isKycCompleted ? 85 : 45));
+    const amlStatus = user.amlStatus || user.amtStatus || (amlScore >= 80 ? 'Low Risk' : amlScore >= 50 ? 'Moderate Risk' : 'High Risk');
+
+    return res.status(200).json({
+      success: true,
+      message: 'AML Score and Risk details retrieved successfully',
+      data: {
+        userId: user.userId,
+        userCode: user.userCode,
+        name: user.fullName || user.username || 'Fipmoney User',
+        mobileNumber: user.mobileNumber,
+        email: user.email,
+        isKycCompleted: user.isKycCompleted,
+        kycLevel: user.kycLevel,
+        status: user.status,
+        amlScore,
+        amlStatus,
+        amlFlaggedReasons: user.amlFlaggedReasons || user.amtFlaggedReasons || [],
+        amtScore: amlScore,
+        amtStatus: amlStatus,
+        amtFlaggedReasons: user.amlFlaggedReasons || user.amtFlaggedReasons || [],
+        lastTxnTimestamp: user.lastTxnTimestamp,
+        lastTxnType: user.lastTxnType
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get All Real MongoDB Users for Admin Users Directory
+// @route   GET /api/users/admin/all-users
+export const getAllAdminUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}).sort({ createdAt: -1 });
+
+    const formattedUsers = users.map((user, idx) => {
+      const userCode = user.userCode || `FIP${String(idx + 1).padStart(4, '0')}`;
+      const name = user.fullName || user.username || `Fipmoney User #${userCode}`;
+      const email = user.email || `${user.mobileNumber}@fipmoney.com`;
+      const amlScore = user.amlScore !== undefined ? user.amlScore : (user.amtScore !== undefined ? user.amtScore : (user.isKycCompleted ? 85 : 45));
+      const amlStatus = user.amlStatus || user.amtStatus || (amlScore >= 80 ? 'Low Risk' : amlScore >= 50 ? 'Moderate Risk' : 'High Risk');
+
+      return {
+        id: user.userId || String(user._id),
+        userCode,
+        name,
+        email,
+        phone: user.mobileNumber,
+        walletBal: `₹${(user.cashBalance || 0).toLocaleString()}`,
+        goldBal: `${(user.goldHoldingsGrams || 0).toFixed(3)} g`,
+        kycStatus: user.isKycCompleted ? 'Verified' : 'Pending',
+        status: user.status === 'SUSPENDED' ? 'Suspended' : 'Active',
+        joined: user.createdAt ? new Date(user.createdAt).toISOString().substring(0, 10) : '2026-08-08',
+        amlScore,
+        amlStatus,
+        amlFlaggedReasons: user.amlFlaggedReasons || user.amtFlaggedReasons || [],
+        amtScore: amlScore,
+        amtStatus: amlStatus,
+        amtFlaggedReasons: user.amlFlaggedReasons || user.amtFlaggedReasons || []
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Real MongoDB users retrieved successfully for Admin Dashboard',
+      count: formattedUsers.length,
+      data: formattedUsers
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin Update AML Score for a user
+// @route   PUT /api/users/admin/update-amt-score
+export const adminUpdateAmtScore = async (req, res, next) => {
+  try {
+    const { userId, amtScore, amlScore, auditNote } = req.body;
+    const targetScore = amlScore !== undefined ? amlScore : amtScore;
+    if (!userId || targetScore === undefined) {
+      res.status(400);
+      throw new Error('userId and score are required');
+    }
+
+    const numScore = Math.max(0, Math.min(100, Number(targetScore)));
+    const cleanId = String(userId).trim();
+
+    const user = await User.findOne({
+      $or: [
+        { userId: cleanId },
+        { mobileNumber: cleanId },
+        { userCode: cleanId }
+      ]
+    });
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    user.amlScore = numScore;
+    user.amlStatus = numScore >= 80 ? 'Low Risk' : numScore >= 50 ? 'Moderate Risk' : 'High Risk';
+    user.amtScore = numScore;
+    user.amtStatus = user.amlStatus;
+
+    const flaggedReasons = user.amlFlaggedReasons || user.amtFlaggedReasons || [];
+    flaggedReasons.push({
+      reason: auditNote ? `Admin Override: ${auditNote}` : `Manual Admin Score Override to ${numScore}/100`,
+      timestamp: new Date(),
+      penalty: 0
+    });
+    user.amlFlaggedReasons = flaggedReasons;
+    user.amtFlaggedReasons = flaggedReasons;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `AML Audit Score updated to ${numScore}/100 (${user.amlStatus}) for user ${user.username || user.mobileNumber}`,
+      data: getSafeUser(user)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin Toggle User Suspension / Active Status
+// @route   PUT /api/users/admin/toggle-status
+export const adminToggleUserStatus = async (req, res, next) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      res.status(400);
+      throw new Error('userId is required');
+    }
+
+    const cleanId = String(userId).trim();
+    const user = await User.findOne({
+      $or: [
+        { userId: cleanId },
+        { mobileNumber: cleanId },
+        { userCode: cleanId }
+      ]
+    });
+
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    user.status = user.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `User status changed to ${user.status}`,
+      data: getSafeUser(user)
+    });
   } catch (error) {
     next(error);
   }

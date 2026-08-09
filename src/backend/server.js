@@ -163,10 +163,13 @@ app.use(
   });
 });
 
+import emailRoutes from './routes/emailRoutes.js';
+
 // API Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/faqs', faqRoutes);
+app.use('/api/emails', emailRoutes);
 
 // Error Handling Middleware
 app.use(notFound);
@@ -175,6 +178,6 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`[FipMoney Backend] Server running in ${process.env.NODE_ENV || 'development'} mode on http://localhost:${PORT}`);
+  console.log(`[FipMoney Backend] AWS SES Email Server running on http://localhost:${PORT}`);
   console.log(`[FipMoney Backend] 🔒 Secret Swagger Portal: http://localhost:${PORT}${swaggerRoute}`);
 });

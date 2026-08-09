@@ -1,10 +1,91 @@
 import express from 'express';
-import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues } from '../controllers/userController.js';
+import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues, getUserAmtScore, getAllAdminUsers, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/users/admin/all-users:
+ *   get:
+ *     summary: Get All Real Users for Admin Dashboard
+ *     description: Fetches real MongoDB user records for the Admin Users table.
+ *     tags:
+ *       - Admin User Control
+ *     responses:
+ *       200:
+ *         description: List of real user records.
+ */
+router.get('/admin/all-users', getAllAdminUsers);
+
+/**
+ * @swagger
+ * /api/users/admin/update-amt-score:
+ *   put:
+ *     summary: Admin Override User AMT Score
+ *     description: Updates a user's AMT risk score and records audit trail in MongoDB.
+ *     tags:
+ *       - Admin User Control
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId: { type: string }
+ *               amtScore: { type: number }
+ *               auditNote: { type: string }
+ *     responses:
+ *       200:
+ *         description: AMT score updated successfully.
+ */
+router.put('/admin/update-amt-score', adminUpdateAmtScore);
+
+/**
+ * @swagger
+ * /api/users/admin/toggle-status:
+ *   put:
+ *     summary: Admin Toggle User Account Status
+ *     description: Suspends or activates a user account in MongoDB.
+ *     tags:
+ *       - Admin User Control
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId: { type: string }
+ *     responses:
+ *       200:
+ *         description: User status toggled.
+ */
+router.put('/admin/toggle-status', adminToggleUserStatus);
+
+/**
+ * @swagger
+ * /api/users/{userId}/amt-score:
+ *   get:
+ *     summary: Get AMT Score for a Particular User
+ *     description: Retrieves the AMT risk score and flagged abnormal activity logs for a user.
+ *     tags:
+ *       - User Management
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: AMT score details returned.
+ */
+router.get('/:userId/aml-score', getUserAmtScore);
+router.get('/:userId/amt-score', getUserAmtScore);
 
 /**
  * @swagger
