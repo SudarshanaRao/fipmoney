@@ -221,7 +221,7 @@ export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, varia
     // Primary: Try AWS SES v2 API
     if (sesClient) {
       try {
-        const command = new SendEmailCommand({
+        const emailParams = {
           FromEmailAddress: senderAddress.includes('<') ? senderAddress : `"FipMoney Support" <${senderAddress}>`,
           Destination: {
             ToAddresses: [toEmail],
@@ -240,7 +240,13 @@ export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, varia
               },
             },
           },
-        });
+        };
+
+        if (process.env.AWS_SES_CONFIGURATION_SET) {
+          emailParams.ConfigurationSetName = process.env.AWS_SES_CONFIGURATION_SET;
+        }
+
+        const command = new SendEmailCommand(emailParams);
 
         const sesResponse = await sesClient.send(command);
         status = 'SENT';
