@@ -55,7 +55,7 @@ export default function MandatoryDisclosures() {
     <section className="py-14 md:py-16 bg-white font-sans">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px]">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#1e293b] tracking-tight font-serif mb-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-2">
             Mandatory Disclosures
           </h2>
           <div className="w-16 h-1 bg-amber-500 mx-auto rounded-full mt-4"></div>
@@ -65,7 +65,7 @@ export default function MandatoryDisclosures() {
           {disclosures.map((item, index) => (
             <div 
               key={index} 
-              className="bg-white rounded-[20px] p-6 shadow-[0_2px_15px_rgba(0,0,0,0.03)] border border-slate-100 flex flex-col hover:-translate-y-1 transition-transform duration-300"
+              className="bg-white rounded-[20px] p-6 shadow-md hover:shadow-xl border border-slate-100 flex flex-col hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">

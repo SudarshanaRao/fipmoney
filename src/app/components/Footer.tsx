@@ -26,11 +26,10 @@ export default function Footer({ onNavigate }: FooterProps) {
       title: 'PRODUCTS',
       icon: Coins,
       links: [
-        { label: 'Digital Gold & Silver', href: '#features' },
-        { label: 'Goal-Based Savings', href: '#features' },
-        { label: 'Auto-Save Features', href: '#features' },
-        { label: 'Live Metal Rates', action: 'live-metal-tracker' },
-        { label: 'Gold Vault', href: '#features' }
+        { label: 'Digital Gold', action: 'digital-gold' },
+        { label: 'Digital Silver', action: 'digital-silver' },
+        { label: 'Goal-Based Savings', action: 'savings' },
+        { label: 'Live Metal Rates', action: 'live-metal-tracker' }
       ]
     },
     {

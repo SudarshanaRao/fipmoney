@@ -45,6 +45,7 @@ import InvestorCharter from "./components/InvestorCharter";
 import LiveMetalTracker from "./components/LiveMetalTracker";
 import HomeFAQs from "./components/HomeFAQs";
 import MandatoryDisclosures from "./components/MandatoryDisclosures";
+import SafetyPriorityCard from "./components/SafetyPriorityCard";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminAuthFlow from "./components/AdminAuthFlow";
 import { OBFUSCATED_ADMIN_PATH } from "./utils/adminStorage";
@@ -425,6 +426,9 @@ export default function App() {
 
               {/* Mandatory Disclosures */}
               <MandatoryDisclosures />
+
+              {/* Safety Priority Card */}
+              <SafetyPriorityCard />
             </main>
 
             {/* Scroll Progress Indicator */}

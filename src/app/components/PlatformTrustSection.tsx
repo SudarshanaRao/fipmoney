@@ -78,9 +78,9 @@ export default function PlatformTrustSection() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* CONCEPT 1: SECURITY OF OWNERSHIP */}
         <div className="space-y-12">
-          <div className="text-center space-y-4">
-            <span className="text-sm font-black tracking-widest text-[#d89221] uppercase">SECURITY OF OWNERSHIP</span>
-            <h3 className="text-4xl md:text-6xl font-bold text-slate-800 tracking-tight">
+          <div className="text-center">
+            <span className="text-sm font-black tracking-widest text-[#d89221] uppercase block mb-6">SECURITY OF OWNERSHIP</span>
+            <h3 className="text-4xl md:text-6xl font-bold text-slate-800 tracking-tight mb-4">
               Real, Vaulted, and Yours
             </h3>
             <p className="text-sm md:text-base font-semibold text-slate-500 max-w-lg mx-auto">
@@ -133,9 +133,9 @@ export default function PlatformTrustSection() {
 
         {/* CONCEPT 2: YOUR GOLD, YOUR CHOICE (WITHDRAWAL OPTIONS) */}
         <div className="space-y-12 pt-4">
-          <div className="text-center space-y-4">
-            <span className="text-sm font-black tracking-widest text-emerald-600 uppercase">YOUR GOLD, YOUR CHOICE</span>
-            <h3 className="text-4xl md:text-6xl font-bold text-slate-800 tracking-tight">
+          <div className="text-center">
+            <span className="text-sm font-black tracking-widest text-emerald-600 uppercase block mb-6">YOUR GOLD, YOUR CHOICE</span>
+            <h3 className="text-4xl md:text-6xl font-bold text-slate-800 tracking-tight mb-4">
               Withdraw It However You Like
             </h3>
             <p className="text-sm md:text-base font-semibold text-slate-500 max-w-lg mx-auto">
@@ -183,40 +183,6 @@ export default function PlatformTrustSection() {
             })}
           </div>
         </div>
-
-        {/* BOTTOM BANNER: SECURE TRANSACTIONS */}
-        <motion.div
-          className="rounded-3xl bg-gradient-to-r from-[#fdfaf2] via-[#fffdf9] to-white border border-[#f5ebd0] p-8 md:p-10 relative overflow-hidden shadow-xs"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-            <div className="lg:col-span-7 space-y-4 text-left">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-[#f5ebd0] text-[#c59325] text-xs font-black tracking-wider uppercase shadow-xs">
-                <Lock className="w-3.5 h-3.5 text-[#c59325]" />
-                YOUR SAFETY IS OUR PRIORITY
-              </div>
-
-              <h3 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-                Bank-Grade Security,<br />Complete Peace of Mind
-              </h3>
-
-              <p className="text-xs md:text-sm font-semibold text-slate-600 leading-relaxed max-w-xl">
-                Every transaction on FipMoney is protected with end-to-end 256-bit encryption and monitored 24x7 to ensure complete safety of your funds.
-              </p>
-            </div>
-
-            <div className="lg:col-span-5 flex justify-center lg:justify-end">
-              <img
-                src={securityIllustration}
-                alt="Secure Transactions Illustration"
-                className="max-h-[220px] w-auto object-contain drop-shadow-md"
-              />
-            </div>
-          </div>
-        </motion.div>
 
       </div>
     </section>
