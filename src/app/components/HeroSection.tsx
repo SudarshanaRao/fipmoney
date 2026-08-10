@@ -56,7 +56,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
   const currentData = carouselData[currentSlide];
 
   return (
-    <section className="bg-white relative overflow-hidden pt-16 pb-12">
+    <section className="bg-white relative overflow-hidden pt-28 md:pt-32 pb-12">
       {/* Dynamic Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <motion.div 

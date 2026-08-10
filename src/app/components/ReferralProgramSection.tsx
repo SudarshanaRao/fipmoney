@@ -1,5 +1,5 @@
 import React from 'react';
-import { Gift, Share2, Copy, Clock, UserPlus, Wallet } from 'lucide-react';
+import { Gift, Share2, Copy, Clock, UserPlus, Wallet, ArrowRight } from 'lucide-react';
 import { getLoggedInUser } from '../utils/userStorage';
 
 const ReferralProgramSection = ({ onNavigate }: { onNavigate?: (page: string) => void }) => {
@@ -69,68 +69,106 @@ const ReferralProgramSection = ({ onNavigate }: { onNavigate?: (page: string) =>
           </div>
         </div>
 
-        {/* Referral Link Box */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 w-full mt-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-left w-full md:w-auto">
-              <h3 className="font-extrabold text-slate-800 text-xl">Your Referral Link</h3>
-              <p className="text-sm text-slate-500 mt-1">Share with friends to start earning.</p>
-            </div>
-            {isLoggedIn && user ? (
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 w-full sm:w-72">
-                  <span className="text-slate-600 font-bold text-sm truncate flex-1">{referralLink}</span>
-                  <button className="text-indigo-600 hover:text-indigo-800 transition-colors shrink-0 ml-3 cursor-pointer bg-indigo-50 p-2 rounded-lg border-none outline-none">
-                    <Copy size={18} />
-                  </button>
+        {/* Unified Referral & How It Works Card */}
+        <div className="bg-white rounded-[32px] p-6 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full mt-10 flex flex-col">
+          
+          {/* Top Section: Your Referral Link */}
+          <div className="flex flex-col xl:flex-row items-center justify-between gap-10 w-full">
+            
+            {/* Left: Link Icon, Text, Input */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 w-full xl:w-auto">
+              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-white to-amber-50 flex items-center justify-center shadow-[0_8px_24px_rgba(251,199,64,0.15)] shrink-0 relative border border-amber-100/50">
+                <svg className="w-9 h-9 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                <div className="absolute top-2.5 left-2.5 w-1.5 h-1.5 bg-amber-400 rounded-full rotate-45"></div>
+                <div className="absolute bottom-4 right-2.5 w-2 h-2 bg-amber-400 rounded-full rotate-45"></div>
+              </div>
+              
+              <div className="flex flex-col items-center sm:items-start w-full">
+                <h3 className="text-[28px] md:text-3xl font-extrabold text-slate-800 tracking-tight">
+                  Your <span className="text-amber-500">Referral</span> Link
+                </h3>
+                <p className="text-[15px] text-slate-500 mt-1.5 mb-6">Share with friends to start earning rewards together!</p>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                  <div className="bg-[#fffcf5] border border-amber-200/60 rounded-xl px-4 py-3.5 w-full sm:w-[340px]">
+                    <span className="text-slate-700 font-bold text-sm truncate block w-full text-center sm:text-left">
+                      {isLoggedIn ? referralLink : "Login to view referral code"}
+                    </span>
+                  </div>
+                  {isLoggedIn ? (
+                    <button className="w-full sm:w-auto flex items-center justify-center gap-2 border border-amber-200 text-amber-600 font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-amber-50 transition-colors shadow-sm bg-white cursor-pointer">
+                      <Copy size={18} /> Copy Link
+                    </button>
+                  ) : (
+                    <button onClick={() => onNavigate?.('login')} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm px-7 py-3.5 rounded-xl transition-colors shadow-md shadow-indigo-600/20 cursor-pointer">
+                      Login <ArrowRight size={16} />
+                    </button>
+                  )}
                 </div>
-                <button className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all cursor-pointer border-none outline-none shadow-md shadow-indigo-600/20">
-                  <Share2 size={18} /> Share Now
+              </div>
+            </div>
+
+            {/* Right: Rewards Banner (Always showing Share box) */}
+            <div className="bg-slate-50/80 border border-slate-100 rounded-3xl p-6 sm:p-8 flex items-center justify-between gap-6 relative overflow-hidden w-full xl:w-auto min-w-[340px]">
+              <div className="z-10 flex flex-col items-start pt-2">
+                <p className="text-slate-700 font-bold text-[15px] whitespace-nowrap leading-snug mb-5">
+                  Share directly with your friends!
+                </p>
+                <button onClick={() => !isLoggedIn && onNavigate?.('login')} className="bg-indigo-600 hover:bg-indigo-700 text-white px-7 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-md shadow-indigo-600/20 cursor-pointer">
+                  <Share2 size={16} /> Share Now
                 </button>
               </div>
-            ) : (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 bg-slate-50 border border-slate-200 rounded-xl px-6 py-4 w-full md:w-auto">
-                <p className="text-slate-700 font-bold text-sm">Login now and get your referral link</p>
-                <button 
-                  onClick={() => onNavigate?.('login')}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold text-sm transition-all cursor-pointer border-none outline-none shrink-0 shadow-md shadow-indigo-600/20"
-                >
-                  Login
-                </button>
+              <div className="absolute right-0 bottom-0 h-[120%] w-[180px] pointer-events-none translate-y-3 translate-x-3">
+                <img src="/gold_refer.png" alt="Rewards" className="object-contain h-full w-full object-right-bottom drop-shadow-xl" />
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* How It Works Horizontal Stepper */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 mt-4">
-          <div className="flex items-center gap-2.5 mb-8">
-            <Clock size={20} className="text-indigo-600" />
-            <h3 className="font-extrabold text-slate-800 text-xl">How It Works</h3>
+            </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0 relative px-4">
-            {/* Horizontal line for desktop */}
-            <div className="hidden md:block absolute top-7 left-[10%] right-[10%] h-[2px] bg-slate-100 -z-10" />
+          {/* Separator & How It Works */}
+          <div className="relative flex flex-col items-center justify-center mt-8 mb-8 w-full">
+            <div className="absolute left-0 right-0 top-[50%] -translate-y-1/2 h-[1px] border-t border-slate-100 -z-10"></div>
+            
+            <div className="flex items-center justify-center gap-4 bg-white px-6 z-10">
+              <div className="h-[2px] w-12 sm:w-20 bg-amber-200 relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+              </div>
+              <h3 className="text-xl md:text-[22px] font-black text-[#1B1147]">How It Works</h3>
+              <div className="h-[2px] w-12 sm:w-20 bg-amber-200 relative">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stepper Cards */}
+          <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-10 md:gap-4 relative px-2 sm:px-6 w-full mb-4">
+            {/* Horizontal dashed line for desktop */}
+            <div className="hidden md:block absolute top-[44px] left-[12%] right-[12%] h-[1.5px] border-t-[1.5px] border-dashed border-slate-200 -z-10" />
 
             {[
-              { step: 1, title: "Share your link", desc: "Invite your friends using your unique referral link", icon: Share2, color: "text-emerald-600", bg: "bg-emerald-100" },
-              { step: 2, title: "They join & verify", desc: "Your friend signs up and completes KYC", icon: UserPlus, color: "text-amber-600", bg: "bg-amber-100" },
-              { step: 3, title: "Purchase Digital Gold", desc: "Friend purchases ₹250 worth of digital gold within 30 days", icon: Wallet, color: "text-blue-600", bg: "bg-blue-100" },
-              { step: 4, title: "You both earn rewards", desc: "You both get ₹50 worth of digital gold as earnings", icon: Gift, color: "text-purple-600", bg: "bg-purple-100" }
+              { step: "01", title: "Share your link", desc: "Invite your friends using your unique referral link.", icon: Share2, color: "text-emerald-500", bg: "bg-emerald-50", badgeBg: "#10b981" },
+              { step: "02", title: "They join & verify", desc: "Your friends sign up and complete KYC.", icon: UserPlus, color: "text-amber-500", bg: "bg-amber-50", badgeBg: "#f59e0b" },
+              { step: "03", title: "Purchase Digital Gold", desc: "Friend purchases ₹500 worth of digital gold within 30 days.", icon: Wallet, color: "text-blue-500", bg: "bg-blue-50", badgeBg: "#3b82f6" },
+              { step: "04", title: "You both earn rewards", desc: "You both get ₹50 wallet credit as a reward for investing!", icon: Gift, color: "text-purple-500", bg: "bg-purple-50", badgeBg: "#8b5cf6" }
             ].map((item, idx) => (
-              <div key={idx} className="flex flex-row md:flex-col items-center md:text-center gap-4 w-full md:w-1/4 relative bg-white">
-                <div className={`w-14 h-14 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center border-[6px] border-white shadow-sm shrink-0`}>
-                  <item.icon size={22} strokeWidth={2.5} />
+              <div key={idx} className="flex flex-col items-center text-center gap-5 w-full md:w-1/4 relative bg-white group">
+                <div className={`w-[88px] h-[88px] rounded-full ${item.bg} ${item.color} flex items-center justify-center border-[8px] border-white shadow-[0_4px_15px_rgba(0,0,0,0.04)] shrink-0 relative z-10 transition-transform group-hover:-translate-y-1`}>
+                  <item.icon size={30} strokeWidth={2} />
+                  {/* Step bubble */}
+                  <div className="absolute -bottom-3 w-8 h-8 rounded-full text-white flex items-center justify-center text-[11px] font-black border-2 border-white shadow-sm" style={{ backgroundColor: item.badgeBg }}>
+                     {item.step}
+                  </div>
                 </div>
-                <div>
-                  <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 md:mt-2">Step {item.step}</div>
-                  <h4 className="font-extrabold text-slate-800 text-base mb-1">{item.title}</h4>
-                  <p className="text-sm text-slate-500 leading-relaxed max-w-[200px] md:mx-auto font-medium">{item.desc}</p>
+                <div className="mt-1 flex flex-col items-center">
+                  <h4 className="font-extrabold text-slate-800 text-base mb-2">{item.title}</h4>
+                  <p className="text-[13px] text-slate-500 leading-relaxed max-w-[190px] font-medium">{item.desc}</p>
                 </div>
               </div>
             ))}
           </div>
+
         </div>
 
       </div>

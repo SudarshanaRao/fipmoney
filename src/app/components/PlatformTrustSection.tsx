@@ -77,13 +77,13 @@ export default function PlatformTrustSection() {
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* CONCEPT 1: SECURITY OF OWNERSHIP */}
-        <div className="space-y-8">
-          <div className="text-center space-y-1">
-            <span className="text-xs font-black tracking-widest text-[#d89221] uppercase">SECURITY OF OWNERSHIP</span>
-            <h3 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">
+        <div className="space-y-12">
+          <div className="text-center space-y-4">
+            <span className="text-sm font-black tracking-widest text-[#d89221] uppercase">SECURITY OF OWNERSHIP</span>
+            <h3 className="text-4xl md:text-6xl font-bold text-slate-800 tracking-tight">
               Real, Vaulted, and Yours
             </h3>
-            <p className="text-xs md:text-sm font-semibold text-slate-500 max-w-lg mx-auto">
+            <p className="text-sm md:text-base font-semibold text-slate-500 max-w-lg mx-auto">
               Every rupee becomes physical 24K — stored under bank-grade security and held in your name, not ours.
             </p>
           </div>
@@ -105,21 +105,21 @@ export default function PlatformTrustSection() {
                       <div className={`w-14 h-14 rounded-2xl ${feat.iconBg} border flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform`}>
                         <IconComponent className="w-7 h-7 stroke-[2.2]" />
                       </div>
-                      <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                      <span className="text-xs font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                         {feat.subtitle}
                       </span>
                     </div>
 
-                    <h4 className="text-xl font-black text-slate-900 tracking-tight pt-2">
+                    <h4 className="text-2xl font-black text-slate-900 tracking-tight pt-2">
                       {feat.title}
                     </h4>
 
-                    <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                    <p className="text-sm font-semibold text-slate-500 leading-relaxed">
                       {feat.desc}
                     </p>
                   </div>
 
-                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-extrabold text-[#d89221] group-hover:text-amber-600 transition-colors mt-6">
+                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-sm font-extrabold text-[#d89221] group-hover:text-amber-600 transition-colors mt-6">
                     <span className="flex items-center gap-1.5">
                       <CheckCircle2 size={15} className="text-emerald-500" /> Fully Verified & Protected
                     </span>
@@ -132,13 +132,13 @@ export default function PlatformTrustSection() {
         </div>
 
         {/* CONCEPT 2: YOUR GOLD, YOUR CHOICE (WITHDRAWAL OPTIONS) */}
-        <div className="space-y-8 pt-4">
-          <div className="text-center space-y-1">
-            <span className="text-xs font-black tracking-widest text-emerald-600 uppercase">YOUR GOLD, YOUR CHOICE</span>
-            <h3 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">
+        <div className="space-y-12 pt-4">
+          <div className="text-center space-y-4">
+            <span className="text-sm font-black tracking-widest text-emerald-600 uppercase">YOUR GOLD, YOUR CHOICE</span>
+            <h3 className="text-4xl md:text-6xl font-bold text-slate-800 tracking-tight">
               Withdraw It However You Like
             </h3>
-            <p className="text-xs md:text-sm font-semibold text-slate-500 max-w-lg mx-auto">
+            <p className="text-sm md:text-base font-semibold text-slate-500 max-w-lg mx-auto">
               Once you've saved enough, take it out your way with instant flexibility.
             </p>
           </div>
@@ -160,21 +160,21 @@ export default function PlatformTrustSection() {
                       <div className={`w-14 h-14 rounded-2xl ${choice.iconBg} border flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform`}>
                         <IconComponent className="w-7 h-7 stroke-[2.2]" />
                       </div>
-                      <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                      <span className="text-xs font-black text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                         {choice.subtitle}
                       </span>
                     </div>
 
-                    <h4 className="text-xl font-black text-slate-900 tracking-tight pt-2">
+                    <h4 className="text-2xl font-black text-slate-900 tracking-tight pt-2">
                       {choice.title}
                     </h4>
 
-                    <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                    <p className="text-sm font-semibold text-slate-500 leading-relaxed">
                       {choice.desc}
                     </p>
                   </div>
 
-                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs font-extrabold text-emerald-600 group-hover:text-emerald-700 transition-colors mt-6">
+                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-sm font-extrabold text-emerald-600 group-hover:text-emerald-700 transition-colors mt-6">
                     <span>Instant Execution</span>
                     <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                   </div>
