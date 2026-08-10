@@ -522,33 +522,55 @@ const SecuritySection = () => {
   );
 };
 
+const renderFormattedAnswer = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-bold text-gray-900">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
 const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const faqs = [
     {
       question: "What is digital gold and how does it work?",
-      answer: "Digital gold represents physical 24K gold stored securely in vaults. When you buy digital gold, you own actual gold equivalent to your investment amount. You can buy, sell, or convert it to physical gold anytime."
+      answer: "Digital gold represents physical **24K gold** stored securely in vaults. When you buy digital gold, you own actual gold equivalent to your investment amount. You can buy, sell, or convert it to physical gold anytime."
     },
     {
       question: "Is my digital gold investment safe and insured?",
-      answer: "Yes, your digital gold is 100% safe. It's stored in secure, insured vaults with comprehensive insurance coverage. We partner with certified refiners and follow strict security protocols."
+      answer: "Yes! Your digital gold is stored in high-security physical vaults with accredited **Vault Keepers**. Insurance policies cover losses caused by **fire, lightning, theft, cyclone, earthquake, flood, etc.** Exclusions apply to force majeure events like **war, revolution, derelict weapons of war, nuclear radiation, etc.**"
+    },
+    {
+      question: "How much gold percentage is stored/insured and on what purity basis?",
+      answer: "**100% of the fine gold weight** is physically stored in bullion bars of **99.5% purity or higher** (99.5%, 99.9%, or 99.99%). Stored amounts are calculated based on **24 Karat gold**. **Illustration:** If you purchase 1g of 99.99% pure gold, at least **1.0049g of 99.5% purity gold** is physically stored for you in the vault (**1g × 99.99% / 99.5% = 1.0049g**)."
+    },
+    {
+      question: "What is the role of Intermediaries and the Trustee Administrator?",
+      answer: "**Intermediaries** (**Trustee Administrator** and **Vault Keeper**) assist in vaulting and protecting your gold. An independent Trustee Administrator monitors customer bullion held in vaults on your behalf and holds a **legal first charge** over it. If any default occurs, the Trustee Administrator is authorized to sell a portion of the bullion to cover charges and distribute your assets safely."
     },
     {
       question: "What is the minimum amount to invest in digital gold?",
-      answer: "You can start investing in digital gold with as little as ₹1. There's no upper limit, and you can invest any amount based on your financial goals."
+      answer: "You can start investing in digital gold with as little as **₹1**. There's **no upper limit**, and you can invest any amount based on your financial goals."
     },
     {
       question: "How are the gold rates determined?",
-      answer: "Gold rates are updated in real-time based on international gold prices and local market conditions. You always buy and sell at live market rates with complete transparency."
+      answer: "Gold rates are updated in **real-time** based on international gold prices and local market conditions. You always buy and sell at **live market rates** with complete transparency."
     },
     {
       question: "Can I convert my digital gold to physical gold?",
-      answer: "Yes, you can convert your digital gold to physical gold coins or bars and get them delivered to your address. Minimum quantity restrictions may apply for physical delivery."
+      answer: "Yes, you can convert your digital gold to physical **24K gold coins or bars** and get them delivered to your address in **insured packaging**."
     },
     {
       question: "Are there any charges for buying or selling digital gold?",
-      answer: "We charge a small transaction fee for buying and selling. There are no storage fees, no lock-in period, and no hidden charges. All fees are transparently displayed before you transact."
+      answer: "We charge a small transaction fee for buying and selling. There are **no storage fees**, **no lock-in period**, and **no hidden charges**."
     }
   ];
 
@@ -613,7 +635,7 @@ const FAQSection = () => {
                       transition={{ duration: 0.3 }}
                     >
                       <div className="px-6 pb-4 text-gray-600 leading-relaxed">
-                        {faq.answer}
+                        {renderFormattedAnswer(faq.answer)}
                       </div>
                     </motion.div>
                   )}

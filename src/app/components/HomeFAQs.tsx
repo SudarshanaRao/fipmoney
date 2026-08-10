@@ -11,140 +11,172 @@ interface FAQ {
   category: string;
 }
 
+const renderFormattedAnswer = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-bold text-slate-800">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
 const faqs: FAQ[] = [
   // FipMoney App FAQs
   {
     id: "1",
     question: "Is FipMoney App safe to use?",
-    answer: "FipMoney app is 100% safe and secure for your Gold & Silver investments. All physical gold and silver purchased on FipMoney is stored in high-security, 100% insured physical vaults operated by Brink's India — the global leader in vault logistics. Furthermore, independent Security Trustee Vistra ITCL safeguards customer assets, holding a first exclusive charge over physical bullion on behalf of users.",
+    answer: "FipMoney app is **100% safe and secure** for your Gold & Silver investments. All physical gold and silver purchased on FipMoney is stored in high-security, **100% insured physical vaults** operated by **Brink's India** — the global leader in vault logistics. Furthermore, independent **Security Trustee Vistra ITCL** safeguards customer assets, holding a **first exclusive charge** over physical bullion on behalf of users.",
     category: "fipmoney-app"
   },
   {
     id: "2",
     question: "Who is the vault custodian and how is my Gold stored?",
-    answer: "Our physical gold and silver vaulting partner is Brink's (Brink's Global Services). When you buy digital gold on FipMoney, an allocated physical vault unit is opened on your behalf under your name/account at Brink's. The gold is 24 Karat 999.9 pure and 100% insured against theft, fire, damage, and natural disasters.",
-    category: "digital-gold"
+    answer: "Our physical gold and silver vaulting partner is **Brink's (Brink's Global Services)**. When you buy digital gold on FipMoney, an allocated physical vault unit is opened on your behalf under your name/account at Brink's. The gold is **24 Karat 999.9 pure** and **100% insured** against theft, fire, damage, and natural disasters.",
+    category: "insurance-trustee"
   },
   {
     id: "3",
-    question: "Who is the Security Trustee and what is their role?",
-    answer: "Vistra ITCL (India) Limited ('Vistra') is the independent Security Trustee appointed to protect customer interests. Vistra holds a legal first charge over the physical gold stored in Brink's vaults and conducts periodic independent audits to ensure 100% of user balances match physical gold held in vaults at all times.",
-    category: "digital-gold"
+    question: "Who is the Security Trustee Administrator and what is their role?",
+    answer: "**Vistra ITCL (India) Limited ('Vistra')** is the independent **Security Trustee Administrator** appointed to protect customer interests. Vistra holds a **legal first charge** over the physical gold stored in Brink's vaults and conducts periodic independent audits to ensure **100% of user balances match physical gold held in vaults** at all times.",
+    category: "insurance-trustee"
   },
   {
     id: "4",
     question: "How does the vault opening process work on FipMoney?",
-    answer: "When you buy digital gold starting from ₹1, FipMoney buys equivalent 24K 999.9 pure physical gold and opens/allocates a physical gold vault account unit on your behalf with Brink's. Your gold stays 100% insured in Brink's vaults and legally protected by Security Trustee Vistra until you decide to sell or request physical delivery.",
-    category: "digital-gold"
+    answer: "When you buy digital gold starting from **₹1**, FipMoney buys equivalent **24K 999.9 pure physical gold** and opens/allocates a physical gold vault account unit on your behalf with Brink's. Your gold stays **100% insured** in Brink's vaults and **legally protected by Security Trustee Vistra** until you decide to sell or request physical delivery.",
+    category: "insurance-trustee"
   },
   {
     id: "5",
     question: "What are FipMoney's official email addresses?",
-    answer: "For general inquiries: info@fipmoney.com | Customer Support: support@fipmoney.com | Payment & transaction queries: payments@fipmoney.com | Legal & compliance issues: legal@fipmoney.com | Grievances: grievance@fipmoney.com.",
+    answer: "For general inquiries: **info@fipmoney.com** | Customer Support: **support@fipmoney.com** | Payment & transaction queries: **payments@fipmoney.com** | Legal & compliance issues: **legal@fipmoney.com** | Grievances: **grievance@fipmoney.com**.",
     category: "fipmoney-app"
   },
   {
     id: "6",
     question: "How do I check today's Digital Gold price?",
-    answer: "You can check today's digital gold price directly in the FipMoney app on the home screen. The price is updated in real-time based on international gold markets. You can also enable price alerts to get notified when gold reaches your target buying or selling price.",
+    answer: "You can check today's digital gold price directly in the FipMoney app on the home screen. The price is **updated in real-time** based on international gold markets. You can also enable price alerts to get notified when gold reaches your target buying or selling price.",
     category: "digital-gold"
   },
   {
     id: "7",
     question: "What is Digital Gold Leasing?",
-    answer: "Digital Gold Leasing is a feature that allows you to earn returns on your gold holdings. Instead of keeping your gold idle, you can lease it to jewelry manufacturers and earn a steady income. This helps your gold investment generate additional returns while maintaining the security of your principal amount.",
+    answer: "Digital Gold Leasing is a feature that allows you to earn **extra returns** on your gold holdings by leasing it to verified jewelry manufacturers while maintaining the security of your **principal investment amount**.",
     category: "digital-gold"
   },
   {
     id: "8",
     question: "Can I convert digital gold to physical gold?",
-    answer: "Yes, you can convert your digital gold to physical gold coins or bars. FipMoney offers options to get gold coins of various denominations delivered to your address. There are minimum quantity requirements and delivery charges may apply based on your location.",
+    answer: "Yes, you can convert your digital gold to physical **24K gold coins or bars**. FipMoney offers options to get gold coins of various denominations delivered to your address in **insured packaging**.",
     category: "digital-gold"
+  },
+  {
+    id: "23",
+    question: "Is my Digital Gold insured, and what risks are covered or excluded?",
+    answer: "Yes, your digital gold & silver stored with certified **Vault Keepers** is covered by **comprehensive insurance policies** aligned with global industry practices. It covers losses due to **fire, lightning, theft, cyclone, earthquake, flood, etc.** However, policy coverage does not extend to extraordinary events like **war, revolution, derelict weapons of war, nuclear radiation, etc.**",
+    category: "insurance-trustee"
+  },
+  {
+    id: "24",
+    question: "How much gold percentage is stored/insured and on what purity basis is it calculated?",
+    answer: "**100% of the fine gold** corresponding to your order is physically stored and insured in secure vaults. Bullion bars are maintained at a minimum of **99.5% purity or higher** (99.5%, 99.9%, or 99.99%). Total storage is calculated based on **24 Karat gold** (and **999 pure silver** for silver). **Illustration:** If you buy 1g of 99.99% pure gold, at least **1.0049g of 99.5% purity gold** is physically stored for you (**1g × 99.99% / 99.5% = 1.0049g**).",
+    category: "insurance-trustee"
+  },
+  {
+    id: "25",
+    question: "What is the role of Intermediaries and the Trustee Administrator in safe keeping arrangements?",
+    answer: "DGIPL appoints specialized **Intermediaries** including an independent **Trustee Administrator** and **Vault Keeper**. The Trustee Administrator monitors vaulted metal on your behalf and holds a **legal first charge** over it. In case of default or unpaid charges affecting order fulfillment, the Trustee Administrator is authorized to sell a portion of the bullion to cover expenses and protect customer entitlements.",
+    category: "insurance-trustee"
   },
   
   // Withdrawal Issues FAQs
   {
     id: "9",
     question: "How long does it take to withdraw money?",
-    answer: "Withdrawals are typically processed within 1-2 business days. The money will be credited to your registered bank account. During high-volume periods or due to banking holidays, it might take up to 3-5 business days.",
+    answer: "Withdrawals are typically processed within **1-2 business days**. The money will be credited directly to your registered bank account via **UPI or IMPS**.",
     category: "withdrawal-issues"
   },
   {
     id: "10",
     question: "What is the minimum withdrawal amount?",
-    answer: "The minimum withdrawal amount is ₹100. You can sell any amount of gold worth ₹100 or more and withdraw the money to your bank account. There are no maximum limits on withdrawals.",
+    answer: "The minimum withdrawal amount is **₹100**. You can sell any amount of gold worth ₹100 or more and withdraw the money to your bank account with **no maximum limit**.",
     category: "withdrawal-issues"
   },
   {
     id: "11",
     question: "Are there any charges for withdrawing money?",
-    answer: "FipMoney charges a small transaction fee of 3% + GST on the gold value when you sell your gold. This covers the platform costs, secure storage, and transaction processing. There are no additional withdrawal charges from FipMoney's side.",
+    answer: "FipMoney charges a small transaction fee of **3% + GST** on the gold value when you sell your gold. This covers platform costs, secure vault storage, and transaction processing.",
     category: "withdrawal-issues"
   },
   {
     id: "12",
     question: "Why is my withdrawal delayed?",
-    answer: "Withdrawal delays can occur due to bank holidays, technical issues, incorrect bank details, or high transaction volumes. If your withdrawal is delayed beyond the expected time, please contact our support team with your transaction ID for immediate assistance.",
+    answer: "Withdrawal delays can occur due to **bank holidays**, **technical issues**, **incorrect bank details**, or **high transaction volumes**.",
     category: "withdrawal-issues"
   },
   {
     id: "13",
     question: "Are there any hidden charges?",
-    answer: "No, FipMoney is completely transparent. There are no hidden fees or account maintenance charges. You only pay for what you buy.",
+    answer: "No, FipMoney is **completely transparent**. There are **no hidden fees** or account maintenance charges. You only pay for what you buy.",
     category: "fipmoney-app"
   },
   {
     id: "14",
     question: "How do I update my profile details?",
-    answer: "You can easily update your profile details by going to the Profile section in the app settings.",
+    answer: "You can easily update your profile details by going to the **Profile section** in the app settings.",
     category: "fipmoney-app"
   },
   {
     id: "15",
     question: "Is there a limit on how much gold I can buy?",
-    answer: "You can start buying gold with as little as ₹1. There is no upper limit to how much you can invest in digital gold.",
+    answer: "You can start buying gold with as little as **₹1**. There is **no upper limit** to how much you can invest in digital gold.",
     category: "digital-gold"
   },
   {
     id: "16",
     question: "Can I gift digital gold?",
-    answer: "Yes, you can easily gift digital gold to your friends and family directly through the app using their mobile number.",
+    answer: "Yes, you can easily gift digital gold to your friends and family directly through the app using their **mobile number**.",
     category: "digital-gold"
   },
   {
     id: "17",
     question: "What happens to my money if a withdrawal fails?",
-    answer: "If a withdrawal fails due to bank issues, the money is instantly and automatically refunded to your FipMoney wallet.",
+    answer: "If a withdrawal fails due to bank issues, the money is **instantly and automatically refunded** to your FipMoney wallet.",
     category: "withdrawal-issues"
   },
   {
     id: "18",
     question: "Can I withdraw my gold as cash on weekends?",
-    answer: "Yes, you can sell your gold and request a withdrawal 24/7, including weekends and public holidays. The amount will be credited to your bank account.",
+    answer: "Yes, you can sell your gold and request a withdrawal **24/7**, including weekends and public holidays.",
     category: "withdrawal-issues"
   },
   {
     id: "19",
     question: "When will I receive my referral bonus?",
-    answer: "You will receive your ₹50 digital gold referral bonus within 24-48 hours after your friend successfully completes a digital gold purchase of at least ₹250 within 30 days of creating their account.",
+    answer: "You will receive your **₹50 digital gold referral bonus** within **24-48 hours** after your friend successfully completes a digital gold purchase of at least **₹250** within **30 days** of account creation.",
     category: "referral-program"
   },
   {
     id: "20",
     question: "Is there a limit to how many friends I can refer?",
-    answer: "No, there is no limit! You can refer as many friends as you want and keep earning the ₹50 digital gold bonus for every successful referral.",
+    answer: "No, there is **no limit**! You can refer as many friends as you want and keep earning the **₹50 digital gold bonus** for every successful referral.",
     category: "referral-program"
   },
   {
     id: "21",
     question: "What happens if my friend purchases gold after 30 days?",
-    answer: "The referral reward is only applicable if the referee completes their first ₹250+ digital gold purchase within 30 days of account creation.",
+    answer: "The referral reward is only applicable if the referee completes their first **₹250+ digital gold purchase** within **30 days** of account creation.",
     category: "referral-program"
   },
   {
     id: "22",
     question: "How do I share my referral link?",
-    answer: "You can copy your unique referral link from the dashboard or use the social share buttons to send it directly via WhatsApp, SMS, or Email.",
+    answer: "You can copy your **unique referral link** from the dashboard or use the social share buttons to send it directly via **WhatsApp, SMS, or Email**.",
     category: "referral-program"
   }
 ];
@@ -153,7 +185,8 @@ const categories = [
   { id: "fipmoney-app", name: "FipMoney App" },
   { id: "digital-gold", name: "Digital Gold" },
   { id: "withdrawal-issues", name: "Withdrawal Issues" },
-  { id: "referral-program", name: "Referral Program" }
+  { id: "referral-program", name: "Referral Program" },
+  { id: "insurance-trustee", name: "Trustee, Vaulting & Insurance" }
 ];
 
 export default function HomeFAQs() {
@@ -259,7 +292,7 @@ export default function HomeFAQs() {
                         >
                           <div className="px-5 pb-5 pt-1">
                             <p className="text-slate-600 text-[14px] leading-relaxed">
-                              {faq.answer}
+                              {renderFormattedAnswer(faq.answer)}
                             </p>
                           </div>
                         </motion.div>

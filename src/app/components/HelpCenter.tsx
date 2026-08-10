@@ -92,6 +92,20 @@ const ContactCard = ({ icon: Icon, title, description, action, delay = 0 }) => (
   </motion.div>
 );
 
+const renderFormattedAnswer = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-bold text-gray-900">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
 const FAQItem = ({ faq, isHighlighted, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -113,7 +127,7 @@ const FAQItem = ({ faq, isHighlighted, delay = 0 }) => (
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-6 pb-4">
-        <p className="text-gray-600 leading-relaxed mb-3">{faq.answer}</p>
+        <p className="text-gray-600 leading-relaxed mb-3">{renderFormattedAnswer(faq.answer)}</p>
         <div className="flex flex-wrap gap-2">
           {faq.tags.map((tag, index) => (
             <Badge key={index} variant="outline" className="text-xs text-gray-500 border-gray-300">
@@ -167,6 +181,13 @@ export default function HelpCenter({ onBack }: HelpCenterProps) {
       id: "security"
     },
     {
+      icon: Shield,
+      title: "Trustee, Vaulting & Insurance",
+      description: "Insurance coverage, Trustee protection, and safe keeping arrangements",
+      count: 7,
+      id: "insurance-trustee"
+    },
+    {
       icon: Settings,
       title: "Technical Support",
       description: "App issues and technical troubleshooting",
@@ -178,15 +199,33 @@ export default function HelpCenter({ onBack }: HelpCenterProps) {
   const faqs: FAQ[] = [
     {
       question: "How do I start investing in digital gold?",
-      answer: "Getting started is simple! Download the FipMoney app, complete your KYC verification, and you can start investing with just ₹1. You can buy gold instantly or set up a SIP for regular investments.",
+      answer: "Getting started is simple! Download the FipMoney app, complete your **KYC verification**, and you can start investing with just **₹1**. You can buy gold instantly or set up a **SIP** for regular investments.",
       category: "getting-started",
       tags: ["investment", "digital gold", "getting started", "KYC"]
     },
     {
       question: "Is my gold investment safe and secure?",
-      answer: "Yes, absolutely! Your digital gold is stored in highly secure vaults with our trusted vault partner's certification. We use bank-grade security measures, including 256-bit SSL encryption and multi-factor authentication to protect your investments.",
+      answer: "Yes, absolutely! Your digital gold is stored in highly secure vaults with our **trusted vault partner's certification**. We use bank-grade security measures, including **256-bit SSL encryption** and **multi-factor authentication** to protect your investments.",
       category: "security",
       tags: ["security", "safety", "vaults", "encryption"]
+    },
+    {
+      question: "Is my Digital Gold insured, and what risks are covered or excluded?",
+      answer: "Yes, **100% of your digital gold and silver** stored with certified **Vault Keepers** is covered by **comprehensive insurance** aligned with global industry practices. It covers losses due to **fire, lightning, theft, cyclone, earthquake, flood, etc.** Coverage excludes extraordinary force majeure events such as **war, revolution, derelict weapons of war, and nuclear radiation**.",
+      category: "insurance-trustee",
+      tags: ["insurance", "security", "vaults", "covered risks", "force majeure"]
+    },
+    {
+      question: "How much gold percentage is stored/insured and on what purity basis is it calculated?",
+      answer: "**100% of the fine gold weight** corresponding to your purchase is stored and insured in secure vaults. Bullion bars are maintained at a minimum of **99.5% purity or higher** (99.5%, 99.9%, or 99.99%). Stored amounts are calculated based on **24 Karat gold**. **Illustration:** If you purchase 1g of 99.99% pure gold, at least **1.0049g of 99.5% purity gold** is physically stored for you in the vault (**1g × 99.99% / 99.5% = 1.0049g**).",
+      category: "insurance-trustee",
+      tags: ["gold percentage", "purity", "24K", "vault calculation", "insurance"]
+    },
+    {
+      question: "What is the role of Intermediaries and the Trustee Administrator?",
+      answer: "DGIPL appoints **Intermediaries** including an independent **Trustee Administrator** and **Vault Keepers** to assist in storing and protecting your metal. The Trustee Administrator holds a **legal first charge** over the bullion and monitors vault balances on your behalf. In default scenarios, the Trustee Administrator is empowered to sell a portion of the metal to satisfy outstanding operational charges and distribute your assets safely.",
+      category: "insurance-trustee",
+      tags: ["trustee administrator", "intermediaries", "safe keeping", "vaulting", "protection"]
     },
     {
       question: "What are the fees for buying and selling gold?",
