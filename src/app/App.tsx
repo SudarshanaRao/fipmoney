@@ -488,11 +488,19 @@ export default function App() {
               </div>
 
               {/* Footer — hidden on auth, user dashboard and all admin pages */}
-              {!['login','signup','dashboard','recharge-details'].includes(currentPage) && 
-               !currentPage.startsWith('admin') && 
-               !currentPage.startsWith('portal-sec') && (
-                <Footer onNavigate={navigateToPage} />
-              )}
+              {(() => {
+                const currentPath = typeof window !== 'undefined' ? window.location.pathname.slice(1) : String(currentPage);
+                const isDashboard = currentPath === 'dashboard' || currentPath.startsWith('dashboard') || currentPage === 'dashboard';
+                const isAuthOrAdmin = ['login','signup','recharge-details'].includes(currentPage) || 
+                                     ['login','signup','recharge-details'].includes(currentPath) ||
+                                     currentPage.startsWith('admin') || currentPath.startsWith('admin') ||
+                                     currentPage.startsWith('portal-sec') || currentPath.startsWith('portal-sec');
+                
+                if (isDashboard || isAuthOrAdmin) {
+                  return null;
+                }
+                return <Footer onNavigate={navigateToPage} />;
+              })()}
             </div>
           </PageTransition>
         )}

@@ -164,12 +164,14 @@ app.use(
 });
 
 import emailRoutes from './routes/emailRoutes.js';
+import agentWaitlistRoutes from './routes/agentWaitlistRoutes.js';
 
 // API Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/faqs', faqRoutes);
 app.use('/api/emails', emailRoutes);
+app.use('/api/agent-waitlist', agentWaitlistRoutes);
 
 // Error Handling Middleware
 app.use(notFound);

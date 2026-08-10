@@ -24,6 +24,7 @@ import ReferAndEarn from "./ReferAndEarn";
 import TermsAndConditions from "./TermsAndConditions";
 import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
 import SavingsPage from "./SavingsPage";
+import BecomeAgentPage from "./BecomeAgentPage";
 import { clearUserSession, getLoggedInUser } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
@@ -155,6 +156,26 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const [showBalance, setShowBalance] = useState(true);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
+
+  // Agent Modal state
+  const [showAgentModal, setShowAgentModal] = useState(false);
+  const [agentFormData, setAgentFormData] = useState({
+    name: "",
+    phone: "",
+    city: "",
+    experience: "advisor"
+  });
+  const [agentFormSubmitted, setAgentFormSubmitted] = useState(false);
+  const [isSubmittingAgent, setIsSubmittingAgent] = useState(false);
+
+  const handleAgentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingAgent(true);
+    setTimeout(() => {
+      setIsSubmittingAgent(false);
+      setAgentFormSubmitted(true);
+    }, 1000);
+  };
 
   // Notification panel states
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
@@ -462,32 +483,62 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
          </div>
        </div>
 
-       {kycStatus !== "full kyc" && (
-         <div className="px-6 lg:px-8 pt-5 md:pt-6 max-w-[1600px] mx-auto w-full">
-           <div className="bg-gradient-to-r from-[#1e1b4b] via-[#2e2b74] to-[#1e1b4b] text-white p-5 md:p-6 rounded-[20px] flex flex-col md:flex-row items-center justify-between gap-5 shadow-lg shadow-indigo-900/10 relative overflow-hidden border border-indigo-500/15">
-             {/* Decorative background shapes */}
-             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-400/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-             <div className="absolute bottom-0 left-10 w-40 h-40 bg-amber-500/10 rounded-full blur-xl translate-y-1/3 pointer-events-none"></div>
-             <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 pointer-events-none"></div>
-             
-             <div className="flex items-center gap-4 relative z-10">
-               <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-[#1e1b4b] shadow-md shadow-amber-500/30 shrink-0 transform -rotate-3 border border-amber-300">
-                 <AlertCircle size={24} strokeWidth={2.5} />
-               </div>
-               <div>
-                 <h3 className="text-[17px] md:text-[19px] font-extrabold mb-0.5 tracking-tight text-white drop-shadow-sm">Unlock Your Full Potential! 🚀</h3>
-                 <p className="text-indigo-100/90 text-[13px] md:text-[14px] font-medium m-0 max-w-xl leading-snug">
-                   Your profile is incomplete. Finish your KYC setup to access seamless transactions, rewards, and all Fipmoney services.
-                 </p>
-               </div>
-             </div>
-             
-             <button onClick={() => setTab("settings")} className="relative z-10 w-full md:w-auto whitespace-nowrap text-[14px] font-bold bg-amber-500 hover:bg-amber-400 text-[#1e1b4b] px-6 py-2.5 rounded-xl border-none cursor-pointer transition-all transform hover:-translate-y-0.5 shadow-md shadow-amber-500/20 shrink-0 flex items-center justify-center gap-1.5">
-               Complete Profile <ChevronRight size={16} strokeWidth={3} />
-             </button>
-           </div>
-         </div>
-       )}
+        {/* Become a Digital Gold Agent (DGA) Banner */}
+        <div className="px-6 lg:px-8 pt-4 max-w-[1600px] mx-auto w-full">
+          <div className="bg-gradient-to-r from-[#fffef5] via-[#fffbeb] to-[#fff7ed] rounded-[20px] p-4 sm:p-5 border border-amber-200/90 shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Background ambient glow */}
+            <div className="absolute top-0 right-1/4 w-40 h-40 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-32 h-32 bg-yellow-300/20 rounded-full blur-2xl pointer-events-none" />
+            
+            {/* Left Content */}
+            <div className="flex items-center gap-3.5 relative z-10">
+              <img
+                src="/digital_gold_agent_small.png"
+                alt="DGA Icon"
+                className="w-10 h-10 sm:w-12 sm:h-12 object-contain shrink-0 drop-shadow-sm"
+              />
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base sm:text-lg font-extrabold text-amber-950 tracking-tight">
+                    Become a Digital Gold Agent (DGA) Today!
+                  </h3>
+                  <span className="bg-amber-100/90 text-amber-800 border border-amber-300/80 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    New
+                  </span>
+                </div>
+                <p className="text-slate-600 text-xs sm:text-[13px] font-semibold mt-0.5">
+                  Earn high commissions, exclusive rewards and unlock a world of benefits.
+                </p>
+              </div>
+            </div>
+
+            {/* Right Actions & Badge */}
+            <div className="flex items-center gap-3 relative z-10 shrink-0 self-start md:self-center">
+              <button
+                onClick={() => setTab("become-agent")}
+                className="px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm text-amber-900 bg-white/90 hover:bg-white border border-amber-300/80 hover:border-amber-400 transition-all shadow-xs cursor-pointer outline-none"
+              >
+                Learn More
+              </button>
+              <button
+                onClick={() => setTab("become-agent")}
+                className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-black text-xs sm:text-sm text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-400 transition-all shadow-md shadow-amber-500/20 hover:shadow-lg flex items-center gap-1.5 cursor-pointer outline-none active:scale-[0.98]"
+              >
+                <span>Become an Agent</span>
+                <ChevronRight size={16} strokeWidth={3} />
+              </button>
+
+              {/* 3D Gold Medal Ribbon Asset on the right side */}
+              <div className="hidden sm:flex items-center justify-center shrink-0 ml-1">
+                <img
+                  src="/digital_gold_agent.png"
+                  alt="Digital Gold Agent Medal"
+                  className="w-16 h-16 md:w-20 md:h-20 object-contain pointer-events-none drop-shadow-md hover:scale-105 transition-transform"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
        <div className="flex-1 p-6 lg:p-8 flex flex-col lg:flex-row gap-8 pb-24 lg:pb-10 max-w-[1600px] mx-auto w-full">
          
@@ -919,7 +970,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           sessionStorage.removeItem("fm_logged_in_name");
         }
         onNavigate("home");
-      }} />
+      }} onBecomeAgent={() => setTab("become-agent")} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {tab === "home" ? (
           <MainDashboard />
@@ -941,6 +992,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <NotificationsPage />
         ) : ["banking", "offers"].includes(tab) ? (
           <ComingSoon tab={tab} />
+        ) : tab === "become-agent" ? (
+          <BecomeAgentPage />
         ) : tab === "refer-and-earn" ? (
           <ReferAndEarn onNavigate={(target) => setTab(target as Tab)} />
         ) : tab === "terms" ? (
@@ -952,6 +1005,161 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         )}
       </div>
       <MobileNav activeTab={tab} onTabChange={setTab} />
+
+      {/* Agent Modal Popup */}
+      <AnimatePresence>
+        {showAgentModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAgentModal(false)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-amber-200/60 z-10 flex flex-col max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#1e1b4b] via-[#2a2468] to-[#1e1b4b] text-white p-6 relative">
+                <button
+                  onClick={() => {
+                    setShowAgentModal(false);
+                    if (tab === "become-agent") setTab("home");
+                  }}
+                  className="absolute right-5 top-5 text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors border-none cursor-pointer outline-none"
+                >
+                  <X size={18} />
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0 font-black">
+                    <Award size={26} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-extrabold tracking-tight text-white">Become a Digital Gold Agent</h3>
+                      <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">DGA</span>
+                    </div>
+                    <p className="text-xs text-indigo-200 font-medium mt-0.5">
+                      Earn lifetime commissions & exclusive rewards with FipMoney
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 overflow-y-auto hide-scrollbar space-y-6">
+                {!agentFormSubmitted ? (
+                  <>
+                    {/* Benefits Grid */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-amber-50/70 border border-amber-200/60 p-3.5 rounded-2xl">
+                        <div className="text-amber-700 font-extrabold text-xs mb-1">💰 High Commissions</div>
+                        <div className="text-[11px] text-gray-600 font-medium">Earn up to 2.5% on every purchase & SIP in your network.</div>
+                      </div>
+                      <div className="bg-purple-50/70 border border-purple-200/60 p-3.5 rounded-2xl">
+                        <div className="text-purple-700 font-extrabold text-xs mb-1">🏆 Gold Rewards</div>
+                        <div className="text-[11px] text-gray-600 font-medium">Unlock 24K Gold coins & milestone tech gifts monthly.</div>
+                      </div>
+                      <div className="bg-blue-50/70 border border-blue-200/60 p-3.5 rounded-2xl">
+                        <div className="text-blue-700 font-extrabold text-xs mb-1">📊 Agent Dashboard</div>
+                        <div className="text-[11px] text-gray-600 font-medium">Track clients, live volume & instant bank payouts.</div>
+                      </div>
+                      <div className="bg-emerald-50/70 border border-emerald-200/60 p-3.5 rounded-2xl">
+                        <div className="text-emerald-700 font-extrabold text-xs mb-1">🛡️ Free Training</div>
+                        <div className="text-[11px] text-gray-600 font-medium">Dedicated relationship manager & free DGA certification.</div>
+                      </div>
+                    </div>
+
+                    {/* Registration Form */}
+                    <form onSubmit={handleAgentSubmit} className="space-y-4 pt-2">
+                      <h4 className="text-sm font-bold text-gray-900">Agent Application Details</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">Full Name</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Enter your full name"
+                            value={agentFormData.name || userName}
+                            onChange={(e) => setAgentFormData({ ...agentFormData, name: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-amber-400 bg-gray-50/50"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Mobile Number</label>
+                            <input
+                              type="tel"
+                              required
+                              placeholder="Mobile number"
+                              value={agentFormData.phone}
+                              onChange={(e) => setAgentFormData({ ...agentFormData, phone: e.target.value })}
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-amber-400 bg-gray-50/50"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">City / Location</label>
+                            <input
+                              type="text"
+                              required
+                              placeholder="Your City"
+                              value={agentFormData.city}
+                              onChange={(e) => setAgentFormData({ ...agentFormData, city: e.target.value })}
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-none focus:border-amber-400 bg-gray-50/50"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmittingAgent}
+                        className="w-full py-3 rounded-2xl font-black text-sm text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-400 transition-all shadow-md shadow-amber-500/20 border-none cursor-pointer outline-none active:scale-[0.98] flex items-center justify-center gap-2"
+                      >
+                        {isSubmittingAgent ? (
+                          <span>Submitting Application...</span>
+                        ) : (
+                          <>
+                            <span>Submit DGA Application</span>
+                            <ChevronRight size={16} strokeWidth={3} />
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <div className="py-8 text-center space-y-4">
+                    <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                      <CheckCircle2 size={36} />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-extrabold text-gray-900">Application Submitted! 🎉</h4>
+                      <p className="text-xs text-gray-600 font-medium max-w-md mx-auto mt-1">
+                        Thank you for applying to become a FipMoney Digital Gold Agent (DGA). Our onboard team will review your profile and contact you within 24 hours.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowAgentModal(false);
+                        setAgentFormSubmitted(false);
+                        if (tab === "become-agent") setTab("home");
+                      }}
+                      className="px-6 py-2.5 bg-[#1e1b4b] text-white font-bold text-xs rounded-xl shadow-md cursor-pointer border-none outline-none"
+                    >
+                      Back to Dashboard
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       
       <style dangerouslySetInnerHTML={{__html: `
         .hide-scrollbar::-webkit-scrollbar { display: none; }
