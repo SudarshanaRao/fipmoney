@@ -21,77 +21,61 @@ const faqs: FAQ[] = [
   {
     id: "1",
     question: "Is FipMoney App safe to use?",
-    answer: "FipMoney app is 100% safe and secure to use for your Daily Savings & Investments in Gold. The gold is stored in world class vaults by India's trusted vault partner — a global market leader in secure logistics and vault services that stores and safeguards all the gold that you have purchased via FipMoney platform. Furthermore, to safeguard your interest, FipMoney has appointed an independent Administrator.",
+    answer: "FipMoney app is 100% safe and secure for your Gold & Silver investments. All physical gold and silver purchased on FipMoney is stored in high-security, 100% insured physical vaults operated by Brink's India — the global leader in vault logistics. Furthermore, independent Security Trustee Vistra ITCL safeguards customer assets, holding a first exclusive charge over the physical bullion on behalf of users.",
     category: "fipmoney-app"
   },
   {
     id: "2",
+    question: "Who is the vault custodian and how is my Gold stored?",
+    answer: "Our physical gold and silver vaulting partner is Brink's (Brink's Global Services). When you buy digital gold on FipMoney, an allocated physical vault unit is opened on your behalf under your name/account at Brink's. The gold is 24 Karat 999.9 pure and 100% insured against theft, fire, damage, and natural disasters.",
+    category: "digital-gold"
+  },
+  {
+    id: "3",
+    question: "Who is the Security Trustee and what is their role?",
+    answer: "Vistra ITCL (India) Limited ('Vistra') is the independent Security Trustee appointed to protect customer interests. Vistra holds a legal first charge over the physical gold stored in Brink's vaults and conducts periodic independent audits to ensure 100% of user balances match physical gold held in vaults at all times.",
+    category: "digital-gold"
+  },
+  {
+    id: "4",
+    question: "How does the vault opening process work on FipMoney?",
+    answer: "When you buy digital gold starting from ₹1, FipMoney buys equivalent 24K 999.9 pure physical gold and opens/allocates a physical gold vault account unit on your behalf with Brink's. Your gold stays 100% insured in Brink's vaults and legally protected by Security Trustee Vistra until you decide to sell or request physical delivery.",
+    category: "digital-gold"
+  },
+  {
+    id: "5",
+    question: "What are FipMoney's official email addresses?",
+    answer: "For general inquiries: info@fipmoney.com | Customer Support: support@fipmoney.com | Payment & transaction queries: payments@fipmoney.com | Legal & compliance issues: legal@fipmoney.com | Grievances: grievance@fipmoney.com.",
+    category: "fipmoney-app"
+  },
+  {
+    id: "6",
     question: "What does the FipMoney App do?",
     answer: "FipMoney App helps you save and invest in digital gold through systematic investment plans (SIPs). You can buy gold starting from ₹1, set up automatic savings, track your investments, and sell your gold whenever you need cash. The app also offers features like round-off savings, goal-based investments, and real-time gold price tracking.",
     category: "fipmoney-app"
   },
   {
-    id: "3",
-    question: "How do I download the FipMoney App?",
-    answer: "You can download the FipMoney App from Google Play Store for Android devices or Apple App Store for iOS devices. Simply search for 'FipMoney' and download the official app. You can also scan the QR code on our website to get direct download links.",
-    category: "fipmoney-app"
-  },
-  {
-    id: "4",
-    question: "How do I create an account on FipMoney?",
-    answer: "Creating an account is simple! Download the app, enter your mobile number, verify it with OTP, complete your KYC by uploading Aadhaar and PAN details, and you're ready to start investing in gold. The entire process takes just a few minutes.",
-    category: "fipmoney-app"
-  },
-  
-  // Digital Gold FAQs
-  {
-    id: "5",
-    question: "Is digital gold Real gold?",
-    answer: "Yes, digital gold represents real, physical gold. When you buy digital gold through FipMoney, you're purchasing actual 24-karat gold that is stored securely in our partner's certified vaults. Each purchase is backed by equivalent physical gold, and you can even convert your digital gold to physical gold coins or bars if needed.",
-    category: "digital-gold"
-  },
-  {
-    id: "6",
-    question: "How do I check today's Digital Gold price?",
-    answer: "You can check today's digital gold price directly in the FipMoney app on the home screen. The price is updated in real-time based on international gold markets. You can also enable price alerts to get notified when gold reaches your target buying or selling price.",
-    category: "digital-gold"
-  },
-  {
     id: "7",
-    question: "What is Digital Gold Leasing?",
-    answer: "Digital Gold Leasing is a feature that allows you to earn returns on your gold holdings. Instead of keeping your gold idle, you can lease it to jewelry manufacturers and earn a steady income. This helps your gold investment generate additional returns while maintaining the security of your principal amount.",
+    question: "Is digital gold Real gold?",
+    answer: "Yes, digital gold represents real, physical gold. When you buy digital gold through FipMoney, you're purchasing actual 24-karat 999.9 pure gold that is stored securely in Brink's certified vaults. Each purchase is backed 1:1 by physical gold.",
     category: "digital-gold"
   },
   {
     id: "8",
     question: "Can I convert digital gold to physical gold?",
-    answer: "Yes, you can convert your digital gold to physical gold coins or bars. FipMoney offers options to get gold coins of various denominations delivered to your address. There are minimum quantity requirements and delivery charges may apply based on your location.",
+    answer: "Yes, you can convert your digital gold to physical 24K gold coins or bars. FipMoney offers options to get gold coins of various denominations delivered to your doorstep in insured, tamper-proof packaging.",
     category: "digital-gold"
   },
-  
-  // Withdrawal Issues FAQs
   {
     id: "9",
     question: "How long does it take to withdraw money?",
-    answer: "Withdrawals are typically processed within 1-2 business days. The money will be credited to your registered bank account. During high-volume periods or due to banking holidays, it might take up to 3-5 business days.",
+    answer: "Withdrawals are typically processed within 1-2 business days. The money will be credited directly to your registered bank account via UPI or IMPS transfer.",
     category: "withdrawal-issues"
   },
   {
     id: "10",
     question: "What is the minimum withdrawal amount?",
-    answer: "The minimum withdrawal amount is ₹100. You can sell any amount of gold worth ₹100 or more and withdraw the money to your bank account. There are no maximum limits on withdrawals.",
-    category: "withdrawal-issues"
-  },
-  {
-    id: "11",
-    question: "Are there any charges for withdrawing money?",
-    answer: "FipMoney charges a small transaction fee of 3% + GST on the gold value when you sell your gold. This covers the platform costs, secure storage, and transaction processing. There are no additional withdrawal charges from FipMoney's side.",
-    category: "withdrawal-issues"
-  },
-  {
-    id: "12",
-    question: "Why is my withdrawal delayed?",
-    answer: "Withdrawal delays can occur due to bank holidays, technical issues, incorrect bank details, or high transaction volumes. If your withdrawal is delayed beyond the expected time, please contact our support team with your transaction ID for immediate assistance.",
+    answer: "The minimum withdrawal amount is ₹100. You can sell any amount of gold worth ₹100 or more and withdraw the money to your bank account with no maximum limit.",
     category: "withdrawal-issues"
   }
 ];

@@ -22,7 +22,7 @@ async function sendSmsOtp(mobile, otpCode) {
   const credentials = Buffer.from(`${authKey}:${authToken}`).toString('base64');
   const endpoint = `https://restapi.smscountry.com/v0.1/Accounts/${authKey}/SMSes/`;
   
-  const messageText = `Dear User, Your Fipmoney verification code is ${otpCode} . Valid for 10 minutes. Never share this OTP with anyone. - Finpages Tech`;
+  const messageText = `Dear User, Your Fipmoney verification code is ${otpCode} . Valid for 10 minutes. Never share this OTP with anyone. - FipMoney Pvt Ltd`;
 
   const payload = {
     Text: messageText,

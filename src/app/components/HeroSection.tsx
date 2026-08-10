@@ -56,7 +56,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
   const currentData = carouselData[currentSlide];
 
   return (
-    <section className="bg-gradient-to-br from-gray-50 to-white relative overflow-hidden pt-20 pb-4">
+    <section className="bg-white relative overflow-hidden pt-16 pb-12">
       {/* Dynamic Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <motion.div 
@@ -89,7 +89,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
         />
       </div>
 
-      <div className="container mx-auto px-4 py-16 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-center lg:text-left">

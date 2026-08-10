@@ -21,14 +21,17 @@ export default function MandatoryDisclosures() {
       title: "Company Legal Name",
       icon: <FileText className="w-4 h-4 text-amber-600" />,
       content: [
-        "Finpages Tech Private Limited"
+        "FipMoney Private Limited"
       ]
     },
     {
-      title: "Official Email ID",
+      title: "Official Email IDs",
       icon: <Mail className="w-4 h-4 text-amber-600" />,
       content: [
-        "info@fipmoney.com"
+        "Official: info@fipmoney.com",
+        "Support: support@fipmoney.com",
+        "Payments: payments@fipmoney.com",
+        "Legal: legal@fipmoney.com"
       ]
     },
     {
@@ -49,7 +52,7 @@ export default function MandatoryDisclosures() {
   ];
 
   return (
-    <section className="py-16 bg-[#fafafb] font-sans border-t border-slate-100">
+    <section className="py-14 md:py-16 bg-white font-sans">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px]">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#1e293b] tracking-tight font-serif mb-2">

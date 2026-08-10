@@ -102,8 +102,8 @@ export default function HomeSavingsSection({ onNavigate }: HomeSavingsSectionPro
   };
 
   return (
-    <section className="w-full py-16 bg-[#FAFAFE] border-b border-slate-100 font-sans relative overflow-hidden">
-      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <section className="w-full py-14 md:py-16 bg-white font-sans relative overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Section Header */}
         <div className="text-center space-y-2 max-w-2xl mx-auto">

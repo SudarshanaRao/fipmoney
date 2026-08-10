@@ -125,7 +125,7 @@ export default function RiskDisclosure({ onBack }: RiskDisclosureProps) {
             <div className="space-y-4 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-6">
               <h3 className="text-lg font-bold text-gray-900 mb-2">Platform Disclaimers</h3>
               <p>
-                1. <strong>Finpages Tech Pvt Ltd</strong> operates the FipMoney technology platform. Finpages Tech Pvt Ltd does not act as a custodian, trustee, or direct seller of digital gold. Sourcing, custody, and vaulting are managed exclusively by certified gold provider partners (India's trusted vault partner).
+                1. <strong>FipMoney Pvt Ltd</strong> operates the FipMoney technology platform. FipMoney Pvt Ltd does not act as a custodian, trustee, or direct seller of digital gold. Sourcing, custody, and vaulting are managed exclusively by certified physical vault partner Brink's and independent Security Trustee Vistra ITCL.
               </p>
               <p>
                 2. Sells and purchases are bound by buyer-seller agreements and terms determined by the partner provider. Investors are requested to read product documents, transaction fees, and spreads before executing transactions.
@@ -137,7 +137,7 @@ export default function RiskDisclosure({ onBack }: RiskDisclosureProps) {
 
             {/* Footer Notice */}
             <div className="text-center text-xs text-gray-400 border-t border-gray-100 pt-6">
-              <p>© 2025 Finpages Tech Pvt Ltd. All rights reserved.</p>
+              <p>© 2026 FipMoney Pvt Ltd. All rights reserved.</p>
               <p>Corporate Office: #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</p>
             </div>
           </motion.div>

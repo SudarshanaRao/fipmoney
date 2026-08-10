@@ -48,9 +48,8 @@ export default function Footer({ onNavigate }: FooterProps) {
       links: [
         { label: 'About Us', action: 'about' },
         { label: 'Careers', action: 'careers' },
-        { label: 'Press', action: 'press' },
-        { label: 'Blog', action: 'blog' },
-        { label: 'Investors', action: 'investors' }
+        { label: 'Terms & Conditions', action: 'terms' },
+        { label: 'Privacy Policy', action: 'privacy' }
       ]
     }
   ];
@@ -83,7 +82,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             </div>
 
             <p className="text-slate-600 text-sm leading-relaxed font-medium">
-              India's trusted digital gold and payments platform. Buy, sell, and store digital gold and silver starting from just ₹1. Secured in 100% insured physical vaults.
+              India's trusted digital gold and payments platform. Buy, sell, and store digital gold and silver starting from just ₹1. Secured in 100% insured physical vaults by Brink's and protected by independent Security Trustee Vistra.
             </p>
             
             <div className="w-12 h-0.5 bg-amber-200 rounded-full mt-5 mb-5"></div>
@@ -136,14 +135,18 @@ export default function Footer({ onNavigate }: FooterProps) {
         <div className="bg-white rounded-[24px] shadow-sm border border-slate-200/60 p-5 md:p-7 mt-10 mb-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
             {[
-              { title: 'VERIFIED PLATFORM', subtitle: '100% trusted & verified', icon: Shield },
-              { title: 'SECURE PLATFORM', subtitle: 'Safe payments & data', icon: Lock },
-              { title: 'INSURED VAULTS', subtitle: 'Insured physical vaults', icon: Database },
-              { title: 'START WITH ₹1', subtitle: 'Systematic gold savings', icon: Coins }
+              { title: 'VERIFIED PLATFORM', subtitle: '100% trusted & verified', icon: Shield, logo: null },
+              { title: 'SECURE PLATFORM', subtitle: 'Safe payments & data', icon: Lock, logo: null },
+              { title: 'BRINK\'S VAULTS', subtitle: '100% insured physical vaults', icon: Database, logo: '/brinks-logo.svg' },
+              { title: 'VISTRA TRUSTEE', subtitle: 'Independent legal safeguard', icon: Coins, logo: '/vistra-logo.svg' }
             ].map((item, idx) => (
               <div key={idx} className={`flex items-center gap-4 ${idx !== 0 ? 'pt-5 sm:pt-0 sm:pl-5 lg:pl-7' : ''}`}>
-                <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-[#ffbf00] shrink-0">
-                  <item.icon className="w-4 h-4" />
+                <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 p-2">
+                  {item.logo ? (
+                    <img src={item.logo} alt={item.title} className="w-full h-full object-contain" />
+                  ) : (
+                    <item.icon className="w-5 h-5 text-[#ffbf00]" />
+                  )}
                 </div>
                 <div>
                   <h5 className="text-[#ffbf00] font-bold text-[11px] uppercase tracking-wider">{item.title}</h5>
@@ -170,7 +173,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             {/* Left: Copyright & Links */}
             <div className="flex flex-col items-center lg:items-start gap-4 order-2 lg:order-1">
               <p className="text-white text-[10px] font-bold tracking-widest uppercase">
-                © 2026 FIPMONEY INDIA. ALL RIGHTS RESERVED.
+                © 2026 FIPMONEY PVT LTD. ALL RIGHTS RESERVED.
               </p>
               <div className="flex items-center gap-3 text-[11px] text-white/70 font-semibold tracking-wide flex-wrap justify-center">
                 <span className="hover:text-white cursor-pointer transition-colors" onClick={() => onNavigate?.('terms')}>Terms</span>
@@ -199,14 +202,18 @@ export default function Footer({ onNavigate }: FooterProps) {
             </div>
 
             {/* Right: Partners */}
-            <div className="flex items-center gap-9 order-3 lg:order-3">
-               <div className="flex flex-col items-center gap-2">
-                 <span className="text-[8px] text-white/50 font-black uppercase tracking-widest">GOLD SOURCING PARTNER</span>
-                 <span className="text-xs font-black text-white/80 tracking-widest">India's Trusted Partner</span>
+            <div className="flex items-center gap-6 sm:gap-8 order-3 lg:order-3">
+               <div className="flex flex-col items-center gap-1.5">
+                 <span className="text-[8px] text-white/50 font-black uppercase tracking-widest">VAULT CUSTODIAN</span>
+                 <div className="bg-white px-3.5 py-1.5 rounded-xl shadow-xs border border-white/20 flex items-center justify-center h-8 hover:bg-slate-50 transition-colors">
+                   <img src="/brinks-logo.svg" alt="Brink's Vault Custodian" className="h-4.5 w-auto object-contain" />
+                 </div>
                </div>
-               <div className="flex flex-col items-center gap-2">
-                 <span className="text-[8px] text-white/50 font-black uppercase tracking-widest">TRUSTEE PARTNER</span>
-                 <span className="text-xs font-black text-white/80 tracking-widest">Certified Trustee</span>
+               <div className="flex flex-col items-center gap-1.5">
+                 <span className="text-[8px] text-white/50 font-black uppercase tracking-widest">SECURITY TRUSTEE</span>
+                 <div className="bg-white px-3.5 py-1.5 rounded-xl shadow-xs border border-white/20 flex items-center justify-center h-8 hover:bg-slate-50 transition-colors">
+                   <img src="/vistra-logo.svg" alt="Vistra Security Trustee" className="h-4.5 w-auto object-contain" />
+                 </div>
                </div>
             </div>
           </div>

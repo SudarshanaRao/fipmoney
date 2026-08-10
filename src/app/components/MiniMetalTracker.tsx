@@ -63,8 +63,8 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
   }, [silverPrice]);
 
   return (
-    <section className="relative font-sans py-16 md:py-24 overflow-hidden bg-white">
-      <div className="container mx-auto px-4 relative z-10">
+    <section className="relative font-sans py-14 md:py-16 overflow-hidden bg-white">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col lg:flex-row gap-16 xl:gap-20 items-center justify-between">
           
           {/* Left Side: Typography & Features */}

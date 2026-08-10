@@ -83,7 +83,7 @@ export default function InvestorCharter({ onBack }: InvestorCharterProps) {
                   Our Mission
                 </h3>
                 <p className="text-gray-700 text-sm leading-relaxed">
-                  To provide a robust, secure, and user-centric platform operated under the highest guidelines of corporate governance by <strong>Finpages Tech Pvt Ltd</strong>, enabling micro-SIPs starting at ₹1.
+                  To provide a robust, secure, and user-centric platform operated under the highest guidelines of corporate governance by <strong>FipMoney Pvt Ltd</strong>, enabling micro-SIPs starting at ₹1.
                 </p>
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function InvestorCharter({ onBack }: InvestorCharterProps) {
 
             {/* Footer Notice */}
             <div className="text-center text-xs text-gray-400 border-t border-gray-100 pt-6">
-              <p>© 2025 Finpages Tech Pvt Ltd. All rights reserved.</p>
+              <p>© 2026 FipMoney Pvt Ltd. All rights reserved.</p>
               <p>Corporate Office: #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</p>
             </div>
           </motion.div>

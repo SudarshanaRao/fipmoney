@@ -9,8 +9,8 @@ const ReferralProgramSection = ({ onNavigate }: { onNavigate?: (page: string) =>
   const referralLink = `https://fipmoney.com/ref/${referralCode}`;
 
   return (
-    <section className="w-full py-16 bg-slate-50 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="w-full max-w-[1200px] flex flex-col space-y-6">
+    <section className="w-full py-14 md:py-16 bg-white font-sans">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col space-y-6">
         
         {/* Section Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto mb-4">

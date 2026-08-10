@@ -211,7 +211,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                 Important Notice
               </h2>
               <p className="text-[#b38200] leading-relaxed mb-4">
-                This privacy policy ("Privacy Policy") is incorporated by reference into the Terms and Conditions (the "Terms and Conditions" or "Terms"). Website https://www.fipmoney.com/ including its mobile application – FipMoney; (collectively referred to as the "Platform") is owned and operated by Finpages Tech Pvt Ltd, ("FipMoney" "We" or "Us") and Finpages Gold Retail Pvt Ltd ("FipMoney Gold" or "We" or "Us") collectively referred to as the company ("Company") to provide you the services.
+                This privacy policy ("Privacy Policy") is incorporated by reference into the Terms and Conditions (the "Terms and Conditions" or "Terms"). Website https://www.fipmoney.com/ including its mobile application – FipMoney; (collectively referred to as the "Platform") is owned and operated by FipMoney Pvt Ltd ("FipMoney" "We" or "Us") and FipMoney Gold Retail Pvt Ltd ("FipMoney Gold" or "We" or "Us") collectively referred to as the company ("Company") to provide you the services.
               </p>
               <p className="text-[#b38200] font-semibold">
                 BY USING AND ACCESSING THE PLATFORM AND BY AVAILING THE SERVICES OR BY OTHERWISE GIVING US YOUR INFORMATION, YOU WILL BE DEEMED TO HAVE READ, UNDERSTOOD AND AGREED TO THE PRACTICES AND POLICIES OUTLINED IN THIS PRIVACY POLICY.
@@ -403,10 +403,19 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               </h2>
               <div className="space-y-6 text-gray-700">
                 <p>
-                  We may make Your Personal Information and/or other non-Personal Information available to Our partners, collaborators including third parties FipMoney Gold to enable them to provide the Services and any other services provided through the Platform to You.
+                  We may make Your Personal Information and/or other non-Personal Information available to Our partners, collaborators including third-party vault custodian <strong>Brink's India Pvt. Limited ("Brink's")</strong> and Security Trustee <strong>Vistra ITCL (India) Limited ("Vistra")</strong> to enable them to process digital gold purchases, open physical vault accounts under your name, perform asset verification, and provide the Services through the Platform to You.
                 </p>
 
                 <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Vault Custodian & Trustee Sharing</h3>
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-4">
+                    <p className="font-semibold text-amber-900 mb-2">Custody and Trustee Partners:</p>
+                    <ul className="space-y-2 text-amber-800 text-sm">
+                      <li>• <strong>Brink's India Pvt. Limited:</strong> Your name and transaction identifiers are shared with Brink's for opening and maintaining an allocated, 100% insured physical gold vault unit on Your behalf.</li>
+                      <li>• <strong>Vistra ITCL (India) Limited:</strong> Necessary transaction and holdings data are shared with Vistra, acting as independent Security Trustee, to perform independent audits, hold first charge over vault assets, and safeguard User holdings.</li>
+                    </ul>
+                  </div>
+
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Third Party Service Providers</h3>
                   <p className="mb-4">
                     We may disclose Your Personal Information to third party vendors, consultants, and other service providers who work for the Company, who are bound by contractual obligations to keep such personal information confidential and use it only for the purposes for which We disclose it to them.
@@ -415,10 +424,10 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                   <div className="bg-green-50 rounded-lg p-6">
                     <p className="font-semibold text-green-800 mb-3">This disclosure may be required for:</p>
                     <ul className="space-y-2 text-green-700">
+                      <li>• Opening & maintaining allocated gold vault units in Brink's insured vaults on Your behalf</li>
+                      <li>• Facilitating independent trustee asset verification with Vistra</li>
                       <li>• Providing access to Services and processing payments</li>
-                      <li>• Validation of Your bank accounts</li>
-                      <li>• Facilitating marketing and advertising activities</li>
-                      <li>• Undertaking auditing or data analysis</li>
+                      <li>• Validation of Your bank accounts and KYC identification</li>
                       <li>• Preventing, detecting, and investigating fraudulent activities</li>
                     </ul>
                   </div>
@@ -751,11 +760,13 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                       <Mail className="w-5 h-5 mr-2" />
-                      Email Support
+                      Email Channels
                     </h4>
                     <div className="space-y-2 text-gray-700">
-                      <p><strong>General Support:</strong> support@fipmoney.com</p>
-                      <p><strong>Privacy Concerns:</strong> privacy@fipmoney.com</p>
+                      <p><strong>Official / General:</strong> info@fipmoney.com</p>
+                      <p><strong>Customer Support:</strong> support@fipmoney.com</p>
+                      <p><strong>Payment Queries:</strong> payments@fipmoney.com</p>
+                      <p><strong>Legal & Compliance:</strong> legal@fipmoney.com</p>
                       <p><strong>Grievances:</strong> grievance@fipmoney.com</p>
                     </div>
                   </div>
@@ -775,8 +786,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
             {/* Footer Notice */}
             <div className="mt-8 text-center text-sm text-gray-500 space-y-2">
-              <p>© 2025 Finpages Tech Pvt Ltd. All rights reserved.</p>
-              <p>Corporate Identification Number: U47733KA2023PTC181719</p>
+              <p>© 2026 FipMoney Pvt Ltd. All rights reserved.</p>
               <p>This Privacy Policy was last updated on January 15, 2025</p>
               <p>
                 FipMoney, a platform used to encourage savings habits in Indians by helping them save on a daily basis.

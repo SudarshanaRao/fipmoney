@@ -16,34 +16,32 @@ const faqs: FAQ[] = [
   {
     id: "1",
     question: "Is FipMoney App safe to use?",
-    answer: "FipMoney app is 100% safe and secure to use for your Daily Savings & Investments in Gold. The gold is stored in world class vaults by India's trusted vault partner — a global market leader in secure logistics and vault services that stores and safeguards all the gold that you have purchased via FipMoney platform. Furthermore, to safeguard your interest, FipMoney has appointed an independent Administrator.",
+    answer: "FipMoney app is 100% safe and secure for your Gold & Silver investments. All physical gold and silver purchased on FipMoney is stored in high-security, 100% insured physical vaults operated by Brink's India — the global leader in vault logistics. Furthermore, independent Security Trustee Vistra ITCL safeguards customer assets, holding a first exclusive charge over physical bullion on behalf of users.",
     category: "fipmoney-app"
   },
   {
     id: "2",
-    question: "What does the FipMoney App do?",
-    answer: "FipMoney App helps you save and invest in digital gold through systematic investment plans (SIPs). You can buy gold starting from ₹1, set up automatic savings, track your investments, and sell your gold whenever you need cash. The app also offers features like round-off savings, goal-based investments, and real-time gold price tracking.",
-    category: "fipmoney-app"
+    question: "Who is the vault custodian and how is my Gold stored?",
+    answer: "Our physical gold and silver vaulting partner is Brink's (Brink's Global Services). When you buy digital gold on FipMoney, an allocated physical vault unit is opened on your behalf under your name/account at Brink's. The gold is 24 Karat 999.9 pure and 100% insured against theft, fire, damage, and natural disasters.",
+    category: "digital-gold"
   },
   {
     id: "3",
-    question: "How do I download the FipMoney App?",
-    answer: "You can download the FipMoney App from Google Play Store for Android devices or Apple App Store for iOS devices. Simply search for 'FipMoney' and download the official app. You can also scan the QR code on our website to get direct download links.",
-    category: "fipmoney-app"
+    question: "Who is the Security Trustee and what is their role?",
+    answer: "Vistra ITCL (India) Limited ('Vistra') is the independent Security Trustee appointed to protect customer interests. Vistra holds a legal first charge over the physical gold stored in Brink's vaults and conducts periodic independent audits to ensure 100% of user balances match physical gold held in vaults at all times.",
+    category: "digital-gold"
   },
   {
     id: "4",
-    question: "How do I create an account on FipMoney?",
-    answer: "Creating an account is simple! Download the app, enter your mobile number, verify it with OTP, complete your KYC by uploading Aadhaar and PAN details, and you're ready to start investing in gold. The entire process takes just a few minutes.",
-    category: "fipmoney-app"
+    question: "How does the vault opening process work on FipMoney?",
+    answer: "When you buy digital gold starting from ₹1, FipMoney buys equivalent 24K 999.9 pure physical gold and opens/allocates a physical gold vault account unit on your behalf with Brink's. Your gold stays 100% insured in Brink's vaults and legally protected by Security Trustee Vistra until you decide to sell or request physical delivery.",
+    category: "digital-gold"
   },
-  
-  // Digital Gold FAQs
   {
     id: "5",
-    question: "Is digital gold Real gold?",
-    answer: "Yes, digital gold represents real, physical gold. When you buy digital gold through FipMoney, you're purchasing actual 24-karat gold that is stored securely in our partner's certified vaults. Each purchase is backed by equivalent physical gold, and you can even convert your digital gold to physical gold coins or bars if needed.",
-    category: "digital-gold"
+    question: "What are FipMoney's official email addresses?",
+    answer: "For general inquiries: info@fipmoney.com | Customer Support: support@fipmoney.com | Payment & transaction queries: payments@fipmoney.com | Legal & compliance issues: legal@fipmoney.com | Grievances: grievance@fipmoney.com.",
+    category: "fipmoney-app"
   },
   {
     id: "6",
@@ -169,13 +167,13 @@ export default function HomeFAQs() {
   };
 
   return (
-    <section className="relative py-20 font-sans w-full min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-amber-50 via-white to-purple-50">
+    <section className="relative py-14 md:py-16 font-sans w-full flex items-center justify-center overflow-hidden bg-white">
       {/* Decorative blurred circles using brand colors */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-amber-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
       <div className="absolute bottom-20 right-10 w-64 h-64 bg-purple-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
 
-      <div className="relative z-10 w-full px-6 md:px-12 bg-white/60 backdrop-blur-xl border-y border-white/80 py-12 shadow-sm">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
         
         {/* Header */}
         <div className="text-center mb-12 max-w-2xl mx-auto">

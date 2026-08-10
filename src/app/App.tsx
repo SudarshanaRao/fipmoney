@@ -9,6 +9,7 @@ import HowItWorksSection from "./components/HowItWorksSection";
 import FeaturesSection from "./components/FeaturesSection";
 import AllInOneSection from "./components/AllInOneSection";
 import PlatformTrustSection from "./components/PlatformTrustSection";
+import BankGradeSecurityBanner from "./components/BankGradeSecurityBanner";
 import Footer from "./components/Footer";
 import TermsAndConditions from "./components/TermsAndConditions";
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -397,12 +398,15 @@ export default function App() {
             <Header onNavigate={navigateToPage} />
 
             {/* Main Content */}
-            <main>
+            <main className="bg-white">
               {/* Hero Section */}
               <HeroSection onNavigate={navigateToPage} />
 
               {/* Mini Live Metal Rates & Calculator */}
               <MiniMetalTracker onNavigate={navigateToPage} />
+
+              {/* Bank-Grade Security & Independent Custody Banner (Captured Top Section) */}
+              <BankGradeSecurityBanner />
 
               {/* Gold Savings Section (Daily, Weekly & Monthly) */}
               <HomeSavingsSection onNavigate={navigateToPage} />
@@ -413,7 +417,7 @@ export default function App() {
               {/* Referral Program Section */}
               <ReferralProgramSection onNavigate={navigateToPage} />
 
-              {/* Platform Trust & Partnerships Section */}
+              {/* Platform Trust & Partnerships Section (Remaining Features & Choices) */}
               <PlatformTrustSection />
 
               {/* FAQs Section */}

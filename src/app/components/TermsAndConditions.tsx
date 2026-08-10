@@ -72,7 +72,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               Important Notice
             </h2>
             <p className="text-[#b38200] leading-relaxed mb-4">
-              These terms and conditions ("Terms and Conditions" or "Terms") mandate the terms on which the users ("You" or "Your" or "User") can access and register on the website https://www.fipmoney.com/ including its mobile application – FipMoney; collectively the platform ("Platform") operated and managed by Finpages Tech Pvt Ltd ("FipMoney" "We" or "Us") and Finpages Gold Retail Pvt Ltd ("FipMoney Gold" or "We" or "Us") collectively referred to as the company ("Company") to provide you the services.
+              These terms and conditions ("Terms and Conditions" or "Terms") mandate the terms on which the users ("You" or "Your" or "User") can access and register on the website https://www.fipmoney.com/ including its mobile application – FipMoney; collectively the platform ("Platform") operated and managed by FipMoney Pvt Ltd ("FipMoney" "We" or "Us") and FipMoney Gold Retail Pvt Ltd ("FipMoney Gold" or "We" or "Us") collectively referred to as the company ("Company") to provide you the services.
             </p>
             <p className="text-[#b38200] font-semibold">
               IF YOU DO NOT AGREE TO THESE TERMS AND CONDITIONS, YOU MAY NOT USE THE PLATFORM AND SHOULD NOT PROCEED TO CREATE ANY ACCOUNTS OR ACQUIRE ANY SUBSCRIPTIONS TO THE PLATFORM. BY USING THE PLATFORM, YOU ARE AGREEING TO BE BOUND BY THESE TERMS AND CONDITIONS, INCLUDING ALL AMENDMENTS MADE HERETO FROM TIME TO TIME.
@@ -86,7 +86,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
             </p>
 
             <p>
-              The Platform is an online portal that facilitates the Users to purchase, sell or transfer gold and/or other precious metals in digital form backed by gold bullions and coins with purity as mentioned ("Precious Metal") operated and managed by Us (incorporated under the laws of India with corporate identification number U47733KA2023PTC181719). FipMoney Gold provides for purchase and sale of Precious Metal, and providing services of safe keeping, vaulting, delivery and fulfilment of Precious Metal and related services ("Services").
+              The Platform is an online portal that facilitates the Users to purchase, sell or transfer gold and/or other precious metals in digital form backed by 100% physical gold bullions and coins of 24 Karat 999.9 purity ("Precious Metal") operated and managed by Us. FipMoney Gold provides for purchase and sale of Precious Metal, and providing services of safe keeping, vaulting, delivery and fulfilment of Precious Metal and related services ("Services").
             </p>
 
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 my-6">
@@ -97,11 +97,11 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
             </div>
 
             <p>
-              You understand that the Precious Metal is being offered for purchase by FipMoney Gold, and the User can also sell the Precious Metal through the Platform. As per these Terms and Conditions, the Precious Metal purchased by You will be accounted in a customer account maintained by FipMoney Gold and the corresponding quantity of Precious Metal in physical form will be stored with Brink's India Pvt. Limited ("Custodian").
+              <strong>Vaulting & Custody Partner (Brink's):</strong> You understand that the Precious Metal is being offered for purchase by FipMoney Gold. For every transaction conducted on the Platform, an allocated physical vault account unit is opened and maintained on Your behalf under Your name/account with Brink's India Pvt. Limited ("Brink's" or "Custodian"). All physical Precious Metals corresponding to Your purchases are stored in high-security, 100% insured physical vaults operated by Brink's.
             </p>
 
             <p>
-              In order to safeguard Your interest, FipMoney Gold has also appointed an Administrator, the appointed Corporate Services Administrator ("Administrator"), and You agree to the appointment of such Administrator and the Custodian, and also accede to the terms for such arrangement with the Administrator. The Administrator shall be responsible for monitoring the physical Precious Metal held on Your behalf with the Custodian.
+              <strong>Independent Security Trustee (Vistra):</strong> In order to safeguard Your interest and ensure complete security of Your assets, FipMoney Gold has appointed Vistra ITCL (India) Limited ("Vistra" or "Security Trustee"), an independent corporate trustee registered under applicable law. Vistra holds a first exclusive charge over the physical Precious Metal stored in Brink's vaults on Your behalf. Vistra monitors and independently audits physical bullion holdings to ensure that 100% of User balances are fully backed by physical gold held in Brink's vaults at all times.
             </p>
 
             <p>
@@ -759,12 +759,14 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               <div>
                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                   <Mail className="w-5 h-5 mr-2" />
-                  Email Support
+                  Email Channels
                 </h4>
                 <div className="space-y-2 text-gray-700">
-                  <p><strong>General Support:</strong> support@fipmoney.com</p>
-                  <p><strong>Legal Queries:</strong> legal@fipmoney.com</p>
-                  <p><strong>Grievances:</strong> grievance@fipmoney.com</p>
+                  <p><strong>Official / Info:</strong> info@fipmoney.com</p>
+                  <p><strong>Customer Support:</strong> support@fipmoney.com</p>
+                  <p><strong>Payment Queries:</strong> payments@fipmoney.com</p>
+                  <p><strong>Legal & Compliance:</strong> legal@fipmoney.com</p>
+                  <p><strong>Grievance Cell:</strong> grievance@fipmoney.com</p>
                 </div>
               </div>
               <div>
@@ -782,8 +784,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
 
           {/* Footer Notice */}
           <div className="mt-8 text-center text-sm text-gray-500 space-y-2">
-            <p>© 2025 Finpages Tech Pvt Ltd. All rights reserved.</p>
-            <p>Corporate Identification Number: U47733KA2023PTC181719</p>
+            <p>© 2026 FipMoney Pvt Ltd. All rights reserved.</p>
             <p>This document was last updated on January 15, 2025</p>
             <p>
               FipMoney, a platform used to encourage savings habits in Indians by helping them save on a daily basis.

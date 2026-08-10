@@ -67,7 +67,7 @@ export default function GrievancePolicy({ onBack }: GrievancePolicyProps) {
           >
             {/* Intro */}
             <p className="text-gray-700 leading-relaxed text-base">
-              At FipMoney, we are committed to providing the highest quality of service. We believe in transparency and value customer satisfaction above all else. This Grievance Redressal Policy outlines the step-by-step mechanism established by <strong>Finpages Tech Pvt Ltd</strong> to address any concerns or complaints you may experience.
+              At FipMoney, we are committed to providing the highest quality of service. We believe in transparency and value customer satisfaction above all else. This Grievance Redressal Policy outlines the step-by-step mechanism established by <strong>FipMoney Pvt Ltd</strong> to address any concerns or complaints you may experience.
             </p>
 
             {/* Redressal Steps */}
@@ -83,7 +83,7 @@ export default function GrievancePolicy({ onBack }: GrievancePolicyProps) {
                 <div className="grid sm:grid-cols-2 gap-4 text-xs text-gray-700">
                   <div className="flex items-center space-x-2">
                     <Mail className="w-4 h-4 text-[#ffbf00]" />
-                    <span><strong>Email:</strong> support@fipmoney.com</span>
+                    <span><strong>Support:</strong> support@fipmoney.com | <strong>Payments:</strong> payments@fipmoney.com</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Phone className="w-4 h-4 text-[#ffbf00]" />
@@ -118,7 +118,7 @@ export default function GrievancePolicy({ onBack }: GrievancePolicyProps) {
                 </p>
                 <div className="flex items-start space-x-2 text-xs text-gray-700">
                   <MapPin className="w-4 h-4 text-[#ffbf00] mt-0.5 flex-shrink-0" />
-                  <span><strong>Address:</strong> Finpages Tech Pvt Ltd, #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</span>
+                  <span><strong>Address:</strong> FipMoney Pvt Ltd, #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</span>
                 </div>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default function GrievancePolicy({ onBack }: GrievancePolicyProps) {
 
             {/* Footer Notice */}
             <div className="text-center text-xs text-gray-400 border-t border-gray-100 pt-6">
-              <p>© 2025 Finpages Tech Pvt Ltd. All rights reserved.</p>
+              <p>© 2026 FipMoney Pvt Ltd. All rights reserved.</p>
               <p>Corporate Office: #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</p>
             </div>
           </motion.div>
