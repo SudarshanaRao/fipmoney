@@ -5,9 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "./components/Header";
 import HeroSection from "./components/HeroSection";
 import BenefitsSection from "./components/BenefitsSection";
-import HowItWorksSection from "./components/HowItWorksSection";
 import FeaturesSection from "./components/FeaturesSection";
-import AllInOneSection from "./components/AllInOneSection";
 import PlatformTrustSection from "./components/PlatformTrustSection";
 import BankGradeSecurityBanner from "./components/BankGradeSecurityBanner";
 import Footer from "./components/Footer";
@@ -18,8 +16,6 @@ import Careers from "./components/Careers";
 import HelpCenter from "./components/HelpCenter";
 import ContactUs from "./components/ContactUs";
 import SecurityCenter from "./components/SecurityCenter";
-import Blog from "./components/Blog";
-import Chatbot from "./components/Chatbot";
 import FAQs from "./components/FAQs";
 import BuyGold from "./components/BuyGold";
 import SellGold from "./components/SellGold";
@@ -28,12 +24,8 @@ import SavingsPage from "./components/SavingsPage";
 import PublicSavingsLandingPage from "./components/PublicSavingsLandingPage";
 import DigitalGold from "./components/DigitalGold";
 import DigitalSilver from "./components/DigitalSilver";
-import RoundOff from "./components/RoundOff";
-import Loans from "./components/Loans";
 import MiniMetalTracker from "./components/MiniMetalTracker";
 import HomeSavingsSection from "./components/HomeSavingsSection";
-import HowTos from "./components/HowTos";
-import GuideReader from "./components/GuideReader";
 import AuthFlow from "./components/AuthFlow";
 import Dashboard from "./components/Dashboard";
 import RechargeDetails from "./components/RechargeDetails";
@@ -41,7 +33,6 @@ import BillShowcaseSection from "./components/BillShowcaseSection";
 import ReferralProgramSection from "./components/ReferralProgramSection";
 import RiskDisclosure from "./components/RiskDisclosure";
 import GrievancePolicy from "./components/GrievancePolicy";
-import InvestorCharter from "./components/InvestorCharter";
 import LiveMetalTracker from "./components/LiveMetalTracker";
 import HomeFAQs from "./components/HomeFAQs";
 import MandatoryDisclosures from "./components/MandatoryDisclosures";
@@ -349,13 +340,13 @@ export default function App() {
       case 'digital-silver':
         return <DigitalSilver onBack={navigateToHome} />;
       case 'instant-loan':
-        return <Loans onBack={navigateToHome} />;
+        return <ComingSoonPage title="Instant Loan" onBack={navigateToHome} />;
       case 'round-off':
-        return <RoundOff onBack={navigateToHome} />;
+        return <ComingSoonPage title="Round Off Savings" onBack={navigateToHome} />;
       
 
       case 'step-up-sip-calculator':
-        return <ComingSoonPage title="Step Up SIP Calculator Coming Soon" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Step Up SIP Calculator" onBack={navigateToHome} />;
       case 'growth-calculator':
         return <ComingSoonPage title="Growth Calculator" onBack={navigateToHome} />;
       case 'retirement-calculator':
@@ -377,11 +368,12 @@ export default function App() {
         
       // Help pages
       case 'jar-how-tos':
-        return <HowTos onBack={navigateToHome} onNavigateToGuide={navigateToGuide} />;
       case 'guide':
-        return <GuideReader onBack={navigateToHowTos} onNavigateToGuide={navigateToGuide} guideId={currentGuideId} />;
+        return <ComingSoonPage title="Guides & How-Tos" onBack={navigateToHome} />;
         
       // Other pages
+      case 'blog':
+        return <ComingSoonPage title="Blog" onBack={navigateToHome} />;
       case 'press':
         return <ComingSoonPage title="Press & Media" onBack={navigateToHome} />;
       case 'investors':
@@ -391,7 +383,7 @@ export default function App() {
       case 'grievance':
         return <GrievancePolicy onBack={navigateToHome} />;
       case 'investor-charter':
-        return <InvestorCharter onBack={navigateToHome} />;
+        return <ComingSoonPage title="Investor Charter" onBack={navigateToHome} />;
       default:
         return (
           <>
@@ -476,9 +468,6 @@ export default function App() {
                 />
               ))}
             </div>
-
-            {/* AI Chatbot */}
-            <Chatbot />
           </>
         );
     }
