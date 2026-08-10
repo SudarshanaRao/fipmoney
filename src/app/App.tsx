@@ -312,8 +312,6 @@ export default function App() {
         return <ContactUs onBack={navigateToHome} />;
       case 'security':
         return <SecurityCenter onBack={navigateToHome} />;
-      case 'blog':
-        return <Blog onBack={navigateToHome} />;
       case 'sip-calculator':
       case 'gold-sip-calculator':
         return <ComingSoonPage title="SIP Calculator Coming Soon" onBack={navigateToHome} />;
