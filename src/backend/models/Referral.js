@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 const referralSchema = new mongoose.Schema(
   {
+    refId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     referrerMobile: {
       type: String,
       required: true,
@@ -18,7 +23,7 @@ const referralSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['JOINED', 'KYC_COMPLETED', 'GOLD_PURCHASED', 'REWARD_CREDITED'],
+      enum: ['JOINED', 'KYC_COMPLETED', 'GOLD_PURCHASED', 'REWARD_CREDITED', 'FLAGGED_FRAUD', 'Flagged Fraud', 'Credited', 'Joined', 'KYC Completed', 'Gold Purchased'],
       default: 'JOINED',
     },
     rewardAmount: {

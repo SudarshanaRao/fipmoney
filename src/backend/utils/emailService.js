@@ -542,7 +542,7 @@ export async function seedDefaultEmailTemplates() {
       if (!existing) {
         await EmailTemplate.create(tmpl);
         console.log(`[EmailService] Seeded HTML template: ${tmpl.templateId}`);
-      } else if (tmpl.templateId === 'FIPMONEY_OTP_VERIFICATION') {
+      } else if (tmpl.templateId === 'FIPMONEY_OTP_VERIFICATION' && existing.htmlContent !== tmpl.htmlContent) {
         existing.name = tmpl.name;
         existing.subject = tmpl.subject;
         existing.htmlContent = tmpl.htmlContent;

@@ -218,7 +218,56 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const [payouts, setPayouts] = useState(INITIAL_PAYOUTS);
   const [users, setUsers] = useState<any[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(true);
-  const [referrals, setReferrals] = useState(INITIAL_REFERRALS);
+  
+  // REFERRALS DYNAMIC STATES & HANDLERS
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [referralStats, setReferralStats] = useState<any>({
+    totalBonusDistributed: "₹0",
+    totalActiveAdvocates: "0 Users",
+    conversionRate: "0.0%",
+    totalReferrals: 0,
+    flaggedFraudCount: 0
+  });
+  const [isLoadingReferrals, setIsLoadingReferrals] = useState<boolean>(true);
+  const [referralSearchQuery, setReferralSearchQuery] = useState<string>("");
+  const [referralStatusFilter, setReferralStatusFilter] = useState<string>("All");
+
+  const fetchAdminReferrals = async () => {
+    setIsLoadingReferrals(true);
+    try {
+      let res = await fetch('/api/referrals/admin/all');
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/referrals/admin/all');
+      }
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setReferrals(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching referrals:', err);
+    } finally {
+      setIsLoadingReferrals(false);
+    }
+  };
+
+  const fetchAdminReferralStats = async () => {
+    try {
+      let res = await fetch('/api/referrals/admin/stats');
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/referrals/admin/stats');
+      }
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setReferralStats(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching referral stats:', err);
+    }
+  };
 
   // DGA WAITLIST STATES & HANDLERS
   const [dgaWaitlistList, setDgaWaitlistList] = useState<any[]>([]);
@@ -276,8 +325,67 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
         fetchKycRequests();
       }, 5000);
       return () => clearInterval(interval);
+    } else if (activeNav === "Referrals") {
+      fetchAdminReferrals();
+      fetchAdminReferralStats();
+      const interval = setInterval(() => {
+        fetchAdminReferrals();
+        fetchAdminReferralStats();
+      }, 5000);
+      return () => clearInterval(interval);
     }
   }, [activeNav]);
+
+  // REFERRALS SINGLE ACTION OPERATIONS
+  const handleUpdateReferralStatus = async (id: string, status: string) => {
+    setReferrals(prev =>
+      prev.map(item => (item.id === id || item._id === id ? { ...item, status } : item))
+    );
+
+    try {
+      let res = await fetch('/api/referrals/admin/update-status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/referrals/admin/update-status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, status })
+        });
+      }
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `Referral status updated to '${status}'!`);
+        fetchAdminReferralStats();
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error updating referral status:', err);
+    }
+    addAuditLog(`Single Action: Updated referral ${id} status to ${status}`, 'Referral Management', status === 'Credited' ? 'Success' : 'Warning');
+  };
+
+  const handleDeleteReferral = async (id: string) => {
+    if (!window.confirm("Are you sure you want to remove this referral record?")) return;
+
+    setReferrals(prev => prev.filter(item => item.id !== id && item._id !== id));
+
+    try {
+      let res = await fetch(`/api/referrals/admin/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        res = await fetch(`http://localhost:5000/api/referrals/admin/${id}`, { method: 'DELETE' });
+      }
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || "Referral record deleted successfully!");
+        fetchAdminReferralStats();
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error deleting referral:', err);
+    }
+    addAuditLog(`Single Action: Deleted referral record ${id}`, 'Referral Management', 'Warning');
+  };
 
   // DGA SINGLE ACTION OPERATIONS
   const handleUpdateDgaStatus = async (id: string, status: string) => {
@@ -2342,71 +2450,207 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
         {/* 9. REFERRALS PAGE */}
         {activeNav === "Referrals" && (
           <div className="space-y-6">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
-              <h2 className="text-lg font-black text-slate-900">Referral & Advocate Program</h2>
-              <p className="text-xs font-semibold text-slate-500">Track user invite codes, bonus rewards, and advocate conversions with AMT Fraud Prevention.</p>
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-black text-slate-900">Referral & Advocate Program</h2>
+                <p className="text-xs font-semibold text-slate-500">Track user invite codes, bonus rewards, and advocate conversions with AMT Fraud Prevention.</p>
+              </div>
+              <button
+                onClick={() => { fetchAdminReferrals(); fetchAdminReferralStats(); triggerToast("Refreshed live referral data!"); }}
+                className="bg-purple-50 hover:bg-purple-100 text-purple-700 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-purple-200 cursor-pointer transition-all shrink-0"
+              >
+                <RefreshCw size={14} className={isLoadingReferrals ? "animate-spin" : ""} />
+                Refresh Data
+              </button>
             </div>
 
+            {/* Dynamic Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4">
                 <div className="text-xs font-bold text-purple-700 uppercase">Total Bonus Distributed</div>
-                <div className="text-2xl font-black text-purple-900 mt-1">₹4.85 Lakhs</div>
+                <div className="text-2xl font-black text-purple-900 mt-1">{referralStats.totalBonusDistributed || "₹0"}</div>
               </div>
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
                 <div className="text-xs font-bold text-emerald-700 uppercase">Total Active Advocates</div>
-                <div className="text-2xl font-black text-emerald-900 mt-1">2,340 Users</div>
+                <div className="text-2xl font-black text-emerald-900 mt-1">{referralStats.totalActiveAdvocates || "0 Users"}</div>
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
                 <div className="text-xs font-bold text-amber-700 uppercase">Conversion Rate</div>
-                <div className="text-2xl font-black text-amber-900 mt-1">24.8%</div>
+                <div className="text-2xl font-black text-amber-900 mt-1">{referralStats.conversionRate || "0.0%"}</div>
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-700">
-                  <thead className="bg-slate-50 text-slate-400 font-black text-[10px] uppercase border-b border-slate-200">
-                    <tr>
-                      <th className="p-3.5">Ref ID</th>
-                      <th className="p-3.5">Referrer (Advocate)</th>
-                      <th className="p-3.5">AMT Score</th>
-                      <th className="p-3.5">Referee (New User)</th>
-                      <th className="p-3.5">Referral Code</th>
-                      <th className="p-3.5">Reward Granted</th>
-                      <th className="p-3.5">Date</th>
-                      <th className="p-3.5">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium">
-                    {referrals.map(ref => {
-                      const amtInfo = getAmtScoreDetails(ref.amtScore);
-                      return (
-                        <tr key={ref.id} className="hover:bg-slate-50">
-                          <td className="p-3.5 font-mono font-bold text-slate-900">{ref.id}</td>
-                          <td className="p-3.5 font-bold text-slate-900">{ref.referrer}</td>
-                          <td className="p-3.5">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${amtInfo.badgeBg}`}>
-                              {ref.amtScore}/100
-                            </span>
-                          </td>
-                          <td className="p-3.5 font-semibold text-slate-700">{ref.referee}</td>
-                          <td className="p-3.5 font-mono font-bold text-purple-600">{ref.code}</td>
-                          <td className="p-3.5 font-black text-slate-900">{ref.reward}</td>
-                          <td className="p-3.5 text-slate-500">{ref.date}</td>
-                          <td className="p-3.5">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              ref.status === "Credited" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-                            }`}>
-                              {ref.status}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+            {/* Search & Filter Bar */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
+              <div className="relative w-full md:w-80">
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name, phone, code..."
+                  value={referralSearchQuery}
+                  onChange={(e) => setReferralSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-purple-500 font-medium"
+                />
+              </div>
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                <Filter size={15} className="text-slate-400 shrink-0" />
+                <select
+                  value={referralStatusFilter}
+                  onChange={(e) => setReferralStatusFilter(e.target.value)}
+                  className="bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-purple-500 cursor-pointer"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="Credited">Credited</option>
+                  <option value="Joined">Joined</option>
+                  <option value="KYC Completed">KYC Completed</option>
+                  <option value="Gold Purchased">Gold Purchased</option>
+                  <option value="Flagged Fraud">Flagged Fraud</option>
+                </select>
               </div>
             </div>
+
+            {/* Table or Loading / Empty state */}
+            {isLoadingReferrals && referrals.length === 0 ? (
+              <div className="bg-white p-12 rounded-2xl border border-slate-200/80 shadow-2xs text-center">
+                <LoadingSpinner />
+                <p className="text-xs font-bold text-slate-500 mt-3">Loading live referral tracking data...</p>
+              </div>
+            ) : referrals.length === 0 ? (
+              <div className="bg-white p-12 rounded-2xl border border-slate-200/80 shadow-2xs text-center">
+                <Share2 size={36} className="mx-auto text-slate-300 mb-2" />
+                <h3 className="text-sm font-black text-slate-700">No Referral Records Found</h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Referrals generated by platform advocates will automatically synchronize here live.</p>
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-700">
+                    <thead className="bg-slate-50 text-slate-400 font-black text-[10px] uppercase border-b border-slate-200">
+                      <tr>
+                        <th className="p-3.5">Ref ID</th>
+                        <th className="p-3.5">Referrer (Advocate)</th>
+                        <th className="p-3.5">AML Risk Score</th>
+                        <th className="p-3.5">Referee (New User)</th>
+                        <th className="p-3.5">Referral Code</th>
+                        <th className="p-3.5">Reward Status</th>
+                        <th className="p-3.5">Date</th>
+                        <th className="p-3.5">Progression & Status</th>
+                        <th className="p-3.5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {referrals
+                        .filter(ref => {
+                          const matchesStatus = referralStatusFilter === "All" || ref.status === referralStatusFilter;
+                          const query = referralSearchQuery.toLowerCase();
+                          const matchesQuery = !query || 
+                            (ref.referrer && ref.referrer.toLowerCase().includes(query)) ||
+                            (ref.referee && ref.referee.toLowerCase().includes(query)) ||
+                            (ref.code && ref.code.toLowerCase().includes(query)) ||
+                            (ref.refId && ref.refId.toLowerCase().includes(query)) ||
+                            (ref.referrerMobile && ref.referrerMobile.includes(query)) ||
+                            (ref.refereeMobile && ref.refereeMobile.includes(query));
+                          return matchesStatus && matchesQuery;
+                        })
+                        .map(ref => {
+                          const score = ref.amlScore !== undefined ? ref.amlScore : (ref.amtScore || 90);
+                          const amlInfo = getAmlScoreDetails(score);
+                          return (
+                            <tr key={ref.refId || ref.id || ref._id} className="hover:bg-slate-50 transition-colors">
+                              <td className="p-3.5 font-mono font-bold text-slate-900">{ref.refId || ref.id}</td>
+                              <td className="p-3.5 font-bold text-slate-900">
+                                {ref.referrer}
+                                {ref.referrerMobile && <div className="text-[10px] text-slate-400 font-normal">{ref.referrerMobile}</div>}
+                              </td>
+                              <td className="p-3.5">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${amlInfo.badgeBg}`}>
+                                  {score}/100
+                                </span>
+                              </td>
+                              <td className="p-3.5 font-semibold text-slate-700">
+                                {ref.referee}
+                                {ref.refereeMobile && <div className="text-[10px] text-slate-400 font-normal">{ref.refereeMobile}</div>}
+                              </td>
+                              <td className="p-3.5 font-mono font-bold text-purple-600">{ref.code}</td>
+                              <td className="p-3.5 whitespace-nowrap">
+                                <div className="font-black text-slate-900">{ref.reward || "₹100 Gold"}</div>
+                                {ref.status === "Credited" ? (
+                                  <span className="inline-block text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mt-0.5">
+                                    Credited
+                                  </span>
+                                ) : (
+                                  <span className="inline-block text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full mt-0.5">
+                                    Reward Pending
+                                  </span>
+                                )}
+                              </td>
+                              <td className="p-3.5 text-slate-500">{ref.date}</td>
+                              <td className="p-3.5 space-y-1">
+                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                  ref.status === "Credited" ? "bg-emerald-100 text-emerald-700" :
+                                  ref.status === "Flagged Fraud" ? "bg-red-100 text-red-700" :
+                                  ref.status === "Gold Purchased" ? "bg-purple-100 text-purple-700" :
+                                  ref.status === "KYC Completed" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+                                }`}>
+                                  {ref.status}
+                                </span>
+                                {ref.stepLabel && (
+                                  <div className="text-[10px] font-semibold text-slate-500 flex items-center gap-1">
+                                    {ref.eligibleForCredit || ref.status === "Credited" ? (
+                                      <CheckCircle2 size={11} className="text-emerald-600 shrink-0 inline" />
+                                    ) : (
+                                      <Clock size={11} className="text-amber-500 shrink-0 inline" />
+                                    )}
+                                    <span>{ref.stepLabel}</span>
+                                  </div>
+                                )}
+                              </td>
+                              <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                                {ref.status === "Credited" ? (
+                                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200">
+                                    Reward Granted
+                                  </span>
+                                ) : ref.eligibleForCredit || ref.status === "Gold Purchased" ? (
+                                  <button
+                                    onClick={() => handleUpdateReferralStatus(ref.refId || ref.id || ref._id, "Credited")}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg border-none cursor-pointer shadow-2xs transition-all animate-pulse"
+                                    title="All steps completed! Click to credit ₹100 gold reward"
+                                  >
+                                    Credit Reward
+                                  </button>
+                                ) : (
+                                  <span
+                                    className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200 cursor-not-allowed inline-block"
+                                    title="Credit button enables only after referee completes KYC & buys ₹250+ Gold"
+                                  >
+                                    Credit Locked
+                                  </span>
+                                )}
+                                {ref.status !== "Flagged Fraud" && (
+                                  <button
+                                    onClick={() => handleUpdateReferralStatus(ref.refId || ref.id || ref._id, "Flagged Fraud")}
+                                    className="bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-1 rounded-lg border border-amber-200 cursor-pointer transition-all"
+                                    title="Flag Fraud"
+                                  >
+                                    Flag Fraud
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteReferral(ref.refId || ref.id || ref._id)}
+                                  className="bg-red-50 hover:bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded-lg border border-red-200 cursor-pointer transition-all"
+                                  title="Delete Record"
+                                >
+                                  <Trash2 size={12} className="inline" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -167,6 +167,7 @@ import emailRoutes from './routes/emailRoutes.js';
 import emailTemplateRoutes from './routes/emailTemplateRoutes.js';
 import agentWaitlistRoutes from './routes/agentWaitlistRoutes.js';
 import kycRoutes from './routes/kycRoutes.js';
+import referralRoutes from './routes/referralRoutes.js';
 
 // API Routes
 app.use('/api/health', healthRoutes);
@@ -176,6 +177,7 @@ app.use('/api/emails', emailRoutes);
 app.use('/api/email-templates', emailTemplateRoutes);
 app.use('/api/agent-waitlist', agentWaitlistRoutes);
 app.use('/api/kyc', kycRoutes);
+app.use('/api/referrals', referralRoutes);
 
 // Error Handling Middleware
 app.use(notFound);
