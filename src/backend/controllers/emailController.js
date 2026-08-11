@@ -1,7 +1,7 @@
 import EmailTemplate from '../models/EmailTemplate.js';
 import EmailLog from '../models/EmailLog.js';
 import User from '../models/User.js';
-import { sendTemplatedEmail, sendBulkEmail, seedDefaultEmailTemplates } from '../utils/emailService.js';
+import { sendTemplatedEmail, sendBulkEmail, sendCustomEmail, seedDefaultEmailTemplates } from '../utils/emailService.js';
 
 // @desc    Get all stored HTML email templates
 // @route   GET /api/emails/templates
@@ -93,17 +93,31 @@ export const saveEmailTemplate = async (req, res, next) => {
 export const deleteEmailTemplate = async (req, res, next) => {
   try {
     const { templateId } = req.params;
-    const cleanId = String(templateId).trim().toUpperCase();
+    const cleanId = String(templateId).trim();
 
-    const result = await EmailTemplate.findOneAndDelete({ templateId: cleanId });
+    let result = null;
+    if (cleanId.match(/^[0-9a-fA-F]{24}$/)) {
+      result = await EmailTemplate.findByIdAndDelete(cleanId);
+    }
+    if (!result) {
+      result = await EmailTemplate.findOneAndDelete({
+        $or: [
+          { templateId: cleanId },
+          { template_id: cleanId },
+          { templateId: cleanId.toUpperCase() },
+          { template_id: cleanId.toUpperCase() }
+        ]
+      });
+    }
+
     if (!result) {
       res.status(404);
-      throw new Error(`Email template '${cleanId}' not found`);
+      throw new Error(`Email template '${cleanId}' not found in database`);
     }
 
     return res.status(200).json({
       success: true,
-      message: `Email template '${cleanId}' deleted successfully`,
+      message: `Email template '${cleanId}' deleted successfully from database`,
     });
   } catch (error) {
     next(error);
@@ -212,6 +226,81 @@ export const getEmailLogs = async (req, res, next) => {
       success: true,
       count: logs.length,
       data: logs,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Send Email (Subject & Body / Template) to Selected Users via Zoho SMTP
+// @route   POST /api/emails/send-to-users
+export const sendEmailToUsers = async (req, res, next) => {
+  try {
+    const { recipients, subject, body, templateId, fromEmail } = req.body;
+
+    if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Recipients array is required and must not be empty',
+      });
+    }
+
+    if (!subject || !body) {
+      return res.status(400).json({
+        success: false,
+        message: 'Subject and body are required',
+      });
+    }
+
+    // Resolve email addresses if user IDs or objects were passed
+    let emails = [];
+    if (typeof recipients[0] === 'string' && recipients[0].includes('@')) {
+      emails = recipients;
+    } else {
+      // Find users by userId, _id, or userCode
+      const userRecords = await User.find({
+        $or: [
+          { userId: { $in: recipients } },
+          { _id: { $in: recipients } },
+          { userCode: { $in: recipients } },
+          { email: { $in: recipients } }
+        ]
+      });
+      emails = userRecords.map(u => u.email).filter(Boolean);
+      if (emails.length === 0) {
+        // Fallback: use recipients directly if they contain string values
+        emails = recipients.map(r => typeof r === 'string' ? r : (r.email || r.toEmail)).filter(Boolean);
+      }
+    }
+
+    if (emails.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid email addresses found for selected recipients',
+      });
+    }
+
+    const results = [];
+    for (const email of emails) {
+      const result = await sendCustomEmail(email, subject, body, fromEmail);
+      results.push({
+        email,
+        success: result.success,
+        message: result.message,
+      });
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.filter(r => !r.success).length;
+
+    return res.status(200).json({
+      success: true,
+      message: `Emails processed: ${successCount} succeeded, ${failureCount} failed`,
+      data: {
+        totalSent: successCount,
+        totalFailed: failureCount,
+        results,
+      },
     });
   } catch (error) {
     next(error);

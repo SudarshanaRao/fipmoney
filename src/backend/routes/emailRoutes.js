@@ -8,6 +8,7 @@ import {
   sendBulkEmailToUsers,
   sendWelcomeEmail,
   getEmailLogs,
+  sendEmailToUsers,
 } from '../controllers/emailController.js';
 
 const router = express.Router();
@@ -229,5 +230,7 @@ router.post('/send-welcome', sendWelcomeEmail);
  *         description: List of email delivery logs.
  */
 router.get('/logs', getEmailLogs);
+router.post('/send-to-users', sendEmailToUsers);
+router.post('/send-email-to-users', sendEmailToUsers);
 
 export default router;

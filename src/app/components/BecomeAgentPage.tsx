@@ -30,6 +30,14 @@ const PREDEFINED_CITIES = [
   "Vadodara", "Ludhiana", "Agra", "Nashik", "Rajkot", "Varanasi", "Amritsar", "Madurai"
 ];
 
+const formatWaitlistNumber = (num: number | string | undefined | null): string => {
+  if (!num) return "DGA0001";
+  if (typeof num === "string" && num.startsWith("DGA")) return num;
+  const parsed = typeof num === "number" ? num : parseInt(String(num).replace(/\D/g, ""), 10);
+  if (isNaN(parsed) || parsed < 1) return "DGA0001";
+  return `DGA${String(parsed).padStart(4, "0")}`;
+};
+
 export default function BecomeAgentPage() {
   const [formData, setFormData] = useState({
     username: "",
@@ -47,36 +55,48 @@ export default function BecomeAgentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [waitlistResult, setWaitlistResult] = useState<{
     waitlistNumber: number;
+    formattedWaitlistNumber?: string;
     username: string;
     alreadyRegistered?: boolean;
+    mobile?: string;
+    email?: string;
+    city?: string;
   } | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("fm_dga_waitlist_data");
     if (saved) {
       try {
-        setWaitlistResult(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setWaitlistResult(parsed);
       } catch (e) {
         // ignore
       }
     }
   }, []);
 
-  // Pincode Auto City Lookup
+  const scrollToForm = () => {
+    const el = document.getElementById("join-waitlist-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Pincode Auto State Lookup (Uses State from https://api.postalpincode.in/pincode/${val})
   const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, "").slice(0, 6);
     setPincode(val);
 
     if (val.length === 6) {
       setIsFetchingPincode(true);
-      setPincodeMsg("Fetching city...");
+      setPincodeMsg("Fetching state...");
       try {
         const res = await fetch(`https://api.postalpincode.in/pincode/${val}`);
         const data = await res.json();
         if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice?.[0]) {
-          const district = data[0].PostOffice[0].District || data[0].PostOffice[0].State;
-          if (district) {
-            setFormData(prev => ({ ...prev, city: district }));
+          const state = data[0].PostOffice[0].State;
+          if (state) {
+            setFormData(prev => ({ ...prev, city: state }));
             setPincodeMsg("✓ Successfully fetched");
           } else {
             setPincodeMsg("");
@@ -115,27 +135,43 @@ export default function BecomeAgentPage() {
       const data = await response.json();
 
       if (data.success) {
+        const num = data.waitlistNumber || 1;
+        const formatted = data.formattedWaitlistNumber || formatWaitlistNumber(num);
         const resultObj = {
-          waitlistNumber: data.waitlistNumber || 1048,
+          waitlistNumber: num,
+          formattedWaitlistNumber: formatted,
           username: formData.username,
-          alreadyRegistered: data.alreadyRegistered
+          alreadyRegistered: data.alreadyRegistered,
+          mobile: formData.mobile,
+          email: formData.email,
+          city: formData.city,
         };
         setWaitlistResult(resultObj);
         localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(resultObj));
       } else {
-        const fallbackNum = Math.floor(1048 + Math.random() * 30);
+        const fallbackNum = 1;
+        const formatted = formatWaitlistNumber(fallbackNum);
         const resultObj = {
           waitlistNumber: fallbackNum,
-          username: formData.username
+          formattedWaitlistNumber: formatted,
+          username: formData.username,
+          mobile: formData.mobile,
+          email: formData.email,
+          city: formData.city,
         };
         setWaitlistResult(resultObj);
         localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(resultObj));
       }
     } catch (error) {
-      const fallbackNum = 1048;
+      const fallbackNum = 1;
+      const formatted = formatWaitlistNumber(fallbackNum);
       const resultObj = {
         waitlistNumber: fallbackNum,
-        username: formData.username
+        formattedWaitlistNumber: formatted,
+        username: formData.username,
+        mobile: formData.mobile,
+        email: formData.email,
+        city: formData.city,
       };
       setWaitlistResult(resultObj);
       localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(resultObj));
@@ -217,75 +253,75 @@ export default function BecomeAgentPage() {
       {/* MAIN CONTAINER */}
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12 space-y-14">
 
-        {/* 2. WHY BECOME A DGA? (5 GRID CARDS) */}
+        {/* 2. WHY BECOME A DGA? (5 GRID CARDS MATCHING REFERENCE IMAGE EXACTLY) */}
         <div className="space-y-6">
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             Why Become a DGA?
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4.5">
             
-            {/* Card 1 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:shadow-md transition-shadow text-center flex flex-col items-center justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-3">
-                <img src="/digital_gold_agent_small.png" alt="Gold Coins" className="w-10 h-10 object-contain" />
+            {/* Card 1: why_dga_1.png */}
+            <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-slate-200/70 shadow-2xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-between group min-h-[300px]">
+              <div className="w-full h-32 sm:h-36 lg:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                <img src="/why_dga_1.png" alt="Earn Unlimited" className="w-full h-full object-contain drop-shadow-md" />
               </div>
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 mb-1">Earn Unlimited</h4>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  Refer more, earn more. No upper limit on your income.
+              <div className="space-y-1.5 w-full">
+                <h4 className="font-extrabold text-base text-slate-900 leading-snug">Earn Unlimited</h4>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Refer more, earn more.<br />No upper limit on your income.
                 </p>
               </div>
             </div>
 
-            {/* Card 2 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:shadow-md transition-shadow text-center flex flex-col items-center justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center mb-3">
-                <Gift size={28} className="text-rose-500" />
+            {/* Card 2: why_dga_2.png */}
+            <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-slate-200/70 shadow-2xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-between group min-h-[300px]">
+              <div className="w-full h-32 sm:h-36 lg:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                <img src="/why_dga_2.png" alt="50/- Digital Gold Reward" className="w-full h-full object-contain drop-shadow-md" />
               </div>
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 mb-1">50/- Digital Gold Reward</h4>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  You & your friend both get ₹50 worth Digital Gold.
+              <div className="space-y-1.5 w-full">
+                <h4 className="font-extrabold text-base text-slate-900 leading-snug">50/- Digital Gold Reward</h4>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  You & your friend both get<br />₹50 worth Digital Gold.
                 </p>
               </div>
             </div>
 
-            {/* Card 3 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:shadow-md transition-shadow text-center flex flex-col items-center justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">
-                <TrendingUp size={28} className="text-blue-600" />
+            {/* Card 3: why_dga_3.png */}
+            <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-slate-200/70 shadow-2xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-between group min-h-[300px]">
+              <div className="w-full h-32 sm:h-36 lg:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                <img src="/why_dga_3.png" alt="Target Based Commission" className="w-full h-full object-contain drop-shadow-md" />
               </div>
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 mb-1">Target Based Commission</h4>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  Earn up to 2% commission on every buy request after reaching monthly target.
+              <div className="space-y-1.5 w-full">
+                <h4 className="font-extrabold text-base text-slate-900 leading-snug">Target Based Commission</h4>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Earn 1% commission on every<br />buy request after reaching<br />monthly target.
                 </p>
               </div>
             </div>
 
-            {/* Card 4 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:shadow-md transition-shadow text-center flex flex-col items-center justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center mb-3">
-                <FileText size={28} className="text-purple-600" />
+            {/* Card 4: why_dga_4.png */}
+            <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-slate-200/70 shadow-2xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-between group min-h-[300px]">
+              <div className="w-full h-32 sm:h-36 lg:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                <img src="/why_dga_4.png" alt="Free Marketing Support" className="w-full h-full object-contain drop-shadow-md" />
               </div>
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 mb-1">Free Marketing Support</h4>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  Get posters, banners, videos, and marketing kit - completely free!
+              <div className="space-y-1.5 w-full">
+                <h4 className="font-extrabold text-base text-slate-900 leading-snug">Free Marketing Support</h4>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  Get posters, banners, videos,<br />and marketing kit –<br />completely free!
                 </p>
               </div>
             </div>
 
-            {/* Card 5 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs hover:shadow-md transition-shadow text-center flex flex-col items-center justify-between">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center mb-3">
-                <ShieldCheck size={28} className="text-amber-600" />
+            {/* Card 5: why_dga_5.png */}
+            <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-slate-200/70 shadow-2xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-between group min-h-[300px]">
+              <div className="w-full h-32 sm:h-36 lg:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
+                <img src="/why_dga_5.png" alt="No Fees Ever" className="w-full h-full object-contain drop-shadow-md" />
               </div>
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 mb-1">No Fees Ever</h4>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  No joining fee. No annual fee. 100% free to join.
+              <div className="space-y-1.5 w-full">
+                <h4 className="font-extrabold text-base text-slate-900 leading-snug">No Fees Ever</h4>
+                <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                  No joining fee. No annual fee.<br />100% free to join.
                 </p>
               </div>
             </div>
@@ -497,16 +533,16 @@ export default function BecomeAgentPage() {
         </div>
 
 
-        {/* 6. JOIN THE DGA WAITLIST SECTION (FORM + DISSOLVED waiting_list.png ASSET OVERLAY) */}
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-sm space-y-6">
+        {/* 6. JOIN THE DGA WAITLIST SECTION (FORM + TICKET GRAPHIC OVERLAY) */}
+        <div id="join-waitlist-section" className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-sm space-y-6">
           
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Join the DGA Waitlist
               </h2>
-              <span className="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">
-                Beta
+              <span className="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">
+                Beta Access
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium mt-1">
@@ -516,121 +552,162 @@ export default function BecomeAgentPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
             
-            {/* LEFT FORM */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Full Name / Username</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Enter your full name"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
-                  />
+            {/* LEFT SIDE: FORM (FOR NEW USER) OR CONFIRMATION CARD (IF ALREADY JOINED) */}
+            {waitlistResult ? (
+              <div className="space-y-4 bg-gradient-to-br from-purple-50/70 via-amber-50/40 to-slate-50 rounded-3xl p-6 sm:p-8 border border-purple-100 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                        Waitlist Ticket Reserved
+                      </span>
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        1 Chance Per User Verified
+                      </span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
+                      You're on the Waitlist, {waitlistResult.username}!
+                    </h3>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-100 text-slate-600 flex items-center">
-                      +91
+                <div className="bg-white/90 backdrop-blur rounded-2xl p-5 border border-purple-100/80 space-y-3 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-50 pb-3">
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Your Official DGA Waitlist Number</span>
+                    <span className="font-black text-lg text-purple-700 bg-purple-100/80 px-3.5 py-1 rounded-xl w-fit">
+                      {waitlistResult.formattedWaitlistNumber || formatWaitlistNumber(waitlistResult.waitlistNumber)}
                     </span>
+                  </div>
+
+                  <div className="text-xs text-slate-600 font-medium leading-relaxed">
+                    Thank you for registering! Each user receives exactly one unique position in the waitlist sequence starting from <strong className="text-purple-700">DGA0001</strong>. We will notify you via mobile & email when early access opens.
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-[11px] font-bold text-purple-700 pt-1">
+                  <ShieldCheck size={16} />
+                  <span>Single registration verified. Your spot is reserved.</span>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Full Name / Username</label>
                     <input
-                      type="tel"
+                      type="text"
                       required
-                      placeholder="Enter your mobile number"
-                      value={formData.mobile}
-                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                      placeholder="Enter your full name"
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
                     />
                   </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
+                    <div className="flex gap-2">
+                      <span className="px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-100 text-slate-600 flex items-center">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="Enter your mobile number"
+                        value={formData.mobile}
+                        onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email address"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
-                />
-              </div>
-
-              {/* PINCODE & CITY ROW WITH PREDEFINED CITIES & PINCODE AUTO-LOOKUP */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Pincode (6-digit PIN)</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
                   <input
-                    type="text"
-                    maxLength={6}
-                    placeholder="e.g. 500001"
-                    value={pincode}
-                    onChange={handlePincodeChange}
+                    type="email"
+                    required
+                    placeholder="Enter your email address"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
                   />
-                  {pincodeMsg && (
-                    <span className="text-[10px] font-bold text-purple-700 mt-1 block">
-                      {pincodeMsg}
-                    </span>
-                  )}
                 </div>
 
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-slate-700 mb-1">City</label>
+                {/* PINCODE & STATE ROW */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Pincode (6-digit PIN)</label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      placeholder="e.g. 500001"
+                      value={pincode}
+                      onChange={handlePincodeChange}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                    />
+                    {pincodeMsg && (
+                      <span className="text-[10px] font-bold text-purple-700 mt-1 block">
+                        {pincodeMsg}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-slate-700 mb-1">State</label>
+                    <input
+                      type="text"
+                      required
+                      readOnly
+                      placeholder="Auto-filled via Pincode"
+                      value={formData.city}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-100/80 cursor-not-allowed outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Preferred Language</label>
+                  <select
+                    value={formData.language}
+                    onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50 cursor-pointer"
+                  >
+                    {LANGUAGES.map((lang, idx) => (
+                      <option key={idx} value={lang.split(" ")[0]}>
+                        {lang}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
                   <input
-                    type="text"
-                    required
-                    readOnly
-                    placeholder="Auto-filled via Pincode"
-                    value={formData.city}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-100/80 cursor-not-allowed outline-none"
+                    type="checkbox"
+                    id="agreeTerms"
+                    checked={formData.agreeTerms}
+                    onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
+                    className="rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
                   />
+                  <label htmlFor="agreeTerms" className="text-xs text-slate-600 font-medium cursor-pointer">
+                    I agree to the <span className="text-purple-600 underline font-bold">Terms & Conditions</span> and <span className="text-purple-600 underline font-bold">Privacy Policy</span>.
+                  </label>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Preferred Language</label>
-                <select
-                  value={formData.language}
-                  onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50 cursor-pointer"
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !formData.agreeTerms}
+                  className="w-full py-3.5 rounded-2xl font-bold text-sm text-white bg-[#6d28d9] hover:bg-[#5b21b6] transition-all shadow-md shadow-purple-900/20 border-none cursor-pointer outline-none active:scale-[0.98] disabled:opacity-50"
                 >
-                  {LANGUAGES.map((lang, idx) => (
-                    <option key={idx} value={lang.split(" ")[0]}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  {isSubmitting ? "Submitting..." : "Join Waitlist"}
+                </button>
+              </form>
+            )}
 
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="agreeTerms"
-                  checked={formData.agreeTerms}
-                  onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
-                  className="rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
-                />
-                <label htmlFor="agreeTerms" className="text-xs text-slate-600 font-medium cursor-pointer">
-                  I agree to the <span className="text-purple-600 underline font-bold">Terms & Conditions</span> and <span className="text-purple-600 underline font-bold">Privacy Policy</span>.
-                </label>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting || !formData.agreeTerms}
-                className="w-full py-3.5 rounded-2xl font-bold text-sm text-white bg-[#6d28d9] hover:bg-[#5b21b6] transition-all shadow-md shadow-purple-900/20 border-none cursor-pointer outline-none active:scale-[0.98] disabled:opacity-50"
-              >
-                {isSubmitting ? "Submitting..." : "Join Waitlist"}
-              </button>
-            </form>
-
-            {/* RIGHT WAITLIST GRAPHIC (DISSOLVED IN BACKGROUND, NO OUTER CARD, ONLY DYNAMIC NUMBER OVERLAY NEXT TO PRINTED HASHTAG) */}
+            {/* RIGHT SIDE: WAITLIST GRAPHIC (TICKET ASSET WITH DYNAMIC OVERLAY) */}
             <div className="relative w-full max-w-md mx-auto aspect-[1.48/1] flex items-center justify-center bg-transparent">
               <img
                 src="/waiting_list.png"
@@ -638,10 +715,21 @@ export default function BecomeAgentPage() {
                 className="w-full h-full object-contain pointer-events-none drop-shadow-md"
               />
 
-              {/* DYNAMIC NUMBER STRING OVERLAY (POSITIONED EXACTLY INSIDE DASHED BOX NEXT TO PRINTED `#`) */}
-              <span className="absolute left-[41%] top-[50%] -translate-y-1/2 font-black font-sans text-lg sm:text-xl md:text-2xl tracking-tight text-[#2b0c5d] pointer-events-none whitespace-nowrap">
-                DGA{displayWaitlistNumber}
-              </span>
+              {/* OVERLAY ON TICKET NEXT TO PRINTED `#` */}
+              {waitlistResult ? (
+                <span className="absolute left-[41%] top-[50%] -translate-y-1/2 font-black font-sans text-lg sm:text-xl md:text-2xl tracking-tight text-[#2b0c5d] pointer-events-none whitespace-nowrap">
+                  {waitlistResult.formattedWaitlistNumber || formatWaitlistNumber(waitlistResult.waitlistNumber)}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={scrollToForm}
+                  className="absolute left-[41%] top-[50%] -translate-y-1/2 font-extrabold font-sans text-base sm:text-lg md:text-xl tracking-wider text-amber-500 hover:text-amber-400 uppercase animate-pulse cursor-pointer border-none bg-transparent transition-all hover:scale-105 active:scale-95 drop-shadow-sm"
+                  title="Click to Join Waiting List"
+                >
+                  Join Now
+                </button>
+              )}
             </div>
 
           </div>
@@ -649,32 +737,40 @@ export default function BecomeAgentPage() {
         </div>
 
 
-        {/* 7. BOTTOM HELP BAR */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center">
-              <Globe size={20} />
+        {/* 7. BOTTOM HELP BAR (USING fipmoney_support.png) */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="flex items-center gap-5 relative z-10">
+            <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 shrink-0 flex items-center justify-center">
+              <img
+                src="/fipmoney_support.png"
+                alt="Fipmoney Support"
+                className="w-full h-full object-contain drop-shadow-md pointer-events-none"
+              />
             </div>
             <div>
-              <h4 className="font-bold text-sm text-slate-900">Have Questions?</h4>
-              <p className="text-xs text-slate-500 font-medium">We're here to help!</p>
+              <h4 className="font-black text-lg sm:text-xl text-slate-900 leading-snug">
+                Have Questions or Need Agent Support?
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">
+                Our dedicated agent support team is here to assist you 24/7.
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-8 text-xs font-semibold">
-            <div className="flex items-center gap-2 text-slate-700">
-              <Mail size={18} className="text-purple-600" />
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-semibold relative z-10">
+            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-5 py-3 rounded-2xl shadow-2xs">
+              <Mail size={20} className="text-purple-600 shrink-0" />
               <div>
-                <span className="text-slate-400 block text-[10px]">Email us</span>
-                <span className="font-bold">support@fipmoney.com</span>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Email Support</span>
+                <span className="font-black text-slate-900 text-xs sm:text-sm">support@fipmoney.com</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-slate-700">
-              <Phone size={18} className="text-purple-600" />
+            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-5 py-3 rounded-2xl shadow-2xs">
+              <Phone size={20} className="text-purple-600 shrink-0" />
               <div>
-                <span className="text-slate-400 block text-[10px]">Call us</span>
-                <span className="font-bold">+91 98765 43210</span>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Helpline</span>
+                <span className="font-black text-slate-900 text-xs sm:text-sm">+91 98765 43210</span>
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues, getUserAmtScore, getAllAdminUsers, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
+import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues, getUserAmtScore, getAllAdminUsers, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -199,6 +199,8 @@ router.post('/send-otp', sendOtp);
  *         description: Invalid or expired OTP.
  */
 router.post('/verify-otp', verifyOtp);
+router.post('/send-email-otp', sendEmailOtp);
+router.post('/verify-email-otp', verifyEmailOtp);
 
 /**
  * @swagger

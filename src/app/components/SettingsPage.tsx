@@ -84,19 +84,80 @@ export default function SettingsPage() {
   const [showVideoCall, setShowVideoCall] = useState(false);
   const [videoStep, setVideoStep] = useState<"connecting" | "intro" | "pan" | "verifying" | "done">("connecting");
 
+  // Fetch real KYC status from database API
+  const fetchRealKycStatus = async () => {
+    if (!loggedInMobile) return;
+    try {
+      let res = await fetch(`${API_BASE_URL}/kyc/status?phone=${loggedInMobile}`);
+      if (!res.ok) res = await fetch(`http://localhost:5000/api/kyc/status?phone=${loggedInMobile}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.status) {
+          if (data.status === 'Verified') {
+            setKycStatus("full kyc");
+            setAadhaarVerified(true);
+            setPanVerified(true);
+          } else if (data.status === 'Pending') {
+            setKycStatus("pending");
+          } else if (data.status === 'Rejected') {
+            setKycStatus("rejected");
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("KYC status API fetch error:", err);
+    }
+  };
+
+  const submitKycRequestToBackend = async (aadhaarVal?: string, panVal?: string) => {
+    try {
+      const payload = {
+        userId: loggedInUser?.userCode || `USR-${loggedInMobile}`,
+        userName: fullName || username || loggedInUser?.username || 'Valued User',
+        phone: loggedInMobile,
+        email: email || loggedInUser?.email || '',
+        documentType: 'Aadhaar + PAN',
+        aadhaarNo: aadhaarVal || aadhaarNumber || 'XXXX-XXXX-9012',
+        panNo: panVal || panNumber || 'ABCDE1234F'
+      };
+
+      let res = await fetch(`${API_BASE_URL}/kyc/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/kyc/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      if (res.ok) {
+        const json = await res.json();
+        showAlert(json.message || "KYC Verification Request submitted to admin panel!", "success", "KYC Initiated");
+        setKycStatus("pending");
+      }
+    } catch (err) {
+      console.error("KYC Submit error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRealKycStatus();
+  }, [loggedInMobile]);
+
   useEffect(() => {
     if (loggedInMobile) {
       fetch(`${API_BASE_URL}/users/profile-settings?mobile=${loggedInMobile}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.data) {
-            // data.data is an object now, not an array
             const user = data.data;
             const isCompleted = user.isKycCompleted;
             const level = user.kycLevel;
-            setKycStatus(isCompleted ? "full kyc" : "pending");
+            if (isCompleted) setKycStatus("full kyc");
             
-            // Assuming these states exist, set them carefully (using optional chaining)
             if (typeof setAadhaarVerified === 'function') {
               setAadhaarVerified(isCompleted || (level && level.toLowerCase().includes("min")));
             }
@@ -104,7 +165,6 @@ export default function SettingsPage() {
               setPanVerified(isCompleted || (level && level.toLowerCase().includes("min")));
             }
 
-            // Populate profile fields directly from API
             if (user.fullName) setFullName(user.fullName);
             if (user.email) setEmail(user.email);
             if (user.occupation) setJobTitle(user.occupation);
@@ -235,17 +295,124 @@ export default function SettingsPage() {
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
-  const handleVerifyCurrentOtp = () => {
-    if (currentVerifyOtp === "123456") {
-      setChangeStep(2);
-      setNewValueInput("");
-      showAlert("Current contact ownership verified. Please enter your new details.", "success", "Step 1 Verified");
-    } else {
-      showAlert("Incorrect OTP. Please enter 123456 to verify.", "error", "Verification Error");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
+  const handleStartFieldChange = async (type: "email" | "mobile") => {
+    setChangeFieldType(type);
+    setChangeStep(1);
+    setCurrentVerifyOtp("");
+    setNewValueInput("");
+    setNewVerifyOtp("");
+
+    setIsSendingOtp(true);
+    try {
+      if (type === "email") {
+        const targetEmail = email || loggedInUser?.email || "";
+        if (targetEmail) {
+          let res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: targetEmail, userName: fullName || loggedInUser?.username || "Valued Member" })
+          });
+          if (!res.ok) {
+            res = await fetch("http://localhost:5000/api/users/send-email-otp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: targetEmail, userName: fullName || loggedInUser?.username || "Valued Member" })
+            });
+          }
+          if (res.ok) {
+            const data = await res.json();
+            showAlert("OTP sent successfully!", "success", "OTP Sent");
+          }
+        }
+      } else {
+        const targetMobile = mobileNumber || loggedInMobile;
+        if (targetMobile) {
+          let res = await fetch(`${API_BASE_URL}/users/send-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mobile: targetMobile })
+          });
+          if (!res.ok) {
+            res = await fetch("http://localhost:5000/api/users/send-otp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ mobile: targetMobile })
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error sending OTP for step 1:", err);
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
-  const handleSendNewOtp = () => {
+  const handleVerifyCurrentOtp = async () => {
+    if (!currentVerifyOtp || currentVerifyOtp.length !== 6) {
+      showAlert("Please enter 6-digit OTP code.", "warning", "Input Error");
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    try {
+      if (changeFieldType === "email") {
+        const targetEmail = email || loggedInUser?.email || "";
+        let res = await fetch(`${API_BASE_URL}/users/verify-email-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: targetEmail, otp: currentVerifyOtp })
+        });
+        if (!res.ok) {
+          res = await fetch("http://localhost:5000/api/users/verify-email-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: targetEmail, otp: currentVerifyOtp })
+          });
+        }
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setChangeStep(2);
+          setNewValueInput("");
+          showAlert("Current email verified successfully. Enter your new details.", "success", "Step 1 Verified");
+        } else {
+          showAlert(data.message || "Invalid or expired OTP code.", "error", "Verification Error");
+        }
+      } else {
+        const targetMobile = mobileNumber || loggedInMobile;
+        let res = await fetch(`${API_BASE_URL}/users/verify-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile: targetMobile, otp: currentVerifyOtp })
+        });
+        if (!res.ok) {
+          res = await fetch("http://localhost:5000/api/users/verify-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mobile: targetMobile, otp: currentVerifyOtp })
+          });
+        }
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setChangeStep(2);
+          setNewValueInput("");
+          showAlert("Current mobile verified successfully. Enter your new details.", "success", "Step 1 Verified");
+        } else {
+          showAlert(data.message || "Invalid or expired OTP code.", "error", "Verification Error");
+        }
+      }
+    } catch (err) {
+      console.error("Verification error:", err);
+      showAlert("Verification failed. Please check network connection.", "error", "Error");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  const handleSendNewOtp = async () => {
     if (!newValueInput) {
       showAlert(`Please enter a valid new ${changeFieldType}.`, "warning", "Input Required");
       return;
@@ -258,34 +425,139 @@ export default function SettingsPage() {
       showAlert("Please enter a valid 10-digit mobile number.", "warning", "Invalid Input");
       return;
     }
-    setChangeStep(3);
-    setNewVerifyOtp("");
+
+    setIsSendingOtp(true);
+    try {
+      if (changeFieldType === "email") {
+        let res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: newValueInput.trim(), userName: fullName || loggedInUser?.username || "Valued Member" })
+        });
+        if (!res.ok) {
+          res = await fetch("http://localhost:5000/api/users/send-email-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: newValueInput.trim(), userName: fullName || loggedInUser?.username || "Valued Member" })
+          });
+        }
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setChangeStep(3);
+          setNewVerifyOtp("");
+          showAlert("OTP sent successfully!", "success", "OTP Sent");
+        } else {
+          showAlert(data.message || "Failed to send verification OTP", "error", "Error");
+        }
+      } else {
+        const cleanMobile = newValueInput.replace(/\D/g, "");
+        let res = await fetch(`${API_BASE_URL}/users/send-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile: cleanMobile })
+        });
+        if (!res.ok) {
+          res = await fetch("http://localhost:5000/api/users/send-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mobile: cleanMobile })
+          });
+        }
+        setChangeStep(3);
+        setNewVerifyOtp("");
+        showAlert(`Verification OTP sent to ${cleanMobile}`, "success", "OTP Sent");
+      }
+    } catch (err) {
+      console.error("Error sending new OTP:", err);
+      showAlert("Failed to send OTP. Please try again.", "error", "Error");
+    } finally {
+      setIsSendingOtp(false);
+    }
   };
 
-  const handleVerifyNewOtp = () => {
-    if (newVerifyOtp === "123456") {
+  const handleVerifyNewOtp = async () => {
+    if (!newVerifyOtp || newVerifyOtp.length !== 6) {
+      showAlert("Please enter 6-digit OTP code.", "warning", "Input Error");
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    try {
       if (changeFieldType === "email") {
-        setEmail(newValueInput);
-        if (typeof window !== "undefined") {
-          localStorage.setItem(`fm_user_email_${loggedInMobile}`, newValueInput);
+        let res = await fetch(`${API_BASE_URL}/users/verify-email-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: newValueInput.trim(), otp: newVerifyOtp })
+        });
+        if (!res.ok) {
+          res = await fetch("http://localhost:5000/api/users/verify-email-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: newValueInput.trim(), otp: newVerifyOtp })
+          });
         }
-        showAlert("Email address updated successfully!", "success", "Verified & Saved");
-      } else if (changeFieldType === "mobile") {
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setEmail(newValueInput.trim());
+          if (typeof window !== "undefined") {
+            localStorage.setItem(`fm_user_email_${loggedInMobile}`, newValueInput.trim());
+          }
+
+          // Sync profile update with backend
+          await fetch(`${API_BASE_URL}/users/update-profile`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mobileNumber: loggedInMobile,
+              email: newValueInput.trim(),
+            })
+          }).catch(console.error);
+
+          showAlert("Email address verified & updated successfully in database!", "success", "Verified & Saved");
+          setChangeFieldType(null);
+          setChangeStep(1);
+          setCurrentVerifyOtp("");
+          setNewValueInput("");
+          setNewVerifyOtp("");
+        } else {
+          showAlert(data.message || "Invalid or expired OTP code.", "error", "Verification Error");
+        }
+      } else {
         const cleanMobile = newValueInput.replace(/\D/g, "");
-        setMobileNumber(cleanMobile);
-        if (typeof window !== "undefined") {
-          localStorage.setItem(`fm_user_mobile_${loggedInMobile}`, cleanMobile);
-          sessionStorage.setItem("fm_logged_in_mobile", cleanMobile);
+        let res = await fetch(`${API_BASE_URL}/users/verify-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile: cleanMobile, otp: newVerifyOtp })
+        });
+        if (!res.ok) {
+          res = await fetch("http://localhost:5000/api/users/verify-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mobile: cleanMobile, otp: newVerifyOtp })
+          });
         }
-        showAlert("Mobile number updated successfully!", "success", "Verified & Saved");
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setMobileNumber(cleanMobile);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(`fm_user_mobile_${loggedInMobile}`, cleanMobile);
+            sessionStorage.setItem("fm_logged_in_mobile", cleanMobile);
+          }
+          showAlert("Mobile number updated successfully!", "success", "Verified & Saved");
+          setChangeFieldType(null);
+          setChangeStep(1);
+          setCurrentVerifyOtp("");
+          setNewValueInput("");
+          setNewVerifyOtp("");
+        } else {
+          showAlert(data.message || "Invalid or expired OTP code.", "error", "Verification Error");
+        }
       }
-      setChangeFieldType(null);
-      setChangeStep(1);
-      setCurrentVerifyOtp("");
-      setNewValueInput("");
-      setNewVerifyOtp("");
-    } else {
-      showAlert("Incorrect OTP. Please enter 123456 to verify.", "error", "Verification Error");
+    } catch (err) {
+      console.error("Error verifying new OTP:", err);
+      showAlert("Verification failed. Please try again.", "error", "Error");
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -348,6 +620,7 @@ export default function SettingsPage() {
     setAadhaarVerified(true);
     setShowAadhaarOtp(false);
     checkAndUpgradeToMinKyc(true, panVerified);
+    submitKycRequestToBackend(aadhaarNumber, panNumber);
   };
 
   const handleVerifyPan = async () => {
@@ -357,6 +630,7 @@ export default function SettingsPage() {
     setIsLinkingPan(false);
     setPanVerified(true);
     checkAndUpgradeToMinKyc(aadhaarVerified, true);
+    submitKycRequestToBackend(aadhaarNumber, panNumber);
   };
 
   const checkAndUpgradeToMinKyc = (av: boolean, pv: boolean) => {
@@ -364,7 +638,8 @@ export default function SettingsPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem(`fm_user_kyc_${loggedInMobile}`, "Min Kyc");
       }
-      setKycStatus("Min Kyc");
+      setKycStatus("pending");
+      submitKycRequestToBackend(aadhaarNumber, panNumber);
     }
   };
 
@@ -626,13 +901,7 @@ export default function SettingsPage() {
                       />
                       <button
                         type="button"
-                        onClick={() => {
-                          setChangeFieldType("email");
-                          setChangeStep(1);
-                          setCurrentVerifyOtp("");
-                          setNewValueInput("");
-                          setNewVerifyOtp("");
-                        }}
+                        onClick={() => handleStartFieldChange("email")}
                         className="bg-[#d97706] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition-all cursor-pointer border-none shrink-0"
                       >
                         Change
@@ -654,13 +923,7 @@ export default function SettingsPage() {
                       />
                       <button
                         type="button"
-                        onClick={() => {
-                          setChangeFieldType("mobile");
-                          setChangeStep(1);
-                          setCurrentVerifyOtp("");
-                          setNewValueInput("");
-                          setNewVerifyOtp("");
-                        }}
+                        onClick={() => handleStartFieldChange("mobile")}
                         className="bg-[#d97706] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition-all cursor-pointer border-none shrink-0"
                       >
                         Change
@@ -1509,7 +1772,7 @@ export default function SettingsPage() {
                     Verify Current {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
                   </label>
                   <p className="text-[11px] font-bold text-amber-600 leading-normal bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
-                    🔑 Verification OTP sent to current detail: {changeFieldType === "email" ? email : mobileNumber}. Enter 123456.
+                    🔑 Verification OTP sent via email to: {changeFieldType === "email" ? email : mobileNumber}. Please enter 6-digit code.
                   </p>
                   <input
                     type="text"
@@ -1535,10 +1798,10 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={handleVerifyCurrentOtp}
-                    disabled={currentVerifyOtp.length !== 6}
-                    className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm"
+                    disabled={currentVerifyOtp.length !== 6 || isVerifyingOtp}
+                    className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
                   >
-                    Next &rarr;
+                    {isVerifyingOtp ? <Loader2 size={14} className="animate-spin" /> : "Next \u2192"}
                   </button>
                 </div>
               </div>
@@ -1574,10 +1837,11 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={handleSendNewOtp}
-                    className="flex-1 py-3 rounded-xl text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm"
+                    disabled={isSendingOtp}
+                    className="flex-1 py-3 rounded-xl text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
                     style={{ background: "linear-gradient(135deg, #b87312, #efb652)" }}
                   >
-                    Send OTP
+                    {isSendingOtp ? <Loader2 size={14} className="animate-spin" /> : "Send OTP"}
                   </button>
                 </div>
               </div>
@@ -1590,7 +1854,7 @@ export default function SettingsPage() {
                     Verify New {changeFieldType === "email" ? "Email" : "Mobile"}
                   </label>
                   <p className="text-[11px] font-bold text-amber-600 leading-normal bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
-                    🔑 OTP sent to new address: {newValueInput}. Enter 123456.
+                    🔑 OTP verification email sent to: {newValueInput}. Check inbox/spam folder.
                   </p>
                   <input
                     type="text"
@@ -1613,10 +1877,10 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={handleVerifyNewOtp}
-                    disabled={newVerifyOtp.length !== 6}
-                    className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm"
+                    disabled={newVerifyOtp.length !== 6 || isVerifyingOtp}
+                    className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
                   >
-                    Verify & Change
+                    {isVerifyingOtp ? <Loader2 size={14} className="animate-spin" /> : "Verify & Change"}
                   </button>
                 </div>
               </div>

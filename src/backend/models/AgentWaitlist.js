@@ -32,6 +32,9 @@ const agentWaitlistSchema = new mongoose.Schema(
       type: Number,
       unique: true,
     },
+    formattedWaitlistNumber: {
+      type: String,
+    },
     status: {
       type: String,
       enum: ['pending', 'approved', 'contacted'],
@@ -43,12 +46,14 @@ const agentWaitlistSchema = new mongoose.Schema(
   }
 );
 
-// Auto-assign waitlistNumber starting from 1048 before saving
+// Auto-assign waitlistNumber starting from 1 before saving in DGA0001 format
 agentWaitlistSchema.pre('save', async function (next) {
   if (!this.waitlistNumber) {
     const count = await mongoose.model('AgentWaitlist').countDocuments();
-    this.waitlistNumber = 1048 + count;
+    this.waitlistNumber = 1 + count;
   }
+  const padded = String(this.waitlistNumber).padStart(4, '0');
+  this.formattedWaitlistNumber = `DGA${padded}`;
   next();
 });
 

@@ -140,7 +140,7 @@ const userSchema = new mongoose.Schema(
     },
     isKycCompleted: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     isPanVerified: {
       type: Boolean,
@@ -250,7 +250,7 @@ const userSchema = new mongoose.Schema(
     },
     kycLevel: {
       type: String,
-      default: 'FULL',
+      default: 'NONE',
     },
     consents: {
       termsAccepted: { type: Boolean, default: true },
@@ -258,21 +258,6 @@ const userSchema = new mongoose.Schema(
       marketingConsent: { type: Boolean, default: false },
       accountAggregatorConsent: { type: Boolean, default: false },
     },
-    amtScore: {
-      type: Number,
-      default: 45,
-    },
-    amtStatus: {
-      type: String,
-      default: 'Moderate Risk',
-    },
-    amtFlaggedReasons: [
-      {
-        reason: { type: String, default: '' },
-        timestamp: { type: Date, default: Date.now },
-        penalty: { type: Number, default: 0 },
-      }
-    ],
     amlScore: {
       type: Number,
       default: 45,

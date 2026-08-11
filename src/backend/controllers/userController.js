@@ -245,6 +245,85 @@ export const verifyOtp = async (req, res, next) => {
   }
 };
 
+// @desc    Generate and send Email OTP for Email Change verification
+// @route   POST /api/users/send-email-otp
+export const sendEmailOtp = async (req, res, next) => {
+  try {
+    const { email, userName } = req.body;
+    if (!email || !email.includes('@')) {
+      res.status(400);
+      throw new Error('Valid email address is required');
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await Otp.findOneAndUpdate(
+      { email: cleanEmail },
+      { email: cleanEmail, otp: generatedOtp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send email using Fipmoney OTP Verification email template via Zoho SMTP
+    const mailResult = await sendTemplatedEmail({
+      toEmail: cleanEmail,
+      templateId: 'FIPMONEY_OTP_VERIFICATION',
+      fromEmail: 'support@fipmoney.com',
+      variables: {
+        userName: userName || 'Valued User',
+        verificationCode: generatedOtp,
+        otp: generatedOtp,
+        expiryMinutes: 5,
+        currentYear: new Date().getFullYear(),
+        supportEmail: 'support@fipmoney.com',
+        mobileNumber: req.body.mobileNumber || '',
+        referralCode: 'FIP2026',
+      },
+    });
+
+    console.log(`[Email OTP] Verification code ${generatedOtp} sent to ${cleanEmail}`);
+
+    return res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify Email OTP
+// @route   POST /api/users/verify-email-otp
+export const verifyEmailOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      res.status(400);
+      throw new Error('Email address and OTP code are required');
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const otpRecord = await Otp.findOne({ email: cleanEmail });
+
+    if (!otpRecord) {
+      res.status(400);
+      throw new Error('OTP expired or not found. Please request a new verification code.');
+    }
+
+    if (otpRecord.otp !== String(otp).trim()) {
+      res.status(400);
+      throw new Error('Invalid OTP code. Please check and try again.');
+    }
+
+    // Delete OTP after successful verification so it can't be reused
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    return res.status(200).json({ success: true, message: 'Email OTP verified successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getSafeUser = (userDoc) => {
   const obj = userDoc.toObject ? userDoc.toObject() : userDoc;
   return {

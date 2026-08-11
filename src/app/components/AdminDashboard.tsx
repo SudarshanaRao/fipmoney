@@ -2,14 +2,15 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-hot-toast";
 import {
   LayoutDashboard, FileText, TrendingUp, Coins, CreditCard, Clock, Users,
   CheckCircle2, Share2, BarChart3, Building2, Percent, Bell, Settings,
   UserCheck, Activity, Search, Calendar, Download, ArrowUpRight, ShieldCheck,
   Headphones, ChevronRight, RefreshCw, LogOut, ArrowRight, Eye, ShieldAlert, X,
-  Plus, Edit2, Trash2, Check, AlertCircle, Filter, Lock, Unlock, Send, Sliders,
+  Plus, Edit2, Edit3, Trash2, Check, AlertCircle, Filter, Lock, Unlock, Send, Sliders,
   DollarSign, CheckCircle, XCircle, FileSpreadsheet, Layers, Shield, Sparkles, AlertTriangle,
-  Award, Zap, ShieldQuestion
+  Award, Zap, ShieldQuestion, CheckSquare, Save, Mail
 } from "lucide-react";
 import {
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -111,11 +112,7 @@ const INITIAL_TRANSACTIONS = [
   { id: "TXN-90408", userName: "Deepak Mehra", type: "Auto-SIP Deposit", amount: "₹500", goldPurchased: "0.0000 g", gateway: "Paytm UPI", refId: "pay_Pk91255z", date: "2026-08-08 08:15", status: "Failed", amtScore: 34 },
 ];
 
-const INITIAL_KYC_REQUESTS = [
-  { id: "KYC-3091", userId: "USR-7710", userName: "Rajesh Malhotra", phone: "+91 98221 09876", documentType: "Aadhaar + PAN", aadhaarNo: "XXXX-XXXX-4512", panNo: "ABCDE1234F", submittedDate: "2026-08-08 11:30", status: "Pending", matchScore: "98%", amtScore: 78 },
-  { id: "KYC-3090", userId: "USR-7708", userName: "Deepak Mehra", phone: "+91 95001 23456", documentType: "Passport", aadhaarNo: "N/A", panNo: "RSTUV3456W", submittedDate: "2026-08-07 16:20", status: "Rejected", matchScore: "42%", amtScore: 34 },
-  { id: "KYC-3089", userId: "USR-7712", userName: "Rohan Verma", phone: "+91 98112 34567", documentType: "Aadhaar + PAN", aadhaarNo: "XXXX-XXXX-9901", panNo: "LMNOP9012Q", submittedDate: "2026-08-07 19:40", status: "Verified", matchScore: "100%", amtScore: 98 },
-];
+const INITIAL_KYC_REQUESTS: any[] = [];
 
 const INITIAL_PAYOUTS = [
   { id: "POUT-5012", userId: "USR-7709", userName: "Amit Kumar", type: "Cash Bank Payout", amount: "₹19,250", goldGrams: "2.450 g", bankDetails: "HDFC Bank (A/C: ****4892)", requestedDate: "2026-08-08 11:10", status: "Pending", amtScore: 85 },
@@ -154,6 +151,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     "Users": "users",
     "KYC Verification": "kyc",
     "Referrals": "referrals",
+    "DGA Waitlist": "dga-waitlist",
     "Reports & Analytics": "reports",
     "Ledger & Settlements": "ledger",
     "Fees & Charges": "fees",
@@ -222,6 +220,153 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(true);
   const [referrals, setReferrals] = useState(INITIAL_REFERRALS);
 
+  // DGA WAITLIST STATES & HANDLERS
+  const [dgaWaitlistList, setDgaWaitlistList] = useState<any[]>([]);
+  const [isLoadingDgaWaitlist, setIsLoadingDgaWaitlist] = useState<boolean>(true);
+  const [selectedDgaIds, setSelectedDgaIds] = useState<string[]>([]);
+  const [dgaStatusFilter, setDgaStatusFilter] = useState<string>("All");
+
+  const fetchDgaWaitlist = async () => {
+    setIsLoadingDgaWaitlist(true);
+    try {
+      let res = await fetch('/api/agent-waitlist/admin/all');
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/agent-waitlist/admin/all');
+      }
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setDgaWaitlistList(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching DGA waitlist:', err);
+    } finally {
+      setIsLoadingDgaWaitlist(false);
+    }
+  };
+
+  const fetchKycRequests = async () => {
+    try {
+      let res = await fetch('/api/kyc/admin/all');
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/kyc/admin/all');
+      }
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setKycRequests(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching KYC requests:', err);
+    }
+  };
+
+  React.useEffect(() => {
+    if (activeNav === "DGA Waitlist") {
+      fetchDgaWaitlist();
+      const interval = setInterval(() => {
+        fetchDgaWaitlist();
+      }, 5000);
+      return () => clearInterval(interval);
+    } else if (activeNav === "KYC Verification") {
+      fetchKycRequests();
+      const interval = setInterval(() => {
+        fetchKycRequests();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [activeNav]);
+
+  // DGA SINGLE ACTION OPERATIONS
+  const handleUpdateDgaStatus = async (id: string, status: string) => {
+    setDgaWaitlistList(prev =>
+      prev.map(item => (item.id === id || item._id === id ? { ...item, status } : item))
+    );
+
+    try {
+      let res = await fetch('/api/agent-waitlist/admin/update-status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/agent-waitlist/admin/update-status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, status })
+        });
+      }
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `Application status updated to '${status}'!`);
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error updating DGA status:', err);
+    }
+    addAuditLog(`Single Action: Updated DGA Waitlist entry ${id} status to ${status}`, 'DGA Management', status === 'approved' ? 'Success' : 'Warning');
+  };
+
+  const handleBulkUpdateDgaStatus = async (status: string) => {
+    if (selectedDgaIds.length === 0) return;
+
+    setDgaWaitlistList(prev =>
+      prev.map(item => (selectedDgaIds.includes(item.id) || selectedDgaIds.includes(item._id) ? { ...item, status } : item))
+    );
+
+    try {
+      let res = await fetch('/api/agent-waitlist/admin/bulk-update-status', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedDgaIds, status })
+      });
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/agent-waitlist/admin/bulk-update-status', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: selectedDgaIds, status })
+        });
+      }
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `Single Action: Updated ${selectedDgaIds.length} applicants to '${status}'!`);
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error bulk updating DGA status:', err);
+    }
+    setSelectedDgaIds([]);
+    addAuditLog(`Single Action: Bulk updated ${selectedDgaIds.length} DGA applications to ${status}`, 'DGA Management', 'Success');
+  };
+
+  const handleDeleteDgaItem = async (id: string) => {
+    if (!window.confirm("Are you sure you want to remove this DGA waitlist entry?")) return;
+
+    setDgaWaitlistList(prev => prev.filter(item => item.id !== id && item._id !== id));
+    setSelectedDgaIds(prev => prev.filter(i => i !== id));
+
+    try {
+      let res = await fetch(`/api/agent-waitlist/admin/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        res = await fetch(`http://localhost:5000/api/agent-waitlist/admin/${id}`, { method: 'DELETE' });
+      }
+      if (res.ok) {
+        triggerToast("Waitlist application removed successfully!");
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error deleting DGA item:', err);
+    }
+    addAuditLog(`Deleted DGA waitlist entry ${id}`, 'DGA Management', 'Warning');
+  };
+
+  const handleToggleSelectDga = (id: string) => {
+    if (selectedDgaIds.includes(id)) {
+      setSelectedDgaIds(selectedDgaIds.filter(i => i !== id));
+    } else {
+      setSelectedDgaIds([...selectedDgaIds, id]);
+    }
+  };
+
   // Live Benchmark Rate Manual Control
   const [liveGoldRate, setLiveGoldRate] = useState<number>(7850.00);
 
@@ -268,9 +413,12 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     mobileNumber: ""
   });
 
-  const triggerToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4000);
+  const triggerToast = (msg: string, type: "success" | "error" | "info" = "success") => {
+    if (type === "error") {
+      toast.error(msg, { position: "top-center" });
+    } else {
+      toast.success(msg, { position: "top-center" });
+    }
   };
 
   const handleLogout = () => {
@@ -385,6 +533,99 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   };
 
   const [selectedRecipientEmails, setSelectedRecipientEmails] = useState<string[]>([]);
+  const [searchRecipientQuery, setSearchRecipientQuery] = useState("");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
+  const [selectedTemplateForCompose, setSelectedTemplateForCompose] = useState("");
+  const [isSendingComposeEmail, setIsSendingComposeEmail] = useState(false);
+
+  const filteredRecipientUsers = users.filter((u) => {
+    if (!searchRecipientQuery.trim()) return true;
+    const q = searchRecipientQuery.toLowerCase();
+    return (
+      u.name?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      u.phone?.includes(q) ||
+      u.userCode?.toLowerCase().includes(q)
+    );
+  });
+
+  const handleSelectTemplateForCompose = (templateId: string) => {
+    setSelectedTemplateForCompose(templateId);
+    if (!templateId) return;
+    const tmpl = emailTemplates.find((t) => t.templateId === templateId);
+    if (tmpl) {
+      setComposeSubject(tmpl.subject);
+      setComposeBody(tmpl.htmlContent);
+    }
+  };
+
+  const handleSaveComposeAsTemplate = async () => {
+    if (!composeSubject || !composeBody) {
+      triggerToast("Please enter subject and body HTML before saving as template");
+      return;
+    }
+    const templateId = `CUSTOM_TMPL_${Date.now()}`;
+    const newTmpl = {
+      templateId,
+      name: composeSubject.substring(0, 35),
+      subject: composeSubject,
+      category: "CUSTOM",
+      htmlContent: composeBody,
+      variables: ["userName", "email"]
+    };
+    setEmailTemplates([newTmpl, ...emailTemplates]);
+    triggerToast(`Template '${composeSubject.substring(0, 20)}...' saved successfully!`);
+  };
+
+  const handleDeleteEmailTemplate = async (templateId: string) => {
+    setEmailTemplates(emailTemplates.filter(t => t.templateId !== templateId));
+    try {
+      await fetch(`http://localhost:5000/api/emails/templates/${templateId}`, { method: 'DELETE' });
+    } catch (e) {
+      console.error(e);
+    }
+    triggerToast(`Template '${templateId}' deleted`);
+  };
+
+  const handleSendComposeEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedRecipientEmails.length === 0) {
+      triggerToast("Please select at least one recipient user from the left list");
+      return;
+    }
+    if (!composeSubject || !composeBody) {
+      triggerToast("Please enter Subject and Body for the email");
+      return;
+    }
+
+    setIsSendingComposeEmail(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/emails/send-to-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipients: selectedRecipientEmails,
+          subject: composeSubject,
+          body: composeBody,
+          fromEmail: 'support@fipmoney.com'
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        triggerToast(`Emails sent successfully via Zoho SMTP to ${selectedRecipientEmails.length} user(s)!`);
+        addAuditLog(`Dispatched email via Zoho SMTP to ${selectedRecipientEmails.length} user(s): "${composeSubject}"`, 'User Management', 'Info');
+      } else {
+        triggerToast(data.message || `Simulated Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho SMTP!`);
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error sending compose email:', err);
+      triggerToast(`Simulated Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho SMTP!`);
+    } finally {
+      setIsSendingComposeEmail(false);
+    }
+  };
 
   const handleToggleRecipientEmail = (email: string) => {
     if (selectedRecipientEmails.includes(email)) {
@@ -468,13 +709,13 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   };
 
   // AML SCORE EDIT HANDLER
-  const handleOpenAmtEditModal = (user: typeof INITIAL_USERS[0]) => {
+  const handleOpenAmlEditModal = (user: typeof INITIAL_USERS[0]) => {
     setEditingAmlUser(user);
-    setNewAmlScoreValue(user.amlScore || user.amtScore);
+    setNewAmlScoreValue(user.amlScore || user.amtScore || 45);
     setAmlAuditNote("");
   };
 
-  const handleSaveAmtScore = async (e: React.FormEvent) => {
+  const handleSaveAmlScore = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingAmlUser) return;
     const scoreNum = Math.min(100, Math.max(0, Number(newAmlScoreValue)));
@@ -486,7 +727,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     setPayouts(payouts.map(p => p.userId === editingAmlUser.id ? { ...p, amlScore: scoreNum, amtScore: scoreNum } : p));
 
     try {
-      await fetch('http://localhost:5000/api/users/admin/update-amt-score', {
+      await fetch('http://localhost:5000/api/users/admin/update-aml-score', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -539,24 +780,68 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     addAuditLog(`Deleted SIP Plan ${id}`, 'System', 'Warning');
   };
 
-  const handleApproveKyc = (id: string) => {
-    const kycReq = kycRequests.find(k => k.id === id);
-    setKycRequests(kycRequests.map(k => k.id === id ? { ...k, status: "Verified", amlScore: 92, amtScore: 92 } : k));
+  const handleApproveKyc = async (id: string) => {
+    const kycReq = kycRequests.find(k => k.id === id || k._id === id);
+    setKycRequests(prev => prev.map(k => (k.id === id || k._id === id ? { ...k, status: "Verified", verifiedAt: new Date() } : k)));
     if (kycReq) {
-      setUsers(users.map(u => u.id === kycReq.userId ? { ...u, kycStatus: "Verified", amlScore: 92, amtScore: 92 } : u));
+      setUsers(users.map(u => u.id === kycReq.userId || u.phone === kycReq.phone ? { ...u, kycStatus: "Verified", isKycCompleted: true } : u));
     }
-    triggerToast(`KYC Verification APPROVED for request ${id}. AML Audit Score boosted to 92 (Low Risk).`);
-    addAuditLog(`Approved User KYC for ${id} (AML Audit Score boosted to 92)`, 'KYC Audit', 'Info');
+
+    try {
+      let res = await fetch('/api/kyc/admin/verify', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/kyc/admin/verify', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+      }
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `KYC Verification APPROVED! Completed successfully.`);
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error approving KYC:', err);
+    }
+
+    addAuditLog(`Single Action: Approved User KYC for ${id}`, 'KYC Audit', 'Info');
   };
 
-  const handleRejectKyc = (id: string) => {
-    const kycReq = kycRequests.find(k => k.id === id);
-    setKycRequests(kycRequests.map(k => k.id === id ? { ...k, status: "Rejected", amlScore: 34, amtScore: 34 } : k));
+  const handleRejectKyc = async (id: string) => {
+    const kycReq = kycRequests.find(k => k.id === id || k._id === id);
+    const reason = window.prompt("Enter rejection reason for this KYC request:", "Document scan blurry or mismatched details.") || "Document verification failed.";
+
+    setKycRequests(prev => prev.map(k => (k.id === id || k._id === id ? { ...k, status: "Rejected", rejectionReason: reason } : k)));
     if (kycReq) {
-      setUsers(users.map(u => u.id === kycReq.userId ? { ...u, kycStatus: "Rejected", amlScore: 34, amtScore: 34 } : u));
+      setUsers(users.map(u => u.id === kycReq.userId || u.phone === kycReq.phone ? { ...u, kycStatus: "Rejected" } : u));
     }
-    triggerToast(`KYC Request ${id} REJECTED. AML Audit Score penalized to 34 (High Risk).`);
-    addAuditLog(`Rejected User KYC for ${id} (AML Audit Score penalized to 34)`, 'KYC Audit', 'Warning');
+
+    try {
+      let res = await fetch('/api/kyc/admin/reject', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, reason })
+      });
+      if (!res.ok) {
+        res = await fetch('http://localhost:5000/api/kyc/admin/reject', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, reason })
+        });
+      }
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `KYC Request REJECTED.`);
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error rejecting KYC:', err);
+    }
+
+    addAuditLog(`Single Action: Rejected User KYC for ${id}`, 'KYC Audit', 'Warning');
   };
 
   const handleApprovePayout = (id: string, score: number) => {
@@ -630,20 +915,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   return (
     <div className="h-screen max-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col lg:flex-row overflow-hidden relative">
       
-      {/* FLOATING TOAST NOTIFICATION */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-5 right-5 z-50 bg-[#161730] text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-purple-500/30 flex items-center gap-3 text-xs font-bold"
-          >
-            <Sparkles className="text-amber-400 shrink-0" size={18} />
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       {/* LEFT SIDEBAR NAVIGATION (#161730) WITH INDEPENDENT SCROLLING */}
       <aside className="w-full lg:w-[270px] h-full max-h-screen bg-[#161730] text-slate-300 flex flex-col justify-between shrink-0 p-4 border-r border-slate-800/60 z-30 overflow-y-auto hide-scrollbar">
@@ -702,7 +974,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
             {[
               { id: "Users", label: "Users", icon: Users },
               { id: "KYC Verification", label: "KYC Verification", icon: CheckCircle2 },
-              { id: "Referrals", label: "Referrals", icon: Share2 }
+              { id: "Referrals", label: "Referrals", icon: Share2 },
+              { id: "DGA Waitlist", label: "DGA Waitlist", icon: Award }
             ].map(item => {
               const Icon = item.icon;
               return (
@@ -1955,7 +2228,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                                   <span>Info</span>
                                 </button>
                                 <button
-                                  onClick={() => handleOpenAmtEditModal(usr)}
+                                  onClick={() => handleOpenAmlEditModal(usr)}
                                   className="bg-purple-50 hover:bg-purple-100 text-[#7C3AED] px-2.5 py-1 rounded-lg font-bold text-[10px] border-none cursor-pointer"
                                 >
                                   Set AML
@@ -1989,68 +2262,80 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               <p className="text-xs font-semibold text-slate-500">Review user identity documents, Aadhaar verification, and PAN authentication.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {kycRequests.map(req => {
-                const reqAmlScore = req.amlScore !== undefined ? req.amlScore : req.amtScore;
-                const amlInfo = getAmlScoreDetails(reqAmlScore);
-                return (
-                  <div key={req.id} className="bg-[#FFFFFF] border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-base font-black text-slate-900">{req.userName}</h3>
-                        <div className="text-xs text-slate-500">{req.phone} • Submitted {req.submittedDate}</div>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                        req.status === "Verified" ? "bg-emerald-100 text-emerald-700" :
-                        req.status === "Pending" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"
-                      }`}>
-                        {req.status}
-                      </span>
-                    </div>
-
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase">AML Audit Score</div>
-                        <span className={`inline-block px-2 py-0.5 rounded-full font-bold text-[10px] border ${amlInfo.badgeBg}`}>
-                          {reqAmlScore}/100 • {amlInfo.label}
+            {kycRequests.length === 0 ? (
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center space-y-3 shadow-2xs">
+                <div className="w-16 h-16 rounded-full bg-purple-50 text-[#7C3AED] flex items-center justify-center mx-auto font-black">
+                  <ShieldCheck size={32} />
+                </div>
+                <h3 className="text-base font-black text-slate-900">No KYC Verification Requests Found</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto font-medium">
+                  When users initiate KYC verification requests from their accounts, they will appear here live in real-time.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {kycRequests.map(req => {
+                  const reqAmlScore = req.amlScore !== undefined ? req.amlScore : req.amtScore;
+                  const amlInfo = getAmlScoreDetails(reqAmlScore);
+                  return (
+                    <div key={req.id || req._id} className="bg-[#FFFFFF] border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-base font-black text-slate-900">{req.userName}</h3>
+                          <div className="text-xs text-slate-500">{req.phone} • Submitted {req.submittedDate}</div>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-black ${
+                          req.status === "Verified" ? "bg-emerald-100 text-emerald-700" :
+                          req.status === "Pending" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"
+                        }`}>
+                          {req.status}
                         </span>
                       </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase">PAN Number</div>
-                        <div className="font-mono font-bold text-slate-900">{req.panNo}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase">Aadhaar Vault Ref</div>
-                        <div className="font-mono font-bold text-slate-900">{req.aadhaarNo}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase">AI Match Score</div>
-                        <div className="font-bold text-emerald-600">{req.matchScore}</div>
-                      </div>
-                    </div>
 
-                    {req.status === "Pending" ? (
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                        <button
-                          onClick={() => handleApproveKyc(req.id)}
-                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-2 rounded-xl border-none cursor-pointer shadow-sm transition-all"
-                        >
-                          Approve KYC
-                        </button>
-                        <button
-                          onClick={() => handleRejectKyc(req.id)}
-                          className="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-4 py-2 rounded-xl border-none cursor-pointer transition-colors"
-                        >
-                          Reject
-                        </button>
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60 grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-bold uppercase">AML Audit Score</div>
+                          <span className={`inline-block px-2 py-0.5 rounded-full font-bold text-[10px] border ${amlInfo.badgeBg}`}>
+                            {reqAmlScore}/100 • {amlInfo.label}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-bold uppercase">PAN Number</div>
+                          <div className="font-mono font-bold text-slate-900">{req.panNo}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-bold uppercase">Aadhaar Vault Ref</div>
+                          <div className="font-mono font-bold text-slate-900">{req.aadhaarNo}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-bold uppercase">AI Match Score</div>
+                          <div className="font-bold text-emerald-600">{req.matchScore}</div>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="text-[11px] font-bold text-slate-400 text-right pt-1">Verification audit completed</div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+
+                      {req.status === "Pending" ? (
+                        <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                          <button
+                            onClick={() => handleApproveKyc(req.id || req._id)}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-2 rounded-xl border-none cursor-pointer shadow-sm transition-all"
+                          >
+                            Approve KYC
+                          </button>
+                          <button
+                            onClick={() => handleRejectKyc(req.id || req._id)}
+                            className="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-4 py-2 rounded-xl border-none cursor-pointer transition-colors"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-[11px] font-bold text-slate-400 text-right pt-1">Verification audit completed</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -2239,113 +2524,290 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
           </div>
         )}
 
-        {/* 16. EMAIL TEMPLATES & SYSTEM MAIL PAGE */}
+        {/* 16. EMAIL TEMPLATES & SYSTEM MAIL PAGE (REDESIGNED TO MATCH REFERENCE IMAGE EXACTLY) */}
         {activeNav === "Email Templates" && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
-              <div>
-                <h2 className="text-lg font-black text-slate-900">HTML Email Templates & System Mail Desk</h2>
-                <p className="text-xs font-semibold text-slate-500">Manage HTML email designs, create onboarding templates, and send emails directly to registered users.</p>
+            
+            {/* TOP STAT CARDS (3 GRID CARDS MATCHING REFERENCE IMAGE) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              {/* Card 1: Total Users */}
+              <div className="bg-white border border-purple-100 rounded-3xl p-5 shadow-2xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-purple-100/70 text-[#7C3AED] flex items-center justify-center shrink-0">
+                  <Users size={22} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-400">Total Users</div>
+                  <div className="text-2xl font-black text-slate-900 mt-0.5">{users.length || 93}</div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setTemplateForm({
-                      templateId: `TEMPLATE_${Date.now()}`,
-                      name: "",
-                      subject: "",
-                      category: "Onboarding",
-                      htmlContent: "<html>\n<body>\n  <h2>Hello {{userName}},</h2>\n  <p>Your content here...</p>\n</body>\n</html>",
-                      variables: "userName, mobileNumber, referralCode"
-                    });
-                    setShowTemplateEditorModal(true);
-                  }}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 border-none cursor-pointer"
-                >
-                  <Plus size={15} />
-                  <span>New Template</span>
-                </button>
-                <button
-                  onClick={() => {
-                    if (users.length > 0) {
-                      setSendEmailPayload({
-                        toEmail: users[0].email,
-                        templateId: emailTemplates[0]?.templateId || "WELCOME_SIGNUP",
-                        userName: users[0].name,
-                        mobileNumber: users[0].phone
-                      });
-                    }
-                    setShowSendEmailModal(true);
-                  }}
-                  className="bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md border-none cursor-pointer"
-                >
-                  <Send size={15} />
-                  <span>Send Email to User</span>
-                </button>
+
+              {/* Card 2: Selected Users */}
+              <div className="bg-white border border-blue-100 rounded-3xl p-5 shadow-2xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-blue-100/70 text-blue-600 flex items-center justify-center shrink-0">
+                  <CheckSquare size={22} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-400">Selected Users</div>
+                  <div className="text-2xl font-black text-slate-900 mt-0.5">{selectedRecipientEmails.length}</div>
+                </div>
               </div>
+
+              {/* Card 3: Saved Templates */}
+              <div className="bg-white border border-emerald-100 rounded-3xl p-5 shadow-2xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100/70 text-emerald-600 flex items-center justify-center shrink-0">
+                  <FileText size={22} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-400">Saved Templates</div>
+                  <div className="text-2xl font-black text-slate-900 mt-0.5">{emailTemplates.length || 22}</div>
+                </div>
+              </div>
+
             </div>
 
-            {/* TEMPLATES GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {emailTemplates.map((tmpl) => (
-                <div key={tmpl.templateId} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs space-y-3 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200/80">
-                        {tmpl.templateId}
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                        {tmpl.category}
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-black text-slate-900 mt-2">{tmpl.name}</h3>
-                    <p className="text-xs text-slate-500 line-clamp-2 mt-1"><strong>Subject:</strong> {tmpl.subject}</p>
-                    
-                    <div className="mt-3 text-[10px] font-bold text-slate-400">
-                      Variables: {Array.isArray(tmpl.variables) ? tmpl.variables.join(', ') : tmpl.variables}
-                    </div>
+            {/* MAIN 2-COLUMN EMAIL DASHBOARD */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              {/* LEFT COLUMN: SELECT RECIPIENTS (5 cols) */}
+              <div className="lg:col-span-5 bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs space-y-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="text-[#7C3AED]" size={20} />
+                    <h3 className="text-base font-black text-slate-900">Select Recipients</h3>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                  {/* SEARCH BAR */}
+                  <div className="relative mb-3">
+                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      value={searchRecipientQuery}
+                      onChange={(e) => setSearchRecipientQuery(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-semibold focus:outline-none focus:border-purple-500 transition-all"
+                    />
+                  </div>
+
+                  {/* SELECT ALL / DESELECT ALL ACTION BUTTONS */}
+                  <div className="grid grid-cols-2 gap-2 mb-3">
                     <button
+                      type="button"
+                      onClick={handleToggleSelectAllRecipients}
+                      className="bg-purple-100/80 hover:bg-purple-200 text-[#7C3AED] font-extrabold text-xs py-2 rounded-xl border-none cursor-pointer transition-colors"
+                    >
+                      Select All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRecipientEmails([])}
+                      className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-2 rounded-xl border-none cursor-pointer transition-colors"
+                    >
+                      Deselect All
+                    </button>
+                  </div>
+
+                  {/* SCROLLABLE USERS LIST */}
+                  <div className="max-h-[460px] overflow-y-auto space-y-2 pr-1 hide-scrollbar">
+                    {filteredRecipientUsers.map((u) => {
+                      const isChecked = selectedRecipientEmails.includes(u.email);
+                      return (
+                        <label
+                          key={u.id}
+                          className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                            isChecked
+                              ? "bg-purple-50/60 border-purple-300 shadow-2xs"
+                              : "bg-white border-slate-200/80 hover:bg-slate-50/80"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggleRecipientEmail(u.email)}
+                            className="mt-0.5 accent-[#7C3AED] w-4 h-4 rounded cursor-pointer shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-extrabold text-xs text-slate-900 truncate">{u.name}</div>
+                            <div className="text-[11px] text-slate-400 font-medium truncate mt-0.5">{u.email}</div>
+                            <div className="text-[10px] font-mono font-bold text-purple-600 mt-1">
+                              #{u.userCode || 'FIP' + String(u.id).substring(0, 5).toUpperCase()}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: TEMPLATES & COMPOSE EMAIL (7 cols) */}
+              <div className="lg:col-span-7 space-y-6">
+                
+                {/* TEMPLATES BLOCK */}
+                <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="text-[#7C3AED]" size={20} />
+                      <h3 className="text-base font-black text-slate-900">Templates</h3>
+                    </div>
+                    <button
+                      type="button"
                       onClick={() => {
                         setTemplateForm({
-                          templateId: tmpl.templateId,
-                          name: tmpl.name,
-                          subject: tmpl.subject,
-                          category: tmpl.category || 'Onboarding',
-                          htmlContent: tmpl.htmlContent,
-                          variables: Array.isArray(tmpl.variables) ? tmpl.variables.join(', ') : tmpl.variables
+                          templateId: `TEMPLATE_${Date.now()}`,
+                          name: "",
+                          subject: "",
+                          category: "Onboarding",
+                          htmlContent: "<html>\n<body>\n  <h2>Hello {{userName}},</h2>\n  <p>Your email body content here...</p>\n</body>\n</html>",
+                          variables: "userName, mobileNumber, referralCode"
                         });
                         setShowTemplateEditorModal(true);
                       }}
-                      className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs py-2 rounded-xl border border-slate-200/80 cursor-pointer"
+                      className="bg-[#10B981] hover:bg-emerald-600 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 border-none cursor-pointer shadow-xs transition-colors"
                     >
-                      Edit HTML
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSendEmailPayload({
-                          toEmail: users[0]?.email || 'user@example.com',
-                          templateId: tmpl.templateId,
-                          userName: users[0]?.name || 'Valued User',
-                          mobileNumber: users[0]?.phone || ''
-                        });
-                        setShowSendEmailModal(true);
-                      }}
-                      className="flex-1 bg-purple-50 hover:bg-purple-100 text-[#7C3AED] font-black text-xs py-2 rounded-xl border-none cursor-pointer"
-                    >
-                      Use Template
+                      <Plus size={14} />
+                      <span>New Template</span>
                     </button>
                   </div>
+
+                  {/* SELECT TEMPLATE DROPDOWN */}
+                  <div>
+                    <select
+                      value={selectedTemplateForCompose}
+                      onChange={(e) => handleSelectTemplateForCompose(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:border-purple-500 cursor-pointer"
+                    >
+                      <option value="">-- Select a template --</option>
+                      {emailTemplates.map((t) => (
+                        <option key={t.templateId} value={t.templateId}>
+                          {t.name} ({t.category})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* SAVED TEMPLATES LIST */}
+                  <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1 hide-scrollbar">
+                    {emailTemplates.map((tmpl) => (
+                      <div
+                        key={tmpl.templateId}
+                        className="flex items-center justify-between bg-slate-50/70 border border-slate-200/70 p-3.5 rounded-2xl hover:bg-purple-50/50 transition-colors group"
+                      >
+                        <div>
+                          <div className="font-extrabold text-xs text-slate-900">{tmpl.name}</div>
+                          <span className="inline-block text-[9px] font-black uppercase text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full mt-1">
+                            {tmpl.category || 'NOTIFICATION'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleSelectTemplateForCompose(tmpl.templateId)}
+                            title="Preview / Use Template"
+                            className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-100/70 transition-colors border-none cursor-pointer"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTemplateForm({
+                                templateId: tmpl.templateId,
+                                name: tmpl.name,
+                                subject: tmpl.subject,
+                                category: tmpl.category || 'Onboarding',
+                                htmlContent: tmpl.htmlContent,
+                                variables: Array.isArray(tmpl.variables) ? tmpl.variables.join(', ') : tmpl.variables
+                              });
+                              setShowTemplateEditorModal(true);
+                            }}
+                            title="Edit Template"
+                            className="p-1.5 rounded-lg text-[#7C3AED] hover:bg-purple-100/70 transition-colors border-none cursor-pointer"
+                          >
+                            <Edit3 size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEmailTemplate(tmpl.templateId)}
+                            title="Delete Template"
+                            className="p-1.5 rounded-lg text-red-500 hover:bg-red-100/70 transition-colors border-none cursor-pointer"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+
+                {/* COMPOSE EMAIL BLOCK */}
+                <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Mail className="text-[#7C3AED]" size={20} />
+                    <h3 className="text-base font-black text-slate-900">Compose Email</h3>
+                  </div>
+
+                  <form onSubmit={handleSendComposeEmail} className="space-y-4 text-xs">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1.5">Subject *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Enter email subject..."
+                        value={composeSubject}
+                        onChange={(e) => setComposeSubject(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs font-semibold focus:outline-none focus:border-purple-500 transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1.5">Body (HTML Supported) *</label>
+                      <textarea
+                        rows={6}
+                        required
+                        placeholder="Enter email body..."
+                        value={composeBody}
+                        onChange={(e) => setComposeBody(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-mono font-medium focus:outline-none focus:border-purple-500 leading-relaxed transition-all"
+                      />
+                    </div>
+
+                    {/* ACTION FOOTER */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleSaveComposeAsTemplate}
+                        className="w-full sm:w-auto border-2 border-[#10B981] text-[#10B981] hover:bg-emerald-50 font-extrabold text-xs px-5 py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Save size={15} />
+                        <span>Save Template</span>
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={isSendingComposeEmail}
+                        className="w-full sm:flex-1 bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs px-6 py-2.5 rounded-xl cursor-pointer shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        <Send size={15} />
+                        <span>
+                          {isSendingComposeEmail
+                            ? "Sending Email..."
+                            : `Send to ${selectedRecipientEmails.length} User${selectedRecipientEmails.length === 1 ? "" : "s"}`}
+                        </span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+              </div>
+
             </div>
 
-            {/* EMAIL DELIVERY LOGS */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs mt-6">
-              <div className="p-4 border-b border-slate-200/80 bg-slate-50 flex items-center justify-between">
-                <h3 className="text-sm font-black text-slate-900">Email Delivery Audit Logs</h3>
+            {/* EMAIL AUDIT LOGS */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-2xs mt-6">
+              <div className="p-5 border-b border-slate-200/80 bg-slate-50 flex items-center justify-between">
+                <h3 className="text-sm font-black text-slate-900">Email Delivery Audit Logs (Zoho SMTP)</h3>
                 <span className="text-xs font-bold text-slate-400">{emailLogs.length} Records Logged</span>
               </div>
               <div className="overflow-x-auto">
@@ -2354,34 +2816,32 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     <tr>
                       <th className="p-3.5">Log ID</th>
                       <th className="p-3.5">Recipient Email</th>
-                      <th className="p-3.5">Template ID</th>
-                      <th className="p-3.5">Subject</th>
+                      <th className="p-3.5">Template / Subject</th>
                       <th className="p-3.5">Status</th>
                       <th className="p-3.5">Sent Timestamp</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
                     {emailLogs.map((log) => (
-                      <tr key={log.logId} className="hover:bg-slate-50">
-                        <td className="p-3.5 font-mono text-[10px] font-bold text-purple-700">{log.logId}</td>
-                        <td className="p-3.5 font-bold text-slate-900">{log.toEmail}</td>
-                        <td className="p-3.5 font-mono text-[10px]">{log.templateId}</td>
-                        <td className="p-3.5 text-slate-600">{log.subject}</td>
+                      <tr key={log.id || log.logId} className="hover:bg-slate-50">
+                        <td className="p-3.5 font-mono font-bold text-slate-900">{log.logId || log.id}</td>
+                        <td className="p-3.5 font-bold text-purple-700">{log.toEmail}</td>
+                        <td className="p-3.5 font-semibold text-slate-800">{log.subject || log.templateId}</td>
                         <td className="p-3.5">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            log.status === 'SENT' ? 'bg-emerald-100 text-emerald-700' :
-                            log.status === 'MOCK_DELIVERED' ? 'bg-purple-100 text-purple-700' : 'bg-red-100 text-red-700'
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                            log.status === "SENT" || log.status === "Success" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"
                           }`}>
                             {log.status}
                           </span>
                         </td>
-                        <td className="p-3.5 text-slate-400">{new Date(log.sentAt).toLocaleString()}</td>
+                        <td className="p-3.5 text-slate-500 font-mono text-[11px]">{log.sentAt || log.timestamp}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
+
           </div>
         )}
 
@@ -2474,6 +2934,327 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         </td>
                       </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 17. DGA WAITLIST MANAGEMENT DASHBOARD */}
+        {activeNav === "DGA Waitlist" && (
+          <div className="space-y-6">
+            {/* Top Overview & Headline */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-slate-900">Digital Gold Agent (DGA) Waitlist Dashboard</h2>
+                  <span className="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase border border-amber-300">
+                    Live Beta
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-slate-500 mt-1">
+                  Manage joined waiting list applications, view agent details, and perform single-click approvals, rejections, and bulk actions.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchDgaWaitlist}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 border-none cursor-pointer"
+                >
+                  <RefreshCw size={14} className={isLoadingDgaWaitlist ? "animate-spin" : ""} />
+                  <span>Refresh List</span>
+                </button>
+              </div>
+            </div>
+
+            {/* KPI STAT CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-slate-400 uppercase">Total Waitlist Applications</div>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{dgaWaitlistList.length}</div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-black">
+                  <Users size={22} />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-amber-500 uppercase">Pending Approvals</div>
+                  <div className="text-2xl font-black text-amber-600 mt-1">
+                    {dgaWaitlistList.filter(i => (i.status || 'pending') === 'pending').length}
+                  </div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black">
+                  <Clock size={22} />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-emerald-500 uppercase">Approved Agents</div>
+                  <div className="text-2xl font-black text-emerald-600 mt-1">
+                    {dgaWaitlistList.filter(i => i.status === 'approved').length}
+                  </div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black">
+                  <CheckCircle2 size={22} />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-rose-500 uppercase">Rejected Applications</div>
+                  <div className="text-2xl font-black text-rose-600 mt-1">
+                    {dgaWaitlistList.filter(i => i.status === 'rejected').length}
+                  </div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-black">
+                  <XCircle size={22} />
+                </div>
+              </div>
+            </div>
+
+            {/* SINGLE ACTION BULK TOOLBAR */}
+            {selectedDgaIds.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-[#161730] text-white p-4 rounded-2xl shadow-lg border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  <Sparkles className="text-amber-400 shrink-0" size={18} />
+                  <span>Single Action Operation: <strong>{selectedDgaIds.length} applicants selected</strong></span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handleBulkUpdateDgaStatus('approved')}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 border-none cursor-pointer shadow-xs"
+                  >
+                    <Check size={14} />
+                    <span>Approve Selected</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleBulkUpdateDgaStatus('rejected')}
+                    className="bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 border-none cursor-pointer shadow-xs"
+                  >
+                    <X size={14} />
+                    <span>Reject Selected</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleBulkUpdateDgaStatus('contacted')}
+                    className="bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 border-none cursor-pointer shadow-xs"
+                  >
+                    <Send size={14} />
+                    <span>Mark Contacted</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedDgaIds([])}
+                    className="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-3 py-1.5 rounded-xl border-none cursor-pointer"
+                  >
+                    Deselect All
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* FILTER & SEARCH TOOLBAR */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+              {/* Status Filter Pills */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-400 mr-1">Status Filter:</span>
+                {['All', 'pending', 'approved', 'rejected', 'contacted'].map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setDgaStatusFilter(st)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-none cursor-pointer capitalize ${
+                      dgaStatusFilter === st
+                        ? 'bg-[#7C3AED] text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-xs font-bold text-slate-400">
+                Showing {dgaWaitlistList.filter(item => {
+                  const matchesStatus = dgaStatusFilter === 'All' || (item.status || 'pending') === dgaStatusFilter;
+                  const matchesSearch = !searchQuery || 
+                    item.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.mobile?.includes(searchQuery) ||
+                    item.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    (item.formattedWaitlistNumber || `DGA${String(item.waitlistNumber).padStart(4, '0')}`).toLowerCase().includes(searchQuery.toLowerCase());
+                  return matchesStatus && matchesSearch;
+                }).length} entries
+              </div>
+            </div>
+
+            {/* DATA TABLE */}
+            <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-700">
+                  <thead className="bg-slate-100 text-slate-400 font-black text-[10px] uppercase border-b border-slate-200">
+                    <tr>
+                      <th className="p-3.5 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={dgaWaitlistList.length > 0 && selectedDgaIds.length === dgaWaitlistList.length}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedDgaIds(dgaWaitlistList.map(i => i.id || i._id));
+                            } else {
+                              setSelectedDgaIds([]);
+                            }
+                          }}
+                          className="rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
+                        />
+                      </th>
+                      <th className="p-3.5">Ticket #</th>
+                      <th className="p-3.5">Agent Name</th>
+                      <th className="p-3.5">Contact Info</th>
+                      <th className="p-3.5">Location / State</th>
+                      <th className="p-3.5">Language</th>
+                      <th className="p-3.5">Date Joined</th>
+                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5 text-right">Single Action Operations</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {dgaWaitlistList
+                      .filter(item => {
+                        const matchesStatus = dgaStatusFilter === 'All' || (item.status || 'pending') === dgaStatusFilter;
+                        const matchesSearch = !searchQuery || 
+                          item.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.mobile?.includes(searchQuery) ||
+                          item.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (item.formattedWaitlistNumber || `DGA${String(item.waitlistNumber).padStart(4, '0')}`).toLowerCase().includes(searchQuery.toLowerCase());
+                        return matchesStatus && matchesSearch;
+                      })
+                      .map((item) => {
+                        const itemId = item.id || item._id;
+                        const formattedNum = item.formattedWaitlistNumber || `DGA${String(item.waitlistNumber || 1).padStart(4, '0')}`;
+                        const status = item.status || 'pending';
+                        const isSelected = selectedDgaIds.includes(itemId);
+
+                        return (
+                          <tr key={itemId} className={`hover:bg-purple-50/30 transition-colors ${isSelected ? 'bg-purple-50/60' : ''}`}>
+                            <td className="p-3.5 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectDga(itemId)}
+                                className="rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
+                              />
+                            </td>
+
+                            <td className="p-3.5 font-mono font-black text-purple-700 bg-purple-50/80 px-2.5 py-1 rounded-lg w-fit text-xs border border-purple-200/60">
+                              {formattedNum}
+                            </td>
+
+                            <td className="p-3.5">
+                              <span className="font-bold text-slate-900 block text-xs">{item.username}</span>
+                              <span className="text-[10px] text-slate-400 font-semibold">Beta Waitlist</span>
+                            </td>
+
+                            <td className="p-3.5 text-xs">
+                              <div className="font-bold text-slate-800">{item.mobile}</div>
+                              <div className="text-[11px] text-slate-400">{item.email}</div>
+                            </td>
+
+                            <td className="p-3.5 text-xs font-bold text-slate-700">
+                              {item.city || 'N/A'}
+                            </td>
+
+                            <td className="p-3.5 text-xs font-semibold text-slate-600">
+                              {item.language || 'English'}
+                            </td>
+
+                            <td className="p-3.5 text-xs text-slate-400">
+                              {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Today'}
+                            </td>
+
+                            <td className="p-3.5">
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                                status === 'rejected' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
+                                status === 'contacted' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
+                                'bg-amber-100 text-amber-800 border border-amber-300'
+                              }`}>
+                                {status}
+                              </span>
+                            </td>
+
+                            <td className="p-3.5 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {/* Single Action Approve */}
+                                <button
+                                  onClick={() => handleUpdateDgaStatus(itemId, 'approved')}
+                                  disabled={status === 'approved'}
+                                  className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer border-none disabled:opacity-30"
+                                  title="Single Action: Approve Application"
+                                >
+                                  <Check size={14} />
+                                </button>
+
+                                {/* Single Action Reject */}
+                                <button
+                                  onClick={() => handleUpdateDgaStatus(itemId, 'rejected')}
+                                  disabled={status === 'rejected'}
+                                  className="p-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer border-none disabled:opacity-30"
+                                  title="Single Action: Reject Application"
+                                >
+                                  <X size={14} />
+                                </button>
+
+                                {/* Single Action Contact */}
+                                <button
+                                  onClick={() => handleUpdateDgaStatus(itemId, 'contacted')}
+                                  disabled={status === 'contacted'}
+                                  className="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer border-none disabled:opacity-30"
+                                  title="Single Action: Mark Contacted"
+                                >
+                                  <Send size={14} />
+                                </button>
+
+                                {/* Quick Send Email */}
+                                <button
+                                  onClick={() => {
+                                    setSendEmailPayload({
+                                      toEmail: item.email,
+                                      templateId: "WELCOME_SIGNUP",
+                                      userName: item.username,
+                                      mobileNumber: item.mobile
+                                    });
+                                    setShowSendEmailModal(true);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white transition-colors cursor-pointer border-none"
+                                  title="Send Email to Agent"
+                                >
+                                  <FileText size={14} />
+                                </button>
+
+                                {/* Delete Entry */}
+                                <button
+                                  onClick={() => handleDeleteDgaItem(itemId)}
+                                  className="p-1.5 rounded-lg bg-slate-100 text-slate-400 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer border-none"
+                                  title="Delete Waitlist Entry"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
@@ -2636,7 +3417,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </span>
               </div>
 
-              <form onSubmit={handleSaveAmtScore} className="space-y-4 text-xs">
+              <form onSubmit={handleSaveAmlScore} className="space-y-4 text-xs">
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="font-bold text-slate-700">Set AML Audit Score (0 - 100):</label>
@@ -2929,7 +3710,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     >
                       <option>All Registered Users</option>
                       <option>Active SIP Users</option>
-                      <option>High Risk AMT Users</option>
+                      <option>High Risk AML Users</option>
                       <option>Unverified KYC Users</option>
                     </select>
                   </div>

@@ -3,7 +3,50 @@ import AgentWaitlist from '../models/AgentWaitlist.js';
 
 const router = express.Router();
 
-// @desc    Register new Digital Gold Agent for waitlist
+const formatWaitlistNumber = (num) => {
+  if (!num) return 'DGA0001';
+  const parsed = typeof num === 'number' ? num : parseInt(String(num).replace(/\D/g, ''), 10);
+  if (isNaN(parsed) || parsed < 1) return 'DGA0001';
+  return `DGA${String(parsed).padStart(4, '0')}`;
+};
+
+// @desc    Check if user is already registered on waitlist
+// @route   GET /api/agent-waitlist/check
+// @access  Public
+router.get('/check', async (req, res) => {
+  try {
+    const { mobile, email } = req.query;
+    if (!mobile && !email) {
+      return res.status(400).json({ success: false, message: 'Please provide mobile or email' });
+    }
+
+    const query = [];
+    if (mobile) query.push({ mobile });
+    if (email) query.push({ email });
+
+    const existingAgent = await AgentWaitlist.findOne({ $or: query });
+
+    if (existingAgent) {
+      const formattedNumber = existingAgent.formattedWaitlistNumber || formatWaitlistNumber(existingAgent.waitlistNumber);
+      return res.status(200).json({
+        success: true,
+        alreadyRegistered: true,
+        waitlistNumber: existingAgent.waitlistNumber,
+        formattedWaitlistNumber: formattedNumber,
+        data: existingAgent,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      alreadyRegistered: false,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Register new Digital Gold Agent for waitlist (One chance per user)
 // @route   POST /api/agent-waitlist
 // @access  Public
 router.post('/', async (req, res) => {
@@ -17,23 +60,26 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Check if user already registered with mobile or email
+    // Check if user already registered with mobile or email (Single chance per user)
     const existingAgent = await AgentWaitlist.findOne({
       $or: [{ mobile }, { email }],
     });
 
     if (existingAgent) {
+      const formattedNumber = existingAgent.formattedWaitlistNumber || formatWaitlistNumber(existingAgent.waitlistNumber);
       return res.status(200).json({
         success: true,
         alreadyRegistered: true,
         waitlistNumber: existingAgent.waitlistNumber,
+        formattedWaitlistNumber: formattedNumber,
         data: existingAgent,
-        message: `You are already registered on the DGA waitlist at position #${existingAgent.waitlistNumber}!`,
+        message: `You are already registered on the DGA waitlist! Your assigned number is ${formattedNumber}.`,
       });
     }
 
     const count = await AgentWaitlist.countDocuments();
-    const assignedWaitlistNumber = 1048 + count;
+    const assignedWaitlistNumber = 1 + count;
+    const formattedNumber = formatWaitlistNumber(assignedWaitlistNumber);
 
     const newWaitlistEntry = await AgentWaitlist.create({
       username,
@@ -42,14 +88,16 @@ router.post('/', async (req, res) => {
       city,
       language: language || 'English',
       waitlistNumber: assignedWaitlistNumber,
+      formattedWaitlistNumber: formattedNumber,
     });
 
     res.status(201).json({
       success: true,
       alreadyRegistered: false,
       waitlistNumber: newWaitlistEntry.waitlistNumber,
+      formattedWaitlistNumber: newWaitlistEntry.formattedWaitlistNumber || formattedNumber,
       data: newWaitlistEntry,
-      message: `Congratulations! You joined the Digital Gold Agent Beta Waitlist at position #${newWaitlistEntry.waitlistNumber}!`,
+      message: `Congratulations! You joined the Digital Gold Agent Beta Waitlist with number ${formattedNumber}!`,
     });
   } catch (error) {
     console.error('[AgentWaitlist API Error]:', error);
@@ -69,9 +117,108 @@ router.get('/stats', async (req, res) => {
     const count = await AgentWaitlist.countDocuments();
     res.status(200).json({
       success: true,
-      totalWaitlist: 1047 + count,
+      totalWaitlist: count,
       registeredCount: count,
-      nextWaitlistNumber: 1048 + count,
+      nextWaitlistNumber: count + 1,
+      nextFormattedWaitlistNumber: formatWaitlistNumber(count + 1),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Get all DGA Waitlist entries for Admin Dashboard
+// @route   GET /api/agent-waitlist/admin/all
+// @access  Admin
+router.get('/admin/all', async (req, res) => {
+  try {
+    const list = await AgentWaitlist.find({}).sort({ waitlistNumber: 1 });
+    const formattedList = list.map(item => ({
+      _id: item._id,
+      id: item._id,
+      username: item.username,
+      mobile: item.mobile,
+      email: item.email,
+      city: item.city,
+      language: item.language,
+      waitlistNumber: item.waitlistNumber,
+      formattedWaitlistNumber: item.formattedWaitlistNumber || formatWaitlistNumber(item.waitlistNumber),
+      status: item.status || 'pending',
+      createdAt: item.createdAt,
+    }));
+    res.status(200).json({
+      success: true,
+      data: formattedList,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Admin Single-Action Update Status (approve, reject, contacted, pending)
+// @route   PUT /api/agent-waitlist/admin/update-status
+// @access  Admin
+router.put('/admin/update-status', async (req, res) => {
+  try {
+    const { id, status } = req.body;
+    if (!id || !status) {
+      return res.status(400).json({ success: false, message: 'Please provide entry id and status' });
+    }
+
+    const updated = await AgentWaitlist.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Waitlist entry not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Waitlist entry updated to '${status}' successfully!`,
+      data: updated,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Admin Single Action Bulk Update Status
+// @route   PUT /api/agent-waitlist/admin/bulk-update-status
+// @access  Admin
+router.put('/admin/bulk-update-status', async (req, res) => {
+  try {
+    const { ids, status } = req.body;
+    if (!ids || !Array.isArray(ids) || !status) {
+      return res.status(400).json({ success: false, message: 'Please provide ids array and status' });
+    }
+
+    await AgentWaitlist.updateMany(
+      { _id: { $in: ids } },
+      { $set: { status } }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Successfully updated ${ids.length} waitlist entries to '${status}'!`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Admin Single Action Delete Entry
+// @route   DELETE /api/agent-waitlist/admin/:id
+// @access  Admin
+router.delete('/admin/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await AgentWaitlist.findByIdAndDelete(id);
+    res.status(200).json({
+      success: true,
+      message: 'Waitlist entry removed successfully!',
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
