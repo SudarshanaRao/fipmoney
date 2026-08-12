@@ -100,7 +100,7 @@ This API documentation is hosted on an obfuscated secret route (\`/${process.env
             rewardAmount: { type: 'number', example: 100 },
             date: { type: 'string', example: '2026-08-08' },
             status: { type: 'string', example: 'Credited' },
-            amtScore: { type: 'number', example: 98 }
+            amlScore: { type: 'number', example: 98 }
           }
         },
         ReferralAdminStats: {

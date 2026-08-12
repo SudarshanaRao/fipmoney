@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues, getUserAmtScore, getAllAdminUsers, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
+import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -22,10 +22,10 @@ router.get('/admin/all-users', getAllAdminUsers);
 
 /**
  * @swagger
- * /api/users/admin/update-amt-score:
+ * /api/users/admin/update-aml-score:
  *   put:
- *     summary: Admin Override User AMT Score
- *     description: Updates a user's AMT risk score and records audit trail in MongoDB.
+ *     summary: Admin Override User AML Risk Score
+ *     description: Updates a user's AML risk score and records audit trail in MongoDB.
  *     tags:
  *       - Admin User Control
  *     requestBody:
@@ -36,13 +36,14 @@ router.get('/admin/all-users', getAllAdminUsers);
  *             type: object
  *             properties:
  *               userId: { type: string }
- *               amtScore: { type: number }
+ *               amlScore: { type: number }
  *               auditNote: { type: string }
  *     responses:
  *       200:
- *         description: AMT score updated successfully.
+ *         description: AML score updated successfully.
  */
-router.put('/admin/update-amt-score', adminUpdateAmtScore);
+router.put('/admin/update-aml-score', adminUpdateAmlScore);
+router.put('/admin/update-amt-score', adminUpdateAmlScore);
 
 /**
  * @swagger
@@ -68,10 +69,10 @@ router.put('/admin/toggle-status', adminToggleUserStatus);
 
 /**
  * @swagger
- * /api/users/{userId}/amt-score:
+ * /api/users/{userId}/aml-score:
  *   get:
- *     summary: Get AMT Score for a Particular User
- *     description: Retrieves the AMT risk score and flagged abnormal activity logs for a user.
+ *     summary: Get AML Risk Score for a Particular User
+ *     description: Retrieves the AML risk score and flagged abnormal activity logs for a user.
  *     tags:
  *       - User Management
  *     parameters:
@@ -82,10 +83,10 @@ router.put('/admin/toggle-status', adminToggleUserStatus);
  *           type: string
  *     responses:
  *       200:
- *         description: AMT score details returned.
+ *         description: AML score details returned.
  */
-router.get('/:userId/aml-score', getUserAmtScore);
-router.get('/:userId/amt-score', getUserAmtScore);
+router.get('/:userId/aml-score', getUserAmlScore);
+router.get('/:userId/amt-score', getUserAmlScore);
 
 /**
  * @swagger
@@ -472,6 +473,7 @@ router.post('/complete-kyc', completeKyc);
  *         description: User not found.
  */
 router.get('/search', getUserByMobile);
+router.get('/uuid/:userId', getUserByUuid);
 
 /**
  * @swagger

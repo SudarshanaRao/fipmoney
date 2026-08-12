@@ -320,8 +320,32 @@ export const verifyEmailOtp = async (req, res, next) => {
   }
 };
 
+const maskMobile = (mobile) => {
+  if (!mobile) return '';
+  const str = String(mobile).trim();
+  if (str.length < 10) return str;
+  return `${str.slice(0, 2)}******${str.slice(-2)}`;
+};
+
+const getAuthMinimalUser = (userDoc) => {
+  const obj = userDoc.toObject ? userDoc.toObject() : userDoc;
+  const rawMobile = obj.mobileNumber || '';
+  return {
+    userId: obj.userId,
+    userCode: obj.userCode,
+    mobileNumber: encryptData256(rawMobile),
+    maskedMobile: maskMobile(rawMobile),
+    username: obj.username || '',
+    fullName: obj.fullName || '',
+    status: obj.status || 'ACTIVE',
+    isKycCompleted: Boolean(obj.isKycCompleted),
+    referralCode: obj.referralCode || ''
+  };
+};
+
 const getSafeUser = (userDoc) => {
   const obj = userDoc.toObject ? userDoc.toObject() : userDoc;
+  const rawMobile = obj.mobileNumber || '';
   return {
     userId: obj.userId,
     userCode: obj.userCode,
@@ -329,7 +353,8 @@ const getSafeUser = (userDoc) => {
     firstName: obj.firstName,
     lastName: obj.lastName,
     fullName: obj.fullName,
-    mobileNumber: obj.mobileNumber,
+    mobileNumber: encryptData256(rawMobile),
+    maskedMobile: maskMobile(rawMobile),
     email: obj.email,
     profileImage: obj.profileImage,
     isKycCompleted: obj.isKycCompleted,
@@ -340,10 +365,7 @@ const getSafeUser = (userDoc) => {
     referralCode: obj.referralCode,
     amlScore: obj.amlScore !== undefined ? obj.amlScore : (obj.amtScore !== undefined ? obj.amtScore : (obj.isKycCompleted ? 85 : 45)),
     amlStatus: obj.amlStatus || obj.amtStatus || (obj.isKycCompleted ? 'Low Risk' : 'Moderate Risk'),
-    amlFlaggedReasons: obj.amlFlaggedReasons || obj.amtFlaggedReasons || [],
-    amtScore: obj.amlScore !== undefined ? obj.amlScore : (obj.amtScore !== undefined ? obj.amtScore : (obj.isKycCompleted ? 85 : 45)),
-    amtStatus: obj.amlStatus || obj.amtStatus || (obj.isKycCompleted ? 'Low Risk' : 'Moderate Risk'),
-    amtFlaggedReasons: obj.amlFlaggedReasons || obj.amtFlaggedReasons || []
+    amlFlaggedReasons: obj.amlFlaggedReasons || obj.amtFlaggedReasons || []
   };
 };
 
@@ -417,7 +439,7 @@ export const authUser = async (req, res, next) => {
       return res.status(200).json({
         success: true,
         message: 'User authenticated successfully',
-        data: getSafeUser(user),
+        data: getAuthMinimalUser(user),
       });
     } else {
       // Auto-generate userCode starting from #FIP0001 series based on DB count
@@ -581,7 +603,7 @@ export const authUser = async (req, res, next) => {
       return res.status(201).json({
         success: true,
         message: 'New user created successfully with 256-bit encrypted password, userCode and UUID userId',
-        data: getSafeUser(user),
+        data: getAuthMinimalUser(user),
       });
     }
   } catch (error) {
@@ -1075,6 +1097,29 @@ export const getUserByMobile = async (req, res, next) => {
   }
 };
 
+export const getUserByUuid = async (req, res, next) => {
+  try {
+    const userId = req.params.userId || req.query.userId;
+    if (!userId) {
+      res.status(400);
+      throw new Error('userId parameter is required');
+    }
+
+    const user = await User.findOne({ userId });
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: getSafeUser(user),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get dashboard data (vault values, KYC, encrypted card, recent txns)
 // @route   GET /api/users/dashboard
 export const getDashboardData = async (req, res, next) => {
@@ -1410,9 +1455,9 @@ export const getReferralSummary = async (req, res, next) => {
   }
 };
 
-// @desc    Get AMT Score and Risk details for a particular user
-// @route   GET /api/users/:userId/amt-score
-export const getUserAmtScore = async (req, res, next) => {
+// @desc    Get AML Score and Risk details for a particular user
+// @route   GET /api/users/:userId/aml-score
+export const getUserAmlScore = async (req, res, next) => {
   try {
     const { userId } = req.params;
     if (!userId) {
@@ -1437,6 +1482,8 @@ export const getUserAmtScore = async (req, res, next) => {
     const amlScore = user.amlScore !== undefined ? user.amlScore : (user.amtScore !== undefined ? user.amtScore : (user.isKycCompleted ? 85 : 45));
     const amlStatus = user.amlStatus || user.amtStatus || (amlScore >= 80 ? 'Low Risk' : amlScore >= 50 ? 'Moderate Risk' : 'High Risk');
 
+    const rawMobile = user.mobileNumber || '';
+
     return res.status(200).json({
       success: true,
       message: 'AML Score and Risk details retrieved successfully',
@@ -1444,7 +1491,8 @@ export const getUserAmtScore = async (req, res, next) => {
         userId: user.userId,
         userCode: user.userCode,
         name: user.fullName || user.username || 'Fipmoney User',
-        mobileNumber: user.mobileNumber,
+        mobileNumber: encryptData256(rawMobile),
+        maskedMobile: maskMobile(rawMobile),
         email: user.email,
         isKycCompleted: user.isKycCompleted,
         kycLevel: user.kycLevel,
@@ -1452,9 +1500,6 @@ export const getUserAmtScore = async (req, res, next) => {
         amlScore,
         amlStatus,
         amlFlaggedReasons: user.amlFlaggedReasons || user.amtFlaggedReasons || [],
-        amtScore: amlScore,
-        amtStatus: amlStatus,
-        amtFlaggedReasons: user.amlFlaggedReasons || user.amtFlaggedReasons || [],
         lastTxnTimestamp: user.lastTxnTimestamp,
         lastTxnType: user.lastTxnType
       }
@@ -1463,6 +1508,8 @@ export const getUserAmtScore = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUserAmtScore = getUserAmlScore;
 
 // @desc    Get All Real MongoDB Users for Admin Users Directory
 // @route   GET /api/users/admin/all-users
@@ -1509,10 +1556,10 @@ export const getAllAdminUsers = async (req, res, next) => {
 };
 
 // @desc    Admin Update AML Score for a user
-// @route   PUT /api/users/admin/update-amt-score
-export const adminUpdateAmtScore = async (req, res, next) => {
+// @route   PUT /api/users/admin/update-aml-score
+export const adminUpdateAmlScore = async (req, res, next) => {
   try {
-    const { userId, amtScore, amlScore, auditNote } = req.body;
+    const { userId, amlScore, amtScore, auditNote } = req.body;
     const targetScore = amlScore !== undefined ? amlScore : amtScore;
     if (!userId || targetScore === undefined) {
       res.status(400);
@@ -1537,17 +1584,14 @@ export const adminUpdateAmtScore = async (req, res, next) => {
 
     user.amlScore = numScore;
     user.amlStatus = numScore >= 80 ? 'Low Risk' : numScore >= 50 ? 'Moderate Risk' : 'High Risk';
-    user.amtScore = numScore;
-    user.amtStatus = user.amlStatus;
 
-    const flaggedReasons = user.amlFlaggedReasons || user.amtFlaggedReasons || [];
+    const flaggedReasons = user.amlFlaggedReasons || [];
     flaggedReasons.push({
       reason: auditNote ? `Admin Override: ${auditNote}` : `Manual Admin Score Override to ${numScore}/100`,
       timestamp: new Date(),
       penalty: 0
     });
     user.amlFlaggedReasons = flaggedReasons;
-    user.amtFlaggedReasons = flaggedReasons;
 
     await user.save();
 
@@ -1560,6 +1604,8 @@ export const adminUpdateAmtScore = async (req, res, next) => {
     next(error);
   }
 };
+
+export const adminUpdateAmtScore = adminUpdateAmlScore;
 
 // @desc    Admin Toggle User Suspension / Active Status
 // @route   PUT /api/users/admin/toggle-status
