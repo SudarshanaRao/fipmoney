@@ -1,18 +1,8 @@
 export const getApiBaseUrl = () => {
-  if (typeof window === 'undefined') return '/api';
-  
-  const hostname = window.location.hostname;
-  
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return '/api';
-  } else if (hostname === 'test.fipmoney.com' || hostname.includes('test.')) {
-    // Development/Staging environment relative API endpoint
-    return '/api';
-  } else if (hostname === 'www.fipmoney.com' || hostname === 'fipmoney.com') {
-    // Production environment relative API endpoint
-    return '/api';
-  }
-  
+  // Always return relative '/api' path.
+  // 1. On localhost:5173 -> Inspect shows http://localhost:5173/api/... (proxied to http://localhost:5000)
+  // 2. On test.fipmoney.com -> Inspect shows https://test.fipmoney.com/api/... (proxied to dev-server.fipmoney.com)
+  // 3. On fipmoney.com / www.fipmoney.com -> Inspect shows https://fipmoney.com/api/... (proxied to prod-server.fipmoney.com)
   return '/api';
 };
 

@@ -10,18 +10,13 @@ import { initializeUserAml, updateKycAmlScore, evaluateTransactionAml } from '..
 import { sendTemplatedEmail } from '../utils/emailService.js';
 
 async function sendSmsOtp(mobile, otpCode) {
-  // Prevent sending real SMS in development/localhost environment
-  if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-    console.log(`[SMS Mock - Localhost Bypass] OTP for ${mobile} is ${otpCode}`);
-    return;
-  }
-
   const authKey = process.env.SMSCOUNTRY_AUTH_KEY;
   const authToken = process.env.SMSCOUNTRY_AUTH_TOKEN;
   const senderId = process.env.SMSCOUNTRY_SENDER_ID || "FIPMNY";
   
+  // If credentials are missing, log mock OTP
   if (!authKey || !authToken) {
-    console.log(`[SMS Mock] OTP for ${mobile} is ${otpCode}`);
+    console.log(`[SMS Mock Fallback - No Credentials] OTP for ${mobile} is ${otpCode}`);
     return;
   }
 

@@ -104,7 +104,6 @@ export default function SettingsPage() {
     if (!loggedInMobile) return;
     try {
       let res = await fetch(`${API_BASE_URL}/kyc/status?phone=${loggedInMobile}`);
-      if (!res.ok) res = await fetch(`http://localhost:5000/api/kyc/status?phone=${loggedInMobile}`);
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.status) {
@@ -141,13 +140,6 @@ export default function SettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) {
-        res = await fetch('http://localhost:5000/api/kyc/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      }
       if (res.ok) {
         const json = await res.json();
         showAlert(json.message || "KYC Verification Request submitted to admin panel!", "success", "KYC Initiated");
@@ -330,13 +322,6 @@ export default function SettingsPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: targetEmail, userName: fullName || loggedInUser?.username || "Valued Member" })
           });
-          if (!res.ok) {
-            res = await fetch("http://localhost:5000/api/users/send-email-otp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email: targetEmail, userName: fullName || loggedInUser?.username || "Valued Member" })
-            });
-          }
           if (res.ok) {
             const data = await res.json();
             showAlert("OTP sent successfully!", "success", "OTP Sent");
@@ -350,13 +335,6 @@ export default function SettingsPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ mobile: targetMobile })
           });
-          if (!res.ok) {
-            res = await fetch("http://localhost:5000/api/users/send-otp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ mobile: targetMobile })
-            });
-          }
         }
       }
     } catch (err) {
@@ -381,13 +359,6 @@ export default function SettingsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: targetEmail, otp: currentVerifyOtp })
         });
-        if (!res.ok) {
-          res = await fetch("http://localhost:5000/api/users/verify-email-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: targetEmail, otp: currentVerifyOtp })
-          });
-        }
         const data = await res.json();
         if (res.ok && data.success) {
           setChangeStep(2);
@@ -403,13 +374,6 @@ export default function SettingsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: targetMobile, otp: currentVerifyOtp })
         });
-        if (!res.ok) {
-          res = await fetch("http://localhost:5000/api/users/verify-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mobile: targetMobile, otp: currentVerifyOtp })
-          });
-        }
         const data = await res.json();
         if (res.ok && data.success) {
           setChangeStep(2);
@@ -449,13 +413,6 @@ export default function SettingsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: newValueInput.trim(), userName: fullName || loggedInUser?.username || "Valued Member" })
         });
-        if (!res.ok) {
-          res = await fetch("http://localhost:5000/api/users/send-email-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: newValueInput.trim(), userName: fullName || loggedInUser?.username || "Valued Member" })
-          });
-        }
         const data = await res.json();
         if (res.ok && data.success) {
           setChangeStep(3);
@@ -471,13 +428,6 @@ export default function SettingsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: cleanMobile })
         });
-        if (!res.ok) {
-          res = await fetch("http://localhost:5000/api/users/send-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mobile: cleanMobile })
-          });
-        }
         setChangeStep(3);
         setNewVerifyOtp("");
         showAlert(`Verification OTP sent to ${cleanMobile}`, "success", "OTP Sent");
@@ -504,13 +454,6 @@ export default function SettingsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: newValueInput.trim(), otp: newVerifyOtp })
         });
-        if (!res.ok) {
-          res = await fetch("http://localhost:5000/api/users/verify-email-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: newValueInput.trim(), otp: newVerifyOtp })
-          });
-        }
         const data = await res.json();
         if (res.ok && data.success) {
           setEmail(newValueInput.trim());
@@ -544,13 +487,6 @@ export default function SettingsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: cleanMobile, otp: newVerifyOtp })
         });
-        if (!res.ok) {
-          res = await fetch("http://localhost:5000/api/users/verify-otp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mobile: cleanMobile, otp: newVerifyOtp })
-          });
-        }
         const data = await res.json();
         if (res.ok && data.success) {
           setMobileNumber(cleanMobile);
