@@ -9,6 +9,8 @@ const getS3Client = () => {
     const region = process.env.AWS_REGION || 'ap-south-2';
     s3Client = new S3Client({
       region: region,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     });
   }
   return s3Client;
