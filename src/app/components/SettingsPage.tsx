@@ -37,7 +37,11 @@ export default function SettingsPage() {
 
   // Load logged-in user details directly from database session
   const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
-  const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
+  let rawMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
+  if (rawMobile.startsWith("enc256:")) {
+    rawMobile = (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
+  }
+  const loggedInMobile = rawMobile.replace(/\D/g, "").slice(-10);
 
   const initialName = loggedInUser?.fullName || loggedInUser?.username || "";
   const initialKyc = loggedInUser?.isKycCompleted ? "full kyc" : "pending";

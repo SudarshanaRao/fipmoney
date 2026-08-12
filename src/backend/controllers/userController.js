@@ -320,6 +320,14 @@ export const verifyEmailOtp = async (req, res, next) => {
   }
 };
 
+const sanitizeMobile = (val) => {
+  if (!val) return '';
+  const str = String(val).trim();
+  if (str.startsWith('enc256:')) return '';
+  const digits = str.replace(/\D/g, '');
+  return digits.length >= 10 ? digits.slice(-10) : str;
+};
+
 const maskMobile = (mobile) => {
   if (!mobile) return '';
   const str = String(mobile).trim();
@@ -1354,13 +1362,15 @@ export const getPresignedUploadUrl = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Mobile number is required' });
     }
 
-    const cleanMobile = String(mobile).trim();
+    const rawInput = String(mobile || '').trim();
+    const cleanMobile = sanitizeMobile(rawInput);
     const user = await User.findOne({
       $or: [
-        { mobileNumber: cleanMobile },
-        { email: cleanMobile },
-        { userCode: cleanMobile },
-        { userId: cleanMobile }
+        ...(cleanMobile ? [{ mobileNumber: cleanMobile }] : []),
+        { mobileNumber: rawInput },
+        { email: rawInput },
+        { userCode: rawInput },
+        { userId: rawInput }
       ]
     });
 
@@ -1392,13 +1402,15 @@ export const confirmProfileImageUpload = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Mobile number and objectKey are required' });
     }
 
-    const cleanMobile = String(mobile).trim();
+    const rawInput = String(mobile || '').trim();
+    const cleanMobile = sanitizeMobile(rawInput);
     const user = await User.findOne({
       $or: [
-        { mobileNumber: cleanMobile },
-        { email: cleanMobile },
-        { userCode: cleanMobile },
-        { userId: cleanMobile }
+        ...(cleanMobile ? [{ mobileNumber: cleanMobile }] : []),
+        { mobileNumber: rawInput },
+        { email: rawInput },
+        { userCode: rawInput },
+        { userId: rawInput }
       ]
     });
 
@@ -1441,12 +1453,14 @@ export const getProfileImageUrl = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Mobile number or userId is required' });
     }
 
-    const cleanId = String(mobile).trim();
+    const rawInput = String(mobile || '').trim();
+    const cleanMobile = sanitizeMobile(rawInput);
     const user = await User.findOne({
       $or: [
-        { mobileNumber: cleanId },
-        { userId: cleanId },
-        { userCode: cleanId }
+        ...(cleanMobile ? [{ mobileNumber: cleanMobile }] : []),
+        { mobileNumber: rawInput },
+        { userId: rawInput },
+        { userCode: rawInput }
       ]
     });
 

@@ -225,6 +225,13 @@ export function registerOrLoginUser(mobile: string, fullName?: string, email?: s
 
 export function saveLoggedInUser(user: MongoUser): void {
   if (typeof window !== "undefined") {
+    let cleanMobile = user.mobileNumber || "";
+    if (cleanMobile.startsWith("enc256:")) {
+      cleanMobile = sessionStorage.getItem("fm_logged_in_mobile") || "";
+    }
+    const digits = cleanMobile.replace(/\D/g, "").slice(-10);
+    if (digits) user.mobileNumber = digits;
+
     localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(user));
     localStorage.setItem(`fm_registered_${user.mobileNumber}`, "1");
     if (user.fullName) {
@@ -241,7 +248,14 @@ export function getLoggedInUser(): MongoUser | null {
   const raw = localStorage.getItem(LOGGED_IN_USER_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw);
+    const user = JSON.parse(raw);
+    if (user && user.mobileNumber && user.mobileNumber.startsWith("enc256:")) {
+      let clean = sessionStorage.getItem("fm_logged_in_mobile") || "";
+      clean = clean.replace(/\D/g, "").slice(-10);
+      user.mobileNumber = clean;
+      localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(user));
+    }
+    return user;
   } catch (e) {
     return null;
   }
