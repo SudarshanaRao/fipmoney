@@ -9,6 +9,7 @@ import {
   ShieldAlert, RefreshCw, Layers, CheckSquare, Trophy, Lock, Zap, Clock
 } from "lucide-react";
 import { API_BASE_URL } from "../utils/apiConfig";
+import { LoadingSpinner } from "./LottiePlayer";
 
 const LANGUAGES = [
   "Select your preferred language",
@@ -700,9 +701,16 @@ export default function BecomeAgentPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting || !formData.agreeTerms}
-                  className="w-full py-3.5 rounded-2xl font-bold text-sm text-white bg-[#6d28d9] hover:bg-[#5b21b6] transition-all shadow-md shadow-purple-900/20 border-none cursor-pointer outline-none active:scale-[0.98] disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl font-bold text-sm text-white bg-[#6d28d9] hover:bg-[#5b21b6] transition-all shadow-md shadow-purple-900/20 border-none cursor-pointer outline-none active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? "Submitting..." : "Join Waitlist"}
+                  {isSubmitting ? (
+                    <>
+                      <LoadingSpinner size={24} />
+                      <span>Securing Your Waitlist Spot...</span>
+                    </>
+                  ) : (
+                    "Join Waitlist"
+                  )}
                 </button>
               </form>
             )}

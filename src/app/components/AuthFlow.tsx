@@ -12,6 +12,7 @@ import { saveLoggedInUser, MongoUser } from "../utils/userStorage";
 import { toast } from "react-hot-toast";
 import { API_BASE_URL } from "../utils/apiConfig";
 import { authTranslations, Language } from "../utils/translations";
+import { LoadingSpinner } from "./LottiePlayer";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "tpin" | "success";
@@ -93,6 +94,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
 
   const [checking,    setChecking]    = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState("");
   const [regStatus,   setRegStatus]   = useState<"registered" | "new" | null>(null);
 
   const [username, setUsername] = useState("");
@@ -209,6 +212,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const handlePrimaryBtn = async () => {
     if (!validateMobile()) return;
     
+    setIsActionLoading(true);
+    setLoadingMsg("Securing session & sending OTP...");
     const loadingToast = toast.loading("Sending OTP...");
     try {
       const res = await fetch(`${API_BASE_URL}/users/send-otp`, {
@@ -221,11 +226,16 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       if (res.ok && data.success) {
         toast.success("OTP Sent!", { id: loadingToast });
         reset();
-        go(() => setStep("otp"));
+        setTimeout(() => {
+          setIsActionLoading(false);
+          go(() => setStep("otp"));
+        }, 400);
       } else {
+        setIsActionLoading(false);
         toast.error(data.message || "Failed to send OTP", { id: loadingToast });
       }
     } catch (e) {
+      setIsActionLoading(false);
       toast.error("Network error. Please try again.", { id: loadingToast });
     }
   };
@@ -233,6 +243,9 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const handleOtpVerify = async () => {
     try {
       setErr("");
+      setIsActionLoading(true);
+      setLoadingMsg("Verifying security OTP...");
+      
       // Verify OTP first
       const verifyRes = await fetch(`${API_BASE_URL}/users/verify-otp`, {
         method: "POST",
@@ -242,13 +255,17 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       const verifyData = await verifyRes.json();
       
       if (!verifyRes.ok || !verifyData.success) {
+        setIsActionLoading(false);
         setErr(verifyData.message || "Invalid OTP code.");
         toast.error(verifyData.message || "Invalid OTP code.", { position: "top-center" });
         return;
       }
 
       if (isNew) {
-        go(() => setStep("profile"));
+        setTimeout(() => {
+          setIsActionLoading(false);
+          go(() => setStep("profile"));
+        }, 400);
       } else {
         markRegistered(mobile);
         const res = await fetch(`${API_BASE_URL}/users/auth`, {
@@ -261,13 +278,18 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
           saveLoggedInUser(data.data);
           setCurrentUser(data.data);
           toast.success("Welcome back!", { position: "top-center" });
-          go(() => setStep("success"));
+          setTimeout(() => {
+            setIsActionLoading(false);
+            go(() => setStep("success"));
+          }, 400);
         } else {
+          setIsActionLoading(false);
           setErr("Login failed: " + (data.message || "Unknown error"));
           toast.error(data.message || "Unknown error", { position: "top-center" });
         }
       }
     } catch (e) {
+      setIsActionLoading(false);
       setErr("Failed to connect to backend server");
       toast.error("Failed to connect to backend server", { position: "top-center" });
     }
@@ -429,10 +451,27 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
          </div>
 
          {/* Form Container */}
-         <div className="flex-1 flex flex-col justify-center max-w-[400px] mx-auto w-full px-6 relative z-10 overflow-y-auto hide-scrollbar pb-10">
+         <div className="flex-1 flex flex-col justify-center max-w-[400px] mx-auto w-full px-6 relative z-10 overflow-hidden hide-scrollbar pb-10 min-h-[520px]">
             
-            {/* ══ STEPPER UI (Only for setup steps) ══ */}
+            {/* Action Loading Overlay with spinner-loading.json */}
             <AnimatePresence>
+              {isActionLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-white/95 backdrop-blur-xs z-50 flex flex-col items-center justify-center gap-3 p-6 text-center rounded-2xl"
+                >
+                  <LoadingSpinner size={90} />
+                  <p className="text-sm font-black text-[#1e1b4b] animate-pulse">
+                    {loadingMsg || "Processing request..."}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ══ STEPPER UI (Only for setup steps) ══ */}
+            <AnimatePresence mode="wait">
               {(step === "profile" || step === "tpin") && (
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="mb-6 w-full flex items-center relative">
                   
@@ -462,7 +501,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               )}
             </AnimatePresence>
 
-            <AnimatePresence mode="popLayout" custom={dir}>
+            <AnimatePresence mode="wait" custom={dir}>
               {/* ══ STEP 1: MOBILE ══ */}
               {step === "mobile" && (
                  <FormSlide key="mobile" dir={dir}>
