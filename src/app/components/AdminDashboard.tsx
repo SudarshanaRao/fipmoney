@@ -235,7 +235,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const fetchAdminReferrals = async () => {
     setIsLoadingReferrals(true);
     try {
-      let res = await fetch('/api/referrals/admin/all');
+      let res = await fetch(`${API_BASE_URL}/referrals/admin/all`);
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
@@ -251,7 +251,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
   const fetchAdminReferralStats = async () => {
     try {
-      let res = await fetch('/api/referrals/admin/stats');
+      let res = await fetch(`${API_BASE_URL}/referrals/admin/stats`);
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {
@@ -272,7 +272,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const fetchDgaWaitlist = async () => {
     setIsLoadingDgaWaitlist(true);
     try {
-      let res = await fetch('/api/agent-waitlist/admin/all');
+      let res = await fetch(`${API_BASE_URL}/agent-waitlist/admin/all`);
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
@@ -288,7 +288,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
   const fetchKycRequests = async () => {
     try {
-      let res = await fetch('/api/kyc/admin/all');
+      let res = await fetch(`${API_BASE_URL}/kyc/admin/all`);
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
@@ -331,7 +331,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     );
 
     try {
-      let res = await fetch('/api/referrals/admin/update-status', {
+      let res = await fetch(`${API_BASE_URL}/referrals/admin/update-status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status })
@@ -353,7 +353,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     setReferrals(prev => prev.filter(item => item.id !== id && item._id !== id));
 
     try {
-      let res = await fetch(`/api/referrals/admin/${id}`, { method: 'DELETE' });
+      let res = await fetch(`${API_BASE_URL}/referrals/admin/${id}`, { method: 'DELETE' });
       if (res.ok) {
         const json = await res.json();
         triggerToast(json.message || "Referral record deleted successfully!");
@@ -372,7 +372,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     );
 
     try {
-      let res = await fetch('/api/agent-waitlist/admin/update-status', {
+      let res = await fetch(`${API_BASE_URL}/agent-waitlist/admin/update-status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status })
@@ -395,7 +395,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     );
 
     try {
-      let res = await fetch('/api/agent-waitlist/admin/bulk-update-status', {
+      let res = await fetch(`${API_BASE_URL}/agent-waitlist/admin/bulk-update-status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: selectedDgaIds, status })
@@ -418,7 +418,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     setSelectedDgaIds(prev => prev.filter(i => i !== id));
 
     try {
-      let res = await fetch(`/api/agent-waitlist/admin/${id}`, { method: 'DELETE' });
+      let res = await fetch(`${API_BASE_URL}/agent-waitlist/admin/${id}`, { method: 'DELETE' });
       if (res.ok) {
         triggerToast("Waitlist application removed successfully!");
       }
@@ -501,7 +501,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
     const fetchRealUsers = async () => {
       try {
-        let res = await fetch('/api/users/admin/all-users');
+        let res = await fetch(`${API_BASE_URL}/users/admin/all-users`);
         if (res.ok) {
           const json = await res.json();
           if (isMounted && json.success && Array.isArray(json.data)) {
@@ -517,7 +517,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
     const fetchEmailData = async () => {
       try {
-        let tRes = await fetch('/api/emails/templates');
+        let tRes = await fetch(`${API_BASE_URL}/emails/templates`);
         if (tRes.ok) {
           const tJson = await tRes.json();
           if (isMounted && tJson.success && Array.isArray(tJson.data)) {
@@ -525,7 +525,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
           }
         }
 
-        let lRes = await fetch('/api/emails/logs');
+        let lRes = await fetch(`${API_BASE_URL}/emails/logs`);
         if (lRes.ok) {
           const lJson = await lRes.json();
           if (isMounted && lJson.success && Array.isArray(lJson.data)) {
@@ -570,7 +570,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       return;
     }
     try {
-      let res = await fetch('/api/emails/templates', {
+      let res = await fetch(`${API_BASE_URL}/emails/templates`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -636,7 +636,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const handleDeleteEmailTemplate = async (templateId: string) => {
     setEmailTemplates(prev => prev.filter(t => t.templateId !== templateId && t._id !== templateId));
     try {
-      let res = await fetch(`/api/emails/templates/${templateId}`, { method: 'DELETE' });
+      let res = await fetch(`${API_BASE_URL}/emails/templates/${templateId}`, { method: 'DELETE' });
     } catch (e) {
       console.error(e);
     }
@@ -649,7 +649,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
     setEmailTemplates([]);
     try {
-      let res = await fetch(`/api/emails/templates-wipe/all`, { method: 'DELETE' });
+      let res = await fetch(`${API_BASE_URL}/emails/templates-wipe/all`, { method: 'DELETE' });
     } catch (e) {
       console.error(e);
     }
@@ -669,7 +669,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
     setIsSendingComposeEmail(true);
     try {
-      const res = await fetch('/api/emails/send-to-users', {
+      const res = await fetch(`${API_BASE_URL}/emails/send-to-users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -740,7 +740,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
 
     try {
-      const endpoint = recipientsList.length > 1 ? '/api/emails/send-bulk' : '/api/emails/send';
+      const endpoint = recipientsList.length > 1 ? `${API_BASE_URL}/emails/send-bulk` : `${API_BASE_URL}/emails/send`;
       const body = recipientsList.length > 1
         ? { recipients: recipientsList, templateId: sendEmailPayload.templateId, fromEmail: sendEmailPayload.fromEmail }
         : {
@@ -788,7 +788,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     setPayouts(payouts.map(p => p.userId === editingAmlUser.id ? { ...p, amlScore: scoreNum, amtScore: scoreNum } : p));
 
     try {
-      await fetch('/api/users/admin/update-aml-score', {
+      await fetch(`${API_BASE_URL}/users/admin/update-aml-score`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -849,7 +849,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
 
     try {
-      let res = await fetch('/api/kyc/admin/verify', {
+      let res = await fetch(`${API_BASE_URL}/kyc/admin/verify`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -875,7 +875,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
 
     try {
-      let res = await fetch('/api/kyc/admin/reject', {
+      let res = await fetch(`${API_BASE_URL}/kyc/admin/reject`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, reason })
@@ -935,7 +935,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     setUsers(users.map(u => u.id === userId ? { ...u, status: u.status === "Active" ? "Suspended" : "Active" } : u));
     
     try {
-      await fetch('/api/users/admin/toggle-status', {
+      await fetch(`${API_BASE_URL}/users/admin/toggle-status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId })
