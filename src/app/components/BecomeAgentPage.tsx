@@ -120,7 +120,7 @@ export default function BecomeAgentPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/agent-waitlist`, {
+      const response = await fetch(`${API_BASE_URL}/agent-waitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

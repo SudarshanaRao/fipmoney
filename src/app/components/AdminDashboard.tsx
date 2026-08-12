@@ -23,6 +23,7 @@ import {
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import fipmoneyIcon from "../../imports/fipmoney_icon_square.png";
 import { LoadingSpinner } from "./LottiePlayer";
+import { API_BASE_URL } from "../utils/apiConfig";
 
 interface AdminDashboardProps {
   secretCode?: string;
