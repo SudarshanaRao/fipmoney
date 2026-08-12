@@ -10,8 +10,8 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'www.fipmoney.com';
-const REGION = process.env.AWS_REGION || 'ap-south-1';
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'fipmoney-test-frontend';
+const REGION = process.env.AWS_REGION || 'ap-south-2';
 const ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 

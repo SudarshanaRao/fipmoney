@@ -1,16 +1,16 @@
-name: Deploy to AWS S3
+name: Fipmoney Test Deploy
 
 on:
-  # Allows 1-click manual trigger from GitHub Actions tab
-  workflow_dispatch:
-  # Automatically triggers when code is pushed to main branch
   push:
     branches:
       - main
+      - master
+      - dev
+  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Build & Deploy to S3
+    name: Build & Deploy to S3 (test.fipmoney.com)
     runs-on: ubuntu-latest
 
     steps:
@@ -34,8 +34,13 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
+          aws-region: ${{ secrets.AWS_REGION || 'ap-south-2' }}
 
-      - name: Deploy Build Files Directly to S3 Root
+      - name: Deploy Build Files to S3 Bucket
         run: |
-          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME || 'www.fipmoney.com' }} --delete
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME || 'fipmoney-test-frontend' }} --delete
+
+      - name: Invalidate CloudFront Cache (Optional)
+        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
