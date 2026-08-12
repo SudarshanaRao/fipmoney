@@ -36,9 +36,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'ap-south-2' }}
 
-      - name: Deploy Build Files to S3 Bucket
+      - name: Deploy Build Files to S3 Bucket (fipmoney-test-frontend)
         run: |
-          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME || 'fipmoney-test-frontend' }} --delete
+          aws s3 sync dist/ s3://fipmoney-test-frontend --delete
 
       - name: Invalidate CloudFront Cache (Optional)
         env:
