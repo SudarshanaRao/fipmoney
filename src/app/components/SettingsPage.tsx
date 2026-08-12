@@ -43,7 +43,7 @@ export default function SettingsPage() {
   }
   const loggedInMobile = rawMobile.replace(/\D/g, "").slice(-10);
 
-  const initialName = loggedInUser?.fullName || loggedInUser?.username || "";
+  const initialName = loggedInUser?.fullName || "";
   const initialKyc = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
   const initialEmail = loggedInUser?.email || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || "" : "");
   const initialUserCode = loggedInUser?.userCode || "";
@@ -182,8 +182,7 @@ export default function SettingsPage() {
               setPanVerified(isCompleted || (level && level.toLowerCase().includes("min")));
             }
 
-            const nameToUse = user.fullName || user.username || user.firstName || "";
-            if (nameToUse) setFullName(nameToUse);
+            if (user.fullName !== undefined) setFullName(user.fullName);
             if (user.email) setEmail(user.email);
             if (user.occupation) setJobTitle(user.occupation);
             if (user.annualIncome) setIncomeRange(String(user.annualIncome));

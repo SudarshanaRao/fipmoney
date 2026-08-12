@@ -345,7 +345,7 @@ const getAuthMinimalUser = (userDoc) => {
     maskedMobile: maskMobile(rawMobile),
     email: obj.email || '',
     username: obj.username || '',
-    fullName: obj.fullName || obj.username || obj.firstName || '',
+    fullName: obj.fullName || '',
     status: obj.status || 'ACTIVE',
     isKycCompleted: Boolean(obj.isKycCompleted),
     referralCode: obj.referralCode || ''
@@ -361,11 +361,12 @@ const getSafeUser = (userDoc) => {
     username: obj.username,
     firstName: obj.firstName,
     lastName: obj.lastName,
-    fullName: obj.fullName || obj.username || obj.firstName || '',
+    fullName: obj.fullName || '',
     mobileNumber: rawMobile,
     maskedMobile: maskMobile(rawMobile),
     email: obj.email,
     profileImage: obj.profileImage,
+    profileImageKey: obj.profileImageKey || '',
     isKycCompleted: obj.isKycCompleted,
     kycLevel: obj.kycLevel,
     status: obj.status,
@@ -1273,6 +1274,12 @@ export const getProfileSettings = async (req, res, next) => {
       throw new Error('User not found');
     }
 
+    // Dynamically sign profile image URL if key exists
+    let activeProfileImage = user.profileImage || '';
+    if (user.profileImageKey) {
+      activeProfileImage = await generatePresignedViewUrl(user.profileImageKey) || user.profileImage || '';
+    }
+
     // Return only profile-specific data needed for Settings page
     const profileData = {
       userId: user.userId,
@@ -1280,10 +1287,11 @@ export const getProfileSettings = async (req, res, next) => {
       mobileNumber: user.mobileNumber,
       email: user.email,
       username: user.username,
-      fullName: user.fullName || user.username || user.firstName || '',
+      fullName: user.fullName || '',
       firstName: user.firstName,
       lastName: user.lastName,
-      profileImage: user.profileImage,
+      profileImage: activeProfileImage,
+      profileImageKey: user.profileImageKey || '',
       occupation: user.occupation,
       annualIncome: user.annualIncome,
       maritalStatus: user.maritalStatus,
