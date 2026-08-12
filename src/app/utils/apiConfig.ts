@@ -4,14 +4,13 @@ export const getApiBaseUrl = () => {
   const hostname = window.location.hostname;
   
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // Rely on Vite proxy or local server routing
     return '/api';
-  } else if (hostname === 'test.fipmoney.com') {
-    // Development/Staging environment backend
-    return 'https://dev-server.fipmoney.com/api';
+  } else if (hostname === 'test.fipmoney.com' || hostname.includes('test.')) {
+    // Development/Staging environment relative API endpoint
+    return '/api';
   } else if (hostname === 'www.fipmoney.com' || hostname === 'fipmoney.com') {
-    // Production environment backend
-    return 'https://prod-server.fipmoney.com/api';
+    // Production environment relative API endpoint
+    return '/api';
   }
   
   return '/api';

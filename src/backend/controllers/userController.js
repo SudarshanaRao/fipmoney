@@ -28,7 +28,7 @@ async function sendSmsOtp(mobile, otpCode) {
   const credentials = Buffer.from(`${authKey}:${authToken}`).toString('base64');
   const endpoint = `https://restapi.smscountry.com/v0.1/Accounts/${authKey}/SMSes/`;
   
-  const messageText = `Dear User, Your Fipmoney verification code is ${otpCode} . Valid for 10 minutes. Never share this OTP with anyone. - FipMoney Pvt Ltd`;
+  const messageText = `Dear User, Your Fipmoney verification code is ${otpCode} . Valid for 10 minutes. Never share this OTP with anyone. - Finpages Tech`;
 
   const payload = {
     Text: messageText,
@@ -1598,6 +1598,106 @@ export const adminToggleUserStatus = async (req, res, next) => {
       message: `User status changed to ${user.status}`,
       data: getSafeUser(user)
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Check if an admin is already registered with an email address
+// @route   POST /api/users/check-admin-email
+export const checkAdminEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required' });
+    }
+    const cleanEmail = String(email).trim().toLowerCase();
+    
+    // Check MongoDB User collection for admin role or admin email match
+    const existingUser = await User.findOne({
+      email: cleanEmail,
+      $or: [{ role: 'admin' }, { role: 'Super Admin' }, { isAdmin: true }, { isApprovedAdmin: true }]
+    });
+
+    if (existingUser) {
+      return res.status(200).json({
+        success: true,
+        alreadyRegistered: true,
+        message: 'An Admin account is already registered with this email address.'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      alreadyRegistered: false,
+      message: 'Email address is available for admin registration.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Send Super-Admin Authorization OTP to support@fipmoney.com for Admin Signup Approval
+// @route   POST /api/users/send-superadmin-otp
+export const sendSuperAdminAuthOtp = async (req, res, next) => {
+  try {
+    const { adminName, adminEmail, adminMobile } = req.body;
+    const targetSupportEmail = 'support@fipmoney.com';
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await Otp.findOneAndUpdate(
+      { email: 'superadmin_approval_' + targetSupportEmail },
+      { email: 'superadmin_approval_' + targetSupportEmail, otp: generatedOtp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send email to support@fipmoney.com
+    await sendTemplatedEmail({
+      toEmail: targetSupportEmail,
+      templateId: 'FIPMONEY_SUPERADMIN_AUTH_OTP',
+      fromEmail: 'support@fipmoney.com',
+      variables: {
+        userName: 'Super-Admin Support Desk',
+        verificationCode: generatedOtp,
+        otp: generatedOtp,
+        adminName: adminName || 'New Admin Applicant',
+        adminEmail: adminEmail || '',
+        adminMobile: adminMobile || '',
+        expiryMinutes: 10,
+        currentYear: new Date().getFullYear(),
+        supportEmail: 'support@fipmoney.com'
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Super-Admin authorization OTP sent to support@fipmoney.com'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify Super-Admin Authorization OTP sent to support@fipmoney.com
+// @route   POST /api/users/verify-superadmin-otp
+export const verifySuperAdminAuthOtp = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+    if (!otp) {
+      return res.status(400).json({ success: false, message: 'Authorization OTP is required' });
+    }
+
+    const otpRecord = await Otp.findOne({ email: 'superadmin_approval_support@fipmoney.com' });
+    if (!otpRecord) {
+      return res.status(400).json({ success: false, message: 'Super-Admin authorization OTP expired or not found. Please request a new one.' });
+    }
+
+    if (otpRecord.otp !== String(otp).trim()) {
+      return res.status(400).json({ success: false, message: 'Invalid Super-Admin authorization OTP code.' });
+    }
+
+    await Otp.deleteOne({ _id: otpRecord._id });
+    return res.status(200).json({ success: true, message: 'Super-Admin authorization verified successfully.' });
   } catch (error) {
     next(error);
   }
