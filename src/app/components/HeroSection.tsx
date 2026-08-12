@@ -93,7 +93,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-center lg:text-left">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={currentSlide}
                 initial={{ opacity: 0, x: -50 }}
@@ -159,7 +159,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
 
           {/* Right Content - Hero Carousel */}
           <div className="relative">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={currentSlide}
                 className="relative"

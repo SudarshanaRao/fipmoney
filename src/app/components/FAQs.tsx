@@ -326,7 +326,7 @@ export default function FAQs({ onBack }: FAQsProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {filteredFAQs.map((faq, index) => (
               <motion.div
                 key={faq.id}

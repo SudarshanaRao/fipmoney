@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "./components/Header";
 import HeroSection from "./components/HeroSection";
@@ -44,8 +44,9 @@ import { LoadingSpinner } from "./components/LottiePlayer";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin';
 
-const PageTransition = ({ children }) => (
+const PageTransition = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => (
   <motion.div
+    ref={ref}
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -20 }}
@@ -53,7 +54,8 @@ const PageTransition = ({ children }) => (
   >
     {children}
   </motion.div>
-);
+));
+PageTransition.displayName = "PageTransition";
 
 const ComingSoonPage = ({ title, onBack }: { title: string; onBack: () => void }) => (
   <motion.div
@@ -478,7 +480,7 @@ export default function App() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="popLayout">
         {!isTransitioning && (
           <PageTransition key={currentPage}>
             <div className="flex flex-col min-h-screen">

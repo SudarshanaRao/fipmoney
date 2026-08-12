@@ -248,7 +248,7 @@ export default function HomeFAQs() {
 
           {/* Right Column: FAQs */}
           <div className="w-full lg:w-2/3 flex flex-col gap-3">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               {filteredFAQs.map((faq) => {
                 const isExpanded = expandedFAQ === faq.id;
                 return (

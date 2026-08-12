@@ -462,7 +462,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               )}
             </AnimatePresence>
 
-            <AnimatePresence mode="wait" custom={dir}>
+            <AnimatePresence mode="popLayout" custom={dir}>
               {/* ══ STEP 1: MOBILE ══ */}
               {step === "mobile" && (
                  <FormSlide key="mobile" dir={dir}>

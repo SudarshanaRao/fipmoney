@@ -216,7 +216,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
     <div className="flex-1 h-screen overflow-y-auto bg-[#FAFAFC] pb-24 text-slate-800 font-sans relative hide-scrollbar">
       <div className="p-4 md:p-6 lg:p-8 max-w-[1360px] mx-auto space-y-8 relative z-10">
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {!activeSetup ? (
             <motion.div
               key="cards-view"

@@ -6,7 +6,7 @@ import { API_BASE_URL } from "../utils/apiConfig";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Wallet, Zap, Eye, Send, Plus, CreditCard, ChevronRight,
-  Shield, CheckCircle2, TrendingUp, ArrowUpRight, ArrowDownRight,
+  Shield, ShieldCheck, CheckCircle2, TrendingUp, ArrowUpRight, ArrowDownRight, User,
   Smartphone, MonitorPlay, GraduationCap, Gift, Play, Flame, Tv, Wifi, Droplets, Car, FileText, Home, AlertCircle,
   Search, Bell, ChevronDown, Check, Building, RefreshCw, Grid, Award, Download, Clock, X, CheckCheck, Coins
 } from "lucide-react";

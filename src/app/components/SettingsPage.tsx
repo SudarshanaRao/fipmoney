@@ -307,25 +307,31 @@ export default function SettingsPage() {
 
   const handleStartFieldChange = async (type: "email" | "mobile") => {
     setChangeFieldType(type);
-    setChangeStep(1);
     setCurrentVerifyOtp("");
     setNewValueInput("");
     setNewVerifyOtp("");
 
+    if (type === "email") {
+      const targetEmail = (email || loggedInUser?.email || "").trim();
+      // If user has NO existing email (or dummy email), skip Step 1 and go directly to Step 2 (enter new email)
+      if (!targetEmail || targetEmail.endsWith('@fipmoney.com')) {
+        setChangeStep(2);
+        return;
+      }
+    }
+
+    setChangeStep(1);
     setIsSendingOtp(true);
     try {
       if (type === "email") {
-        const targetEmail = email || loggedInUser?.email || "";
-        if (targetEmail) {
-          let res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: targetEmail, userName: fullName || loggedInUser?.username || "Valued Member" })
-          });
-          if (res.ok) {
-            const data = await res.json();
-            showAlert("OTP sent successfully!", "success", "OTP Sent");
-          }
+        const targetEmail = (email || loggedInUser?.email || "").trim();
+        let res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: targetEmail, userName: fullName || loggedInUser?.username || "Valued Member" })
+        });
+        if (res.ok) {
+          showAlert(`Security OTP sent to current email (${targetEmail})`, "success", "OTP Sent");
         }
       } else {
         const targetMobile = mobileNumber || loggedInMobile;
@@ -335,6 +341,9 @@ export default function SettingsPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ mobile: targetMobile })
           });
+          if (res.ok) {
+            showAlert(`Security OTP sent to current mobile (+91 ${targetMobile})`, "success", "OTP Sent");
+          }
         }
       }
     } catch (err) {
@@ -711,7 +720,7 @@ export default function SettingsPage() {
           {/* LEFT: Live Form Column */}
           <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] border border-gray-150 shadow-[0_10px_30px_rgba(0,0,0,0.015)] space-y-6">
 
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               {activeSubTab === "profile" && (
                 <motion.div
                   key="profile"
@@ -1727,12 +1736,15 @@ export default function SettingsPage() {
           >
             <div>
               <h3 className="text-lg font-black text-slate-900 capitalize">
-                Change {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
+                {(!email || email.endsWith('@fipmoney.com')) && changeFieldType === "email"
+                  ? "Add & Verify Email Address"
+                  : `Change ${changeFieldType === "email" ? "Email Address" : "Mobile Number"}`}
               </h3>
               <p className="text-xs text-gray-400 font-semibold mt-1">
-                {changeStep === 1 && "Step 1: Cross-verify your current identity."}
-                {changeStep === 2 && "Step 2: Enter your new details."}
-                {changeStep === 3 && "Step 3: Verify your new details."}
+                {(!email || email.endsWith('@fipmoney.com')) && changeFieldType === "email"
+                  ? (changeStep === 2 ? "Enter your official email address below." : "Enter 6-digit OTP sent to your email.")
+                  : (changeStep === 1 ? "Step 1: Cross-verify your current identity." : changeStep === 2 ? "Step 2: Enter your new details." : "Step 3: Verify your new details.")
+                }
               </p>
             </div>
 

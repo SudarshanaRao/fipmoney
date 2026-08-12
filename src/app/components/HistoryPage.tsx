@@ -848,7 +848,7 @@ export default function HistoryPage() {
 
         {/* Transaction History Log list */}
         <div className="space-y-6">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {Object.keys(grouped).length === 0 ? (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
