@@ -5,7 +5,7 @@ import VaultTransaction from '../models/VaultTransaction.js';
 import Otp from '../models/Otp.js';
 import Referral from '../models/Referral.js';
 import { generateUniqueCardDetails } from '../utils/cardGenerator.js';
-import { uploadProfileImageToS3 } from '../utils/s3Uploader.js';
+import { uploadProfileImageToS3, generatePresignedUploadUrl, generatePresignedViewUrl, deleteObjectFromS3 } from '../utils/s3Uploader.js';
 import { initializeUserAml, updateKycAmlScore, evaluateTransactionAml } from '../utils/amlEvaluator.js';
 import { sendTemplatedEmail } from '../utils/emailService.js';
 
@@ -333,10 +333,11 @@ const getAuthMinimalUser = (userDoc) => {
   return {
     userId: obj.userId,
     userCode: obj.userCode,
-    mobileNumber: encryptData256(rawMobile),
+    mobileNumber: rawMobile,
     maskedMobile: maskMobile(rawMobile),
+    email: obj.email || '',
     username: obj.username || '',
-    fullName: obj.fullName || '',
+    fullName: obj.fullName || obj.username || obj.firstName || '',
     status: obj.status || 'ACTIVE',
     isKycCompleted: Boolean(obj.isKycCompleted),
     referralCode: obj.referralCode || ''
@@ -352,8 +353,8 @@ const getSafeUser = (userDoc) => {
     username: obj.username,
     firstName: obj.firstName,
     lastName: obj.lastName,
-    fullName: obj.fullName,
-    mobileNumber: encryptData256(rawMobile),
+    fullName: obj.fullName || obj.username || obj.firstName || '',
+    mobileNumber: rawMobile,
     maskedMobile: maskMobile(rawMobile),
     email: obj.email,
     profileImage: obj.profileImage,
@@ -1271,7 +1272,7 @@ export const getProfileSettings = async (req, res, next) => {
       mobileNumber: user.mobileNumber,
       email: user.email,
       username: user.username,
-      fullName: user.fullName,
+      fullName: user.fullName || user.username || user.firstName || '',
       firstName: user.firstName,
       lastName: user.lastName,
       profileImage: user.profileImage,
@@ -1344,7 +1345,164 @@ export const getReferralsTracking = async (req, res, next) => {
   }
 };
 
-// @desc    Upload Profile Image
+// @desc    Generate S3 Presigned Upload URL for Direct Frontend -> Private S3 Upload
+// @route   POST /api/users/profile/image/upload-url
+export const getPresignedUploadUrl = async (req, res, next) => {
+  try {
+    const { mobile, fileName, contentType } = req.body;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required' });
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({
+      $or: [
+        { mobileNumber: cleanMobile },
+        { email: cleanMobile },
+        { userCode: cleanMobile },
+        { userId: cleanMobile }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const presignedData = await generatePresignedUploadUrl(user.userId, contentType || 'image/jpeg');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Presigned upload URL generated successfully',
+      data: presignedData,
+      uploadUrl: presignedData.uploadUrl,
+      objectKey: presignedData.objectKey
+    });
+  } catch (error) {
+    console.error('Error generating presigned upload URL:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate presigned upload URL', error: error.message });
+  }
+};
+
+// @desc    Confirm S3 Profile Image Upload and Update User Object Key in MongoDB
+// @route   POST /api/users/profile/image/confirm
+export const confirmProfileImageUpload = async (req, res, next) => {
+  try {
+    const { mobile, objectKey } = req.body;
+    if (!mobile || !objectKey) {
+      return res.status(400).json({ success: false, message: 'Mobile number and objectKey are required' });
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({
+      $or: [
+        { mobileNumber: cleanMobile },
+        { email: cleanMobile },
+        { userCode: cleanMobile },
+        { userId: cleanMobile }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Delete old profile image from private S3 if present
+    if (user.profileImageKey && user.profileImageKey !== objectKey) {
+      await deleteObjectFromS3(user.profileImageKey);
+    }
+
+    // Generate signed GET URL for immediate viewing
+    const viewUrl = await generatePresignedViewUrl(objectKey);
+
+    // Save objectKey & viewUrl in MongoDB
+    user.profileImageKey = objectKey;
+    user.profileImage = viewUrl;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile image updated successfully in database',
+      profileImageKey: objectKey,
+      imageUrl: viewUrl,
+      data: getSafeUser(user)
+    });
+  } catch (error) {
+    console.error('Error confirming profile image upload:', error);
+    res.status(500).json({ success: false, message: 'Failed to confirm profile image upload', error: error.message });
+  }
+};
+
+// @desc    Get Temporary Signed View URL for Private Profile Image
+// @route   GET /api/users/profile/image
+export const getProfileImageUrl = async (req, res, next) => {
+  try {
+    const mobile = req.query.mobile || req.query.userId;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number or userId is required' });
+    }
+
+    const cleanId = String(mobile).trim();
+    const user = await User.findOne({
+      $or: [
+        { mobileNumber: cleanId },
+        { userId: cleanId },
+        { userCode: cleanId }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const targetKey = user.profileImageKey || user.profileImage;
+    const viewUrl = await generatePresignedViewUrl(targetKey);
+
+    return res.status(200).json({
+      success: true,
+      profileImageKey: user.profileImageKey || '',
+      imageUrl: viewUrl || user.profileImage || ''
+    });
+  } catch (error) {
+    console.error('Error fetching profile image URL:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch profile image URL', error: error.message });
+  }
+};
+
+// @desc    Delete Profile Image from S3 and MongoDB
+// @route   DELETE /api/users/profile/image
+export const deleteProfileImage = async (req, res, next) => {
+  try {
+    const { mobile } = req.body;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required' });
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({ mobileNumber: cleanMobile });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.profileImageKey) {
+      await deleteObjectFromS3(user.profileImageKey);
+    }
+
+    user.profileImageKey = '';
+    user.profileImage = '';
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile photo removed successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting profile image:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete profile image', error: error.message });
+  }
+};
+
+// @desc    Upload Profile Image (Legacy direct endpoint fallback)
 // @route   POST /api/users/profile-image
 export const uploadProfileImage = async (req, res, next) => {
   try {
@@ -1374,16 +1532,19 @@ export const uploadProfileImage = async (req, res, next) => {
     // Upload to S3
     const fileBuffer = req.file.buffer;
     const mimeType = req.file.mimetype;
-    const imageUrl = await uploadProfileImageToS3(fileBuffer, mimeType, user.userId);
+    const objectKey = await uploadProfileImageToS3(fileBuffer, mimeType, user.userId);
+    const viewUrl = await generatePresignedViewUrl(objectKey);
 
     // Update MongoDB
-    user.profileImage = imageUrl;
+    user.profileImageKey = objectKey;
+    user.profileImage = viewUrl;
     await user.save();
 
     res.status(200).json({
       success: true,
       message: 'Profile image uploaded successfully',
-      imageUrl: imageUrl
+      profileImageKey: objectKey,
+      imageUrl: viewUrl
     });
   } catch (error) {
     console.error('Profile image upload error:', error);

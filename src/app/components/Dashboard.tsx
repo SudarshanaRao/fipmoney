@@ -247,7 +247,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
       });
       // Fetch latest user KYC state
       fetch(`${API_BASE_URL}/users/search?mobile=${loggedInMobile}`)
-        .then(res => res.json())
+        .then(res => {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            return res.json();
+          }
+          throw new Error(`Non-JSON response (HTTP ${res.status})`);
+        })
         .then(data => {
           if (data.success && data.data && data.data.length > 0) {
             const user = data.data[0];
@@ -270,11 +276,17 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             }
           }
         })
-        .catch(err => console.warn("Failed to fetch user details:", err));
+        .catch(err => console.warn("Notice fetching user details:", err.message || err));
 
       // Fetch dashboard data for premium card
       fetch(`${API_BASE_URL}/users/dashboard?mobile=${loggedInMobile}`)
-        .then(res => res.json())
+        .then(res => {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            return res.json();
+          }
+          throw new Error(`Non-JSON response (HTTP ${res.status})`);
+        })
         .then(data => {
           if (data.success && data.data && data.data.premiumCardEncrypted) {
             try {
@@ -293,7 +305,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             }
           }
         })
-        .catch(err => console.warn("Failed to fetch dashboard data:", err))
+        .catch(err => console.warn("Notice fetching dashboard data:", err.message || err))
         .finally(() => setIsLoadingCard(false));
     } else {
       setIsLoadingCard(false);

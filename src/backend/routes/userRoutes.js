@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
+import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPresignedUploadUrl, confirmProfileImageUpload, getProfileImageUrl, deleteProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -548,25 +548,91 @@ router.get('/referrals/summary', getReferralSummary);
 
 /**
  * @swagger
- * /api/users/profile-image:
+ * /api/users/profile/image/upload-url:
  *   post:
- *     summary: Upload Profile Image
- *     description: Uploads a user's profile image to S3 and updates MongoDB.
+ *     summary: Generate Presigned S3 Upload URL
+ *     description: Returns a temporary S3 PUT presigned URL for direct frontend image upload.
  *     tags:
  *       - Profile & Dashboard
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
  *               mobile: { type: string }
- *               image: { type: string, format: binary }
+ *               fileName: { type: string }
+ *               contentType: { type: string }
  *     responses:
  *       200:
- *         description: Profile image uploaded successfully.
+ *         description: Presigned upload URL generated.
  */
+router.post('/profile/image/upload-url', getPresignedUploadUrl);
+router.post('/profile-image/upload-url', getPresignedUploadUrl);
+
+/**
+ * @swagger
+ * /api/users/profile/image/confirm:
+ *   post:
+ *     summary: Confirm Direct S3 Image Upload
+ *     description: Updates MongoDB user profileImageKey after successful S3 upload.
+ *     tags:
+ *       - Profile & Dashboard
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mobile: { type: string }
+ *               objectKey: { type: string }
+ *     responses:
+ *       200:
+ *         description: Profile image confirmed in database.
+ */
+router.post('/profile/image/confirm', confirmProfileImageUpload);
+router.post('/profile-image/confirm', confirmProfileImageUpload);
+
+/**
+ * @swagger
+ * /api/users/profile/image:
+ *   get:
+ *     summary: Get Temporary Signed View URL for Profile Photo
+ *     description: Generates a temporary S3 GET signed URL for private user avatar viewing.
+ *     tags:
+ *       - Profile & Dashboard
+ *     parameters:
+ *       - in: query
+ *         name: mobile
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Temporary view URL generated.
+ *   delete:
+ *     summary: Delete User Profile Photo
+ *     description: Removes object from S3 and resets MongoDB profile keys.
+ *     tags:
+ *       - Profile & Dashboard
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               mobile: { type: string }
+ *     responses:
+ *       200:
+ *         description: Profile image deleted.
+ */
+router.get('/profile/image', getProfileImageUrl);
+router.get('/profile-image', getProfileImageUrl);
+router.delete('/profile/image', deleteProfileImage);
+router.delete('/profile-image', deleteProfileImage);
+
 router.post('/profile-image', upload.single('image'), uploadProfileImage);
 
 /**

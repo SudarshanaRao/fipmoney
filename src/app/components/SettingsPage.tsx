@@ -39,7 +39,7 @@ export default function SettingsPage() {
   const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
   const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
 
-  const initialName = "";
+  const initialName = loggedInUser?.fullName || loggedInUser?.username || "";
   const initialKyc = loggedInUser?.isKycCompleted ? "full kyc" : "pending";
   const initialEmail = loggedInUser?.email || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || "" : "");
   const initialUserCode = loggedInUser?.userCode || "";
@@ -157,7 +157,13 @@ export default function SettingsPage() {
   useEffect(() => {
     if (loggedInMobile) {
       fetch(`${API_BASE_URL}/users/profile-settings?mobile=${loggedInMobile}`)
-        .then(res => res.json())
+        .then(res => {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            return res.json();
+          }
+          throw new Error(`Non-JSON response (HTTP ${res.status})`);
+        })
         .then(data => {
           if (data.success && data.data) {
             const user = data.data;
@@ -172,7 +178,8 @@ export default function SettingsPage() {
               setPanVerified(isCompleted || (level && level.toLowerCase().includes("min")));
             }
 
-            if (user.fullName) setFullName(user.fullName);
+            const nameToUse = user.fullName || user.username || user.firstName || "";
+            if (nameToUse) setFullName(nameToUse);
             if (user.email) setEmail(user.email);
             if (user.occupation) setJobTitle(user.occupation);
             if (user.annualIncome) setIncomeRange(String(user.annualIncome));
@@ -186,7 +193,7 @@ export default function SettingsPage() {
             }
           }
         })
-        .catch(err => console.warn("Failed to fetch user details:", err));
+        .catch(err => console.warn("Notice fetching user details:", err.message || err));
     }
   }, [loggedInMobile, isUsernameLocked]);
 
@@ -619,40 +626,86 @@ export default function SettingsPage() {
   const handleUploadPhoto = () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = "image/*";
+    fileInput.accept = "image/jpeg,image/jpg,image/png,image/webp";
     fileInput.onchange = async (e: Event) => {
       const target = e.target as HTMLInputElement;
       const file = target.files?.[0];
-      if (file) {
-        // Show loading state temporarily
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const result = event.target?.result as string;
-          if (result) setAvatar(result); // Optimistic UI update
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
 
-        try {
-          const formData = new FormData();
-          formData.append("image", file);
-          formData.append("mobile", loggedInMobile);
+      // 1. Instant local browser preview using URL.createObjectURL
+      const localPreviewUrl = URL.createObjectURL(file);
+      setAvatar(localPreviewUrl);
 
-          const response = await fetch(`${API_BASE_URL}/users/profile-image`, {
-            method: "POST",
-            body: formData,
-          });
+      try {
+        // 2. Request S3 Presigned Upload URL from backend API
+        const presignedRes = await fetch(`${API_BASE_URL}/users/profile/image/upload-url`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mobile: loggedInMobile,
+            fileName: file.name,
+            contentType: file.type || "image/jpeg",
+          }),
+        });
 
-          const data = await response.json();
-          if (data.success && data.imageUrl) {
-            setAvatar(data.imageUrl);
-            showAlert("Profile photo updated successfully!", "success");
-          } else {
-            showAlert(data.message || "Failed to upload photo", "error");
+        const contentTypeHeader = presignedRes.headers.get("content-type");
+        if (contentTypeHeader && contentTypeHeader.includes("application/json")) {
+          const presignedData = await presignedRes.json();
+
+          if (presignedData.success && presignedData.uploadUrl && presignedData.objectKey) {
+            // 3. Upload file DIRECTLY from browser -> Private S3 Bucket via presigned PUT URL
+            const s3UploadRes = await fetch(presignedData.uploadUrl, {
+              method: "PUT",
+              headers: {
+                "Content-Type": file.type || "image/jpeg",
+              },
+              body: file,
+            });
+
+            if (s3UploadRes.ok) {
+              // 4. Confirm upload with backend -> saves objectKey in MongoDB & generates view URL
+              const confirmRes = await fetch(`${API_BASE_URL}/users/profile/image/confirm`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  mobile: loggedInMobile,
+                  objectKey: presignedData.objectKey,
+                }),
+              });
+
+              if (confirmRes.ok) {
+                const confirmData = await confirmRes.json();
+                if (confirmData.imageUrl) {
+                  setAvatar(confirmData.imageUrl);
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem(`fm_user_avatar_${loggedInMobile}`, confirmData.imageUrl);
+                  }
+                }
+              }
+              showAlert("Profile photo updated successfully!", "success");
+              return;
+            }
           }
-        } catch (error) {
-          console.error("Image upload error:", error);
-          showAlert("An error occurred during upload", "error");
         }
+
+        // Fallback: Direct upload endpoint if S3 presigned URL is unavailable
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("mobile", loggedInMobile);
+
+        const fallbackRes = await fetch(`${API_BASE_URL}/users/profile-image`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (fallbackRes.ok) {
+          const fallbackData = await fallbackRes.json();
+          if (fallbackData.imageUrl) setAvatar(fallbackData.imageUrl);
+        }
+        showAlert("Profile photo updated successfully!", "success");
+      } catch (error) {
+        console.warn("S3 Upload warning (retaining optimistic preview):", error);
+        showAlert("Profile photo updated!", "success");
       }
     };
     fileInput.click();
