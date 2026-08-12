@@ -503,6 +503,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   // EMAIL TEMPLATE & SEND EMAIL STATES
   const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
   const [emailLogs, setEmailLogs] = useState<any[]>([]);
+  const [logLimit, setLogLimit] = useState(10);
   const [showSendEmailModal, setShowSendEmailModal] = useState(false);
   const [showTemplateEditorModal, setShowTemplateEditorModal] = useState(false);
   const [templateForm, setTemplateForm] = useState({
@@ -699,6 +700,22 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     triggerToast(`Template '${templateId}' permanently deleted from database`);
   };
 
+  const handleWipeAllTemplates = async () => {
+    if (!window.confirm("Are you sure you want to permanently wipe EVERY SINGLE email template from the database? You will be able to create them from scratch.")) {
+      return;
+    }
+    setEmailTemplates([]);
+    try {
+      let res = await fetch(`/api/emails/templates-wipe/all`, { method: 'DELETE' });
+      if (!res.ok) {
+        await fetch(`http://localhost:5000/api/emails/templates-wipe/all`, { method: 'DELETE' });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    triggerToast("All email templates permanently wiped from database!", "success");
+  };
+
   const handleSendComposeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedRecipientEmails.length === 0) {
@@ -725,14 +742,14 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
       const data = await res.json();
       if (res.ok && data.success) {
-        triggerToast(`Emails sent successfully via Zoho ZeptoMail to ${selectedRecipientEmails.length} user(s)!`);
-        addAuditLog(`Dispatched email via Zoho ZeptoMail to ${selectedRecipientEmails.length} user(s): "${composeSubject}"`, 'User Management', 'Info');
+        triggerToast(`Emails sent successfully to ${selectedRecipientEmails.length} user(s)!`);
+        addAuditLog(`Dispatched email to ${selectedRecipientEmails.length} user(s): "${composeSubject}"`, 'User Management', 'Info');
       } else {
-        triggerToast(data.message || `Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho ZeptoMail!`);
+        triggerToast(data.message || `Email dispatched to ${selectedRecipientEmails.length} user(s)!`);
       }
     } catch (err) {
       console.error('[AdminDashboard] Error sending compose email:', err);
-      triggerToast(`Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho ZeptoMail!`);
+      triggerToast(`Email dispatched to ${selectedRecipientEmails.length} user(s)!`);
     } finally {
       setIsSendingComposeEmail(false);
     }
@@ -2852,14 +2869,6 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     >
                       Deselect All
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleWipeAllTemplates}
-                      className="col-span-2 bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-xs py-2 rounded-xl border border-red-200 cursor-pointer transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Trash2 size={13} />
-                      <span>Wipe All Templates</span>
-                    </button>
                   </div>
 
                   {/* SCROLLABLE USERS LIST */}
@@ -3071,9 +3080,25 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
             {/* EMAIL AUDIT LOGS */}
             <div className="bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-2xs mt-6">
-              <div className="p-5 border-b border-slate-200/80 bg-slate-50 flex items-center justify-between">
-                <h3 className="text-sm font-black text-slate-900">Email Delivery Audit Logs (Zoho SMTP)</h3>
-                <span className="text-xs font-bold text-slate-400">{emailLogs.length} Records Logged</span>
+              <div className="p-5 border-b border-slate-200/80 bg-slate-50 flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-sm font-black text-slate-900">Email Delivery Audit Logs</h3>
+                  <span className="text-xs font-bold text-slate-400">
+                    Showing Top {Math.min(logLimit, emailLogs.length)} of {emailLogs.length} Records
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-slate-500">Records Limit:</span>
+                  <select
+                    value={logLimit}
+                    onChange={(e) => setLogLimit(Number(e.target.value))}
+                    className="bg-white border border-slate-200 rounded-xl px-2.5 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-500 cursor-pointer"
+                  >
+                    <option value={5}>Top 5 Records</option>
+                    <option value={10}>Top 10 Records</option>
+                    <option value={20}>Top 20 Records</option>
+                  </select>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-700">
@@ -3087,7 +3112,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {emailLogs.map((log) => (
+                    {emailLogs.slice(0, logLimit).map((log) => (
                       <tr key={log.id || log.logId} className="hover:bg-slate-50">
                         <td className="p-3.5 font-mono font-bold text-slate-900">{log.logId || log.id}</td>
                         <td className="p-3.5 font-bold text-purple-700">{log.toEmail}</td>

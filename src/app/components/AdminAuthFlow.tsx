@@ -497,7 +497,7 @@ export default function AdminAuthFlow({
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <label className="text-xs font-extrabold text-slate-700">
-                            Official Email (Zoho ZeptoMail)
+                            Official Email Address
                           </label>
                           {isEmailVerified && (
                             <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
@@ -564,7 +564,7 @@ export default function AdminAuthFlow({
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <label className="text-xs font-extrabold text-slate-700">
-                            Mobile Number (SMSCountry)
+                            Mobile Number
                           </label>
                           {isMobileVerified && (
                             <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
@@ -728,9 +728,9 @@ export default function AdminAuthFlow({
                         <div>
                           <div className="text-xs font-black text-slate-900">OTP Verification Status</div>
                           <div className="text-[11px] font-semibold text-slate-500 mt-0.5 flex items-center gap-2">
-                            <span>Email (ZeptoMail): {isEmailVerified ? "✅ Verified" : "❌ Pending"}</span>
+                            <span>Email OTP: {isEmailVerified ? "✅ Verified" : "❌ Pending"}</span>
                             <span>•</span>
-                            <span>Mobile (SMSCountry): {isMobileVerified ? "✅ Verified" : "❌ Pending"}</span>
+                            <span>Mobile OTP: {isMobileVerified ? "✅ Verified" : "❌ Pending"}</span>
                           </div>
                         </div>
                       </div>

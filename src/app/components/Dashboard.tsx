@@ -1063,7 +1063,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 </div>
                 <div>
                   <div className="text-xs font-bold text-purple-950">Email Invoice Delivery</div>
-                  <div className="text-[10px] font-semibold text-purple-700">Official GST invoices sent directly via Zoho ZeptoMail</div>
+                  <div className="text-[10px] font-semibold text-purple-700">Official GST invoices sent directly to your verified inbox</div>
                 </div>
               </div>
 
