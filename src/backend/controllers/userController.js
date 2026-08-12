@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import VirtualCard from '../models/VirtualCard.js';
 import VaultTransaction from '../models/VaultTransaction.js';
@@ -640,11 +641,30 @@ export const getUsers = async (req, res, next) => {
 // @route   GET /api/users/:id
 export const getUserById = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id);
+    const targetId = req.params.id;
+
+    // Check if targetId is a valid Mongo ObjectId
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(targetId);
+    if (!isValidObjectId) {
+      // Search by custom userId / userCode / mobileNumber
+      const userByCode = await User.findOne({
+        $or: [{ userId: targetId }, { userCode: targetId }, { mobileNumber: targetId }]
+      });
+      if (userByCode) {
+        return res.status(200).json({
+          success: true,
+          data: getSafeUser(userByCode),
+        });
+      }
+      res.status(404);
+      throw new Error('Route or User not found');
+    }
+
+    const user = await User.findById(targetId);
     if (user) {
       res.status(200).json({
         success: true,
-        data: user,
+        data: getSafeUser(user),
       });
     } else {
       res.status(404);
