@@ -124,6 +124,20 @@ export const deleteEmailTemplate = async (req, res, next) => {
   }
 };
 
+// @desc    Wipe all HTML email templates from database
+// @route   DELETE /api/emails/templates-wipe/all
+export const deleteAllEmailTemplates = async (req, res, next) => {
+  try {
+    await EmailTemplate.deleteMany({});
+    return res.status(200).json({
+      success: true,
+      message: 'All email templates have been permanently wiped from the database.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Send Templated Email to User
 // @route   POST /api/emails/send
 export const sendEmailToUser = async (req, res, next) => {
@@ -178,7 +192,7 @@ export const sendWelcomeEmail = async (req, res, next) => {
     const result = await sendTemplatedEmail({
       toEmail: targetEmail,
       templateId: 'WELCOME_SIGNUP',
-      fromEmail: 'support@fipmoney.com',
+      fromEmail: 'noreply@fipmoney.com',
       variables: {
         userName: targetName,
         mobileNumber: mobileNumber || (user ? user.mobileNumber : ''),
@@ -236,7 +250,7 @@ export const getEmailLogs = async (req, res, next) => {
 // @route   POST /api/emails/send-to-users
 export const sendEmailToUsers = async (req, res, next) => {
   try {
-    const { recipients, subject, body, templateId, fromEmail } = req.body;
+    const { recipients, subject, body, templateId, fromEmail, category } = req.body;
 
     if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
       return res.status(400).json({
@@ -282,7 +296,7 @@ export const sendEmailToUsers = async (req, res, next) => {
 
     const results = [];
     for (const email of emails) {
-      const result = await sendCustomEmail(email, subject, body, fromEmail);
+      const result = await sendCustomEmail(email, subject, body, fromEmail, category);
       results.push({
         email,
         success: result.success,

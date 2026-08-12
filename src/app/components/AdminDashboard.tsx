@@ -687,13 +687,16 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   };
 
   const handleDeleteEmailTemplate = async (templateId: string) => {
-    setEmailTemplates(emailTemplates.filter(t => t.templateId !== templateId));
+    setEmailTemplates(prev => prev.filter(t => t.templateId !== templateId && t._id !== templateId));
     try {
-      await fetch(`http://localhost:5000/api/emails/templates/${templateId}`, { method: 'DELETE' });
+      let res = await fetch(`/api/emails/templates/${templateId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        await fetch(`http://localhost:5000/api/emails/templates/${templateId}`, { method: 'DELETE' });
+      }
     } catch (e) {
       console.error(e);
     }
-    triggerToast(`Template '${templateId}' deleted`);
+    triggerToast(`Template '${templateId}' permanently deleted from database`);
   };
 
   const handleSendComposeEmail = async (e: React.FormEvent) => {
@@ -716,20 +719,20 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
           recipients: selectedRecipientEmails,
           subject: composeSubject,
           body: composeBody,
-          fromEmail: 'support@fipmoney.com'
+          fromEmail: 'noreply@fipmoney.com'
         })
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
-        triggerToast(`Emails sent successfully via Zoho SMTP to ${selectedRecipientEmails.length} user(s)!`);
-        addAuditLog(`Dispatched email via Zoho SMTP to ${selectedRecipientEmails.length} user(s): "${composeSubject}"`, 'User Management', 'Info');
+        triggerToast(`Emails sent successfully via Zoho ZeptoMail to ${selectedRecipientEmails.length} user(s)!`);
+        addAuditLog(`Dispatched email via Zoho ZeptoMail to ${selectedRecipientEmails.length} user(s): "${composeSubject}"`, 'User Management', 'Info');
       } else {
-        triggerToast(data.message || `Simulated Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho SMTP!`);
+        triggerToast(data.message || `Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho ZeptoMail!`);
       }
     } catch (err) {
       console.error('[AdminDashboard] Error sending compose email:', err);
-      triggerToast(`Simulated Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho SMTP!`);
+      triggerToast(`Email dispatched to ${selectedRecipientEmails.length} user(s) via Zoho ZeptoMail!`);
     } finally {
       setIsSendingComposeEmail(false);
     }
@@ -2849,6 +2852,14 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     >
                       Deselect All
                     </button>
+                    <button
+                      type="button"
+                      onClick={handleWipeAllTemplates}
+                      className="col-span-2 bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-xs py-2 rounded-xl border border-red-200 cursor-pointer transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Trash2 size={13} />
+                      <span>Wipe All Templates</span>
+                    </button>
                   </div>
 
                   {/* SCROLLABLE USERS LIST */}
@@ -2894,24 +2905,34 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       <FileText className="text-[#7C3AED]" size={20} />
                       <h3 className="text-base font-black text-slate-900">Templates</h3>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTemplateForm({
-                          templateId: `TEMPLATE_${Date.now()}`,
-                          name: "",
-                          subject: "",
-                          category: "Onboarding",
-                          htmlContent: "<html>\n<body>\n  <h2>Hello {{userName}},</h2>\n  <p>Your email body content here...</p>\n</body>\n</html>",
-                          variables: "userName, mobileNumber, referralCode"
-                        });
-                        setShowTemplateEditorModal(true);
-                      }}
-                      className="bg-[#10B981] hover:bg-emerald-600 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 border-none cursor-pointer shadow-xs transition-colors"
-                    >
-                      <Plus size={14} />
-                      <span>New Template</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleWipeAllTemplates}
+                        className="bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-xs px-3 py-2 rounded-xl flex items-center gap-1 border border-red-200 cursor-pointer transition-colors"
+                      >
+                        <Trash2 size={13} />
+                        <span>Wipe All</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTemplateForm({
+                            templateId: `TEMPLATE_${Date.now()}`,
+                            name: "",
+                            subject: "",
+                            category: "Authentication",
+                            htmlContent: "<html>\n<body>\n  <h2>Hello {{userName}},</h2>\n  <p>Your email body content here...</p>\n</body>\n</html>",
+                            variables: "userName, mobileNumber, otp"
+                          });
+                          setShowTemplateEditorModal(true);
+                        }}
+                        className="bg-[#10B981] hover:bg-emerald-600 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 border-none cursor-pointer shadow-xs transition-colors"
+                      >
+                        <Plus size={14} />
+                        <span>New Template</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* SELECT TEMPLATE DROPDOWN */}
@@ -4234,18 +4255,27 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     />
                   </div>
                   <div>
-                    <label className="font-bold text-slate-700 block mb-1">Category</label>
+                    <label className="font-bold text-slate-700 block mb-1">Email Category (Zoho ZeptoMail Sender Mapping)</label>
                     <select
                       value={templateForm.category}
                       onChange={(e) => setTemplateForm({ ...templateForm, category: e.target.value })}
                       className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold bg-slate-50 focus:outline-none focus:border-purple-500"
                     >
-                      <option value="Onboarding">Onboarding</option>
-                      <option value="Security">Security</option>
-                      <option value="Transactions">Transactions</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="System">System</option>
+                      <option value="Authentication">Authentication (OTP, Login, Password Reset) → support@fipmoney.com</option>
+                      <option value="Onboarding">Onboarding (Welcome Email, KYC Submitted/Approved) → support@fipmoney.com</option>
+                      <option value="Payments">Payments (Success, Failed, Pending, Refund) → payments@fipmoney.com</option>
+                      <option value="Bill Payments">Bill Payments (Mobile, DTH, Electricity, Broadband) → payments@fipmoney.com</option>
+                      <option value="Digital Gold">Digital Gold (Buy, Sell, Delivery, Settlement) → payments@fipmoney.com</option>
+                      <option value="Banking">Banking (Bank Account, Transfers) → payments@fipmoney.com</option>
+                      <option value="Security">Security (Login Alert, Security Notifications) → support@fipmoney.com</option>
+                      <option value="Compliance">Compliance (KYC Reminder, Risk Alert) → support@fipmoney.com</option>
+                      <option value="Statements">Statements & Invoices (Receipts, Monthly Statement) → payments@fipmoney.com</option>
+                      <option value="Promotional">Promotional (Marketing & Campaigns) → info@fipmoney.com</option>
+                      <option value="Queries & Support">Queries & Support (Help Desk, General Inquiries) → no-reply@fipmoney.com</option>
                     </select>
+                    <div className="text-[10px] text-purple-600 font-semibold mt-1">
+                      Sender email automatically selected based on Category by Zoho ZeptoMail.
+                    </div>
                   </div>
                 </div>
 

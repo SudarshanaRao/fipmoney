@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
+import { SendMailClient } from 'zeptomail';
 import EmailTemplate from '../models/EmailTemplate.js';
 import EmailLog from '../models/EmailLog.js';
 
@@ -532,29 +532,14 @@ const DEFAULT_TEMPLATES = [
 </body>
 </html>`
   }
-];
+// Default HTML Email Templates Seed Data - Empty so templates can be created from scratch
+const DEFAULT_TEMPLATES = [];
 
-// Helper to seed or update default HTML templates
+let isDefaultTemplatesSeeded = true;
+
+// Helper to seed default HTML templates
 export async function seedDefaultEmailTemplates() {
-  try {
-    for (const tmpl of DEFAULT_TEMPLATES) {
-      const existing = await EmailTemplate.findOne({ templateId: tmpl.templateId });
-      if (!existing) {
-        await EmailTemplate.create(tmpl);
-        console.log(`[EmailService] Seeded HTML template: ${tmpl.templateId}`);
-      } else if (tmpl.templateId === 'FIPMONEY_OTP_VERIFICATION' && existing.htmlContent !== tmpl.htmlContent) {
-        existing.name = tmpl.name;
-        existing.subject = tmpl.subject;
-        existing.htmlContent = tmpl.htmlContent;
-        existing.body = tmpl.htmlContent;
-        existing.variables = tmpl.variables;
-        await existing.save();
-        console.log(`[EmailService] Updated FIPMONEY_OTP_VERIFICATION template to user design`);
-      }
-    }
-  } catch (err) {
-    console.error('[EmailService] Error seeding email templates:', err.message);
-  }
+  return;
 }
 
 // Render HTML template with dynamic variables
@@ -568,50 +553,117 @@ export function renderHtmlTemplate(html, variables = {}) {
   return rendered;
 }
 
-// Initialize AWS SES v2 Client
-function getSesV2Client() {
-  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-  const region = process.env.AWS_REGION || 'ap-south-1';
+// Initialize Zoho ZeptoMail Client
+function getZeptoClient() {
+  const url = process.env.ZEPTOMAIL_URL || 'https://api.zeptomail.in/v1.1/email';
+  const token = process.env.ZEPTOMAIL_TOKEN || 'Zoho-enczapikey PHtE6r1cRrjqjW8r8BgGt6XrE5OhPNsr/e8zf1JA5NpGWfYCS00HqN8slz++rRkoVKVEFKGanYpu47iV5umEJDm7MWxJXGqyqK3sx/VYSPOZsbq6x00euF8ZfkHVUI/sd9Bo0STVud+X';
 
-  if (accessKeyId && secretAccessKey) {
-    return new SESv2Client({
-      region,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-    });
+  if (token) {
+    return new SendMailClient({ url, token });
   }
   return null;
 }
 
-// Create Nodemailer Transporter Fallback
-function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+// Helper to format sender address for Zoho ZeptoMail
+function formatSender(fromEmail) {
+  let address = process.env.ZEPTOMAIL_FROM_ADDRESS || 'support@fipmoney.com';
+  let name = process.env.ZEPTOMAIL_FROM_NAME || 'FipMoney';
 
-  if (host && user && pass) {
-    return nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
+  if (fromEmail) {
+    if (fromEmail.includes('<') && fromEmail.includes('>')) {
+      const match = fromEmail.match(/"?([^"<]+)"?\s*<([^>]+)>/);
+      if (match) {
+        name = match[1].trim();
+        address = match[2].trim();
+      } else {
+        address = fromEmail.trim();
+      }
+    } else {
+      address = fromEmail.trim();
+    }
   }
 
-  return null; // Fallback mock
+  return { address, name };
 }
 
-// Send Templated HTML Email via AWS SES v2 API (or Nodemailer SMTP)
+/**
+ * Resolves the appropriate Zoho ZeptoMail sender address based on email category:
+ * 1. Authentication, Onboarding, Security, Compliance -> support@fipmoney.com
+ * 2. Payments, Bill Payments, Digital Gold, Banking, Statements -> payments@fipmoney.com
+ * 3. Promotional, Marketing -> info@fipmoney.com
+ * 4. Queries & Support / Help -> no-reply@fipmoney.com
+ */
+export function getSenderAddressByCategory(category = '', explicitFromEmail = null) {
+  if (explicitFromEmail && typeof explicitFromEmail === 'string' && explicitFromEmail.trim().length > 0 && explicitFromEmail.includes('@')) {
+    return formatSender(explicitFromEmail);
+  }
+
+  const catLower = (category || '').toLowerCase().trim();
+
+  // 1. Transactional / Authentication / Onboarding / Security / Compliance -> support@fipmoney.com
+  if (
+    catLower.includes('auth') ||
+    catLower.includes('otp') ||
+    catLower.includes('onboard') ||
+    catLower.includes('security') ||
+    catLower.includes('compliance') ||
+    catLower.includes('kyc') ||
+    catLower.includes('transactional')
+  ) {
+    return { address: 'support@fipmoney.com', name: 'FipMoney Support' };
+  }
+
+  // 2. Payments, Bill Payments, Digital Gold, Banking, Statements, Receipts, Transactions -> payments@fipmoney.com
+  if (
+    catLower.includes('payment') ||
+    catLower.includes('bill') ||
+    catLower.includes('gold') ||
+    catLower.includes('silver') ||
+    catLower.includes('bank') ||
+    catLower.includes('invoice') ||
+    catLower.includes('receipt') ||
+    catLower.includes('statement') ||
+    catLower.includes('billing') ||
+    catLower.includes('transaction')
+  ) {
+    return { address: 'payments@fipmoney.com', name: 'FipMoney Payments' };
+  }
+
+  // 3. Promotional, Marketing -> info@fipmoney.com
+  if (
+    catLower.includes('promo') ||
+    catLower.includes('marketing') ||
+    catLower.includes('campaign') ||
+    catLower.includes('offer')
+  ) {
+    return { address: 'info@fipmoney.com', name: 'FipMoney Info' };
+  }
+
+  // 4. Queries, Support, Help -> no-reply@fipmoney.com
+  if (
+    catLower.includes('query') ||
+    catLower.includes('queries') ||
+    catLower.includes('help') ||
+    catLower.includes('desk') ||
+    catLower.includes('no-reply') ||
+    catLower.includes('noreply')
+  ) {
+    return { address: 'no-reply@fipmoney.com', name: 'FipMoney Support' };
+  }
+
+  // Default fallback -> support@fipmoney.com
+  return { address: 'support@fipmoney.com', name: 'FipMoney Support' };
+}
+
+// Legacy Zoho Mail SMTP Transporter - Locked for now
+function getTransporter() {
+  // Zoho SMTP mail sending is locked in favor of Zoho ZeptoMail
+  return null;
+}
+
+// Send Templated HTML Email via Zoho ZeptoMail API
 export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, variables = {} }) {
   const logId = 'EML' + Math.floor(100000 + Math.random() * 900000);
-  const senderAddress = fromEmail || process.env.SMTP_FROM || 'support@fipmoney.com';
   
   try {
     const template = await EmailTemplate.findOne({ templateId: String(templateId).toUpperCase() });
@@ -619,84 +671,42 @@ export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, varia
       throw new Error(`Email Template '${templateId}' not found in database.`);
     }
 
+    // Resolve sender address based on category rules
+    const sender = getSenderAddressByCategory(template.category, fromEmail);
+
     const renderedSubject = renderHtmlTemplate(template.subject, variables);
     const renderedHtml = renderHtmlTemplate(template.htmlContent, variables);
 
-    const sesClient = getSesV2Client();
-    const transporter = getTransporter();
+    const zeptoClient = getZeptoClient();
     let status = 'MOCK_DELIVERED';
     let errorMessage = '';
 
-    // Primary: Try AWS SES v2 API
-    if (sesClient) {
+    if (zeptoClient) {
       try {
-        const emailParams = {
-          FromEmailAddress: senderAddress.includes('<') ? senderAddress : `"FipMoney Support" <${senderAddress}>`,
-          Destination: {
-            ToAddresses: [toEmail],
-          },
-          Content: {
-            Simple: {
-              Subject: {
-                Data: renderedSubject,
-                Charset: 'UTF-8',
-              },
-              Body: {
-                Html: {
-                  Data: renderedHtml,
-                  Charset: 'UTF-8',
-                },
+        const recipientName = variables.userName || variables.name || 'Valued User';
+        await zeptoClient.sendMail({
+          from: sender,
+          to: [
+            {
+              email_address: {
+                address: toEmail,
+                name: recipientName,
               },
             },
-          },
-        };
-
-        if (process.env.AWS_SES_CONFIGURATION_SET) {
-          emailParams.ConfigurationSetName = process.env.AWS_SES_CONFIGURATION_SET;
-        }
-
-        const command = new SendEmailCommand(emailParams);
-
-        const sesResponse = await sesClient.send(command);
-        status = 'SENT';
-        console.log(`[AWS SES v2] Email sent to ${toEmail} | MessageId: ${sesResponse.MessageId}`);
-      } catch (sesErr) {
-        console.warn(`[AWS SES v2] SES Send warning: ${sesErr.message}. Falling back to Nodemailer SMTP.`);
-        if (transporter) {
-          try {
-            await transporter.sendMail({
-              from: senderAddress.includes('<') ? senderAddress : `"FipMoney Support" <${senderAddress}>`,
-              to: toEmail,
-              subject: renderedSubject,
-              html: renderedHtml,
-            });
-            status = 'SENT';
-          } catch (smtpErr) {
-            status = 'FAILED';
-            errorMessage = smtpErr.message;
-            console.error('[EmailService] SMTP send error:', smtpErr);
-          }
-        } else {
-          status = 'FAILED';
-          errorMessage = sesErr.message;
-        }
-      }
-    } else if (transporter) {
-      try {
-        await transporter.sendMail({
-          from: senderAddress.includes('<') ? senderAddress : `"FipMoney Support" <${senderAddress}>`,
-          to: toEmail,
+          ],
           subject: renderedSubject,
-          html: renderedHtml,
+          htmlbody: renderedHtml,
         });
+
         status = 'SENT';
-      } catch (err) {
+        console.log(`[Zoho ZeptoMail] Email sent successfully to ${toEmail} | Template: ${templateId}`);
+      } catch (zeptoErr) {
         status = 'FAILED';
-        errorMessage = err.message;
-        console.error('[EmailService] SMTP send error:', err);
+        errorMessage = zeptoErr.message || JSON.stringify(zeptoErr);
+        console.error(`[Zoho ZeptoMail Error] Failed to send email to ${toEmail}:`, errorMessage);
       }
     } else {
-      console.log(`[EmailService Mock] Simulated email sent from ${senderAddress} to ${toEmail} | Subject: "${renderedSubject}" | Template: ${templateId}`);
+      console.log(`[EmailService Mock] Simulated email sent from ${sender.address} to ${toEmail} | Subject: "${renderedSubject}" | Template: ${templateId}`);
     }
 
     const log = await EmailLog.create({
@@ -704,7 +714,7 @@ export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, varia
       toEmail,
       templateId,
       subject: renderedSubject,
-      variables: { ...variables, fromEmail: senderAddress },
+      variables: { ...variables, fromEmail: sender.address },
       status,
       error: errorMessage,
       sentAt: new Date(),
@@ -714,9 +724,9 @@ export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, varia
       success: status !== 'FAILED',
       logId,
       status,
-      senderAddress,
+      senderAddress: sender.address,
       renderedSubject,
-      message: status === 'SENT' ? `Email sent successfully via AWS SES to ${toEmail}` : 'Email logged and delivered in mock mode',
+      message: status === 'SENT' ? `Email sent successfully via Zoho ZeptoMail to ${toEmail}` : 'Email logged and delivered in mock mode',
       log,
     };
   } catch (err) {
@@ -726,7 +736,7 @@ export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, varia
       toEmail: toEmail || 'unknown@domain.com',
       templateId: templateId || 'UNKNOWN',
       subject: 'Failed Delivery',
-      variables: { ...variables, fromEmail: senderAddress },
+      variables: { ...variables, fromEmail: sender.address },
       status: 'FAILED',
       error: err.message,
       sentAt: new Date(),
@@ -741,7 +751,7 @@ export async function sendTemplatedEmail({ toEmail, templateId, fromEmail, varia
   }
 }
 
-// Bulk Email Sending Helper via AWS SES v2 API
+// Bulk Email Sending Helper via Zoho ZeptoMail API
 export async function sendBulkEmail({ recipients = [], templateId, fromEmail, customVariables = {} }) {
   const results = [];
   let sentCount = 0;
@@ -779,24 +789,31 @@ export async function sendBulkEmail({ recipients = [], templateId, fromEmail, cu
   };
 }
 
-// Send Custom HTML Email directly via Zoho SMTP transporter
-export async function sendCustomEmail(toEmail, subject, body, fromEmail) {
-  const senderAddress = fromEmail || process.env.EMAIL_USER || process.env.SMTP_FROM || 'support@fipmoney.com';
-  const transporter = getTransporter();
+// Send Custom HTML Email directly via Zoho ZeptoMail Client
+export async function sendCustomEmail(toEmail, subject, body, fromEmail, category = '') {
+  const sender = getSenderAddressByCategory(category, fromEmail);
+  const zeptoClient = getZeptoClient();
 
-  if (transporter) {
+  if (zeptoClient) {
     try {
-      const info = await transporter.sendMail({
-        from: senderAddress.includes('<') ? senderAddress : `"FipMoney Support" <${senderAddress}>`,
-        to: toEmail,
+      const response = await zeptoClient.sendMail({
+        from: sender,
+        to: [
+          {
+            email_address: {
+              address: toEmail,
+              name: 'Valued User',
+            },
+          },
+        ],
         subject: subject,
-        html: body,
+        htmlbody: body,
       });
-      console.log(`[Zoho SMTP] Custom email sent to ${toEmail} | MessageId: ${info.messageId}`);
-      return { success: true, message: `Email sent to ${toEmail} via Zoho SMTP`, messageId: info.messageId };
+      console.log(`[Zoho ZeptoMail] Custom email sent to ${toEmail}`);
+      return { success: true, message: `Email sent to ${toEmail} via Zoho ZeptoMail`, response };
     } catch (err) {
-      console.error('[Zoho SMTP Error]:', err.message);
-      return { success: false, message: err.message };
+      console.error('[Zoho ZeptoMail Error]:', err.message || err);
+      return { success: false, message: err.message || 'ZeptoMail send failed' };
     }
   } else {
     console.log(`[EmailService Mock] Custom Email sent to ${toEmail} | Subject: "${subject}"`);

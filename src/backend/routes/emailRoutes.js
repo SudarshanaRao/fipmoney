@@ -4,6 +4,7 @@ import {
   getEmailTemplateById,
   saveEmailTemplate,
   deleteEmailTemplate,
+  deleteAllEmailTemplates,
   sendEmailToUser,
   sendBulkEmailToUsers,
   sendWelcomeEmail,
@@ -127,6 +128,8 @@ router.post('/templates', saveEmailTemplate);
  *         description: Email template deleted.
  */
 router.delete('/templates/:templateId', deleteEmailTemplate);
+router.delete('/templates-wipe/all', deleteAllEmailTemplates);
+router.post('/templates-wipe/all', deleteAllEmailTemplates);
 
 /**
  * @swagger

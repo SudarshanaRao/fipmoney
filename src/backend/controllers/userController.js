@@ -264,11 +264,12 @@ export const sendEmailOtp = async (req, res, next) => {
       { upsert: true, new: true }
     );
 
-    // Send email using Fipmoney OTP Verification email template via Zoho SMTP
+    // Send email using Fipmoney OTP Verification email template via Zoho ZeptoMail
+    const senderEmail = req.body.fromEmail || 'support@fipmoney.com';
     const mailResult = await sendTemplatedEmail({
       toEmail: cleanEmail,
       templateId: 'FIPMONEY_OTP_VERIFICATION',
-      fromEmail: 'support@fipmoney.com',
+      fromEmail: senderEmail,
       variables: {
         userName: userName || 'Valued User',
         verificationCode: generatedOtp,
@@ -1317,7 +1318,14 @@ export const uploadProfileImage = async (req, res, next) => {
     }
 
     const cleanMobile = String(mobile).trim();
-    const user = await User.findOne({ mobileNumber: cleanMobile });
+    const user = await User.findOne({
+      $or: [
+        { mobileNumber: cleanMobile },
+        { email: cleanMobile },
+        { userCode: cleanMobile },
+        { userId: cleanMobile }
+      ]
+    });
     
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });

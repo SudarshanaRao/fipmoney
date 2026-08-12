@@ -30,31 +30,211 @@ export default function AdminAuthFlow({
   onNavigateToSecretCode,
   onBackToMainSite
 }: AdminAuthFlowProps) {
-  // Signup State
-  const [signupStep, setSignupStep] = useState<'details' | 'otp_verify' | 'approved'>('details');
-  const [name, setName] = useState("Admin User");
-  const [email, setEmail] = useState("admin@fipmoney.com");
-  const [mobile, setMobile] = useState("98765 43210");
-  const [secretCodeInput, setSecretCodeInput] = useState("2787"); // 4-digit code e.g. 2787
-  const [password, setPassword] = useState("Admin@2026");
+  // Signup State - Cleared all prefilled values
+  const [signupStep, setSignupStep] = useState<'details' | 'approved'>('details');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("info@fipmoney.com");
+  const [mobile, setMobile] = useState("");
+  const [secretCodeInput, setSecretCodeInput] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState<AdminUser['role']>("Super Admin");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showSecretCode, setShowSecretCode] = useState(false);
 
-  // Email OTP State
-  const [generatedOtp, setGeneratedOtp] = useState("849201");
-  const [enteredOtp, setEnteredOtp] = useState("");
+  // Mobile Verification State (SMSCountry)
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
+  const [mobileOtpSent, setMobileOtpSent] = useState(false);
+  const [mobileOtpInput, setMobileOtpInput] = useState("");
+  const [isSendingMobileOtp, setIsSendingMobileOtp] = useState(false);
+  const [isVerifyingMobileOtp, setIsVerifyingMobileOtp] = useState(false);
 
-  // Login for Secret Code State
-  const [loginEmail, setLoginEmail] = useState("admin@fipmoney.com");
-  const [loginPassword, setLoginPassword] = useState("Admin@2026");
+  // Email Verification State (Zoho ZeptoMail)
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailOtpInput, setEmailOtpInput] = useState("");
+  const [isSendingEmailOtp, setIsSendingEmailOtp] = useState(false);
+  const [isVerifyingEmailOtp, setIsVerifyingEmailOtp] = useState(false);
+
+  // Login for Secret Code State - Cleared prefilled values
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
   // Feedback State
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  // Handle Signup Submit (Step 1 -> Send Email OTP)
+  // Send Mobile OTP via SMSCountry
+  const handleSendMobileOtp = async () => {
+    setErrorMsg("");
+    setSuccessMsg("");
+    const cleanMobile = mobile.replace(/\D/g, "");
+    if (cleanMobile.length !== 10) {
+      setErrorMsg("Please enter a valid 10-digit mobile number before requesting SMS OTP.");
+      return;
+    }
+
+    setIsSendingMobileOtp(true);
+    try {
+      let res = await fetch("http://localhost:5000/api/users/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile: cleanMobile })
+      });
+      if (!res.ok) {
+        res = await fetch("/api/users/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile: cleanMobile })
+        });
+      }
+
+      if (res.ok) {
+        setMobileOtpSent(true);
+        setSuccessMsg(`SMS OTP sent successfully to +91 ${cleanMobile} via SMSCountry.`);
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.message || "Failed to send SMS OTP.");
+      }
+    } catch (err) {
+      console.error("[AdminAuthFlow] Error sending mobile OTP:", err);
+      setErrorMsg("Failed to connect to backend server for SMS OTP.");
+    } finally {
+      setIsSendingMobileOtp(false);
+    }
+  };
+
+  // Verify Mobile OTP
+  const handleVerifyMobileOtp = async () => {
+    setErrorMsg("");
+    setSuccessMsg("");
+    if (!mobileOtpInput || mobileOtpInput.length !== 6) {
+      setErrorMsg("Please enter the 6-digit SMS OTP code.");
+      return;
+    }
+
+    setIsVerifyingMobileOtp(true);
+    try {
+      const cleanMobile = mobile.replace(/\D/g, "");
+      let res = await fetch("http://localhost:5000/api/users/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile: cleanMobile, otp: mobileOtpInput.trim() })
+      });
+      if (!res.ok) {
+        res = await fetch("/api/users/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile: cleanMobile, otp: mobileOtpInput.trim() })
+        });
+      }
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsMobileVerified(true);
+        setMobileOtpSent(false);
+        setSuccessMsg("Mobile number verified successfully via SMSCountry! ✅");
+      } else {
+        setErrorMsg(data.message || "Invalid SMS OTP code. Please try again.");
+      }
+    } catch (err) {
+      console.error("[AdminAuthFlow] Error verifying mobile OTP:", err);
+      setErrorMsg("Verification request failed.");
+    } finally {
+      setIsVerifyingMobileOtp(false);
+    }
+  };
+
+  // Send Email OTP via Zoho ZeptoMail (To: info@fipmoney.com From: support@fipmoney.com)
+  const handleSendEmailOtp = async () => {
+    setErrorMsg("");
+    setSuccessMsg("");
+    const targetEmail = email.trim() || "info@fipmoney.com";
+    if (!targetEmail.includes("@")) {
+      setErrorMsg("Please enter a valid official email address.");
+      return;
+    }
+
+    setIsSendingEmailOtp(true);
+    try {
+      let res = await fetch("http://localhost:5000/api/users/send-email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: targetEmail,
+          userName: name.trim() || "Admin User",
+          fromEmail: "support@fipmoney.com"
+        })
+      });
+      if (!res.ok) {
+        res = await fetch("/api/users/send-email-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: targetEmail,
+            userName: name.trim() || "Admin User",
+            fromEmail: "support@fipmoney.com"
+          })
+        });
+      }
+
+      if (res.ok) {
+        setEmailOtpSent(true);
+        setSuccessMsg(`Email verification OTP sent to ${targetEmail} from support@fipmoney.com via Zoho ZeptoMail.`);
+      } else {
+        const data = await res.json();
+        setErrorMsg(data.message || "Failed to send Email OTP.");
+      }
+    } catch (err) {
+      console.error("[AdminAuthFlow] Error sending email OTP:", err);
+      setErrorMsg("Failed to connect to backend server for Email OTP.");
+    } finally {
+      setIsSendingEmailOtp(false);
+    }
+  };
+
+  // Verify Email OTP
+  const handleVerifyEmailOtp = async () => {
+    setErrorMsg("");
+    setSuccessMsg("");
+    if (!emailOtpInput || emailOtpInput.length !== 6) {
+      setErrorMsg("Please enter the 6-digit Email OTP code.");
+      return;
+    }
+
+    setIsVerifyingEmailOtp(true);
+    try {
+      const targetEmail = email.trim() || "info@fipmoney.com";
+      let res = await fetch("http://localhost:5000/api/users/verify-email-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail, otp: emailOtpInput.trim() })
+      });
+      if (!res.ok) {
+        res = await fetch("/api/users/verify-email-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: targetEmail, otp: emailOtpInput.trim() })
+        });
+      }
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsEmailVerified(true);
+        setEmailOtpSent(false);
+        setSuccessMsg(`Email address ${targetEmail} verified successfully via Zoho ZeptoMail! ✅`);
+      } else {
+        setErrorMsg(data.message || "Invalid Email OTP code. Please check and try again.");
+      }
+    } catch (err) {
+      console.error("[AdminAuthFlow] Error verifying email OTP:", err);
+      setErrorMsg("Verification request failed.");
+    } finally {
+      setIsVerifyingEmailOtp(false);
+    }
+  };
+
+  // Handle Signup Submit (Validates Mobile & Email OTP verifications)
   const handleSignupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
@@ -70,27 +250,19 @@ export default function AdminAuthFlow({
       return;
     }
 
-    // Generate random 6-digit Email OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(otp);
-    setSignupStep('otp_verify');
-    setSuccessMsg(`Email approval OTP sent to ${email}. (Demo OTP: ${otp})`);
-  };
+    if (!isMobileVerified) {
+      setErrorMsg("Please verify your Mobile Number using SMS OTP (SMSCountry) before completing registration.");
+      return;
+    }
 
-  // Handle OTP Verification (Step 2 -> Approve Signup)
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg("");
-    setSuccessMsg("");
-
-    if (enteredOtp.trim() !== generatedOtp.trim()) {
-      setErrorMsg("INVALID EMAIL OTP. Please enter the correct 6-digit approval code.");
+    if (!isEmailVerified) {
+      setErrorMsg("Please verify your Email Address (info@fipmoney.com) using Email OTP (Zoho ZeptoMail) before completing registration.");
       return;
     }
 
     const newAdmin = createAdminUserWithCode(name, email, mobile, secretCodeInput.trim(), role);
     setSignupStep('approved');
-    setSuccessMsg(`Admin Account Approved! Your 4-digit secret access code URL is /admin/${secretCodeInput.trim()}`);
+    setSuccessMsg(`Admin Account Approved & Created! Your 4-digit secret access code URL is /admin/${secretCodeInput.trim()}`);
   };
 
   // Handle Login for Secret Code URL (/admin/2787)
@@ -105,8 +277,8 @@ export default function AdminAuthFlow({
       if (secretCodeFromUrl === "2787") {
         const masterAdmin: AdminUser = {
           id: 'ADM-001',
-          name: 'Admin User',
-          email: loginEmail,
+          name: name || 'Admin User',
+          email: loginEmail || 'info@fipmoney.com',
           mobile: '+91 98765 43210',
           secretCode: '2787',
           role: 'Super Admin',
@@ -301,7 +473,7 @@ export default function AdminAuthFlow({
               <>
                 {signupStep === 'details' && (
                   <form onSubmit={handleSignupSubmit} className="space-y-5">
-                    {/* Row 1: Full Name & Official Email */}
+                    {/* Row 1: Full Name & Official Email (with Zoho ZeptoMail OTP Verification) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="text-xs font-extrabold text-slate-700 block mb-1.5">
@@ -316,57 +488,144 @@ export default function AdminAuthFlow({
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
-                            placeholder="Admin User"
+                            placeholder="Enter full name"
                             className="w-full bg-slate-50/80 border border-slate-200 rounded-xl pl-10 pr-3.5 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-colors"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-xs font-extrabold text-slate-700 block mb-1.5">
-                          Official Email (For OTP Approval)
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600">
-                            <Mail size={16} />
-                          </span>
-                          <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            placeholder="admin@fipmoney.com"
-                            className="w-full bg-slate-50/80 border border-slate-200 rounded-xl pl-10 pr-3.5 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-colors"
-                          />
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-extrabold text-slate-700">
+                            Official Email (Zoho ZeptoMail)
+                          </label>
+                          {isEmailVerified && (
+                            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
+                              <CheckCircle2 size={12} /> Verified
+                            </span>
+                          )}
                         </div>
+                        <div className="flex items-center gap-2">
+                          <div className="relative flex-1">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600">
+                              <Mail size={16} />
+                            </span>
+                            <input
+                              type="email"
+                              value={email}
+                              onChange={(e) => {
+                                setEmail(e.target.value);
+                                setIsEmailVerified(false);
+                              }}
+                              required
+                              placeholder="info@fipmoney.com"
+                              className="w-full bg-slate-50/80 border border-slate-200 rounded-xl pl-10 pr-3.5 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-colors"
+                            />
+                          </div>
+
+                          {!isEmailVerified && (
+                            <button
+                              type="button"
+                              onClick={handleSendEmailOtp}
+                              disabled={isSendingEmailOtp}
+                              className="bg-purple-100 hover:bg-purple-200 text-[#7C3AED] font-black text-xs px-3.5 py-3 rounded-xl border border-purple-200 transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                            >
+                              {isSendingEmailOtp ? "Sending..." : emailOtpSent ? "Resend" : "Verify Email"}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Inline Email OTP Verification Input */}
+                        {!isEmailVerified && emailOtpSent && (
+                          <div className="mt-2.5 bg-purple-50/80 border border-purple-200 p-2.5 rounded-xl flex items-center gap-2">
+                            <input
+                              type="text"
+                              maxLength={6}
+                              value={emailOtpInput}
+                              onChange={(e) => setEmailOtpInput(e.target.value.replace(/\D/g, ''))}
+                              placeholder="Enter 6-digit OTP"
+                              className="w-full bg-white border border-purple-200 rounded-lg px-3 py-2 text-xs font-mono font-bold text-slate-900 tracking-wider focus:outline-none focus:border-[#7C3AED]"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleVerifyEmailOtp}
+                              disabled={isVerifyingEmailOtp}
+                              className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black text-xs px-3.5 py-2 rounded-lg transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                            >
+                              {isVerifyingEmailOtp ? "Verifying..." : "Confirm OTP"}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    {/* Row 2: Mobile Number & Create Password */}
+                    {/* Row 2: Mobile Number (SMSCountry OTP) & Create Password */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-xs font-extrabold text-slate-700 block mb-1.5">
-                          Mobile Number
-                        </label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-extrabold text-slate-700">
+                            Mobile Number (SMSCountry)
+                          </label>
+                          {isMobileVerified && (
+                            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
+                              <CheckCircle2 size={12} /> Verified
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
-                          <div className="bg-slate-50/80 border border-slate-200 rounded-xl px-3 py-3 text-xs font-black text-slate-800 flex items-center gap-1.5 shrink-0">
+                          <div className="bg-slate-50/80 border border-slate-200 rounded-xl px-2.5 py-3 text-xs font-black text-slate-800 flex items-center gap-1 shrink-0">
                             <span>🇮🇳 +91</span>
-                            <ChevronDown size={12} className="text-slate-400" />
                           </div>
                           <div className="relative flex-1">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-600">
                               <Phone size={15} />
                             </span>
                             <input
                               type="tel"
                               value={mobile}
-                              onChange={(e) => setMobile(e.target.value)}
+                              onChange={(e) => {
+                                setMobile(e.target.value);
+                                setIsMobileVerified(false);
+                              }}
                               required
-                              placeholder="98765 43210"
-                              className="w-full bg-slate-50/80 border border-slate-200 rounded-xl pl-10 pr-3.5 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-colors"
+                              placeholder="10-digit mobile number"
+                              className="w-full bg-slate-50/80 border border-slate-200 rounded-xl pl-9 pr-2 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-colors"
                             />
                           </div>
+
+                          {!isMobileVerified && (
+                            <button
+                              type="button"
+                              onClick={handleSendMobileOtp}
+                              disabled={isSendingMobileOtp}
+                              className="bg-amber-100 hover:bg-amber-200 text-[#D97706] font-black text-xs px-3.5 py-3 rounded-xl border border-amber-200 transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                            >
+                              {isSendingMobileOtp ? "Sending..." : mobileOtpSent ? "Resend" : "Verify Mobile"}
+                            </button>
+                          )}
                         </div>
+
+                        {/* Inline Mobile OTP Verification Input */}
+                        {!isMobileVerified && mobileOtpSent && (
+                          <div className="mt-2.5 bg-amber-50/80 border border-amber-200 p-2.5 rounded-xl flex items-center gap-2">
+                            <input
+                              type="text"
+                              maxLength={6}
+                              value={mobileOtpInput}
+                              onChange={(e) => setMobileOtpInput(e.target.value.replace(/\D/g, ''))}
+                              placeholder="Enter 6-digit SMS OTP"
+                              className="w-full bg-white border border-amber-200 rounded-lg px-3 py-2 text-xs font-mono font-bold text-slate-900 tracking-wider focus:outline-none focus:border-[#D97706]"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleVerifyMobileOtp}
+                              disabled={isVerifyingMobileOtp}
+                              className="bg-[#D97706] hover:bg-[#B45309] text-white font-black text-xs px-3.5 py-2 rounded-lg transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                            >
+                              {isVerifyingMobileOtp ? "Verifying..." : "Confirm OTP"}
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -382,7 +641,7 @@ export default function AdminAuthFlow({
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            placeholder="••••••••••••"
+                            placeholder="Enter password"
                             className="w-full bg-slate-50/80 border border-slate-200 rounded-xl pl-10 pr-10 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-colors"
                           />
                           <button
@@ -410,7 +669,7 @@ export default function AdminAuthFlow({
                             value={secretCodeInput}
                             onChange={(e) => setSecretCodeInput(e.target.value.replace(/\D/g, ''))}
                             required
-                            placeholder="2787"
+                            placeholder="e.g. 2787"
                             className="w-full bg-white border border-purple-200 rounded-xl pl-4 pr-10 py-2.5 text-base font-black text-slate-900 tracking-widest font-mono focus:outline-none focus:border-[#7C3AED]"
                           />
                           <button
@@ -460,16 +719,18 @@ export default function AdminAuthFlow({
                       </div>
                     </div>
 
-                    {/* Row 5: Email Approval Banner & CTA Submit Button */}
+                    {/* Row 5: Dual Verification Status Banner & Submit Button */}
                     <div className="bg-[#FFFDF0] border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-100 text-[#D97706] flex items-center justify-center shrink-0">
-                          <Mail size={20} />
+                          <ShieldCheck size={20} />
                         </div>
                         <div>
-                          <div className="text-xs font-black text-slate-900">Email approval required</div>
-                          <div className="text-[11px] font-semibold text-slate-500 mt-0.5">
-                            We'll send a secure OTP to your email for verification.
+                          <div className="text-xs font-black text-slate-900">OTP Verification Status</div>
+                          <div className="text-[11px] font-semibold text-slate-500 mt-0.5 flex items-center gap-2">
+                            <span>Email (ZeptoMail): {isEmailVerified ? "✅ Verified" : "❌ Pending"}</span>
+                            <span>•</span>
+                            <span>Mobile (SMSCountry): {isMobileVerified ? "✅ Verified" : "❌ Pending"}</span>
                           </div>
                         </div>
                       </div>
@@ -478,55 +739,15 @@ export default function AdminAuthFlow({
                         type="submit"
                         className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black text-xs px-6 py-3.5 rounded-xl shadow-md shadow-purple-600/20 transition-all flex items-center gap-2 cursor-pointer border-none outline-none shrink-0 self-stretch sm:self-auto justify-center"
                       >
-                        <Mail size={16} />
-                        <span>Send Email Approval OTP</span>
+                        <ShieldCheck size={16} />
+                        <span>Complete Admin Registration</span>
                         <ArrowRight size={16} />
                       </button>
                     </div>
                   </form>
                 )}
 
-                {/* STEP 2: EMAIL OTP APPROVAL SCREEN */}
-                {signupStep === 'otp_verify' && (
-                  <form onSubmit={handleVerifyOtp} className="space-y-5 py-4">
-                    <div className="text-center space-y-2">
-                      <div className="w-16 h-16 rounded-3xl bg-purple-100 text-[#7C3AED] flex items-center justify-center mx-auto shadow-md">
-                        <Mail size={32} />
-                      </div>
-                      <h3 className="text-xl font-black text-slate-900">Approve Signup via Email OTP</h3>
-                      <p className="text-xs font-semibold text-slate-500 max-w-sm mx-auto">
-                        We sent a 6-digit approval code to <span className="font-bold text-slate-900">{email}</span>
-                      </p>
-                    </div>
-
-                    <div className="bg-purple-50 border border-purple-200 p-4 rounded-2xl text-center text-sm font-mono font-black text-[#7C3AED]">
-                      APPROVAL OTP: {generatedOtp}
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-extrabold text-slate-700 block mb-2 text-center uppercase tracking-wider">
-                        Enter 6-Digit Email OTP
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={6}
-                        value={enteredOtp}
-                        onChange={(e) => setEnteredOtp(e.target.value.replace(/\D/g, ''))}
-                        required
-                        placeholder="849201"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-center text-2xl font-black text-slate-900 tracking-widest font-mono focus:outline-none focus:border-[#7C3AED]"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-black text-xs py-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer border-none outline-none"
-                    >
-                      <CheckCircle2 size={18} />
-                      <span>Verify & Approve Admin Account</span>
-                    </button>
-                  </form>
-                )}
+                {/* STEP 2: APPROVED SUCCESS SCREEN */}
 
                 {/* STEP 3: APPROVED SUCCESS SCREEN */}
                 {signupStep === 'approved' && (

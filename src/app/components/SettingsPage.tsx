@@ -19,6 +19,21 @@ type SettingsTab = "profile" | "bank" | "nominee" | "security";
 export default function SettingsPage() {
   const { showAlert, showConfirm, ModalComponent } = useFipModal();
   const [activeSubTab, setActiveSubTab] = useState<SettingsTab>("profile");
+  const [isEmailHighlighted, setIsEmailHighlighted] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const highlight = sessionStorage.getItem("fm_highlight_email");
+      if (highlight === "true") {
+        setIsEmailHighlighted(true);
+        sessionStorage.removeItem("fm_highlight_email");
+        setTimeout(() => {
+          const el = document.getElementById("email-input-section");
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 300);
+      }
+    }
+  }, []);
 
   // Load logged-in user details directly from database session
   const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
@@ -888,23 +903,43 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Email Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div
+                    id="email-input-section"
+                    className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100 transition-all rounded-2xl px-2 ${
+                      isEmailHighlighted || !email ? 'bg-purple-50/70 border-purple-200 ring-2 ring-purple-500/50 p-4' : ''
+                    }`}
+                  >
                     <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Email Address</label>
+                      <div className="flex items-center gap-1.5">
+                        <label className="text-sm font-semibold text-gray-700">Email Address</label>
+                        {(!email || email.endsWith('@fipmoney.com')) && (
+                          <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                            Required ⚠️
+                          </span>
+                        )}
+                      </div>
+                      {isEmailHighlighted && (
+                        <span className="block text-[11px] text-purple-700 font-bold mt-1">
+                          👉 Please add & verify your official email here!
+                        </span>
+                      )}
                     </div>
                     <div className="md:col-span-8 flex gap-3 max-w-lg items-center">
                       <input
                         type="email"
                         value={email}
+                        placeholder="e.g. yourname@domain.com"
                         readOnly
-                        className="flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 outline-none select-none cursor-not-allowed"
+                        className={`flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium border outline-none select-none ${
+                          !email ? 'bg-amber-50/60 border-amber-200 text-slate-800 placeholder:text-slate-400' : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
                       />
                       <button
                         type="button"
                         onClick={() => handleStartFieldChange("email")}
-                        className="bg-[#d97706] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition-all cursor-pointer border-none shrink-0"
+                        className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-extrabold px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0 shadow-sm"
                       >
-                        Change
+                        {!email || email.endsWith('@fipmoney.com') ? "Add & Verify Email" : "Change"}
                       </button>
                     </div>
                   </div>

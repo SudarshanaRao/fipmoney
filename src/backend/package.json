@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1103.0",
-    "@aws-sdk/client-sesv2": "^3.1106.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -18,7 +17,8 @@
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",
     "swagger-jsdoc": "^6.3.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "zeptomail": "^5.0.0"
   },
   "devDependencies": {
     "mongodb-memory-server": "^11.2.0",

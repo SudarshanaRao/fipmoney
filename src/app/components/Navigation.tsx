@@ -21,9 +21,10 @@ interface NavProps {
   onTabChange: (tab: Tab) => void;
   onLogout: () => void;
   onBecomeAgent?: () => void;
+  profileCompletion?: number;
 }
 
-export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent }: NavProps) => (
+export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent, profileCompletion = 100 }: NavProps) => (
   <>
   <div className="hidden lg:flex w-64 bg-[#1e1b4b] flex-col py-6 px-4 shrink-0 h-screen sticky top-0 overflow-y-auto hide-scrollbar">
     <div className="flex items-center gap-1.5 mb-8 px-2">
@@ -50,17 +51,29 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent }: Nav
       {/* Secondary Items */}
       {[
         { id: "refer-and-earn", label: "Referral Rewards", Icon: Gift },
-        { id: "settings", label: "Settings", Icon: Settings },
+        { id: "settings", label: "Settings", Icon: Settings, hasAlert: profileCompletion < 50 },
         { id: "help", label: "Help & Support", Icon: HelpCircle },
       ].map((item, i) => {
         const active = activeTab === item.id;
         return (
           <button key={i} onClick={() => onTabChange(item.id as Tab)}
-            className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm outline-none border-none cursor-pointer
+            className={`flex items-center justify-between gap-3 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm outline-none border-none cursor-pointer
               ${active ? 'text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6]' : 'text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent'}`}
             >
-            <item.Icon size={20} strokeWidth={active ? 2.5 : 2} />
-            {item.label}
+            <div className="flex items-center gap-4 relative">
+              <div className="relative">
+                <item.Icon size={20} strokeWidth={active ? 2.5 : 2} />
+                {item.hasAlert && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1e1b4b] animate-pulse" />
+                )}
+              </div>
+              <span>{item.label}</span>
+            </div>
+            {item.hasAlert && (
+              <span className="text-[9px] font-black text-red-300 bg-red-500/20 px-1.5 py-0.5 rounded-full border border-red-400/30">
+                &lt;50%
+              </span>
+            )}
           </button>
         )
       })}
@@ -118,14 +131,18 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent }: Nav
   </>
 );
 
-export const MobileNav = ({ activeTab, onTabChange }: Omit<NavProps, "onLogout">) => (
+export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: Omit<NavProps, "onLogout">) => (
   <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#1e1b4b] border-t border-white/10 flex justify-around items-center px-4 z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.2)] pb-safe">
     {navItems.filter(item => ['home', 'portfolio', 'sip', 'bills', 'history', 'settings'].includes(item.id)).map(({ id, Icon, label }) => {
       const active = activeTab === id;
+      const showRedDot = id === 'settings' && profileCompletion < 50;
       return (
-        <button key={id} onClick={() => onTabChange(id as Tab)} className="flex flex-col items-center gap-1 bg-transparent border-none outline-none cursor-pointer">
-          <div className={`p-1.5 rounded-xl transition-all duration-300 ${active ? 'bg-[#7c3aed] shadow-lg' : ''}`} style={active ? { color: 'white' } : { color: '#a5b4fc' }}>
+        <button key={id} onClick={() => onTabChange(id as Tab)} className="flex flex-col items-center gap-1 bg-transparent border-none outline-none cursor-pointer relative">
+          <div className={`p-1.5 rounded-xl transition-all duration-300 relative ${active ? 'bg-[#7c3aed] shadow-lg' : ''}`} style={active ? { color: 'white' } : { color: '#a5b4fc' }}>
             <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+            {showRedDot && (
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1e1b4b] animate-pulse" />
+            )}
           </div>
           <span className={`text-[9px] font-bold transition-colors duration-300 ${active ? 'text-white' : 'text-indigo-200'}`}>
             {label.split(' ')[0]}

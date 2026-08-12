@@ -206,11 +206,26 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
   const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
   
+  const userEmail = loggedInUser?.email || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || "" : "");
+  const hasValidEmail = Boolean(userEmail && userEmail.trim().length > 0 && !userEmail.endsWith('@fipmoney.com'));
+  const [showEmailMissingModal, setShowEmailMissingModal] = useState(() => !hasValidEmail);
+
   const savedUsername = (typeof window !== 'undefined' && localStorage.getItem(`fm_username_${loggedInMobile}`)) || loggedInUser?.username || "";
   const userName = savedUsername ? savedUsername : (loggedInUser?.fullName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "Guest User" : "Guest User"));
   const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
   const [userAvatar, setUserAvatar] = useState((typeof window !== 'undefined' && localStorage.getItem(`fm_user_avatar_${loggedInMobile}`)) || "https://i.pravatar.cc/150?img=11");
   const [kycStatus, setKycStatus] = useState(loggedInUser?.isKycCompleted ? "full kyc" : "pending");
+
+  const calcProfileCompletion = (): number => {
+    let score = 0;
+    if (userName && userName !== "Guest User") score += 25;
+    if (hasValidEmail) score += 25;
+    if (loggedInMobile) score += 25;
+    if (kycStatus === "full kyc") score += 25;
+    return score;
+  };
+  const profileCompletion = calcProfileCompletion();
+
   const [virtualCard, setVirtualCard] = useState<{ cardNumber: string, expiry: string, cvv: string, nameOnCard: string } | null>(null);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
   
@@ -964,7 +979,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
   return (
     <div className="flex h-screen bg-[#fcfdfd] font-sans overflow-hidden text-gray-800">
-      <Sidebar activeTab={tab} onTabChange={setTab} onLogout={() => {
+      <Sidebar activeTab={tab} onTabChange={setTab} profileCompletion={profileCompletion} onLogout={() => {
         if (typeof window !== 'undefined') {
           clearUserSession();
           sessionStorage.removeItem("fm_logged_in_name");
@@ -1004,7 +1019,81 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <MainDashboard />
         )}
       </div>
-      <MobileNav activeTab={tab} onTabChange={setTab} />
+      <MobileNav activeTab={tab} onTabChange={setTab} profileCompletion={profileCompletion} />
+
+      {/* Missing Email Modal Popup */}
+      <AnimatePresence>
+        {showEmailMissingModal && !hasValidEmail && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowEmailMissingModal(false)}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 border border-purple-200 z-10 space-y-5 text-center"
+            >
+              <button
+                onClick={() => setShowEmailMissingModal(false)}
+                className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1.5 rounded-full hover:bg-slate-100 transition-colors border-none bg-transparent cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="w-16 h-16 rounded-3xl bg-purple-100 text-[#7C3AED] flex items-center justify-center mx-auto shadow-md shadow-purple-500/10">
+                <FileText size={32} />
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-xl font-black text-slate-900">Add Official Email Address ✉️</h3>
+                <p className="text-xs font-semibold text-slate-500 max-w-xs mx-auto leading-relaxed">
+                  To protect your 24K digital gold locker, receive transaction invoices, purchase receipts, and security OTPs, please add & verify your email address.
+                </p>
+              </div>
+
+              <div className="bg-purple-50/80 border border-purple-200 p-3.5 rounded-2xl text-left flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-purple-100 text-[#7C3AED] flex items-center justify-center shrink-0">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-purple-950">Email Invoice Delivery</div>
+                  <div className="text-[10px] font-semibold text-purple-700">Official GST invoices sent directly via Zoho ZeptoMail</div>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <button
+                  onClick={() => {
+                    setShowEmailMissingModal(false);
+                    if (typeof window !== 'undefined') {
+                      sessionStorage.setItem("fm_highlight_email", "true");
+                    }
+                    setTab("settings");
+                  }}
+                  className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-[#FFF] font-black text-xs py-3.5 rounded-xl shadow-lg shadow-purple-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-none outline-none"
+                >
+                  <User size={16} />
+                  <span>Go to Profile & Add Email</span>
+                  <ChevronRight size={16} />
+                </button>
+
+                <button
+                  onClick={() => setShowEmailMissingModal(false)}
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer border-none outline-none"
+                >
+                  Remind Me Later
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Agent Modal Popup */}
       <AnimatePresence>

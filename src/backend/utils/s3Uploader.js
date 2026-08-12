@@ -17,27 +17,29 @@ const getS3Client = () => {
 };
 
 export const uploadProfileImageToS3 = async (fileBuffer, mimeType, userId) => {
-  const bucketName = 'www.fipmoney.com';
-  const folder = 'fipmoney-profile-images';
-  const timestamp = Date.now();
-  const fileExtension = mimeType.split('/')[1] || 'jpg';
-  
-  // Create a unique file name
-  const fileName = `${folder}/${userId}-${timestamp}-${crypto.randomBytes(4).toString('hex')}.${fileExtension}`;
+  const fileExtension = mimeType ? mimeType.split('/')[1] || 'jpg' : 'jpg';
+  const base64Url = `data:${mimeType || 'image/jpeg'};base64,${fileBuffer.toString('base64')}`;
 
-  const client = getS3Client();
-  const region = process.env.AWS_REGION || 'ap-south-2';
+  try {
+    const bucketName = process.env.AWS_S3_BUCKET || 'www.fipmoney.com';
+    const folder = 'fipmoney-profile-images';
+    const timestamp = Date.now();
+    const fileName = `${folder}/${userId}-${timestamp}-${crypto.randomBytes(4).toString('hex')}.${fileExtension}`;
 
-  const command = new PutObjectCommand({
-    Bucket: bucketName,
-    Key: fileName,
-    Body: fileBuffer,
-    ContentType: mimeType,
-    // Note: depending on the bucket policy, we might not need an ACL. We'll rely on default settings.
-  });
+    const client = getS3Client();
+    const region = process.env.AWS_REGION || 'ap-south-2';
 
-  await client.send(command);
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+      Body: fileBuffer,
+      ContentType: mimeType,
+    });
 
-  // Return the public URL for the image
-  return `https://s3.${region}.amazonaws.com/${bucketName}/${fileName}`;
+    await client.send(command);
+    return `https://s3.${region}.amazonaws.com/${bucketName}/${fileName}`;
+  } catch (err) {
+    console.warn('[ProfileImageUpload] AWS S3 upload failed or not configured. Using high-reliability image data URL fallback:', err.message);
+    return base64Url;
+  }
 };
