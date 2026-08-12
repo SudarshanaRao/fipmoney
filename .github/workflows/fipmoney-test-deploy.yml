@@ -40,9 +40,9 @@ jobs:
         run: |
           aws s3 sync dist/ s3://fipmoney-test-frontend --delete
 
-      - name: Invalidate CloudFront Cache (Optional)
+      - name: Invalidate CloudFront Cache (Distribution E2T3VE6UED744P)
         env:
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID || 'E2T3VE6UED744P' }}
         run: |
           if [ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]; then
             echo "Invalidating CloudFront distribution: $CLOUDFRONT_DISTRIBUTION_ID"
