@@ -275,8 +275,13 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
         });
         const data = await res.json();
         if (data.success && data.data) {
-          saveLoggedInUser(data.data);
-          setCurrentUser(data.data);
+          const userData = { ...data.data, sessionId: data.sessionId || data.data.sessionId };
+          saveLoggedInUser(userData);
+          setCurrentUser(userData);
+          if (data.sessionId) {
+            sessionStorage.setItem("fm_session_id", data.sessionId);
+            localStorage.setItem("fm_session_id", data.sessionId);
+          }
           toast.success("Welcome back!", { position: "top-center" });
           setTimeout(() => {
             setIsActionLoading(false);
@@ -309,8 +314,13 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       });
       const data = await res.json();
       if (data.success && data.data) {
-        saveLoggedInUser(data.data);
-        setCurrentUser(data.data);
+        const userData = { ...data.data, sessionId: data.sessionId || data.data.sessionId };
+        saveLoggedInUser(userData);
+        setCurrentUser(userData);
+        if (data.sessionId) {
+          sessionStorage.setItem("fm_session_id", data.sessionId);
+          localStorage.setItem("fm_session_id", data.sessionId);
+        }
         toast.success("Account created successfully!", { position: "top-center" });
         go(() => setStep("success"));
       } else {

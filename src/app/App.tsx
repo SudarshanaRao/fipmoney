@@ -41,6 +41,8 @@ import AdminDashboard from "./components/AdminDashboard";
 import AdminAuthFlow from "./components/AdminAuthFlow";
 import { OBFUSCATED_ADMIN_PATH } from "./utils/adminStorage";
 import { LoadingSpinner } from "./components/LottiePlayer";
+import { API_BASE_URL } from "./utils/apiConfig";
+import { clearUserSession } from "./utils/userStorage";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin';
 
@@ -119,8 +121,64 @@ export default function App() {
   const [currentGuideId, setCurrentGuideId] = useState<string>('');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const homeScrollPosition = useRef(0);
-  const isLoggedOut = typeof window !== 'undefined' ? !sessionStorage.getItem("fm_logged_in_mobile") : true;
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => typeof window !== 'undefined' ? sessionStorage.getItem('fm_admin_logged_in') === 'true' : false);
+  const [showRevokedModal, setShowRevokedModal] = useState(false);
+  const [revokedMessage, setRevokedMessage] = useState("");
+
+  const isLoggedIn = typeof window !== 'undefined' ? !!sessionStorage.getItem("fm_logged_in_mobile") : false;
+
+  // 1. Enforce Strict Route Protection Guard
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const currentPath = window.location.pathname.slice(1);
+
+    // Unauthenticated user trying to access /dashboard -> redirect to /login
+    if (!isLoggedIn && (currentPath === 'dashboard' || currentPath.startsWith('dashboard/') || currentPage === 'dashboard')) {
+      window.history.replaceState({}, '', '/login');
+      setCurrentPage('login');
+      return;
+    }
+
+    // Authenticated user trying to access /, /login, or /signup -> redirect to /dashboard
+    if (isLoggedIn && (currentPath === '' || currentPath === 'home' || currentPath === 'login' || currentPath === 'signup' || currentPage === 'home' || currentPage === 'login' || currentPage === 'signup')) {
+      window.history.replaceState({}, '', '/dashboard');
+      setCurrentPage('dashboard');
+      return;
+    }
+  }, [currentPage, isLoggedIn]);
+
+  // 2. Real-time Active Session Status Polling
+  useEffect(() => {
+    const checkSessionStatus = async () => {
+      const mobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") : null;
+      const sessionId = typeof window !== 'undefined' ? (sessionStorage.getItem("fm_session_id") || localStorage.getItem("fm_session_id")) : null;
+      if (!mobile || !sessionId) return;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/users/session-status?mobile=${encodeURIComponent(mobile)}`, {
+          headers: {
+            "x-session-id": sessionId,
+            "x-user-mobile": mobile,
+          }
+        });
+        const data = await res.json();
+        if (data && data.sessionRevoked) {
+          clearUserSession();
+          setRevokedMessage(data.message || "Your session is logged out. Kindly login back..!");
+          setShowRevokedModal(true);
+          window.history.replaceState({}, '', '/login');
+          setCurrentPage('login');
+        }
+      } catch (err) {
+        // silent catch
+      }
+    };
+
+    if (isLoggedIn) {
+      checkSessionStatus();
+      const interval = setInterval(checkSessionStatus, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     // Add smooth scrolling behavior
@@ -519,6 +577,46 @@ export default function App() {
             transition={{ duration: 0.2 }}
           >
             <LoadingSpinner size={100} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Revoked Session Alert Modal */}
+      <AnimatePresence>
+        {showRevokedModal && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl border border-red-100"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+            >
+              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">
+                🔒
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-gray-900">Session Terminated</h3>
+                <p className="text-sm font-semibold text-gray-600 mt-2 leading-relaxed">
+                  {revokedMessage || "Your session is logged out. Kindly login back..!"}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowRevokedModal(false);
+                  clearUserSession();
+                  window.history.replaceState({}, '', '/login');
+                  setCurrentPage('login');
+                }}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-sm shadow-md cursor-pointer transition-all border-none outline-none"
+              >
+                Kindly Login Back →
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

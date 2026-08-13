@@ -210,6 +210,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '1.0.0',
     },
+    activeSessions: [
+      {
+        sessionId: { type: String, required: true },
+        deviceName: { type: String, default: 'Desktop' },
+        deviceOS: { type: String, default: 'Unknown OS' },
+        browser: { type: String, default: 'Unknown Browser' },
+        ipAddress: { type: String, default: '' },
+        lastActiveAt: { type: Date, default: Date.now },
+        createdAt: { type: Date, default: Date.now },
+      }
+    ],
     lastLoginAt: {
       type: Date,
       default: Date.now,

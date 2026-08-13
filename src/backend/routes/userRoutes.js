@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPresignedUploadUrl, confirmProfileImageUpload, getProfileImageUrl, deleteProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus } from '../controllers/userController.js';
+import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPresignedUploadUrl, confirmProfileImageUpload, getProfileImageUrl, deleteProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus, getUserSessions, revokeUserSession, checkSessionStatus } from '../controllers/userController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -685,6 +685,10 @@ router.get('/pending-dues', getPendingDues);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/:id', getUserById);
+
+router.get('/sessions', getUserSessions);
+router.post('/sessions/revoke', revokeUserSession);
+router.get('/session-status', checkSessionStatus);
 
 router.post('/check-admin-email', checkAdminEmail);
 router.post('/send-superadmin-otp', sendSuperAdminAuthOtp);

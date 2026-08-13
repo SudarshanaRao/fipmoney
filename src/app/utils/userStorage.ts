@@ -88,6 +88,16 @@ export interface MongoUser {
   updatedAt: string;
   createdBy: string;
   updatedBy: string;
+  sessionId?: string;
+  activeSessions?: Array<{
+    sessionId: string;
+    deviceName: string;
+    deviceOS: string;
+    browser: string;
+    ipAddress: string;
+    lastActiveAt: string;
+    createdAt: string;
+  }>;
 }
 
 const STORAGE_KEY = "fm_mongodb_users_v3";
@@ -240,6 +250,10 @@ export function saveLoggedInUser(user: MongoUser): void {
     localStorage.setItem(`fm_user_code_${user.mobileNumber}`, user.userCode);
     localStorage.setItem(`fm_user_id_${user.mobileNumber}`, user.userId);
     sessionStorage.setItem("fm_logged_in_mobile", user.mobileNumber);
+    if (user.sessionId) {
+      sessionStorage.setItem("fm_session_id", user.sessionId);
+      localStorage.setItem("fm_session_id", user.sessionId);
+    }
   }
 }
 
@@ -265,5 +279,7 @@ export function clearUserSession(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(LOGGED_IN_USER_KEY);
     sessionStorage.removeItem("fm_logged_in_mobile");
+    sessionStorage.removeItem("fm_session_id");
+    localStorage.removeItem("fm_session_id");
   }
 }

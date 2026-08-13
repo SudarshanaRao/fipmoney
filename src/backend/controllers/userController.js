@@ -393,6 +393,42 @@ const generateUniqueReferralCode = async (User) => {
   return code;
 };
 
+export const parseDeviceInfo = (req) => {
+  const ua = req.headers['user-agent'] || '';
+  let ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '';
+  if (typeof ip === 'string' && ip.includes(',')) {
+    ip = ip.split(',')[0].trim();
+  }
+  if (ip === '::1' || ip === '::ffff:127.0.0.1') {
+    ip = '127.0.0.1 (Localhost)';
+  }
+
+  let deviceOS = 'Windows';
+  if (/macintosh|mac os x/i.test(ua)) deviceOS = 'macOS';
+  else if (/android/i.test(ua)) deviceOS = 'Android';
+  else if (/iphone|ipad|ipod/i.test(ua)) deviceOS = 'iOS';
+  else if (/linux/i.test(ua)) deviceOS = 'Linux';
+  else if (/windows/i.test(ua)) deviceOS = 'Windows';
+
+  let browser = 'Chrome';
+  if (/edg/i.test(ua)) browser = 'Edge';
+  else if (/firefox|fxios/i.test(ua)) browser = 'Firefox';
+  else if (/safari/i.test(ua) && !/chrome|crios/i.test(ua)) browser = 'Safari';
+  else if (/opera|opr/i.test(ua)) browser = 'Opera';
+  else if (/chrome|crios/i.test(ua)) browser = 'Chrome';
+
+  let deviceName = 'Desktop Device';
+  if (/mobile/i.test(ua)) deviceName = 'Mobile Phone';
+  else if (/tablet|ipad/i.test(ua)) deviceName = 'Tablet';
+
+  return {
+    deviceName,
+    deviceOS,
+    browser,
+    ipAddress: ip || '127.0.0.1',
+  };
+};
+
 // @desc    Register or Login User
 // @route   POST /api/users/auth
 export const authUser = async (req, res, next) => {
@@ -407,14 +443,31 @@ export const authUser = async (req, res, next) => {
     const cleanMobile = String(mobile).trim();
     let user = await User.findOne({ mobileNumber: cleanMobile });
 
+    const deviceInfo = parseDeviceInfo(req);
+    const newSessionId = crypto.randomUUID();
+
     if (user) {
       // User exists -> Update last login info and increment loginCount
       user.lastLoginAt = new Date();
       user.lastActiveAt = new Date();
       user.loginCount = (user.loginCount || 0) + 1;
+      user.deviceName = deviceInfo.deviceName;
+      user.deviceOS = deviceInfo.deviceOS;
+      user.deviceId = newSessionId;
       if (dateOfBirth) {
         user.dateOfBirth = dateOfBirth;
       }
+
+      if (!user.activeSessions) user.activeSessions = [];
+      user.activeSessions.push({
+        sessionId: newSessionId,
+        deviceName: deviceInfo.deviceName,
+        deviceOS: deviceInfo.deviceOS,
+        browser: deviceInfo.browser,
+        ipAddress: deviceInfo.ipAddress,
+        lastActiveAt: new Date(),
+        createdAt: new Date(),
+      });
 
       // Generate a random unique referral code if missing
       if (!user.referralCode || user.referralCode.startsWith('FIP0')) {
@@ -449,8 +502,12 @@ export const authUser = async (req, res, next) => {
 
       return res.status(200).json({
         success: true,
+        sessionId: newSessionId,
         message: 'User authenticated successfully',
-        data: getAuthMinimalUser(user),
+        data: {
+          ...getAuthMinimalUser(user),
+          sessionId: newSessionId,
+        },
       });
     } else {
       // Auto-generate userCode starting from #FIP0001 series based on DB count
@@ -550,10 +607,21 @@ export const authUser = async (req, res, next) => {
         primaryBankAccountId: null,
         defaultUPIId: '',
         defaultPaymentMethod: '',
-        deviceId: '',
-        deviceName: '',
-        deviceOS: '',
+        deviceId: newSessionId,
+        deviceName: deviceInfo.deviceName,
+        deviceOS: deviceInfo.deviceOS,
         deviceModel: '',
+        activeSessions: [
+          {
+            sessionId: newSessionId,
+            deviceName: deviceInfo.deviceName,
+            deviceOS: deviceInfo.deviceOS,
+            browser: deviceInfo.browser,
+            ipAddress: deviceInfo.ipAddress,
+            lastActiveAt: new Date(),
+            createdAt: new Date(),
+          }
+        ],
         appVersion: '1.0.0',
         lastLoginAt: new Date(),
         lastActiveAt: new Date(),
@@ -613,8 +681,12 @@ export const authUser = async (req, res, next) => {
 
       return res.status(201).json({
         success: true,
+        sessionId: newSessionId,
         message: 'New user created successfully with 256-bit encrypted password, userCode and UUID userId',
-        data: getAuthMinimalUser(user),
+        data: {
+          ...getAuthMinimalUser(user),
+          sessionId: newSessionId,
+        },
       });
     }
   } catch (error) {
@@ -1942,6 +2014,118 @@ export const verifySuperAdminAuthOtp = async (req, res, next) => {
 
     await Otp.deleteOne({ _id: otpRecord._id });
     return res.status(200).json({ success: true, message: 'Super-Admin authorization verified successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get user active sessions
+// @route   GET /api/users/sessions
+export const getUserSessions = async (req, res, next) => {
+  try {
+    const mobile = req.query.mobile || req.headers['x-user-mobile'];
+    const currentSessionId = req.headers['x-session-id'] || req.query.sessionId;
+
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required' });
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({ mobileNumber: cleanMobile });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const sessions = (user.activeSessions || []).map((s) => ({
+      sessionId: s.sessionId,
+      deviceName: s.deviceName || 'Desktop Device',
+      deviceOS: s.deviceOS || 'Unknown OS',
+      browser: s.browser || 'Unknown Browser',
+      ipAddress: s.ipAddress || '127.0.0.1',
+      lastActiveAt: s.lastActiveAt || s.createdAt,
+      createdAt: s.createdAt,
+      isCurrent: Boolean(currentSessionId && s.sessionId === currentSessionId),
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: sessions.length,
+      data: sessions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Revoke an active user session
+// @route   POST /api/users/sessions/revoke
+export const revokeUserSession = async (req, res, next) => {
+  try {
+    const { mobile, sessionId } = req.body;
+    if (!mobile || !sessionId) {
+      return res.status(400).json({ success: false, message: 'Mobile number and sessionId are required' });
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({ mobileNumber: cleanMobile });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.activeSessions = (user.activeSessions || []).filter(
+      (s) => s.sessionId !== String(sessionId).trim()
+    );
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Session revoked successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Check if session is still active
+// @route   GET /api/users/session-status
+export const checkSessionStatus = async (req, res, next) => {
+  try {
+    const mobile = req.query.mobile || req.headers['x-user-mobile'];
+    const sessionId = req.headers['x-session-id'] || req.query.sessionId;
+
+    if (!mobile || !sessionId) {
+      return res.status(200).json({ success: true, active: true });
+    }
+
+    const cleanMobile = String(mobile).trim();
+    const user = await User.findOne({ mobileNumber: cleanMobile });
+
+    if (!user) {
+      return res.status(200).json({ success: false, active: false, sessionRevoked: true, message: 'Your session is logged out. Kindly login back..!' });
+    }
+
+    const activeSession = (user.activeSessions || []).find(
+      (s) => s.sessionId === String(sessionId).trim()
+    );
+
+    if (!activeSession) {
+      return res.status(200).json({
+        success: false,
+        active: false,
+        sessionRevoked: true,
+        message: 'Your session is logged out. Kindly login back..!',
+      });
+    }
+
+    // Update last active time for this session
+    activeSession.lastActiveAt = new Date();
+    user.lastActiveAt = new Date();
+    await user.save();
+
+    return res.status(200).json({ success: true, active: true });
   } catch (error) {
     next(error);
   }
