@@ -501,7 +501,19 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               </AnimatePresence>
             </div>
             <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab("settings")}>
-               <img src={userAvatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
+               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-gray-100 shadow-xs">
+                 <span>{(userName || "U").charAt(0)}</span>
+                 {userAvatar && (
+                   <img
+                     src={userAvatar}
+                     alt={userName}
+                     className="absolute inset-0 w-full h-full object-cover"
+                     onError={(e) => {
+                       (e.target as HTMLElement).style.display = "none";
+                     }}
+                   />
+                 )}
+               </div>
                <div className="flex flex-col hidden sm:flex">
                  <span className="text-[11px] text-gray-500 font-medium">Welcome back,</span>
                  <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors">{userName}</span> <ChevronDown size={14} className="text-gray-400" /></div>

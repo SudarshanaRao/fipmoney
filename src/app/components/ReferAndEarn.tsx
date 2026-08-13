@@ -310,11 +310,17 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                         onClick={() => setExpandedReferralId(expandedReferralId === user.id ? null : user.id)}
                         className="flex items-center gap-3 p-3 bg-slate-50 cursor-pointer hover:bg-slate-100/70 transition-colors"
                       >
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm shrink-0 uppercase overflow-hidden">
-                          {user.profileImage ? (
-                            <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
-                          ) : (
-                            user.name.charAt(0)
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shrink-0 uppercase overflow-hidden relative shadow-xs">
+                          <span>{(user.name || "U").charAt(0)}</span>
+                          {user.profileImage && (
+                            <img
+                              src={user.profileImage}
+                              alt={user.name}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = "none";
+                              }}
+                            />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">

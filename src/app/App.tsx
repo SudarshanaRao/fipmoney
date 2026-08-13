@@ -156,6 +156,7 @@ export default function App() {
       try {
         const res = await fetch(`${API_BASE_URL}/users/session-status?mobile=${encodeURIComponent(mobile)}`, {
           headers: {
+            "Accept": "application/json",
             "x-session-id": sessionId,
             "x-user-mobile": mobile,
           }

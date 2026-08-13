@@ -56,6 +56,7 @@ export default function SettingsPage() {
       const currentSessionId = typeof window !== 'undefined' ? (sessionStorage.getItem("fm_session_id") || localStorage.getItem("fm_session_id") || "") : "";
       const res = await fetch(`${API_BASE_URL}/users/sessions?mobile=${loggedInMobile}`, {
         headers: {
+          "Accept": "application/json",
           "x-session-id": currentSessionId,
         }
       });
@@ -930,13 +931,19 @@ export default function SettingsPage() {
                       <span className="block text-xs text-gray-400 mt-1 font-semibold">This will be displayed on your profile.</span>
                     </div>
                     <div className="md:col-span-8 flex items-center gap-5">
-                      {avatar ? (
-                        <img src={avatar} alt="Avatar" className="w-14 h-14 rounded-full object-cover border border-gray-100 shadow-sm" />
-                      ) : (
-                        <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 font-bold text-lg border border-amber-100 shadow-sm uppercase">
-                          {(username || "F").charAt(0)}
-                        </div>
-                      )}
+                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-lg border border-amber-200 shadow-sm uppercase overflow-hidden relative">
+                        <span>{(fullName || username || "F").charAt(0)}</span>
+                        {avatar && (
+                          <img
+                            src={avatar}
+                            alt="Avatar"
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = "none";
+                            }}
+                          />
+                        )}
+                      </div>
                       <div className="flex gap-4">
                         <button
                           onClick={handleUploadPhoto}

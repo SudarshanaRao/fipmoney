@@ -655,6 +655,10 @@ router.post('/profile-image', upload.single('image'), uploadProfileImage);
  */
 router.get('/pending-dues', getPendingDues);
 
+router.get('/sessions', getUserSessions);
+router.post('/sessions/revoke', revokeUserSession);
+router.get('/session-status', checkSessionStatus);
+
 /**
  * @swagger
  * /api/users/{id}:
@@ -685,10 +689,6 @@ router.get('/pending-dues', getPendingDues);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/:id', getUserById);
-
-router.get('/sessions', getUserSessions);
-router.post('/sessions/revoke', revokeUserSession);
-router.get('/session-status', checkSessionStatus);
 
 router.post('/check-admin-email', checkAdminEmail);
 router.post('/send-superadmin-otp', sendSuperAdminAuthOtp);

@@ -110,17 +110,25 @@ export const notFound = (req, res, next) => {
 
 export const errorHandler = (err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  console.error(`[Error] ${err.message}`);
-
-  // If user accesses route directly in browser (accepts HTML)
-  if (req.accepts('html')) {
-    return res.status(statusCode).send(get404HtmlPage(req.originalUrl));
+  
+  // Log error (suppress excessive log noise for standard 404s)
+  if (statusCode !== 404) {
+    console.error(`[Error ${statusCode}] ${err.message}`);
   }
 
-  res.status(statusCode).json({
-    success: false,
-    message: err.message,
-    statusCode: statusCode,
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
-  });
+  // All API requests MUST return JSON responses, never HTML
+  const isApiRoute = req.originalUrl.startsWith('/api') || req.path.startsWith('/api');
+  const prefersJson = !req.accepts('html') || (req.headers.accept && req.headers.accept.includes('application/json'));
+
+  if (isApiRoute || prefersJson) {
+    return res.status(statusCode).json({
+      success: false,
+      message: err.message,
+      statusCode: statusCode,
+      stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    });
+  }
+
+  // Serve custom HTML page only for direct non-API browser navigation
+  return res.status(statusCode).send(get404HtmlPage(req.originalUrl));
 };
