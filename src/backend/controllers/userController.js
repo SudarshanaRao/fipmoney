@@ -380,6 +380,32 @@ const getSafeUser = (userDoc) => {
   };
 };
 
+export const getFreshProfileImageUrl = async (user) => {
+  if (!user) return '';
+
+  let key = user.profileImageKey || '';
+
+  if (!key && user.profileImage) {
+    const match = user.profileImage.match(/(users\/[^?]+)/);
+    if (match && match[1]) {
+      key = match[1];
+      user.profileImageKey = key;
+      user.save().catch(err => console.warn('[SaveProfileImageKey Error]', err.message));
+    }
+  }
+
+  if (key) {
+    const freshSignedUrl = await generatePresignedViewUrl(key);
+    if (freshSignedUrl) return freshSignedUrl;
+  }
+
+  if (user.profileImage && (user.profileImage.startsWith('http') || user.profileImage.startsWith('data:'))) {
+    return user.profileImage;
+  }
+
+  return '';
+};
+
 const generateUniqueReferralCode = async (User) => {
   let isUnique = false;
   let code = '';
@@ -1190,9 +1216,12 @@ export const getUserByMobile = async (req, res, next) => {
       throw new Error('User not found');
     }
 
+    const safeUser = getSafeUser(user);
+    safeUser.profileImage = await getFreshProfileImageUrl(user);
+
     return res.status(200).json({
       success: true,
-      data: [getSafeUser(user)],
+      data: [safeUser],
     });
   } catch (error) {
     next(error);
@@ -1213,9 +1242,12 @@ export const getUserByUuid = async (req, res, next) => {
       throw new Error('User not found');
     }
 
+    const safeUser = getSafeUser(user);
+    safeUser.profileImage = await getFreshProfileImageUrl(user);
+
     return res.status(200).json({
       success: true,
-      data: getSafeUser(user),
+      data: safeUser,
     });
   } catch (error) {
     next(error);
@@ -1366,11 +1398,8 @@ export const getProfileSettings = async (req, res, next) => {
       throw new Error('User not found');
     }
 
-    // Dynamically sign profile image URL if key exists
-    let activeProfileImage = user.profileImage || '';
-    if (user.profileImageKey) {
-      activeProfileImage = await generatePresignedViewUrl(user.profileImageKey) || user.profileImage || '';
-    }
+    // Dynamically sign profile image URL
+    const activeProfileImage = await getFreshProfileImageUrl(user);
 
     // Return only profile-specific data needed for Settings page
     const profileData = {
@@ -1429,6 +1458,7 @@ export const getReferralsTracking = async (req, res, next) => {
 
     const trackingData = await Promise.all(referrals.map(async (ref) => {
       const referee = await User.findOne({ mobileNumber: ref.refereeMobile });
+      const refereeImage = referee ? await getFreshProfileImageUrl(referee) : null;
       return {
         id: referee ? referee.userId : ref._id,
         name: referee ? (referee.firstName ? `${referee.firstName} ${referee.lastName || ''}`.trim() : (referee.username || 'User')) : 'User',
@@ -1437,7 +1467,7 @@ export const getReferralsTracking = async (req, res, next) => {
         isKycCompleted: ref.status === 'KYC_COMPLETED' || ref.status === 'GOLD_PURCHASED' || ref.status === 'REWARD_CREDITED',
         hasPurchasedGold: ref.status === 'GOLD_PURCHASED' || ref.status === 'REWARD_CREDITED',
         rewardCredited: ref.status === 'REWARD_CREDITED',
-        profileImage: referee ? referee.profileImage : null
+        profileImage: refereeImage
       };
     }));
 
@@ -1568,13 +1598,12 @@ export const getProfileImageUrl = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    const targetKey = user.profileImageKey || user.profileImage;
-    const viewUrl = await generatePresignedViewUrl(targetKey);
+    const viewUrl = await getFreshProfileImageUrl(user);
 
     return res.status(200).json({
       success: true,
       profileImageKey: user.profileImageKey || '',
-      imageUrl: viewUrl || user.profileImage || ''
+      imageUrl: viewUrl
     });
   } catch (error) {
     console.error('Error fetching profile image URL:', error);
