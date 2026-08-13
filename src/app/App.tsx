@@ -39,12 +39,13 @@ import MandatoryDisclosures from "./components/MandatoryDisclosures";
 import SafetyPriorityCard from "./components/SafetyPriorityCard";
 import AdminDashboard from "./components/AdminDashboard";
 import AdminAuthFlow from "./components/AdminAuthFlow";
+import AgentDashboard from "./components/AgentDashboard";
 import { OBFUSCATED_ADMIN_PATH } from "./utils/adminStorage";
 import { LoadingSpinner } from "./components/LottiePlayer";
 import { API_BASE_URL } from "./utils/apiConfig";
 import { clearUserSession } from "./utils/userStorage";
 
-type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin';
+type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin' | 'agent/login' | 'agent/dashboard' | 'agent-login' | 'agent-dashboard' | 'agent';
 
 const PageTransition = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => (
   <motion.div
@@ -124,12 +125,30 @@ export default function App() {
   const [showRevokedModal, setShowRevokedModal] = useState(false);
   const [revokedMessage, setRevokedMessage] = useState("");
 
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('fm_admin_logged_in') === 'true';
+    }
+    return false;
+  });
+
   const isLoggedIn = typeof window !== 'undefined' ? !!sessionStorage.getItem("fm_logged_in_mobile") : false;
 
   // 1. Enforce Strict Route Protection Guard
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const currentPath = window.location.pathname.slice(1);
+
+    // Dedicated Standalone Agent Dashboard Environment Route Guard
+    if (currentPath === 'agent-dashboard' || currentPath === 'agent/dashboard' || currentPath === 'agent' || currentPage === 'agent-dashboard' as any) {
+      if (isLoggedIn) {
+        if (currentPage !== 'agent-dashboard') setCurrentPage('agent-dashboard' as PageType);
+      } else {
+        window.history.replaceState({}, '', '/login');
+        setCurrentPage('login');
+      }
+      return;
+    }
 
     // Unauthenticated user trying to access /dashboard -> redirect to /login
     if (!isLoggedIn && (currentPath === 'dashboard' || currentPath.startsWith('dashboard/') || currentPage === 'dashboard')) {
@@ -350,6 +369,16 @@ export default function App() {
               Back to Homepage
             </button>
           </div>
+        );
+
+      case 'agent-dashboard':
+        return (
+          <AgentDashboard
+            onLogout={() => {
+              window.history.pushState({}, '', '/dashboard');
+              setCurrentPage('dashboard');
+            }}
+          />
         );
 
       case 'login':

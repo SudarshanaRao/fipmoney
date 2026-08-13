@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { API_BASE_URL } from "../utils/apiConfig";
 import { LoadingSpinner } from "./LottiePlayer";
+import AgentDashboard from "./AgentDashboard";
 
 const LANGUAGES = [
   "Select your preferred language",
@@ -54,25 +55,60 @@ export default function BecomeAgentPage() {
   const [pincodeMsg, setPincodeMsg] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isApprovedAgent, setIsApprovedAgent] = useState(false);
   const [waitlistResult, setWaitlistResult] = useState<{
     waitlistNumber: number;
     formattedWaitlistNumber?: string;
     username: string;
     alreadyRegistered?: boolean;
+    isApproved?: boolean;
+    status?: string;
     mobile?: string;
     email?: string;
     city?: string;
   } | null>(null);
 
   useEffect(() => {
+    const mobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") : null;
+    
+    // Check saved waitlist data locally first
     const saved = localStorage.getItem("fm_dga_waitlist_data");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setWaitlistResult(parsed);
-      } catch (e) {
-        // ignore
-      }
+        if (parsed.isApproved || parsed.status === 'approved' || parsed.status === 'APPROVED') {
+          setIsApprovedAgent(true);
+        }
+      } catch (e) {}
+    }
+
+    // Always poll live check endpoint to get updated waitlist number & approval status
+    if (mobile) {
+      fetch(`${API_BASE_URL}/agent-waitlist/check?mobile=${encodeURIComponent(mobile)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && data.alreadyRegistered) {
+            const isAppr = data.isApproved || data.status === 'approved' || data.status === 'APPROVED';
+            if (isAppr) {
+              setIsApprovedAgent(true);
+            }
+            const updatedObj = {
+              waitlistNumber: data.waitlistNumber,
+              formattedWaitlistNumber: data.formattedWaitlistNumber,
+              username: data.data?.username || "Agent Partner",
+              alreadyRegistered: true,
+              isApproved: isAppr,
+              status: data.status,
+              mobile: data.data?.mobile || mobile,
+              email: data.data?.email || "",
+              city: data.data?.city || ""
+            };
+            setWaitlistResult(updatedObj);
+            localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(updatedObj));
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
@@ -181,7 +217,54 @@ export default function BecomeAgentPage() {
     }
   };
 
-  const displayWaitlistNumber = waitlistResult ? waitlistResult.waitlistNumber : 1048;
+  if (isApprovedAgent) {
+    return (
+      <div className="flex-1 min-h-screen bg-slate-50 p-6 lg:p-12 flex items-center justify-center font-sans">
+        <div className="max-w-2xl w-full bg-white border border-amber-200/90 rounded-[32px] p-8 sm:p-12 shadow-xl text-center space-y-6 relative overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-100/60 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 via-amber-500 to-amber-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20 text-3xl font-bold">
+            👑
+          </div>
+
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider border border-emerald-300 mb-3">
+              <ShieldCheck size={14} className="text-emerald-600" /> Verified Approved DGA Partner
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Your Digital Gold Agent Terminal is Ready!</h1>
+            <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-2 max-w-lg mx-auto leading-relaxed">
+              Your application has been approved by admin. Access your standalone partner environment to manage client portfolios, track payouts, and view marketing resources.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
+            <div>
+              <div className="text-lg font-black text-amber-600">₹1,48,250</div>
+              <div className="text-[10px] text-slate-500 font-bold uppercase">Total Earned</div>
+            </div>
+            <div>
+              <div className="text-lg font-black text-slate-900">42 Clients</div>
+              <div className="text-[10px] text-slate-500 font-bold uppercase">Portfolio</div>
+            </div>
+            <div>
+              <div className="text-lg font-black text-emerald-600">Diamond</div>
+              <div className="text-[10px] text-slate-500 font-bold uppercase">Agent Tier</div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              window.history.pushState({}, '', '/agent-dashboard');
+              window.dispatchEvent(new Event('popstate'));
+            }}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 cursor-pointer transition-all flex items-center justify-center gap-2 border-none outline-none"
+          >
+            🚀 Launch Standalone Agent Dashboard Environment <ArrowRight size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 h-screen overflow-y-auto bg-[#fafafd] pb-20 text-slate-800 hide-scrollbar font-sans">

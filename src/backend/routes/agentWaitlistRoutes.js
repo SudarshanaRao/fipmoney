@@ -10,6 +10,27 @@ const formatWaitlistNumber = (num) => {
   return `DGA${String(parsed).padStart(4, '0')}`;
 };
 
+// Re-index remaining pending waitlist applicants after an approval or removal
+export const reindexPendingWaitlist = async () => {
+  try {
+    const pendingList = await AgentWaitlist.find({
+      status: { $nin: ['approved', 'APPROVED'] }
+    }).sort({ createdAt: 1, _id: 1 });
+
+    for (let i = 0; i < pendingList.length; i++) {
+      const newNum = i + 1;
+      const formatted = formatWaitlistNumber(newNum);
+      if (pendingList[i].waitlistNumber !== newNum || pendingList[i].formattedWaitlistNumber !== formatted) {
+        pendingList[i].waitlistNumber = newNum;
+        pendingList[i].formattedWaitlistNumber = formatted;
+        await pendingList[i].save();
+      }
+    }
+  } catch (err) {
+    console.error('[ReindexPendingWaitlist Error]:', err.message);
+  }
+};
+
 // @desc    Check if user is already registered on waitlist
 // @route   GET /api/agent-waitlist/check
 // @access  Public
@@ -27,10 +48,13 @@ router.get('/check', async (req, res) => {
     const existingAgent = await AgentWaitlist.findOne({ $or: query });
 
     if (existingAgent) {
-      const formattedNumber = existingAgent.formattedWaitlistNumber || formatWaitlistNumber(existingAgent.waitlistNumber);
+      const isApproved = existingAgent.status === 'approved' || existingAgent.status === 'APPROVED';
+      const formattedNumber = isApproved ? 'APPROVED' : (existingAgent.formattedWaitlistNumber || formatWaitlistNumber(existingAgent.waitlistNumber));
       return res.status(200).json({
         success: true,
         alreadyRegistered: true,
+        isApproved,
+        status: existingAgent.status || 'pending',
         waitlistNumber: existingAgent.waitlistNumber,
         formattedWaitlistNumber: formattedNumber,
         data: existingAgent,
@@ -40,6 +64,7 @@ router.get('/check', async (req, res) => {
     return res.status(200).json({
       success: true,
       alreadyRegistered: false,
+      isApproved: false,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -77,8 +102,8 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const count = await AgentWaitlist.countDocuments();
-    const assignedWaitlistNumber = 1 + count;
+    const pendingCount = await AgentWaitlist.countDocuments({ status: { $nin: ['approved', 'APPROVED'] } });
+    const assignedWaitlistNumber = 1 + pendingCount;
     const formattedNumber = formatWaitlistNumber(assignedWaitlistNumber);
 
     const newWaitlistEntry = await AgentWaitlist.create({
@@ -114,13 +139,13 @@ router.post('/', async (req, res) => {
 // @access  Public
 router.get('/stats', async (req, res) => {
   try {
-    const count = await AgentWaitlist.countDocuments();
+    const pendingCount = await AgentWaitlist.countDocuments({ status: { $nin: ['approved', 'APPROVED'] } });
     res.status(200).json({
       success: true,
-      totalWaitlist: count,
-      registeredCount: count,
-      nextWaitlistNumber: count + 1,
-      nextFormattedWaitlistNumber: formatWaitlistNumber(count + 1),
+      totalWaitlist: pendingCount,
+      registeredCount: pendingCount,
+      nextWaitlistNumber: pendingCount + 1,
+      nextFormattedWaitlistNumber: formatWaitlistNumber(pendingCount + 1),
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -132,7 +157,7 @@ router.get('/stats', async (req, res) => {
 // @access  Admin
 router.get('/admin/all', async (req, res) => {
   try {
-    const list = await AgentWaitlist.find({}).sort({ waitlistNumber: 1 });
+    const list = await AgentWaitlist.find({}).sort({ waitlistNumber: 1, createdAt: 1 });
     const formattedList = list.map(item => ({
       _id: item._id,
       id: item._id,
@@ -142,7 +167,7 @@ router.get('/admin/all', async (req, res) => {
       city: item.city,
       language: item.language,
       waitlistNumber: item.waitlistNumber,
-      formattedWaitlistNumber: item.formattedWaitlistNumber || formatWaitlistNumber(item.waitlistNumber),
+      formattedWaitlistNumber: (item.status === 'approved' || item.status === 'APPROVED') ? 'APPROVED' : (item.formattedWaitlistNumber || formatWaitlistNumber(item.waitlistNumber)),
       status: item.status || 'pending',
       createdAt: item.createdAt,
     }));
@@ -175,9 +200,12 @@ router.put('/admin/update-status', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Waitlist entry not found' });
     }
 
+    // Forward the queue: re-index remaining pending waitlist applicants
+    await reindexPendingWaitlist();
+
     res.status(200).json({
       success: true,
-      message: `Waitlist entry updated to '${status}' successfully!`,
+      message: `Waitlist entry updated to '${status}' successfully! Queue forwarded for remaining applicants.`,
       data: updated,
     });
   } catch (error) {
@@ -200,9 +228,12 @@ router.put('/admin/bulk-update-status', async (req, res) => {
       { $set: { status } }
     );
 
+    // Forward the queue: re-index remaining pending waitlist applicants
+    await reindexPendingWaitlist();
+
     res.status(200).json({
       success: true,
-      message: `Successfully updated ${ids.length} waitlist entries to '${status}'!`,
+      message: `Successfully updated ${ids.length} waitlist entries to '${status}'! Queue forwarded for remaining applicants.`,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -216,9 +247,10 @@ router.delete('/admin/:id', async (req, res) => {
   try {
     const { id } = req.params;
     await AgentWaitlist.findByIdAndDelete(id);
+    await reindexPendingWaitlist();
     res.status(200).json({
       success: true,
-      message: 'Waitlist entry removed successfully!',
+      message: 'Waitlist entry removed successfully! Queue forwarded for remaining applicants.',
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

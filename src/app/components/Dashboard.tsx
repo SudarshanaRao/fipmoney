@@ -157,8 +157,25 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const [isFlipped, setIsFlipped] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
 
-  // Agent Modal state
+  // Agent Modal state & Approved DGA state
+  const [isApprovedDga, setIsApprovedDga] = useState(false);
   const [showAgentModal, setShowAgentModal] = useState(false);
+
+  useEffect(() => {
+    const mobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") : null;
+    if (mobile) {
+      fetch(`${API_BASE_URL}/agent-waitlist/check?mobile=${encodeURIComponent(mobile)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && data.alreadyRegistered) {
+            if (data.isApproved || data.status === 'approved' || data.status === 'APPROVED') {
+              setIsApprovedDga(true);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
   const [agentFormData, setAgentFormData] = useState({
     name: "",
     phone: "",
@@ -539,14 +556,14 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-base sm:text-lg font-extrabold text-amber-950 tracking-tight">
-                    Become a Digital Gold Agent (DGA) Today!
+                    {isApprovedDga ? "You are an Approved Digital Gold Agent (DGA)!" : "Become a Digital Gold Agent (DGA) Today!"}
                   </h3>
                   <span className="bg-amber-100/90 text-amber-800 border border-amber-300/80 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    New
+                    {isApprovedDga ? "Verified Partner" : "New"}
                   </span>
                 </div>
                 <p className="text-slate-600 text-xs sm:text-[13px] font-semibold mt-0.5">
-                  Earn high commissions, exclusive rewards and unlock a world of benefits.
+                  {isApprovedDga ? "Access your partner console, manage client portfolios, and track instant commission payouts." : "Earn high commissions, exclusive rewards and unlock a world of benefits."}
                 </p>
               </div>
             </div>
@@ -554,16 +571,28 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             {/* Right Actions & Badge */}
             <div className="flex items-center gap-3 relative z-10 shrink-0 self-start md:self-center">
               <button
-                onClick={() => setTab("become-agent")}
+                onClick={() => {
+                  if (isApprovedDga) {
+                    onNavigate('agent-dashboard');
+                  } else {
+                    setTab("become-agent");
+                  }
+                }}
                 className="px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm text-amber-900 bg-white/90 hover:bg-white border border-amber-300/80 hover:border-amber-400 transition-all shadow-xs cursor-pointer outline-none"
               >
-                Learn More
+                {isApprovedDga ? "View Terminal" : "Learn More"}
               </button>
               <button
-                onClick={() => setTab("become-agent")}
+                onClick={() => {
+                  if (isApprovedDga) {
+                    onNavigate('agent-dashboard');
+                  } else {
+                    setTab("become-agent");
+                  }
+                }}
                 className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl font-black text-xs sm:text-sm text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-400 transition-all shadow-md shadow-amber-500/20 hover:shadow-lg flex items-center gap-1.5 cursor-pointer outline-none active:scale-[0.98]"
               >
-                <span>Become an Agent</span>
+                <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
                 <ChevronRight size={16} strokeWidth={3} />
               </button>
 

@@ -380,7 +380,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       });
       if (res.ok) {
         const json = await res.json();
-        triggerToast(json.message || `Application status updated to '${status}'!`);
+        triggerToast(json.message || `Application status updated to '${status}'! Queue forwarded.`);
+        await fetchDgaWaitlist();
       }
     } catch (err) {
       console.error('[AdminDashboard] Error updating DGA status:', err);
@@ -403,7 +404,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       });
       if (res.ok) {
         const json = await res.json();
-        triggerToast(json.message || `Single Action: Updated ${selectedDgaIds.length} applicants to '${status}'!`);
+        triggerToast(json.message || `Single Action: Updated ${selectedDgaIds.length} applicants to '${status}'! Queue forwarded.`);
+        await fetchDgaWaitlist();
       }
     } catch (err) {
       console.error('[AdminDashboard] Error bulk updating DGA status:', err);
@@ -421,7 +423,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     try {
       let res = await fetch(`${API_BASE_URL}/agent-waitlist/admin/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        triggerToast("Waitlist application removed successfully!");
+        triggerToast("Waitlist application removed successfully! Queue forwarded.");
+        await fetchDgaWaitlist();
       }
     } catch (err) {
       console.error('[AdminDashboard] Error deleting DGA item:', err);
