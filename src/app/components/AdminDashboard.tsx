@@ -25,6 +25,46 @@ import fipmoneyIcon from "../../imports/fipmoney_icon_square.png";
 import { LoadingSpinner } from "./LottiePlayer";
 import { API_BASE_URL } from "../utils/apiConfig";
 
+const getDynamicVariableDefaults = (): Record<string, string> => {
+  const baseDomain = (typeof window !== 'undefined' && window.location && window.location.origin)
+    ? window.location.origin.replace(/\/+$/, '')
+    : 'https://www.fipmoney.com';
+
+  return {
+    baseUrl: baseDomain,
+    FIPMONEY_LOGO_URL: `${baseDomain}/fipmoney_logo_final.png`,
+    HELLO_RAFIKI_ANIMATION_URL: `${baseDomain}/fipmoney-welcome-hello-rafiki.gif`,
+    WALLET_BRO_ANIMATION_URL: `${baseDomain}/fipmoney-wallet-bro.gif`,
+    EWALLET_PANA_ANIMATION_URL: `${baseDomain}/fipmoney-ewallet-pana.gif`,
+    DIGITAL_GOLD_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_gold.png`,
+    DIGITAL_SILVER_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_silver.png`,
+    MANAGE_MONEY_AMICO_ANIMATION_URL: `${baseDomain}/fipmoney-manage-money-amico.gif`,
+    GROWTH_ANALYTICS_AMICO_ANIMATION_URL: `${baseDomain}/fipmoney-growth-analytics-amico.gif`,
+    DGA_URL: `${baseDomain}/become-agent`,
+    FIPMONEY_DASHBOARD_URL: `${baseDomain}/dashboard`,
+    FIPMONEY_HOME_URL: `${baseDomain}/`,
+    FIPMONEY_ABOUT_URL: `${baseDomain}/about`,
+    FIPMONEY_CONTACT_URL: `${baseDomain}/contact`,
+    FIPMONEY_FAQ_URL: `${baseDomain}/faq`,
+    FIPMONEY_TERMS_URL: `${baseDomain}/terms-and-conditions`,
+    FIPMONEY_PRIVACY_URL: `${baseDomain}/privacy-policy`,
+    supportEmail: "support@fipmoney.com",
+    currentYear: String(new Date().getFullYear()),
+  };
+};
+
+const extractVariablesFromText = (text: string): string[] => {
+  if (!text) return [];
+  const matches = text.match(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g);
+  if (!matches) return [];
+  const set = new Set<string>();
+  matches.forEach(m => {
+    const clean = m.replace(/[{}]/g, '').trim();
+    if (clean) set.add(clean);
+  });
+  return Array.from(set);
+};
+
 interface AdminDashboardProps {
   secretCode?: string;
   onBackToMainSite: () => void;
@@ -653,6 +693,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const [composeBody, setComposeBody] = useState("");
   const [selectedTemplateForCompose, setSelectedTemplateForCompose] = useState("");
   const [isSendingComposeEmail, setIsSendingComposeEmail] = useState(false);
+  const [composeVariables, setComposeVariables] = useState<Record<string, string>>({});
+  const [modalVariables, setModalVariables] = useState<Record<string, string>>({});
 
   const filteredRecipientUsers = users.filter((u) => {
     if (!searchRecipientQuery.trim()) return true;
@@ -665,6 +707,30 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     );
   });
 
+  const syncComposeVariables = (subject: string, body: string) => {
+    const detected = extractVariablesFromText(subject + " " + body);
+    const defaults = getDynamicVariableDefaults();
+    setComposeVariables((prev) => {
+      const updated: Record<string, string> = { ...prev };
+      detected.forEach((v) => {
+        if (updated[v] === undefined) {
+          if (defaults[v]) {
+            updated[v] = defaults[v];
+          } else if (v === 'userName') {
+            updated[v] = 'Valued Member';
+          } else if (v === 'currentYear') {
+            updated[v] = String(new Date().getFullYear());
+          } else if (v === 'supportEmail') {
+            updated[v] = 'support@fipmoney.com';
+          } else {
+            updated[v] = '';
+          }
+        }
+      });
+      return updated;
+    });
+  };
+
   const handleSelectTemplateForCompose = (templateId: string) => {
     setSelectedTemplateForCompose(templateId);
     if (!templateId) return;
@@ -672,6 +738,48 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     if (tmpl) {
       setComposeSubject(tmpl.subject);
       setComposeBody(tmpl.htmlContent);
+
+      const detected = extractVariablesFromText(tmpl.subject + " " + tmpl.htmlContent);
+      const defaults = getDynamicVariableDefaults();
+      const varMap: Record<string, string> = {};
+      detected.forEach((v) => {
+        if (defaults[v]) {
+          varMap[v] = defaults[v];
+        } else if (v === 'userName') {
+          varMap[v] = 'Valued Member';
+        } else if (v === 'currentYear') {
+          varMap[v] = String(new Date().getFullYear());
+        } else if (v === 'supportEmail') {
+          varMap[v] = 'support@fipmoney.com';
+        } else {
+          varMap[v] = '';
+        }
+      });
+      setComposeVariables(varMap);
+    }
+  };
+
+  const handleSelectModalTemplate = (templateId: string) => {
+    setSendEmailPayload(prev => ({ ...prev, templateId }));
+    const tmpl = emailTemplates.find(t => t.templateId === templateId);
+    if (tmpl) {
+      const detected = extractVariablesFromText(tmpl.subject + " " + tmpl.htmlContent);
+      const defaults = getDynamicVariableDefaults();
+      const varMap: Record<string, string> = {};
+      detected.forEach((v) => {
+        if (defaults[v]) {
+          varMap[v] = defaults[v];
+        } else if (v === 'userName') {
+          varMap[v] = 'Valued Member';
+        } else if (v === 'currentYear') {
+          varMap[v] = String(new Date().getFullYear());
+        } else if (v === 'supportEmail') {
+          varMap[v] = 'support@fipmoney.com';
+        } else {
+          varMap[v] = '';
+        }
+      });
+      setModalVariables(varMap);
     }
   };
 
@@ -687,7 +795,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       subject: composeSubject,
       category: "CUSTOM",
       htmlContent: composeBody,
-      variables: ["userName", "email"]
+      variables: Object.keys(composeVariables)
     };
     setEmailTemplates([newTmpl, ...emailTemplates]);
     triggerToast(`Template '${composeSubject.substring(0, 20)}...' saved successfully!`);
@@ -736,7 +844,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
           recipients: selectedRecipientEmails,
           subject: composeSubject,
           body: composeBody,
-          fromEmail: 'noreply@fipmoney.com'
+          fromEmail: sendEmailPayload.fromEmail || 'support@fipmoney.com',
+          variables: composeVariables
         })
       });
 
@@ -799,25 +908,22 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       return;
     }
 
-    try {
-      const endpoint = recipientsList.length > 1 ? `${API_BASE_URL}/emails/send-bulk` : `${API_BASE_URL}/emails/send`;
-      const body = recipientsList.length > 1
-        ? { recipients: recipientsList, templateId: sendEmailPayload.templateId, fromEmail: sendEmailPayload.fromEmail }
-        : {
-            toEmail: recipientsList[0].toEmail,
-            templateId: sendEmailPayload.templateId,
-            fromEmail: sendEmailPayload.fromEmail,
-            variables: {
-              userName: recipientsList[0].userName,
-              mobileNumber: recipientsList[0].mobileNumber,
-              referralCode: 'FIP2026'
-            }
-          };
+    const tmpl = emailTemplates.find(t => t.templateId === sendEmailPayload.templateId);
+    const subject = tmpl ? tmpl.subject : "Fipmoney Notification";
+    const bodyContent = tmpl ? tmpl.htmlContent : "";
 
-      let res = await fetch(endpoint, {
+    try {
+      let res = await fetch(`${API_BASE_URL}/emails/send-to-users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          recipients: recipientsList.map(r => r.toEmail),
+          subject: subject,
+          body: bodyContent,
+          templateId: sendEmailPayload.templateId,
+          fromEmail: sendEmailPayload.fromEmail,
+          variables: modalVariables
+        })
       });
       if (res.ok) {
         const json = await res.json();
@@ -3038,10 +3144,55 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         required
                         placeholder="Enter email body..."
                         value={composeBody}
-                        onChange={(e) => setComposeBody(e.target.value)}
+                        onChange={(e) => {
+                          setComposeBody(e.target.value);
+                          syncComposeVariables(composeSubject, e.target.value);
+                        }}
                         className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-xs font-mono font-medium focus:outline-none focus:border-purple-500 leading-relaxed transition-all"
                       />
                     </div>
+
+                    {/* DYNAMIC TEMPLATE VARIABLES & PUBLIC ASSET VALUES GRID */}
+                    {Object.keys(composeVariables).length > 0 && (
+                      <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Sparkles size={15} className="text-[#7C3AED]" />
+                            <span className="font-extrabold text-xs text-purple-950">Template Variables & Public Image URLs ({Object.keys(composeVariables).length})</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                            Values replace &#123;&#123;tags&#125;&#125; in email
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1 hide-scrollbar">
+                          {Object.keys(composeVariables).map((vKey) => {
+                            const isDefaultAsset = Boolean(getDynamicVariableDefaults()[vKey]);
+                            return (
+                              <div key={vKey} className="bg-white border border-purple-100 p-2.5 rounded-xl shadow-2xs space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <label className="font-mono text-[10px] font-black text-slate-800 truncate" title={vKey}>
+                                    &#123;&#123;{vKey}&#125;&#125;
+                                  </label>
+                                  {isDefaultAsset && (
+                                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                      Public Asset
+                                    </span>
+                                  )}
+                                </div>
+                                <input
+                                  type="text"
+                                  value={composeVariables[vKey]}
+                                  onChange={(e) => setComposeVariables({ ...composeVariables, [vKey]: e.target.value })}
+                                  placeholder={`Enter value for ${vKey}...`}
+                                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] font-semibold text-slate-700 focus:outline-none focus:border-purple-500"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
                     {/* ACTION FOOTER */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
@@ -4116,7 +4267,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
+              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
@@ -4212,9 +4363,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <label className="font-bold text-slate-700 block mb-1">Select HTML Email Template</label>
                   <select
                     value={sendEmailPayload.templateId}
-                    onChange={(e) => setSendEmailPayload({ ...sendEmailPayload, templateId: e.target.value })}
+                    onChange={(e) => handleSelectModalTemplate(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 font-bold bg-slate-50 focus:outline-none focus:border-purple-500"
                   >
+                    <option value="">-- Select a template --</option>
                     {emailTemplates.map(t => (
                       <option key={t.templateId} value={t.templateId}>
                         {t.name} ({t.templateId})
@@ -4222,6 +4374,48 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     ))}
                   </select>
                 </div>
+
+                {/* MODAL TEMPLATE VARIABLES & PUBLIC ASSETS CUSTOMIZATION GRID */}
+                {Object.keys(modalVariables).length > 0 && (
+                  <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 font-black text-xs text-purple-950">
+                        <Sparkles size={14} className="text-[#7C3AED]" />
+                        <span>Template Variables & Image Assets ({Object.keys(modalVariables).length})</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                        Values replace &#123;&#123;tags&#125;&#125;
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 hide-scrollbar">
+                      {Object.keys(modalVariables).map((vKey) => {
+                        const isDefaultAsset = Boolean(getDynamicVariableDefaults()[vKey]);
+                        return (
+                          <div key={vKey} className="bg-white border border-purple-100 p-2 rounded-xl flex flex-col gap-1">
+                            <div className="flex items-center justify-between">
+                              <label className="font-mono text-[10px] font-black text-slate-800 truncate" title={vKey}>
+                                &#123;&#123;{vKey}&#125;&#125;
+                              </label>
+                              {isDefaultAsset && (
+                                <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                  Public Asset
+                                </span>
+                              )}
+                            </div>
+                            <input
+                              type="text"
+                              value={modalVariables[vKey]}
+                              onChange={(e) => setModalVariables({ ...modalVariables, [vKey]: e.target.value })}
+                              placeholder={`Enter value for ${vKey}...`}
+                              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-semibold text-slate-700 focus:outline-none focus:border-purple-500"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <div className="pt-2 flex items-center justify-end gap-2">
                   <button type="button" onClick={() => setShowSendEmailModal(false)} className="px-4 py-2 rounded-xl bg-slate-100 font-bold text-slate-600 border-none cursor-pointer">

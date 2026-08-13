@@ -692,11 +692,15 @@ export const authUser = async (req, res, next) => {
         });
       }
 
+      const signupBaseUrl = req.headers.origin || (req.headers.referer ? (function(){ try { return new URL(req.headers.referer).origin; } catch(e){ return null; } })() : null) || `${req.protocol}://${req.get('host')}`;
+
       // Trigger Signup Welcome Email
       sendTemplatedEmail({
         toEmail: user.email || `${cleanMobile}@fipmoney.com`,
-        templateId: 'WELCOME_SIGNUP',
+        templateId: 'FIPMONEY_WELCOME_ONBOARDING',
+        fromEmail: 'support@fipmoney.com',
         variables: {
+          baseUrl: signupBaseUrl,
           userName: user.fullName || user.username || 'Valued Member',
           mobileNumber: cleanMobile,
           referralCode: user.referralCode,

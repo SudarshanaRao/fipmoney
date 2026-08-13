@@ -138,11 +138,34 @@ export const deleteAllEmailTemplates = async (req, res, next) => {
   }
 };
 
+export const getRequestBaseUrl = (req) => {
+  if (!req) return 'https://www.fipmoney.com';
+  const origin = req.headers.origin;
+  if (origin && origin.trim() && origin.startsWith('http')) {
+    return origin.trim();
+  }
+  const referer = req.headers.referer;
+  if (referer && referer.trim() && referer.startsWith('http')) {
+    try {
+      return new URL(referer).origin;
+    } catch (e) {
+      // ignore
+    }
+  }
+  const host = req.get('host');
+  if (host) {
+    const protocol = req.protocol || 'http';
+    return `${protocol}://${host}`;
+  }
+  return 'https://www.fipmoney.com';
+};
+
 // @desc    Send Templated Email to User
 // @route   POST /api/emails/send
 export const sendEmailToUser = async (req, res, next) => {
   try {
     const { toEmail, templateId, fromEmail, variables } = req.body;
+    const requestBaseUrl = getRequestBaseUrl(req);
 
     if (!toEmail || !templateId) {
       res.status(400);
@@ -153,7 +176,7 @@ export const sendEmailToUser = async (req, res, next) => {
       toEmail: String(toEmail).trim(),
       templateId: String(templateId).trim().toUpperCase(),
       fromEmail: fromEmail ? String(fromEmail).trim() : undefined,
-      variables: variables || {},
+      variables: { baseUrl: requestBaseUrl, ...(variables || {}) },
     });
 
     if (!result.success && result.status === 'FAILED') {
@@ -172,6 +195,7 @@ export const sendEmailToUser = async (req, res, next) => {
 export const sendWelcomeEmail = async (req, res, next) => {
   try {
     const { mobileNumber, email, userName } = req.body;
+    const requestBaseUrl = getRequestBaseUrl(req);
 
     if (!mobileNumber && !email) {
       res.status(400);
@@ -189,11 +213,18 @@ export const sendWelcomeEmail = async (req, res, next) => {
     const targetName = userName || (user ? (user.fullName || user.username) : 'Valued Member');
     const referralCode = user ? user.referralCode : 'FIP2026';
 
+    let templateIdToUse = 'FIPMONEY_WELCOME_ONBOARDING';
+    const tmplExists = await EmailTemplate.findOne({ templateId: 'FIPMONEY_WELCOME_ONBOARDING' });
+    if (!tmplExists) {
+      templateIdToUse = 'WELCOME_SIGNUP';
+    }
+
     const result = await sendTemplatedEmail({
       toEmail: targetEmail,
-      templateId: 'WELCOME_SIGNUP',
-      fromEmail: 'noreply@fipmoney.com',
+      templateId: templateIdToUse,
+      fromEmail: 'support@fipmoney.com',
       variables: {
+        baseUrl: requestBaseUrl,
         userName: targetName,
         mobileNumber: mobileNumber || (user ? user.mobileNumber : ''),
         referralCode: referralCode,
@@ -294,9 +325,21 @@ export const sendEmailToUsers = async (req, res, next) => {
       });
     }
 
+    const requestBaseUrl = getRequestBaseUrl(req);
+    const customVars = req.body.variables || {};
     const results = [];
     for (const email of emails) {
-      const result = await sendCustomEmail(email, subject, body, fromEmail, category);
+      const user = await User.findOne({ email: String(email).trim().toLowerCase() });
+      const recipientVars = {
+        baseUrl: requestBaseUrl,
+        userName: user ? (user.fullName || user.username || 'Valued User') : 'Valued User',
+        mobileNumber: user ? user.mobileNumber : '',
+        referralCode: user ? user.referralCode : 'FIP2026',
+        userCode: user ? user.userCode : '',
+        email: email,
+        ...customVars,
+      };
+      const result = await sendCustomEmail(email, subject, body, fromEmail, category, recipientVars);
       results.push({
         email,
         success: result.success,
