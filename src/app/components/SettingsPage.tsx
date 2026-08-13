@@ -79,34 +79,32 @@ export default function SettingsPage() {
     }
   }, [activeSubTab]);
 
-  const handleRevokeSession = async (sessionIdToRevoke: string) => {
-    const confirm = await showConfirm(
-      "Revoke Active Session?",
+  const handleRevokeSession = (sessionIdToRevoke: string) => {
+    showConfirm(
       "Are you sure you want to log out this device? The user on that device will be signed out immediately.",
-      "Revoke Session",
-      "Cancel"
+      async () => {
+        setRevokingSessionId(sessionIdToRevoke);
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/sessions/revoke`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mobile: loggedInMobile, sessionId: sessionIdToRevoke })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showAlert("Session revoked successfully! Device logged out.", "success");
+            setSessionsList(prev => prev.filter(s => s.sessionId !== sessionIdToRevoke));
+          } else {
+            showAlert(data.message || "Failed to revoke session", "error");
+          }
+        } catch (err) {
+          showAlert("Failed to connect to server", "error");
+        } finally {
+          setRevokingSessionId(null);
+        }
+      },
+      { title: "Revoke Active Session?", confirmText: "Revoke Session", cancelText: "Cancel" }
     );
-    if (!confirm) return;
-
-    setRevokingSessionId(sessionIdToRevoke);
-    try {
-      const res = await fetch(`${API_BASE_URL}/users/sessions/revoke`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile: loggedInMobile, sessionId: sessionIdToRevoke })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showAlert("Session revoked successfully! Device logged out.", "success");
-        setSessionsList(prev => prev.filter(s => s.sessionId !== sessionIdToRevoke));
-      } else {
-        showAlert(data.message || "Failed to revoke session", "error");
-      }
-    } catch (err) {
-      showAlert("Failed to connect to server", "error");
-    } finally {
-      setRevokingSessionId(null);
-    }
   };
 
   const initialName = loggedInUser?.fullName || "";
@@ -276,10 +274,25 @@ export default function SettingsPage() {
   const [isLinkingAadhaar, setIsLinkingAadhaar] = useState(false);
   const [isLinkingPan, setIsLinkingPan] = useState(false);
 
-  // Bank details
-  const [bankName, setBankName] = useState("HDFC Bank");
-  const [accountNumber, setAccountNumber] = useState("50100438290123");
-  const [ifscCode, setIfscCode] = useState("HDFC0000104");
+  // Real Dynamic Bank details (no static dummy defaults)
+  const [bankName, setBankName] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`fm_bank_name_${loggedInMobile}`) || loggedInUser?.bankAccount?.bankName || "";
+    }
+    return loggedInUser?.bankAccount?.bankName || "";
+  });
+  const [accountNumber, setAccountNumber] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`fm_bank_acc_${loggedInMobile}`) || loggedInUser?.bankAccount?.accountNumber || "";
+    }
+    return loggedInUser?.bankAccount?.accountNumber || "";
+  });
+  const [ifscCode, setIfscCode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`fm_bank_ifsc_${loggedInMobile}`) || loggedInUser?.bankAccount?.ifscCode || "";
+    }
+    return loggedInUser?.bankAccount?.ifscCode || "";
+  });
 
   // Nominee Details
   const [nomineeName, setNomineeName] = useState("");
@@ -299,6 +312,47 @@ export default function SettingsPage() {
   // Job Title & Income Range: 20%
   // Link Bank Account: 20%
   // Nominee Verification: 20%
+  // Real-Time Debounced Profile Autosave Effect
+  useEffect(() => {
+    if (!loggedInMobile) return;
+    const saveTimer = setTimeout(async () => {
+      try {
+        if (typeof window !== 'undefined') {
+          if (bankName) localStorage.setItem(`fm_bank_name_${loggedInMobile}`, bankName);
+          if (accountNumber) localStorage.setItem(`fm_bank_acc_${loggedInMobile}`, accountNumber);
+          if (ifscCode) localStorage.setItem(`fm_bank_ifsc_${loggedInMobile}`, ifscCode);
+        }
+        await fetch(`${API_BASE_URL}/users/update-profile`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mobileNumber: loggedInMobile,
+            fullName,
+            email,
+            username,
+            annualIncome: incomeRange,
+            occupation: jobTitle,
+            bankAccount: {
+              bankName,
+              accountNumber,
+              ifscCode,
+              accountHolderName: fullName || username || 'Valued User'
+            },
+            nominee: {
+              name: nomineeName,
+              relationship: nomineeRelation,
+              dob: nomineeDob
+            }
+          })
+        });
+      } catch (err) {
+        console.warn("[Autosave Profile Warning]:", err);
+      }
+    }, 800);
+
+    return () => clearTimeout(saveTimer);
+  }, [fullName, email, username, incomeRange, jobTitle, bankName, accountNumber, ifscCode, nomineeName, nomineeRelation, nomineeDob, loggedInMobile]);
+
   const getCompletionStats = () => {
     const personalDone = Boolean(fullName.trim() && username.trim() && (email.trim() || mobileNumber.trim()));
     const jobDone = Boolean((jobTitle.trim() || sourceOfFunds) && incomeRange);
@@ -792,20 +846,26 @@ export default function SettingsPage() {
             <p className="text-sm text-gray-500 font-semibold mt-1">Manage your financial profile and account configurations</p>
           </div>
 
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="px-6 py-3 rounded-lg text-white text-sm font-bold shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:shadow-none cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2 bg-[#d97706]"
-          >
-            {isSaving ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-            ) : saveSuccess ? (
-              <CheckCircle2 size={16} />
-            ) : (
-              <Save size={16} />
-            )}
-            {saveSuccess ? "Saved!" : "Save Changes"}
-          </button>
+          <div className="flex flex-col items-start md:items-end gap-2">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="px-6 py-3 rounded-lg text-white text-sm font-bold shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:shadow-none cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2 bg-[#d97706]"
+            >
+              {isSaving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              ) : saveSuccess ? (
+                <CheckCircle2 size={16} />
+              ) : (
+                <Save size={16} />
+              )}
+              {saveSuccess ? "Saved!" : "Save Changes"}
+            </button>
+            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs">
+              <Sparkles size={13} className="text-amber-500 animate-pulse" />
+              Note: Any changes made will auto-save automatically in real-time, so you don't need to worry about manually saving!
+            </span>
+          </div>
         </div>
 
         {/* Sub Navigation Tabs (Underline Layout with Framer Motion) */}

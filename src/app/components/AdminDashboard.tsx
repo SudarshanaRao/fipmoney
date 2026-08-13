@@ -322,8 +322,64 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
         fetchAdminReferralStats();
       }, 5000);
       return () => clearInterval(interval);
+    } else if (activeNav === "Admin Users") {
+      fetchAdminsList();
+      const interval = setInterval(() => {
+        fetchAdminsList();
+      }, 5000);
+      return () => clearInterval(interval);
     }
   }, [activeNav]);
+
+  const [isLoadingAdminsList, setIsLoadingAdminsList] = useState<boolean>(true);
+
+  const fetchAdminsList = async () => {
+    setIsLoadingAdminsList(true);
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/all`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setAdminsList(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching admins from API:', err);
+    } finally {
+      setIsLoadingAdminsList(false);
+    }
+  };
+
+  const handleUpdateAdminRole = async (id: string, role: AdminUser['role']) => {
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/update-role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, role })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || "Admin role updated successfully!");
+        fetchAdminsList();
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error updating admin role:', err);
+    }
+  };
+
+  const handleDeleteAdmin = async (id: string) => {
+    if (!window.confirm("Are you sure you want to remove this admin user?")) return;
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || "Admin account removed!");
+        fetchAdminsList();
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error deleting admin:', err);
+    }
+  };
 
   // REFERRALS SINGLE ACTION OPERATIONS
   const handleUpdateReferralStatus = async (id: string, status: string) => {
@@ -910,20 +966,37 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     addAuditLog(`Rejected Payout Request ${id}`, 'Rate Change', 'Warning');
   };
 
-  const handleCreateAdmin = (e: React.FormEvent) => {
+  const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAdmin.name || !newAdmin.secretCode) return;
-    const created = createAdminUserWithCode(
-      newAdmin.name,
-      newAdmin.email,
-      newAdmin.mobile,
-      newAdmin.secretCode,
-      newAdmin.role
-    );
-    setAdminsList(getStoredAdmins());
-    setShowAddAdminModal(false);
-    triggerToast(`New Admin "${created.name}" created with code /admin/${created.secretCode}`);
-    setNewAdmin({ name: "", email: "", mobile: "", secretCode: "", role: "Finance Manager" });
+    if (!newAdmin.name || !newAdmin.email || !newAdmin.mobile) {
+      triggerToast("Please provide admin name, email, and mobile number.", "error");
+      return;
+    }
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newAdmin.name.trim(),
+          email: newAdmin.email.trim(),
+          mobile: newAdmin.mobile.trim(),
+          secretCode: newAdmin.secretCode ? newAdmin.secretCode.trim() : '2787',
+          role: newAdmin.role
+        })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast(json.message || `New Admin "${newAdmin.name}" created!`);
+        setShowAddAdminModal(false);
+        setNewAdmin({ name: "", email: "", mobile: "", secretCode: "", role: "Finance Manager" });
+        fetchAdminsList();
+      } else {
+        triggerToast(json.message || "Failed to create admin.", "error");
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error creating admin:', err);
+      triggerToast("Server connection error creating admin.", "error");
+    }
   };
 
   const handleSendBroadcast = (e: React.FormEvent) => {
@@ -3117,20 +3190,21 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <table className="w-full text-left text-xs text-slate-700">
                   <thead className="bg-slate-50 text-slate-400 font-black text-[10px] uppercase border-b border-slate-200">
                     <tr>
-                      <th className="p-3.5">Admin ID & Name</th>
+                      <th className="p-3.5">Admin Name & ID</th>
                       <th className="p-3.5">Email</th>
                       <th className="p-3.5">Mobile</th>
-                      <th className="p-3.5">Secret Access Code</th>
+                      <th className="p-3.5">Secret Code</th>
                       <th className="p-3.5">Role</th>
                       <th className="p-3.5">Status</th>
+                      <th className="p-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
                     {adminsList.map(adm => (
-                      <tr key={adm.id} className="hover:bg-slate-50">
+                      <tr key={adm.id || adm._id} className="hover:bg-slate-50">
                         <td className="p-3.5">
                           <div className="font-black text-slate-900">{adm.name}</div>
-                          <div className="text-[10px] font-mono text-slate-400">{adm.id}</div>
+                          <div className="text-[10px] font-mono text-slate-400">{adm.id || adm._id}</div>
                         </td>
                         <td className="p-3.5 font-semibold text-slate-700">{adm.email}</td>
                         <td className="p-3.5 font-semibold text-slate-700">{adm.mobile}</td>
@@ -3139,11 +3213,31 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                             /admin/{adm.secretCode}
                           </span>
                         </td>
-                        <td className="p-3.5 font-bold text-slate-800">{adm.role}</td>
+                        <td className="p-3.5 font-bold text-slate-800">
+                          <select
+                            value={adm.role}
+                            onChange={(e) => handleUpdateAdminRole(adm.id || adm._id, e.target.value as any)}
+                            className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 outline-none cursor-pointer"
+                          >
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="Finance Manager">Finance Manager</option>
+                            <option value="Support Lead">Support Lead</option>
+                            <option value="Compliance Officer">Compliance Officer</option>
+                          </select>
+                        </td>
                         <td className="p-3.5">
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
-                            {adm.status}
+                            {adm.status || 'Active'}
                           </span>
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <button
+                            onClick={() => handleDeleteAdmin(adm.id || adm._id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 border-none cursor-pointer transition-colors"
+                            title="Remove Admin User"
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </td>
                       </tr>
                     ))}

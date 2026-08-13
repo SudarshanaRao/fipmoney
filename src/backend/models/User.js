@@ -182,6 +182,18 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       default: null,
     },
+    bankAccount: {
+      bankName: { type: String, default: '' },
+      accountNumber: { type: String, default: '' },
+      ifscCode: { type: String, default: '' },
+      accountHolderName: { type: String, default: '' },
+      isVerified: { type: Boolean, default: false }
+    },
+    nominee: {
+      name: { type: String, default: '' },
+      relationship: { type: String, default: '' },
+      dob: { type: String, default: '' }
+    },
     defaultUPIId: {
       type: String,
       default: '',

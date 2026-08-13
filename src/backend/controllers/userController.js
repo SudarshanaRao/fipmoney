@@ -1151,6 +1151,24 @@ export const updateProfile = async (req, res, next) => {
     if (occupation !== undefined) user.occupation = occupation;
     if (annualIncome !== undefined) user.annualIncome = annualIncome;
 
+    if (req.body.bankAccount) {
+      user.bankAccount = {
+        bankName: req.body.bankAccount.bankName || user.bankAccount?.bankName || '',
+        accountNumber: req.body.bankAccount.accountNumber || user.bankAccount?.accountNumber || '',
+        ifscCode: req.body.bankAccount.ifscCode || user.bankAccount?.ifscCode || '',
+        accountHolderName: req.body.bankAccount.accountHolderName || user.fullName || user.username || ''
+      };
+      user.isBankVerified = Boolean(user.bankAccount.accountNumber && user.bankAccount.ifscCode);
+    }
+
+    if (req.body.nominee) {
+      user.nominee = {
+        name: req.body.nominee.name || user.nominee?.name || '',
+        relationship: req.body.nominee.relationship || user.nominee?.relationship || '',
+        dob: req.body.nominee.dob || user.nominee?.dob || ''
+      };
+    }
+
     await user.save();
 
     return res.status(200).json({
@@ -1424,6 +1442,8 @@ export const getProfileSettings = async (req, res, next) => {
       referralCode: user.referralCode,
       isKycCompleted: user.isKycCompleted,
       kycLevel: user.kycLevel,
+      bankAccount: user.bankAccount || null,
+      nominee: user.nominee || null,
       isMobileVerified: user.isMobileVerified,
       isEmailVerified: user.isEmailVerified,
       status: user.status

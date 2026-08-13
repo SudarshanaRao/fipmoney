@@ -166,7 +166,13 @@ export default function FipModal({
               </button>
               <button
                 onClick={() => {
-                  onConfirm?.();
+                  if (typeof onConfirm === "function") {
+                    try {
+                      onConfirm();
+                    } catch (e) {
+                      console.error("[FipModal] Error executing onConfirm:", e);
+                    }
+                  }
                   onClose();
                 }}
                 className={`flex-1 py-3.5 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r ${config.btnGradient} ${config.btnShadow} hover:-translate-y-0.5 transition-all outline-none border-none cursor-pointer`}
@@ -231,19 +237,34 @@ export function useFipModal() {
 
   const showConfirm = useCallback(
     (
-      message: string,
-      onConfirm: () => void,
-      options?: { title?: string; confirmText?: string; cancelText?: string }
+      arg1: string,
+      arg2: (() => void) | string,
+      arg3?: { title?: string; confirmText?: string; cancelText?: string } | string,
+      arg4?: string
     ) => {
-      setState({
-        open: true,
-        message,
-        variant: "confirm",
-        onConfirm,
-        title: options?.title,
-        confirmText: options?.confirmText,
-        cancelText: options?.cancelText,
-      });
+      if (typeof arg2 === "function") {
+        const opts = typeof arg3 === "object" ? arg3 : {};
+        setState({
+          open: true,
+          message: arg1,
+          variant: "confirm",
+          onConfirm: arg2,
+          title: opts.title,
+          confirmText: opts.confirmText,
+          cancelText: opts.cancelText,
+        });
+      } else {
+        // Called as (title, message, confirmText, cancelText)
+        setState({
+          open: true,
+          title: arg1,
+          message: String(arg2 || ""),
+          variant: "confirm",
+          confirmText: typeof arg3 === "string" ? arg3 : "Confirm",
+          cancelText: typeof arg4 === "string" ? arg4 : "Cancel",
+          onConfirm: undefined,
+        });
+      }
     },
     []
   );

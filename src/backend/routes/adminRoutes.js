@@ -201,10 +201,99 @@ router.post('/login', async (req, res) => {
 router.get('/all', async (req, res) => {
   try {
     const list = await Admin.find({}).select('-password').sort({ createdAt: -1 });
+    const formattedList = list.map(item => ({
+      _id: item._id,
+      id: item._id,
+      name: item.name,
+      email: item.email,
+      mobile: item.mobile,
+      role: item.role,
+      status: item.status,
+      secretCode: item.secretCode,
+      createdAt: item.createdAt ? item.createdAt.toISOString().split('T')[0] : 'Just now',
+      lastLogin: item.lastLogin ? item.lastLogin.toISOString().replace('T', ' ').substring(0, 19) : 'Never',
+      permissions: item.permissions || ['all'],
+    }));
     res.status(200).json({
       success: true,
-      count: list.length,
-      data: list,
+      count: formattedList.length,
+      data: formattedList,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Create new admin user from Admin Panel
+// @route   POST /api/admin/create
+// @access  Admin
+router.post('/create', async (req, res) => {
+  try {
+    const { name, email, mobile, secretCode, role } = req.body;
+    if (!name || !email || !mobile) {
+      return res.status(400).json({ success: false, message: 'Name, email, and mobile are required' });
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanMobile = String(mobile).trim();
+    const cleanCode = secretCode ? String(secretCode).trim() : String(Math.floor(1000 + Math.random() * 9000));
+
+    const existing = await Admin.findOne({
+      $or: [{ email: cleanEmail }, { mobile: cleanMobile }]
+    });
+
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'Admin user with this email or mobile already exists.' });
+    }
+
+    const newAdmin = await Admin.create({
+      name: String(name).trim(),
+      email: cleanEmail,
+      mobile: cleanMobile,
+      secretCode: cleanCode,
+      password: hashPassword('123456'), // Default temporary PIN
+      role: role || 'Finance Manager',
+      status: 'Active',
+      permissions: role === 'Super Admin' ? ['all'] : ['view_users', 'export_reports'],
+      lastLogin: new Date(),
+    });
+
+    const adminResponse = newAdmin.toObject();
+    delete adminResponse.password;
+
+    res.status(201).json({
+      success: true,
+      message: `Admin user '${name}' created successfully with secret code ${cleanCode}!`,
+      data: adminResponse,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Update admin user role / status
+// @route   PUT /api/admin/update-role
+// @access  Admin
+router.put('/update-role', async (req, res) => {
+  try {
+    const { id, role, status } = req.body;
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Admin id is required' });
+    }
+
+    const updateObj = {};
+    if (role) updateObj.role = role;
+    if (status) updateObj.status = status;
+
+    const updated = await Admin.findByIdAndUpdate(id, updateObj, { new: true }).select('-password');
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Admin user not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Admin user updated successfully!`,
+      data: updated,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
