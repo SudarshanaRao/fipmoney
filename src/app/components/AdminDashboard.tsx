@@ -34,6 +34,8 @@ const getDynamicVariableDefaults = (): Record<string, string> => {
     baseUrl: baseDomain,
     FIPMONEY_LOGO_URL: `${baseDomain}/fipmoney_logo_final.png`,
     HELLO_RAFIKI_ANIMATION_URL: `${baseDomain}/fipmoney-welcome-hello-rafiki.gif`,
+    SECURE_LOGIN_ANIMATION_URL: `${baseDomain}/secure_login.gif`,
+    MOBILE_ENCRYPTION_ANIMATION_URL: `${baseDomain}/mobile_encryption.gif`,
     WALLET_BRO_ANIMATION_URL: `${baseDomain}/fipmoney-wallet-bro.gif`,
     EWALLET_PANA_ANIMATION_URL: `${baseDomain}/fipmoney-ewallet-pana.gif`,
     DIGITAL_GOLD_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_gold.png`,
@@ -202,9 +204,9 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     "Admin Users": "admin-users"
   }), []);
 
-  const slugToNavMap: Record<string, string> = React.useMemo(() => 
+  const slugToNavMap: Record<string, string> = React.useMemo(() =>
     Object.fromEntries(Object.entries(navToSlugMap).map(([k, v]) => [v, k])),
-  [navToSlugMap]);
+    [navToSlugMap]);
 
   const getInitialAdminTab = (): string => {
     if (typeof window !== 'undefined') {
@@ -259,7 +261,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const [payouts, setPayouts] = useState(INITIAL_PAYOUTS);
   const [users, setUsers] = useState<any[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(true);
-  
+
   // REFERRALS DYNAMIC STATES & HANDLERS
   const [referrals, setReferrals] = useState<any[]>([]);
   const [referralStats, setReferralStats] = useState<any>({
@@ -902,18 +904,18 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
     const recipientsList = selectedRecipientEmails.length > 0
       ? selectedRecipientEmails.map(email => {
-          const u = users.find(usr => usr.email === email);
-          return {
-            toEmail: email,
-            userName: u ? u.name : 'Valued User',
-            mobileNumber: u ? u.phone : ''
-          };
-        })
+        const u = users.find(usr => usr.email === email);
+        return {
+          toEmail: email,
+          userName: u ? u.name : 'Valued User',
+          mobileNumber: u ? u.phone : ''
+        };
+      })
       : [{
-          toEmail: sendEmailPayload.toEmail,
-          userName: sendEmailPayload.userName || 'Valued User',
-          mobileNumber: sendEmailPayload.mobileNumber || ''
-        }];
+        toEmail: sendEmailPayload.toEmail,
+        userName: sendEmailPayload.userName || 'Valued User',
+        mobileNumber: sendEmailPayload.mobileNumber || ''
+      }];
 
     if (recipientsList.length === 0 || !recipientsList[0].toEmail) {
       alert("Please select at least one recipient user email");
@@ -958,7 +960,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     e.preventDefault();
     if (!editingAmlUser) return;
     const scoreNum = Math.min(100, Math.max(0, Number(newAmlScoreValue)));
-    
+
     // Update state across all user-related arrays
     setUsers(users.map(u => u.id === editingAmlUser.id ? { ...u, amlScore: scoreNum, amtScore: scoreNum } : u));
     setInvestments(investments.map(i => i.userId === editingAmlUser.id ? { ...i, amlScore: scoreNum, amtScore: scoreNum } : i));
@@ -978,7 +980,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     } catch (err) {
       console.error('[AdminDashboard] API error updating AML score:', err);
     }
-    
+
     addAuditLog(`Updated AML Audit Score for ${editingAmlUser.name} (${editingAmlUser.id}) to ${scoreNum}/100. Note: ${amlAuditNote || 'Admin manual override'}`, 'User Management', scoreNum < 50 ? 'Warning' : 'Info');
     triggerToast(`AML Audit Score updated for ${editingAmlUser.name} to ${scoreNum}/100`);
     setEditingAmlUser(null);
@@ -1128,7 +1130,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
   const handleToggleUserStatus = async (userId: string) => {
     setUsers(users.map(u => u.id === userId ? { ...u, status: u.status === "Active" ? "Suspended" : "Active" } : u));
-    
+
     try {
       await fetch(`${API_BASE_URL}/users/admin/toggle-status`, {
         method: 'PUT',
@@ -1156,7 +1158,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
   return (
     <div className="h-screen max-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col lg:flex-row overflow-hidden relative">
-      
+
 
 
       {/* LEFT SIDEBAR NAVIGATION (#161730) WITH INDEPENDENT SCROLLING */}
@@ -1194,11 +1196,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <button
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${
-                    activeNav === item.id
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
                       ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
                       : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <Icon size={17} />
                   <span>{item.label}</span>
@@ -1224,11 +1225,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <button
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${
-                    activeNav === item.id
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
                       ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
                       : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <Icon size={17} />
                   <span>{item.label}</span>
@@ -1253,11 +1253,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <button
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${
-                    activeNav === item.id
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
                       ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
                       : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <Icon size={17} />
                   <span>{item.label}</span>
@@ -1283,11 +1282,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <button
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${
-                    activeNav === item.id
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
                       ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
                       : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
+                    }`}
                 >
                   <Icon size={17} />
                   <span>{item.label}</span>
@@ -1319,7 +1317,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 h-screen max-h-screen p-4 sm:p-6 space-y-5 overflow-y-auto max-w-[1400px]">
-        
+
         {/* TOP BAR HEADER */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 border-b border-slate-200/60 pb-2.5">
           <div>
@@ -1349,7 +1347,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
             </div>
 
             {/* Notifications Bell */}
-            <button 
+            <button
               onClick={() => setActiveNav("Notifications")}
               className="relative w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer outline-none"
             >
@@ -1557,7 +1555,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
             {/* BOTTOM DASHBOARD ROW: Top Performing Plans | User KYC Breakdown | System Health */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-              
+
               {/* Top Performing Plans Table (Col Span 6) */}
               <div className="lg:col-span-6 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs">
                 <div className="flex items-center justify-between mb-4">
@@ -1770,9 +1768,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       </span>
                       <button
                         onClick={() => handleTogglePlanStatus(plan.id)}
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer border-none ${
-                          plan.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-                        }`}
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold cursor-pointer border-none ${plan.status === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+                          }`}
                       >
                         {plan.status}
                       </button>
@@ -1866,9 +1863,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <td className="p-3.5 font-bold text-amber-600">{inv.totalGold}</td>
                           <td className="p-3.5 font-black text-slate-900">{inv.totalValue}</td>
                           <td className="p-3.5">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              inv.autoPay === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                            }`}>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${inv.autoPay === "Active" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                              }`}>
                               {inv.autoPay}
                             </span>
                           </td>
@@ -1902,7 +1898,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </h2>
                 <p className="text-xs font-semibold text-slate-500">Real-time benchmark pricing control, physical vault reserve management, and trustee audit stream.</p>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <div className="text-[10px] font-bold text-slate-400 uppercase">Live 24K Rate / Gram</div>
@@ -2080,8 +2076,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     ]}>
                       <defs>
                         <linearGradient id="goldRateGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -2100,7 +2096,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <Layers className="w-4 h-4 text-purple-600" />
                   Physical Form Factor Breakdown
                 </h3>
-                
+
                 <div className="space-y-3 pt-1">
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
                     <div>
@@ -2148,7 +2144,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   </h3>
                   <p className="text-xs font-semibold text-slate-500">Live custody logs, bullion deposit certificates, and trustee physical count audits.</p>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => triggerToast("Generating Vault Reserve Audit PDF Report...")}
@@ -2252,10 +2248,9 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <td className="p-3.5 font-black text-slate-900">{pout.amount} ({pout.goldGrams})</td>
                           <td className="p-3.5 font-semibold text-slate-600 max-w-xs truncate">{pout.bankDetails}</td>
                           <td className="p-3.5">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                              pout.status === "Approved" || pout.status === "Dispatched" ? "bg-emerald-100 text-emerald-700" :
-                              pout.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
-                            }`}>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${pout.status === "Approved" || pout.status === "Dispatched" ? "bg-emerald-100 text-emerald-700" :
+                                pout.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                              }`}>
                               {pout.status}
                             </span>
                           </td>
@@ -2317,7 +2312,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       const amtInfo = getAmtScoreDetails(txn.amtScore);
                       return (
                         <tr key={txn.id} className="hover:bg-slate-50">
-                          <td className="p-3.5 font-mono font-bold text-slate-900">{txn.id}<br/><span className="text-[10px] text-slate-400 font-normal">{txn.refId}</span></td>
+                          <td className="p-3.5 font-mono font-bold text-slate-900">{txn.id}<br /><span className="text-[10px] text-slate-400 font-normal">{txn.refId}</span></td>
                           <td className="p-3.5 font-bold text-slate-800">{txn.userName}</td>
                           <td className="p-3.5">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${amtInfo.badgeBg}`}>
@@ -2329,10 +2324,9 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <td className="p-3.5 font-bold text-amber-600">{txn.goldPurchased}</td>
                           <td className="p-3.5 font-semibold text-slate-500">{txn.gateway}</td>
                           <td className="p-3.5">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              txn.status === "Success" ? "bg-emerald-100 text-emerald-700" :
-                              txn.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
-                            }`}>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${txn.status === "Success" ? "bg-emerald-100 text-emerald-700" :
+                                txn.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                              }`}>
                               {txn.status}
                             </span>
                           </td>
@@ -2444,18 +2438,16 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                             <td className="p-3.5 font-bold text-amber-600">{usr.goldBal}</td>
                             <td className="p-3.5">
                               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
-                                <span className={`w-2 h-2 rounded-full ${
-                                  usr.kycStatus === "Verified" ? "bg-emerald-500 shadow-xs" :
-                                  usr.kycStatus === "Pending" ? "bg-amber-500 animate-pulse" : "bg-red-500"
-                                }`} />
+                                <span className={`w-2 h-2 rounded-full ${usr.kycStatus === "Verified" ? "bg-emerald-500 shadow-xs" :
+                                    usr.kycStatus === "Pending" ? "bg-amber-500 animate-pulse" : "bg-red-500"
+                                  }`} />
                                 <span>{usr.kycStatus}</span>
                               </div>
                             </td>
                             <td className="p-3.5">
                               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
-                                <span className={`w-2 h-2 rounded-full ${
-                                  usr.status === "Active" ? "bg-emerald-500 shadow-xs" : "bg-red-500"
-                                }`} />
+                                <span className={`w-2 h-2 rounded-full ${usr.status === "Active" ? "bg-emerald-500 shadow-xs" : "bg-red-500"
+                                  }`} />
                                 <span>{usr.status}</span>
                               </div>
                             </td>
@@ -2477,9 +2469,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                                 </button>
                                 <button
                                   onClick={() => handleToggleUserStatus(usr.id)}
-                                  className={`px-2.5 py-1 rounded-lg font-bold text-[10px] border-none cursor-pointer ${
-                                    usr.status === "Active" ? "bg-red-50 hover:bg-red-100 text-red-600" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
-                                  }`}
+                                  className={`px-2.5 py-1 rounded-lg font-bold text-[10px] border-none cursor-pointer ${usr.status === "Active" ? "bg-red-50 hover:bg-red-100 text-red-600" : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
+                                    }`}
                                 >
                                   {usr.status === "Active" ? "Freeze" : "Activate"}
                                 </button>
@@ -2526,10 +2517,9 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <h3 className="text-base font-black text-slate-900">{req.userName}</h3>
                           <div className="text-xs text-slate-500">{req.phone} • Submitted {req.submittedDate}</div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-black ${
-                          req.status === "Verified" ? "bg-emerald-100 text-emerald-700" :
-                          req.status === "Pending" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-black ${req.status === "Verified" ? "bg-emerald-100 text-emerald-700" :
+                            req.status === "Pending" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"
+                          }`}>
                           {req.status}
                         </span>
                       </div>
@@ -2677,7 +2667,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         .filter(ref => {
                           const matchesStatus = referralStatusFilter === "All" || ref.status === referralStatusFilter;
                           const query = referralSearchQuery.toLowerCase();
-                          const matchesQuery = !query || 
+                          const matchesQuery = !query ||
                             (ref.referrer && ref.referrer.toLowerCase().includes(query)) ||
                             (ref.referee && ref.referee.toLowerCase().includes(query)) ||
                             (ref.code && ref.code.toLowerCase().includes(query)) ||
@@ -2720,12 +2710,11 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                               </td>
                               <td className="p-3.5 text-slate-500">{ref.date}</td>
                               <td className="p-3.5 space-y-1">
-                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                  ref.status === "Credited" ? "bg-emerald-100 text-emerald-700" :
-                                  ref.status === "Flagged Fraud" ? "bg-red-100 text-red-700" :
-                                  ref.status === "Gold Purchased" ? "bg-purple-100 text-purple-700" :
-                                  ref.status === "KYC Completed" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
-                                }`}>
+                                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${ref.status === "Credited" ? "bg-emerald-100 text-emerald-700" :
+                                    ref.status === "Flagged Fraud" ? "bg-red-100 text-red-700" :
+                                      ref.status === "Gold Purchased" ? "bg-purple-100 text-purple-700" :
+                                        ref.status === "KYC Completed" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+                                  }`}>
                                   {ref.status}
                                 </span>
                                 {ref.stepLabel && (
@@ -2905,10 +2894,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
         {/* 16. EMAIL TEMPLATES & SYSTEM MAIL PAGE (REDESIGNED TO MATCH REFERENCE IMAGE EXACTLY) */}
         {activeNav === "Email Templates" && (
           <div className="space-y-6">
-            
+
             {/* TOP STAT CARDS (3 GRID CARDS MATCHING REFERENCE IMAGE) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              
+
               {/* Card 1: Total Users */}
               <div className="bg-white border border-purple-100 rounded-3xl p-5 shadow-2xs flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-purple-100/70 text-[#7C3AED] flex items-center justify-center shrink-0">
@@ -2946,7 +2935,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
             {/* MAIN 2-COLUMN EMAIL DASHBOARD */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              
+
               {/* LEFT COLUMN: SELECT RECIPIENTS (5 cols) */}
               <div className="lg:col-span-5 bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs space-y-4 flex flex-col justify-between">
                 <div>
@@ -2992,11 +2981,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       return (
                         <label
                           key={u.id}
-                          className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                            isChecked
+                          className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${isChecked
                               ? "bg-purple-50/60 border-purple-300 shadow-2xs"
                               : "bg-white border-slate-200/80 hover:bg-slate-50/80"
-                          }`}
+                            }`}
                         >
                           <input
                             type="checkbox"
@@ -3020,7 +3008,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
               {/* RIGHT COLUMN: TEMPLATES & COMPOSE EMAIL (7 cols) */}
               <div className="lg:col-span-7 space-y-6">
-                
+
                 {/* TEMPLATES BLOCK */}
                 <div className="bg-white border border-slate-200/80 rounded-3xl p-5 shadow-2xs space-y-4">
                   <div className="flex items-center justify-between">
@@ -3319,9 +3307,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         <td className="p-3.5 font-bold text-purple-700">{log.toEmail}</td>
                         <td className="p-3.5 font-semibold text-slate-800">{log.subject || log.templateId}</td>
                         <td className="p-3.5">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                            log.status === "SENT" || log.status === "Success" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"
-                          }`}>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${log.status === "SENT" || log.status === "Success" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"
+                            }`}>
                             {log.status}
                           </span>
                         </td>
@@ -3586,11 +3573,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <button
                     key={st}
                     onClick={() => setDgaStatusFilter(st)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-none cursor-pointer capitalize ${
-                      dgaStatusFilter === st
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-none cursor-pointer capitalize ${dgaStatusFilter === st
                         ? 'bg-[#7C3AED] text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
+                      }`}
                   >
                     {st}
                   </button>
@@ -3600,7 +3586,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               <div className="text-xs font-bold text-slate-400">
                 Showing {dgaWaitlistList.filter(item => {
                   const matchesStatus = dgaStatusFilter === 'All' || (item.status || 'pending') === dgaStatusFilter;
-                  const matchesSearch = !searchQuery || 
+                  const matchesSearch = !searchQuery ||
                     item.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     item.mobile?.includes(searchQuery) ||
                     item.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -3644,7 +3630,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     {dgaWaitlistList
                       .filter(item => {
                         const matchesStatus = dgaStatusFilter === 'All' || (item.status || 'pending') === dgaStatusFilter;
-                        const matchesSearch = !searchQuery || 
+                        const matchesSearch = !searchQuery ||
                           item.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.mobile?.includes(searchQuery) ||
                           item.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -3695,12 +3681,11 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                             </td>
 
                             <td className="p-3.5">
-                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                                status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-                                status === 'rejected' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
-                                status === 'contacted' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
-                                'bg-amber-100 text-amber-800 border border-amber-300'
-                              }`}>
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                                  status === 'rejected' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
+                                    status === 'contacted' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
+                                      'bg-amber-100 text-amber-800 border border-amber-300'
+                                }`}>
                                 {status}
                               </span>
                             </td>
@@ -4358,9 +4343,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         return (
                           <label
                             key={u.id}
-                            className={`flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer ${
-                              isChecked ? "bg-purple-50/80 border-purple-300" : "bg-white border-slate-200/80 hover:bg-slate-50"
-                            }`}
+                            className={`flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer ${isChecked ? "bg-purple-50/80 border-purple-300" : "bg-white border-slate-200/80 hover:bg-slate-50"
+                              }`}
                           >
                             <div className="flex items-center gap-2">
                               <input
@@ -4684,11 +4668,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <button
                     type="button"
                     onClick={() => setPreviewDeviceMode('desktop')}
-                    className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${
-                      previewDeviceMode === 'desktop'
+                    className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${previewDeviceMode === 'desktop'
                         ? 'bg-[#7C3AED] text-white shadow-xs'
                         : 'text-slate-400 hover:text-white bg-transparent'
-                    }`}
+                      }`}
                   >
                     <Monitor size={15} />
                     <span>Desktop View</span>
@@ -4696,11 +4679,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <button
                     type="button"
                     onClick={() => setPreviewDeviceMode('mobile')}
-                    className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${
-                      previewDeviceMode === 'mobile'
+                    className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${previewDeviceMode === 'mobile'
                         ? 'bg-[#7C3AED] text-white shadow-xs'
                         : 'text-slate-400 hover:text-white bg-transparent'
-                    }`}
+                      }`}
                   >
                     <Smartphone size={15} />
                     <span>Mobile View (375px)</span>
