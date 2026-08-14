@@ -36,6 +36,7 @@ const getDynamicVariableDefaults = (): Record<string, string> => {
     HELLO_RAFIKI_ANIMATION_URL: `${baseDomain}/fipmoney-welcome-hello-rafiki.gif`,
     SECURE_LOGIN_ANIMATION_URL: `${baseDomain}/secure_login.gif`,
     MOBILE_ENCRYPTION_ANIMATION_URL: `${baseDomain}/mobile_encryption.gif`,
+    KYC_SUBMITTED_ANIMATION_URL: `${baseDomain}/documents.gif`,
     WALLET_BRO_ANIMATION_URL: `${baseDomain}/fipmoney-wallet-bro.gif`,
     EWALLET_PANA_ANIMATION_URL: `${baseDomain}/fipmoney-ewallet-pana.gif`,
     DIGITAL_GOLD_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_gold.png`,
@@ -43,6 +44,8 @@ const getDynamicVariableDefaults = (): Record<string, string> => {
     MANAGE_MONEY_AMICO_ANIMATION_URL: `${baseDomain}/fipmoney-manage-money-amico.gif`,
     GROWTH_ANALYTICS_AMICO_ANIMATION_URL: `${baseDomain}/fipmoney-growth-analytics-amico.gif`,
     DGA_URL: `${baseDomain}/become-agent`,
+    KYC_FAILED_ANIMATION_URL: `${baseDomain}/failed.gif`,
+    ACCOUNT_DEACTIVATION_ANIMATION_URL: `${baseDomain}/mobile_login.gif`,
     FIPMONEY_DASHBOARD_URL: `${baseDomain}/dashboard`,
     FIPMONEY_HOME_URL: `${baseDomain}/`,
     FIPMONEY_ABOUT_URL: `${baseDomain}/about`,
@@ -1197,8 +1200,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
-                      ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
+                    : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                 >
                   <Icon size={17} />
@@ -1226,8 +1229,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
-                      ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
+                    : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                 >
                   <Icon size={17} />
@@ -1254,8 +1257,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
-                      ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
+                    : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                 >
                   <Icon size={17} />
@@ -1283,8 +1286,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   key={item.id}
                   onClick={() => setActiveNav(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer border-none outline-none ${activeNav === item.id
-                      ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#7C3AED] text-white shadow-lg shadow-purple-900/40"
+                    : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                 >
                   <Icon size={17} />
@@ -2249,7 +2252,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <td className="p-3.5 font-semibold text-slate-600 max-w-xs truncate">{pout.bankDetails}</td>
                           <td className="p-3.5">
                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${pout.status === "Approved" || pout.status === "Dispatched" ? "bg-emerald-100 text-emerald-700" :
-                                pout.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                              pout.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
                               }`}>
                               {pout.status}
                             </span>
@@ -2325,7 +2328,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <td className="p-3.5 font-semibold text-slate-500">{txn.gateway}</td>
                           <td className="p-3.5">
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${txn.status === "Success" ? "bg-emerald-100 text-emerald-700" :
-                                txn.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
+                              txn.status === "Pending" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"
                               }`}>
                               {txn.status}
                             </span>
@@ -2439,7 +2442,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                             <td className="p-3.5">
                               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
                                 <span className={`w-2 h-2 rounded-full ${usr.kycStatus === "Verified" ? "bg-emerald-500 shadow-xs" :
-                                    usr.kycStatus === "Pending" ? "bg-amber-500 animate-pulse" : "bg-red-500"
+                                  usr.kycStatus === "Pending" ? "bg-amber-500 animate-pulse" : "bg-red-500"
                                   }`} />
                                 <span>{usr.kycStatus}</span>
                               </div>
@@ -2518,7 +2521,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <div className="text-xs text-slate-500">{req.phone} • Submitted {req.submittedDate}</div>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-black ${req.status === "Verified" ? "bg-emerald-100 text-emerald-700" :
-                            req.status === "Pending" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"
+                          req.status === "Pending" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"
                           }`}>
                           {req.status}
                         </span>
@@ -2711,9 +2714,9 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                               <td className="p-3.5 text-slate-500">{ref.date}</td>
                               <td className="p-3.5 space-y-1">
                                 <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${ref.status === "Credited" ? "bg-emerald-100 text-emerald-700" :
-                                    ref.status === "Flagged Fraud" ? "bg-red-100 text-red-700" :
-                                      ref.status === "Gold Purchased" ? "bg-purple-100 text-purple-700" :
-                                        ref.status === "KYC Completed" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
+                                  ref.status === "Flagged Fraud" ? "bg-red-100 text-red-700" :
+                                    ref.status === "Gold Purchased" ? "bg-purple-100 text-purple-700" :
+                                      ref.status === "KYC Completed" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"
                                   }`}>
                                   {ref.status}
                                 </span>
@@ -2982,8 +2985,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         <label
                           key={u.id}
                           className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${isChecked
-                              ? "bg-purple-50/60 border-purple-300 shadow-2xs"
-                              : "bg-white border-slate-200/80 hover:bg-slate-50/80"
+                            ? "bg-purple-50/60 border-purple-300 shadow-2xs"
+                            : "bg-white border-slate-200/80 hover:bg-slate-50/80"
                             }`}
                         >
                           <input
@@ -3574,8 +3577,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     key={st}
                     onClick={() => setDgaStatusFilter(st)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border-none cursor-pointer capitalize ${dgaStatusFilter === st
-                        ? 'bg-[#7C3AED] text-white shadow-xs'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      ? 'bg-[#7C3AED] text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                   >
                     {st}
@@ -3682,9 +3685,9 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
                             <td className="p-3.5">
                               <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-                                  status === 'rejected' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
-                                    status === 'contacted' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
-                                      'bg-amber-100 text-amber-800 border border-amber-300'
+                                status === 'rejected' ? 'bg-rose-100 text-rose-800 border border-rose-300' :
+                                  status === 'contacted' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
+                                    'bg-amber-100 text-amber-800 border border-amber-300'
                                 }`}>
                                 {status}
                               </span>
@@ -4669,8 +4672,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     type="button"
                     onClick={() => setPreviewDeviceMode('desktop')}
                     className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${previewDeviceMode === 'desktop'
-                        ? 'bg-[#7C3AED] text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white bg-transparent'
+                      ? 'bg-[#7C3AED] text-white shadow-xs'
+                      : 'text-slate-400 hover:text-white bg-transparent'
                       }`}
                   >
                     <Monitor size={15} />
@@ -4680,8 +4683,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     type="button"
                     onClick={() => setPreviewDeviceMode('mobile')}
                     className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${previewDeviceMode === 'mobile'
-                        ? 'bg-[#7C3AED] text-white shadow-xs'
-                        : 'text-slate-400 hover:text-white bg-transparent'
+                      ? 'bg-[#7C3AED] text-white shadow-xs'
+                      : 'text-slate-400 hover:text-white bg-transparent'
                       }`}
                   >
                     <Smartphone size={15} />
