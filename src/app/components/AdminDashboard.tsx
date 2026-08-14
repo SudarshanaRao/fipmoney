@@ -10,7 +10,7 @@ import {
   Headphones, ChevronRight, RefreshCw, LogOut, ArrowRight, Eye, ShieldAlert, X,
   Plus, Edit2, Edit3, Trash2, Check, AlertCircle, Filter, Lock, Unlock, Send, Sliders,
   DollarSign, CheckCircle, XCircle, FileSpreadsheet, Layers, Shield, Sparkles, AlertTriangle,
-  Award, Zap, ShieldQuestion, CheckSquare, Save, Mail
+  Award, Zap, ShieldQuestion, CheckSquare, Save, Mail, Smartphone, Monitor, Maximize2, ExternalLink
 } from "lucide-react";
 import {
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -578,10 +578,22 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const [sendEmailPayload, setSendEmailPayload] = useState({
     fromEmail: "support@fipmoney.com",
     toEmail: "",
-    templateId: "WELCOME_SIGNUP",
+    templateId: "",
     userName: "",
     mobileNumber: ""
   });
+
+  // FULL VIEW EMAIL PREVIEW MODAL STATE
+  const [fullPreviewData, setFullPreviewData] = useState<{
+    isOpen: boolean;
+    name: string;
+    subject: string;
+    category?: string;
+    templateId?: string;
+    htmlContent: string;
+    variablesMap?: Record<string, string>;
+  } | null>(null);
+  const [previewDeviceMode, setPreviewDeviceMode] = useState<'desktop' | 'mobile'>('desktop');
 
   const triggerToast = (msg: string, type: "success" | "error" | "info" = "success") => {
     if (type === "error") {
@@ -2926,7 +2938,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-400">Saved Templates</div>
-                  <div className="text-2xl font-black text-slate-900 mt-0.5">{emailTemplates.length || 22}</div>
+                  <div className="text-2xl font-black text-slate-900 mt-0.5">{emailTemplates.length}</div>
                 </div>
               </div>
 
@@ -3064,56 +3076,74 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
                   {/* SAVED TEMPLATES LIST */}
                   <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1 hide-scrollbar">
-                    {emailTemplates.map((tmpl) => (
-                      <div
-                        key={tmpl.templateId}
-                        className="flex items-center justify-between bg-slate-50/70 border border-slate-200/70 p-3.5 rounded-2xl hover:bg-purple-50/50 transition-colors group"
-                      >
-                        <div>
-                          <div className="font-extrabold text-xs text-slate-900">{tmpl.name}</div>
-                          <span className="inline-block text-[9px] font-black uppercase text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full mt-1">
-                            {tmpl.category || 'NOTIFICATION'}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleSelectTemplateForCompose(tmpl.templateId)}
-                            title="Preview / Use Template"
-                            className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-100/70 transition-colors border-none cursor-pointer"
-                          >
-                            <Eye size={15} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setTemplateForm({
-                                templateId: tmpl.templateId,
-                                name: tmpl.name,
-                                subject: tmpl.subject,
-                                category: tmpl.category || 'Onboarding',
-                                htmlContent: tmpl.htmlContent,
-                                variables: Array.isArray(tmpl.variables) ? tmpl.variables.join(', ') : tmpl.variables
-                              });
-                              setShowTemplateEditorModal(true);
-                            }}
-                            title="Edit Template"
-                            className="p-1.5 rounded-lg text-[#7C3AED] hover:bg-purple-100/70 transition-colors border-none cursor-pointer"
-                          >
-                            <Edit3 size={15} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteEmailTemplate(tmpl.templateId)}
-                            title="Delete Template"
-                            className="p-1.5 rounded-lg text-red-500 hover:bg-red-100/70 transition-colors border-none cursor-pointer"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
+                    {emailTemplates.length === 0 ? (
+                      <div className="p-4 text-center text-xs font-semibold text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        No email templates found in EmailTemplate model database. Click "New Template" to create one.
                       </div>
-                    ))}
+                    ) : (
+                      emailTemplates.map((tmpl) => (
+                        <div
+                          key={tmpl.templateId}
+                          className="flex items-center justify-between bg-slate-50/70 border border-slate-200/70 p-3.5 rounded-2xl hover:bg-purple-50/50 transition-colors group"
+                        >
+                          <div>
+                            <div className="font-extrabold text-xs text-slate-900">{tmpl.name}</div>
+                            <span className="inline-block text-[9px] font-black uppercase text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full mt-1">
+                              {tmpl.category || 'NOTIFICATION'}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleSelectTemplateForCompose(tmpl.templateId);
+                                setFullPreviewData({
+                                  isOpen: true,
+                                  name: tmpl.name || tmpl.templateId,
+                                  subject: tmpl.subject || "(No Subject)",
+                                  category: tmpl.category || "NOTIFICATION",
+                                  templateId: tmpl.templateId,
+                                  htmlContent: tmpl.htmlContent || tmpl.body || "",
+                                  variablesMap: composeVariables
+                                });
+                              }}
+                              title="Full View Preview Template"
+                              className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-100/70 transition-colors border-none cursor-pointer flex items-center gap-1 font-bold text-xs"
+                            >
+                              <Eye size={15} />
+                              <span className="hidden sm:inline text-[11px]">Preview</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTemplateForm({
+                                  templateId: tmpl.templateId,
+                                  name: tmpl.name,
+                                  subject: tmpl.subject,
+                                  category: tmpl.category || 'Onboarding',
+                                  htmlContent: tmpl.htmlContent,
+                                  variables: Array.isArray(tmpl.variables) ? tmpl.variables.join(', ') : tmpl.variables
+                                });
+                                setShowTemplateEditorModal(true);
+                              }}
+                              title="Edit Template"
+                              className="p-1.5 rounded-lg text-[#7C3AED] hover:bg-purple-100/70 transition-colors border-none cursor-pointer"
+                            >
+                              <Edit3 size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteEmailTemplate(tmpl.templateId)}
+                              title="Delete Template"
+                              className="p-1.5 rounded-lg text-red-500 hover:bg-red-100/70 transition-colors border-none cursor-pointer"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -3196,14 +3226,38 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
                     {/* ACTION FOOTER */}
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={handleSaveComposeAsTemplate}
-                        className="w-full sm:w-auto border-2 border-[#10B981] text-[#10B981] hover:bg-emerald-50 font-extrabold text-xs px-5 py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5"
-                      >
-                        <Save size={15} />
-                        <span>Save Template</span>
-                      </button>
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!composeSubject && !composeBody) {
+                              triggerToast("Please enter email subject and body to preview", "error");
+                              return;
+                            }
+                            setFullPreviewData({
+                              isOpen: true,
+                              name: selectedTemplateForCompose ? (emailTemplates.find(t => t.templateId === selectedTemplateForCompose)?.name || "Compose Email Preview") : "Compose Email Preview",
+                              subject: composeSubject || "(No Subject)",
+                              category: "Compose Email",
+                              templateId: selectedTemplateForCompose || "CUSTOM",
+                              htmlContent: composeBody,
+                              variablesMap: composeVariables
+                            });
+                          }}
+                          className="w-full sm:w-auto border-2 border-amber-500 text-amber-600 hover:bg-amber-50 font-extrabold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <Eye size={15} />
+                          <span>Preview Email</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveComposeAsTemplate}
+                          className="w-full sm:w-auto border-2 border-[#10B981] text-[#10B981] hover:bg-emerald-50 font-extrabold text-xs px-4 py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <Save size={15} />
+                          <span>Save Template</span>
+                        </button>
+                      </div>
 
                       <button
                         type="submit"
@@ -4540,15 +4594,40 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </div>
 
                 {/* LIVE HTML PREVIEW BOX */}
-                <div className="border border-slate-200 rounded-2xl p-3 bg-slate-50">
-                  <div className="text-[10px] font-black uppercase text-slate-400 mb-2">Live HTML Preview Output</div>
+                <div className="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[10px] font-black uppercase text-slate-500 flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-[#7C3AED]" />
+                      <span>Live HTML Preview Output</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFullPreviewData({
+                          isOpen: true,
+                          name: templateForm.name || "Template Editor Preview",
+                          subject: templateForm.subject || "(No Subject)",
+                          category: templateForm.category || "Onboarding",
+                          templateId: templateForm.templateId || "NEW_TEMPLATE",
+                          htmlContent: templateForm.htmlContent,
+                          variablesMap: {}
+                        });
+                      }}
+                      className="bg-purple-100/80 hover:bg-purple-200 text-[#7C3AED] font-extrabold text-[11px] px-2.5 py-1 rounded-lg border-none cursor-pointer flex items-center gap-1 transition-colors"
+                    >
+                      <Maximize2 size={13} />
+                      <span>Full Screen Preview</span>
+                    </button>
+                  </div>
                   <div
-                    className="bg-white p-4 rounded-xl border border-slate-200 max-h-48 overflow-y-auto"
+                    className="bg-white p-4 rounded-xl border border-slate-200 min-h-[200px] max-h-[360px] overflow-y-auto"
                     dangerouslySetInnerHTML={{
-                      __html: templateForm.htmlContent
+                      __html: (templateForm.htmlContent || "<p style='color:#888; font-style:italic;'>Type HTML code above to preview here...</p>")
                         .replace(/\{\{\s*userName\s*\}\}/g, 'Rohan Verma')
                         .replace(/\{\{\s*mobileNumber\s*\}\}/g, '9876543210')
                         .replace(/\{\{\s*referralCode\s*\}\}/g, 'FIP100')
+                        .replace(/\{\{\s*supportEmail\s*\}\}/g, 'support@fipmoney.com')
+                        .replace(/\{\{\s*currentYear\s*\}\}/g, String(new Date().getFullYear()))
                     }}
                   />
                 </div>
@@ -4562,6 +4641,178 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* FULL VIEW EMAIL TEMPLATE PREVIEW MODAL */}
+      <AnimatePresence>
+        {fullPreviewData && fullPreviewData.isOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-6xl h-[92vh] flex flex-col shadow-2xl overflow-hidden"
+            >
+              {/* MODAL HEADER */}
+              <div className="bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center shrink-0">
+                    <Mail size={20} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-white">{fullPreviewData.name}</h3>
+                      {fullPreviewData.category && (
+                        <span className="text-[10px] font-black uppercase text-purple-300 bg-purple-900/60 px-2 py-0.5 rounded-full border border-purple-500/30">
+                          {fullPreviewData.category}
+                        </span>
+                      )}
+                    </div>
+                    {fullPreviewData.templateId && (
+                      <div className="text-xs font-mono text-purple-400 font-bold mt-0.5">
+                        ID: {fullPreviewData.templateId}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* DEVICE MODE SWITCHER */}
+                <div className="bg-slate-800 p-1 rounded-2xl border border-slate-700 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDeviceMode('desktop')}
+                    className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${
+                      previewDeviceMode === 'desktop'
+                        ? 'bg-[#7C3AED] text-white shadow-xs'
+                        : 'text-slate-400 hover:text-white bg-transparent'
+                    }`}
+                  >
+                    <Monitor size={15} />
+                    <span>Desktop View</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDeviceMode('mobile')}
+                    className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 border-none cursor-pointer transition-all ${
+                      previewDeviceMode === 'mobile'
+                        ? 'bg-[#7C3AED] text-white shadow-xs'
+                        : 'text-slate-400 hover:text-white bg-transparent'
+                    }`}
+                  >
+                    <Smartphone size={15} />
+                    <span>Mobile View (375px)</span>
+                  </button>
+                </div>
+
+                {/* CLOSE BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => setFullPreviewData(null)}
+                  className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 flex items-center justify-center border-none cursor-pointer transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* SUBJECT & SENDER INFO BAR */}
+              <div className="bg-slate-950/80 border-b border-slate-800/80 px-5 py-2.5 flex items-center justify-between text-xs text-slate-300 gap-4 flex-wrap">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="font-bold text-slate-400 uppercase text-[10px]">Subject:</span>
+                  <span className="font-extrabold text-white truncate">
+                    {(() => {
+                      const defaults = getDynamicVariableDefaults();
+                      const vars: Record<string, string> = { userName: 'Rohan Verma', mobileNumber: '9876543210', referralCode: 'FIP100', ...defaults, ...(fullPreviewData.variablesMap || {}) };
+                      let subj = fullPreviewData.subject || '';
+                      Object.keys(vars).forEach(k => {
+                        subj = subj.replace(new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, 'g'), vars[k]);
+                      });
+                      return subj;
+                    })()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400">
+                  <span>From: <strong className="text-purple-400 font-sans">support@fipmoney.com</strong></span>
+                  <span>To: <strong className="text-slate-200 font-sans">Rohan Verma &lt;rohan@example.com&gt;</strong></span>
+                </div>
+              </div>
+
+              {/* PREVIEW CONTAINER BODY */}
+              <div className="flex-1 bg-slate-950 p-4 sm:p-6 overflow-hidden flex justify-center items-center relative">
+                {previewDeviceMode === 'desktop' ? (
+                  <div className="bg-white w-full max-w-4xl h-full rounded-2xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
+                    <iframe
+                      srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><style>body{margin:0;padding:0;background-color:#ffffff;font-family:Arial,Helvetica,sans-serif;}</style></head><body>${(() => {
+                        const defaults = getDynamicVariableDefaults();
+                        const vars: Record<string, string> = { userName: 'Rohan Verma', mobileNumber: '9876543210', referralCode: 'FIP100', ...defaults, ...(fullPreviewData.variablesMap || {}) };
+                        let html = fullPreviewData.htmlContent || '';
+                        Object.keys(vars).forEach(k => {
+                          html = html.replace(new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, 'g'), vars[k]);
+                        });
+                        return html;
+                      })()}</body></html>`}
+                      className="w-full h-full border-none bg-white"
+                      title="Full View Email Template Preview (Desktop)"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-slate-900 w-[380px] h-full max-h-[680px] rounded-[40px] p-3 shadow-2xl border-4 border-slate-700 flex flex-col relative shrink-0">
+                    {/* PHONE NOTCH */}
+                    <div className="w-32 h-4 bg-slate-800 rounded-full mx-auto mb-2 shrink-0 flex items-center justify-center">
+                      <div className="w-3 h-3 rounded-full bg-slate-950"></div>
+                    </div>
+                    <div className="bg-white w-full flex-1 rounded-[28px] overflow-hidden border border-slate-800">
+                      <iframe
+                        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><style>body{margin:0;padding:0;background-color:#ffffff;font-family:Arial,Helvetica,sans-serif;}</style></head><body>${(() => {
+                          const defaults = getDynamicVariableDefaults();
+                          const vars: Record<string, string> = { userName: 'Rohan Verma', mobileNumber: '9876543210', referralCode: 'FIP100', ...defaults, ...(fullPreviewData.variablesMap || {}) };
+                          let html = fullPreviewData.htmlContent || '';
+                          Object.keys(vars).forEach(k => {
+                            html = html.replace(new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, 'g'), vars[k]);
+                          });
+                          return html;
+                        })()}</body></html>`}
+                        className="w-full h-full border-none bg-white"
+                        title="Full View Email Template Preview (Mobile)"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* MODAL FOOTER */}
+              <div className="bg-slate-900 border-t border-slate-800 p-3.5 px-6 flex items-center justify-between">
+                <div className="text-xs font-semibold text-slate-400">
+                  Full View Preview Mode • Rendered HTML with sample variable values
+                </div>
+                <div className="flex items-center gap-2">
+                  {fullPreviewData.templateId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (fullPreviewData.templateId) {
+                          handleSelectTemplateForCompose(fullPreviewData.templateId);
+                          triggerToast(`Loaded '${fullPreviewData.name}' into Compose Email`);
+                        }
+                        setFullPreviewData(null);
+                      }}
+                      className="bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl border-none cursor-pointer transition-colors shadow-xs"
+                    >
+                      Use in Compose
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setFullPreviewData(null)}
+                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-4 py-2 rounded-xl border-none cursor-pointer transition-colors"
+                  >
+                    Close Preview
+                  </button>
+                </div>
+              </div>
+
             </motion.div>
           </div>
         )}
