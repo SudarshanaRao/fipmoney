@@ -3,261 +3,45 @@ import { SendMailClient } from 'zeptomail';
 import EmailTemplate from '../models/EmailTemplate.js';
 import EmailLog from '../models/EmailLog.js';
 
-// Default HTML Email Templates Seed Data - Empty so templates can be created from scratch
+// Default templates array (managed via EmailTemplate database model)
 const DEFAULT_TEMPLATES = [];
 
-let isDefaultTemplatesSeeded = true;
-
-// Helper to seed default HTML templates
+// Helper to seed default email templates - No hardcoded HTML or predefined templates stored in code
 export async function seedDefaultEmailTemplates() {
-  try {
-    const existingCount = await EmailTemplate.countDocuments();
-    if (existingCount > 0) {
-      return; // Skip seeding if templates already exist in EmailTemplate model
-    }
-
-    const onboardingHtml = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Welcome to Fipmoney — Your Account Is Ready</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f4f6f9; font-family: Arial, Helvetica, sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; color: #1a1a1a;">
-    <div style="display: none; max-height: 0px; overflow: hidden; opacity: 0; color: transparent; font-size: 1px; line-height: 1px; max-width: 0px;">
-        Welcome to Fipmoney! Your account has been created successfully. Explore 24K Digital Gold, Digital Silver, and smart wealth tools.
-    </div>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f6f9; width: 100%; margin: 0; padding: 40px 15px;">
-        <tr>
-            <td align="center" valign="top">
-                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 640px; width: 100%; background-color: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #eaedf2; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.07); margin: 0 auto;">
-                    <tr>
-                        <td align="center" valign="middle" style="padding: 30px 40px 22px; background-color: #ffffff; border-bottom: 1px solid #f0f0f0;">
-                            <a href="{{FIPMONEY_HOME_URL}}" target="_blank" style="text-decoration: none; display: inline-block;">
-                                <img src="{{FIPMONEY_LOGO_URL}}" alt="Fipmoney Logo" width="155" style="display: block; width: 155px; max-width: 155px; height: auto; border: 0; outline: none; text-decoration: none;" />
-                            </a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" valign="top" style="padding: 35px 40px 25px; background-color: #ffffff;">
-                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 18px;">
-                                <tr>
-                                    <td align="center" style="background-color: #fff8e7; border-radius: 30px; padding: 6px 16px; border: 1px solid #ffe8b3;">
-                                        <span style="font-family: Arial, sans-serif; font-size: 11px; font-weight: 800; color: #b27a00; letter-spacing: 1px; text-transform: uppercase; display: block;">
-                                            Account Verified &amp; Ready
-                                        </span>
-                                    </td>
-                                </tr>
-                            </table>
-                            <img src="{{HELLO_RAFIKI_ANIMATION_URL}}" alt="Welcome to Fipmoney" width="280" style="display: block; width: 100%; max-width: 280px; height: auto; margin: 0 auto 20px; border: 0; outline: none;" />
-                            <h1 style="margin: 0 0 14px; font-family: Arial, sans-serif; font-size: 26px; line-height: 34px; font-weight: 800; color: #111111; text-align: center;">
-                                Welcome aboard, {{userName}}! 🚀
-                            </h1>
-                            <p style="margin: 0 0 28px; font-family: Arial, sans-serif; font-size: 15px; line-height: 25px; color: #555555; text-align: center;">
-                                Congratulations on creating your Fipmoney account! You now have direct access to India's premier platform for 24K Digital Gold micro-savings, Digital Silver, and automated wealth creation.
-                            </p>
-                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
-                                <tr>
-                                    <td align="center" style="background-color: #b8860b; border-radius: 12px; padding: 15px 36px;">
-                                        <a href="{{FIPMONEY_DASHBOARD_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 15px; font-weight: bold; color: #ffffff; text-decoration: none; display: inline-block; letter-spacing: 0.5px;">
-                                            Open Your Fipmoney Dashboard &rarr;
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" valign="top" style="padding: 10px 40px 30px; background-color: #ffffff;">
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fafafa; border: 1px solid #eeeeee; border-radius: 16px; margin-bottom: 16px;">
-                                <tr>
-                                    <td width="100" valign="middle" style="padding: 18px 0 18px 18px;">
-                                        <img src="{{DIGITAL_GOLD_ILLUSTRATION_URL}}" alt="Digital Gold" width="90" style="display: block; width: 90px; height: auto; border-radius: 10px; border: 0;" />
-                                    </td>
-                                    <td valign="middle" style="padding: 18px 20px 18px 15px; text-align: left;">
-                                        <div style="font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; color: #171717; margin-bottom: 6px;">
-                                            ✨ 24K 99.9% Pure Digital Gold
-                                        </div>
-                                        <div style="font-family: Arial, sans-serif; font-size: 13px; line-height: 20px; color: #666666;">
-                                            Start micro-saving in 24K 999.9 pure gold insured in Brink's physical vaults starting from just ₹1.
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fafafa; border: 1px solid #eeeeee; border-radius: 16px; margin-bottom: 16px;">
-                                <tr>
-                                    <td width="100" valign="middle" style="padding: 18px 0 18px 18px;">
-                                        <img src="{{DIGITAL_SILVER_ILLUSTRATION_URL}}" alt="Digital Silver" width="90" style="display: block; width: 90px; height: auto; border-radius: 10px; border: 0;" />
-                                    </td>
-                                    <td valign="middle" style="padding: 18px 20px 18px 15px; text-align: left;">
-                                        <div style="font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; color: #171717; margin-bottom: 6px;">
-                                            🥈 99.9% Pure Digital Silver
-                                        </div>
-                                        <div style="font-family: Arial, sans-serif; font-size: 13px; line-height: 20px; color: #666666;">
-                                            Accumulate silver digitally at live market rates with zero storage fee and instant liquidity.
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fafafa; border: 1px solid #eeeeee; border-radius: 16px; margin-bottom: 16px;">
-                                <tr>
-                                    <td width="100" valign="middle" style="padding: 18px 0 18px 18px;">
-                                        <img src="{{WALLET_BRO_ANIMATION_URL}}" alt="Smart Wallet" width="90" style="display: block; width: 90px; height: auto; border-radius: 10px; border: 0;" />
-                                    </td>
-                                    <td valign="middle" style="padding: 18px 20px 18px 15px; text-align: left;">
-                                        <div style="font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; color: #171717; margin-bottom: 6px;">
-                                            💳 Instant Digital Wallet &amp; Micro-SIP
-                                        </div>
-                                        <div style="font-family: Arial, sans-serif; font-size: 13px; line-height: 20px; color: #666666;">
-                                            Automate daily, weekly, or monthly micro-SIPs seamlessly from your encrypted Fipmoney virtual card.
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fafafa; border: 1px solid #eeeeee; border-radius: 16px; margin-bottom: 16px;">
-                                <tr>
-                                    <td width="100" valign="middle" style="padding: 18px 0 18px 18px;">
-                                        <img src="{{GROWTH_ANALYTICS_AMICO_ANIMATION_URL}}" alt="Analytics" width="90" style="display: block; width: 90px; height: auto; border-radius: 10px; border: 0;" />
-                                    </td>
-                                    <td valign="middle" style="padding: 18px 20px 18px 15px; text-align: left;">
-                                        <div style="font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; color: #171717; margin-bottom: 6px;">
-                                            📈 Real-Time Portfolio Analytics
-                                        </div>
-                                        <div style="font-family: Arial, sans-serif; font-size: 13px; line-height: 20px; color: #666666;">
-                                            Monitor live market price benchmarks, historical gold yields, and independent Vistra trustee holdings 24/7.
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fffcf4; border: 2px dashed #d4a62a; border-radius: 16px; margin-top: 15px;">
-                                <tr>
-                                    <td align="center" style="padding: 24px;">
-                                        <div style="font-family: Arial, sans-serif; font-size: 17px; font-weight: 800; color: #7a5800; margin-bottom: 8px;">
-                                            💼 Become a Digital Gold Agent (DGA)
-                                        </div>
-                                        <p style="margin: 0 0 16px; font-family: Arial, sans-serif; font-size: 13px; line-height: 21px; color: #6b551e;">
-                                            Want to earn up to <strong>2.5% lifetime commissions</strong>? Join our DGA network to build your financial advisory business with Fipmoney.
-                                        </p>
-                                        <a href="{{DGA_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; color: #ffffff; background-color: #171717; padding: 11px 24px; border-radius: 8px; text-decoration: none; display: inline-block;">
-                                            Become a DGA Now
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                            <div style="margin-top: 30px; font-family: Arial, sans-serif; font-size: 14px; color: #666666; line-height: 22px; text-align: left;">
-                                If you have any questions or need guidance getting started, simply reply to this email or contact our support team.
-                                <br/><br/>
-                                Warm regards,<br/>
-                                <strong style="color: #171717;">Team Fipmoney</strong>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="center" valign="top" style="padding: 30px 40px; background-color: #fafafa; border-top: 1px solid #eeeeee;">
-                            <div style="margin-bottom: 18px;">
-                                <a href="{{FIPMONEY_HOME_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 12px; color: #666666; text-decoration: none; margin: 0 8px; font-weight: 500;">Home</a>
-                                <a href="{{FIPMONEY_ABOUT_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 12px; color: #666666; text-decoration: none; margin: 0 8px; font-weight: 500;">About Us</a>
-                                <a href="{{FIPMONEY_CONTACT_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 12px; color: #666666; text-decoration: none; margin: 0 8px; font-weight: 500;">Contact Us</a>
-                                <a href="{{FIPMONEY_FAQ_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 12px; color: #666666; text-decoration: none; margin: 0 8px; font-weight: 500;">FAQs</a>
-                                <a href="{{FIPMONEY_TERMS_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 12px; color: #666666; text-decoration: none; margin: 0 8px; font-weight: 500;">Terms &amp; Conditions</a>
-                                <a href="{{FIPMONEY_PRIVACY_URL}}" target="_blank" style="font-family: Arial, sans-serif; font-size: 12px; color: #666666; text-decoration: none; margin: 0 8px; font-weight: 500;">Privacy Policy</a>
-                            </div>
-                            <p style="margin: 0; font-family: Arial, sans-serif; font-size: 11px; line-height: 18px; color: #999999;">
-                                &copy; {{currentYear}} Fipmoney Technologies. All rights reserved.
-                            </p>
-                            <p style="margin-top: 12px; font-family: Arial, sans-serif; font-size: 12px; color: #777777;">
-                                Need assistance? 
-                                <a href="mailto:{{supportEmail}}" style="color: #b8860b; text-decoration: none; font-weight: 600;">{{supportEmail}}</a>
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>`;
-
-    await EmailTemplate.findOneAndUpdate(
-      { templateId: 'FIPMONEY_WELCOME_ONBOARDING' },
-      {
-        templateId: 'FIPMONEY_WELCOME_ONBOARDING',
-        name: 'Fipmoney Welcome & Onboarding',
-        subject: 'Welcome to Fipmoney — Your Account Is Ready',
-        category: 'Onboarding',
-        htmlContent: onboardingHtml,
-        variables: [
-          'userName', 'currentYear', 'supportEmail', 'FIPMONEY_LOGO_URL', 'HELLO_RAFIKI_ANIMATION_URL',
-          'WALLET_BRO_ANIMATION_URL', 'EWALLET_PANA_ANIMATION_URL', 'DIGITAL_GOLD_ILLUSTRATION_URL',
-          'DIGITAL_SILVER_ILLUSTRATION_URL', 'MANAGE_MONEY_AMICO_ANIMATION_URL',
-          'GROWTH_ANALYTICS_AMICO_ANIMATION_URL', 'DGA_URL', 'FIPMONEY_DASHBOARD_URL',
-          'FIPMONEY_HOME_URL', 'FIPMONEY_ABOUT_URL', 'FIPMONEY_CONTACT_URL',
-          'FIPMONEY_FAQ_URL', 'FIPMONEY_TERMS_URL', 'FIPMONEY_PRIVACY_URL'
-        ]
-      },
-      { upsert: true, new: true }
-    );
-
-    await EmailTemplate.findOneAndUpdate(
-      { templateId: 'WELCOME_SIGNUP' },
-      {
-        templateId: 'WELCOME_SIGNUP',
-        name: 'Fipmoney Welcome & Onboarding',
-        subject: 'Welcome to Fipmoney — Your Account Is Ready',
-        category: 'Onboarding',
-        htmlContent: onboardingHtml,
-        variables: [
-          'userName', 'currentYear', 'supportEmail', 'FIPMONEY_LOGO_URL', 'HELLO_RAFIKI_ANIMATION_URL',
-          'WALLET_BRO_ANIMATION_URL', 'EWALLET_PANA_ANIMATION_URL', 'DIGITAL_GOLD_ILLUSTRATION_URL',
-          'DIGITAL_SILVER_ILLUSTRATION_URL', 'MANAGE_MONEY_AMICO_ANIMATION_URL',
-          'GROWTH_ANALYTICS_AMICO_ANIMATION_URL', 'DGA_URL', 'FIPMONEY_DASHBOARD_URL',
-          'FIPMONEY_HOME_URL', 'FIPMONEY_ABOUT_URL', 'FIPMONEY_CONTACT_URL',
-          'FIPMONEY_FAQ_URL', 'FIPMONEY_TERMS_URL', 'FIPMONEY_PRIVACY_URL'
-        ]
-      },
-      { upsert: true, new: true }
-    );
-  } catch (err) {
-    console.error('[seedDefaultEmailTemplates Error]', err);
-  }
+  // Templates are fetched and created dynamically via EmailTemplate MongoDB model
+  return;
 }
 
-// Render HTML template with dynamic variables
+/**
+ * Render HTML or Subject string by dynamically replacing {{ variableName }} placeholders
+ * with values from the passed variables object or dynamic system parameters.
+ * 
+ * Searches for all {{ variableName }} matches in the template and replaces them automatically.
+ */
 export function renderHtmlTemplate(html, variables = {}) {
+  if (!html || typeof html !== 'string') return '';
+
   let baseDomain = (variables.baseUrl || variables.origin || process.env.APP_BASE_URL || 'https://www.fipmoney.com').trim();
   if (baseDomain.endsWith('/')) {
     baseDomain = baseDomain.slice(0, -1);
   }
 
-  const defaultVars = {
-    currentYear: new Date().getFullYear(),
-    supportEmail: 'support@fipmoney.com',
+  // System dynamic defaults (minimal runtime system variables, no hardcoded asset paths)
+  const systemDefaults = {
+    currentYear: String(new Date().getFullYear()),
+    supportEmail: process.env.SUPPORT_EMAIL || 'support@fipmoney.com',
     baseUrl: baseDomain,
-    FIPMONEY_LOGO_URL: `${baseDomain}/fipmoney_logo_final.png`,
-    HELLO_RAFIKI_ANIMATION_URL: `${baseDomain}/fipmoney-welcome-hello-rafiki.gif`,
-    WALLET_BRO_ANIMATION_URL: `${baseDomain}/fipmoney-wallet-bro.gif`,
-    EWALLET_PANA_ANIMATION_URL: `${baseDomain}/fipmoney-ewallet-pana.gif`,
-    DIGITAL_GOLD_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_gold.png`,
-    DIGITAL_SILVER_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_silver.png`,
-    MANAGE_MONEY_AMICO_ANIMATION_URL: `${baseDomain}/fipmoney-manage-money-amico.gif`,
-    GROWTH_ANALYTICS_AMICO_ANIMATION_URL: `${baseDomain}/fipmoney-growth-analytics-amico.gif`,
-    DGA_URL: `${baseDomain}/become-agent`,
-    FIPMONEY_DASHBOARD_URL: `${baseDomain}/dashboard`,
-    FIPMONEY_HOME_URL: `${baseDomain}/`,
-    FIPMONEY_ABOUT_URL: `${baseDomain}/about`,
-    FIPMONEY_CONTACT_URL: `${baseDomain}/contact`,
-    FIPMONEY_FAQ_URL: `${baseDomain}/faq`,
-    FIPMONEY_TERMS_URL: `${baseDomain}/terms-and-conditions`,
-    FIPMONEY_PRIVACY_URL: `${baseDomain}/privacy-policy`,
   };
-  const mergedVars = { ...defaultVars, ...variables };
-  let rendered = html;
-  Object.keys(mergedVars).forEach((key) => {
-    const value = mergedVars[key] !== undefined ? mergedVars[key] : '';
-    const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-    rendered = rendered.replace(regex, value);
+
+  const mergedVars = { ...systemDefaults, ...variables };
+
+  // Dynamically find and replace all {{ placeholder }} tags in content
+  return html.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, key) => {
+    if (Object.prototype.hasOwnProperty.call(mergedVars, key) && mergedVars[key] !== undefined && mergedVars[key] !== null) {
+      return String(mergedVars[key]);
+    }
+    return '';
   });
-  return rendered;
 }
 
 // Initialize Zoho ZeptoMail Client
