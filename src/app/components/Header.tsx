@@ -14,7 +14,7 @@ const DropdownMenu = ({ title, items, isOpen, onToggle, onItemClick }) => {
   return (
     <div className="relative">
       <motion.button
-        className="flex items-center space-x-1 text-gray-600 hover:text-[#ffbf00] font-medium transition-colors duration-200 hover-gold"
+        className="flex items-center space-x-1 text-gray-600 hover:text-[#1e1b4b] font-medium transition-colors duration-200"
         onClick={onToggle}
         whileHover={{ scale: 1.05 }}
       >
@@ -39,13 +39,13 @@ const DropdownMenu = ({ title, items, isOpen, onToggle, onItemClick }) => {
             {items.map((item, index) => (
               <motion.button
                 key={item.name}
-                className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-600 hover:text-[#ffbf00] hover:bg-gray-50 transition-all duration-200"
+                className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-600 hover:text-[#1e1b4b] hover:bg-indigo-50/50 transition-all duration-200"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => onItemClick(item.action)}
               >
-                {item.icon && <item.icon className="w-4 h-4 text-[#ffbf00]" />}
+                {item.icon && <item.icon className="w-4 h-4 text-[#1e1b4b]" />}
                 <span className="text-sm">{item.name}</span>
               </motion.button>
             ))}
@@ -148,7 +148,7 @@ export default function Header({ onNavigate }: HeaderProps) {
             />
             <motion.span 
               className="text-2xl md:text-3xl font-bold text-gray-900"
-              whileHover={{ color: "#ffbf00" }}
+              whileHover={{ color: "#1e1b4b" }}
               transition={{ duration: 0.3 }}
             >
               FipMoney
@@ -160,7 +160,7 @@ export default function Header({ onNavigate }: HeaderProps) {
             {/* Features Megamenu Trigger */}
             <div className="relative">
               <motion.button
-                className="flex items-center space-x-1 text-gray-600 hover:text-[#ffbf00] font-medium transition-colors duration-200 hover-gold"
+                className="flex items-center space-x-1 text-gray-600 hover:text-[#1e1b4b] font-medium transition-colors duration-200"
                 onClick={handleDropdownToggle('features')}
                 whileHover={{ scale: 1.05 }}
               >
@@ -324,7 +324,7 @@ export default function Header({ onNavigate }: HeaderProps) {
             {navItems.map((item, index) => (
               <motion.button
                 key={item.name}
-                className="text-gray-600 hover:text-[#ffbf00] font-medium transition-colors duration-200 hover-gold"
+                className="text-gray-600 hover:text-[#1e1b4b] font-medium transition-colors duration-200"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -338,16 +338,16 @@ export default function Header({ onNavigate }: HeaderProps) {
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center space-x-3">
             <motion.button
-              className="flex items-center space-x-1.5 px-5 py-2.5 text-sm font-semibold text-[#b8860b] border border-[#ffbf00] rounded-xl hover:bg-[#fffbea] transition-all duration-200"
+              className="flex items-center space-x-1.5 px-5 py-2.5 text-sm font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all duration-200 cursor-pointer shadow-2xs"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onNavigate?.('login')}
             >
-              <LogIn className="w-4 h-4" />
+              <LogIn className="w-4 h-4 text-[#1e1b4b]" />
               <span>Login</span>
             </motion.button>
             <motion.button
-              className="flex items-center space-x-1.5 px-5 py-2.5 text-sm font-bold text-gray-900 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] rounded-xl shadow-lg shadow-[#ffbf00]/30 hover:shadow-[#ffbf00]/50 transition-all duration-200"
+              className="flex items-center space-x-1.5 px-5.5 py-2.5 text-sm font-black text-white bg-gradient-to-r from-[#1e1b4b] to-[#312e81] hover:from-[#111827] hover:to-[#1e1b4b] rounded-xl shadow-md shadow-[#1e1b4b]/20 transition-all duration-200 cursor-pointer"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onNavigate?.('signup')}

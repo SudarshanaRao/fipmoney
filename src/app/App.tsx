@@ -479,7 +479,7 @@ export default function App() {
             <Header onNavigate={navigateToPage} />
 
             {/* Main Content */}
-            <main className="bg-white">
+            <main className="bg-[#f0f4f9]">
               {/* Hero Section */}
               <HeroSection onNavigate={navigateToPage} />
 
@@ -563,7 +563,7 @@ export default function App() {
 
   return (
     <motion.div
-      className="min-h-screen bg-white smooth-scroll"
+      className="min-h-screen bg-[#f0f4f9] smooth-scroll"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -577,16 +577,17 @@ export default function App() {
                 {renderMainContent()}
               </div>
 
-              {/* Footer — hidden on auth, user dashboard and all admin pages */}
+              {/* Footer — hidden on auth, user dashboard, agent dashboard and all admin pages */}
               {(() => {
                 const currentPath = typeof window !== 'undefined' ? window.location.pathname.slice(1) : String(currentPage);
                 const isDashboard = currentPath === 'dashboard' || currentPath.startsWith('dashboard') || currentPage === 'dashboard';
+                const isAgentDashboard = currentPath.startsWith('agent') || currentPage.startsWith('agent');
                 const isAuthOrAdmin = ['login','signup','recharge-details'].includes(currentPage) || 
                                      ['login','signup','recharge-details'].includes(currentPath) ||
                                      currentPage.startsWith('admin') || currentPath.startsWith('admin') ||
                                      currentPage.startsWith('portal-sec') || currentPath.startsWith('portal-sec');
                 
-                if (isDashboard || isAuthOrAdmin) {
+                if (isDashboard || isAgentDashboard || isAuthOrAdmin) {
                   return null;
                 }
                 return <Footer onNavigate={navigateToPage} />;

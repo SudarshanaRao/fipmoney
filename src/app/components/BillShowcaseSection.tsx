@@ -33,7 +33,7 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
   const displayedBills = showAll ? billsList : billsList.slice(0, 10);
 
   return (
-    <section className="py-14 md:py-16 bg-white" id="bills-showcase">
+    <section className="py-14 md:py-16 bg-[#f0f4f9]" id="bills-showcase">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
         
         {/* Section Header */}

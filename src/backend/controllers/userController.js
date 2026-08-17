@@ -1639,7 +1639,7 @@ export const getProfileImageUrl = async (req, res, next) => {
 // @route   DELETE /api/users/profile/image
 export const deleteProfileImage = async (req, res, next) => {
   try {
-    const { mobile } = req.body;
+    const mobile = req.body?.mobile || req.query?.mobile;
     if (!mobile) {
       return res.status(400).json({ success: false, message: 'Mobile number is required' });
     }
@@ -1652,7 +1652,11 @@ export const deleteProfileImage = async (req, res, next) => {
     }
 
     if (user.profileImageKey) {
-      await deleteObjectFromS3(user.profileImageKey);
+      try {
+        await deleteObjectFromS3(user.profileImageKey);
+      } catch (s3Err) {
+        console.warn('Notice removing object from S3:', s3Err.message);
+      }
     }
 
     user.profileImageKey = '';

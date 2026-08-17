@@ -52,7 +52,7 @@ const savingsPlans = [
     subIconBg: "bg-purple-100/70 text-[#6D28D9]",
     subTextTitle: "Small Steps",
     subTextSubtitle: "Big Future",
-    btnBg: "bg-[#6D28D9] hover:bg-[#5B21B6]"
+    btnBg: "bg-[#1e1b4b] hover:bg-[#312e81]"
   },
   {
     id: "weekly",
@@ -60,19 +60,19 @@ const savingsPlans = [
     amount: "₹1,000 / week",
     desc: "Perfect for matching your steady weekly expenses.",
     tag: "STEADY GROWTH",
-    tagColorHex: "#059669",
-    pillBorder: "border-emerald-200",
-    pillBg: "bg-emerald-50/50",
-    pillText: "text-[#059669]",
-    suggestedBoxBg: "bg-[#F0FDF4] border-[#DCFCE7]",
-    amountColor: "text-[#059669]",
+    tagColorHex: "#1e1b4b",
+    pillBorder: "border-indigo-200",
+    pillBg: "bg-indigo-50/50",
+    pillText: "text-[#1e1b4b]",
+    suggestedBoxBg: "bg-[#F0F3FF] border-[#E0E7FF]",
+    amountColor: "text-[#1e1b4b]",
     projected: "₹52,000/yr",
     image: "/weekly_savings.png",
     subIcon: TrendingUp,
-    subIconBg: "bg-emerald-100/70 text-[#059669]",
+    subIconBg: "bg-indigo-100/70 text-[#1e1b4b]",
     subTextTitle: "Stay Consistent",
     subTextSubtitle: "Stay Ahead",
-    btnBg: "bg-[#059669] hover:bg-[#047857]"
+    btnBg: "bg-[#1e1b4b] hover:bg-[#312e81]"
   },
   {
     id: "monthly",
@@ -80,19 +80,19 @@ const savingsPlans = [
     amount: "₹5,000 / month",
     desc: "Serious wealth building directly from your salary.",
     tag: "WEALTH BUILDER",
-    tagColorHex: "#D97706",
-    pillBorder: "border-amber-200",
-    pillBg: "bg-amber-50/50",
-    pillText: "text-[#D97706]",
-    suggestedBoxBg: "bg-[#FFFBEB] border-[#FEF3C7]",
-    amountColor: "text-[#D97706]",
+    tagColorHex: "#312e81",
+    pillBorder: "border-purple-200",
+    pillBg: "bg-purple-50/50",
+    pillText: "text-[#312e81]",
+    suggestedBoxBg: "bg-[#F5F3FF] border-[#EDE9FE]",
+    amountColor: "text-[#312e81]",
     projected: "₹60,000/yr",
     image: "/monthly_savings.png",
     subIcon: Scale,
-    subIconBg: "bg-amber-100/70 text-[#D97706]",
+    subIconBg: "bg-purple-100/70 text-[#312e81]",
     subTextTitle: "Build Wealth",
     subTextSubtitle: "Secure Future",
-    btnBg: "bg-[#D97706] hover:bg-[#B45309]"
+    btnBg: "bg-[#1e1b4b] hover:bg-[#312e81]"
   }
 ];
 
@@ -102,7 +102,7 @@ export default function HomeSavingsSection({ onNavigate }: HomeSavingsSectionPro
   };
 
   return (
-    <section className="w-full py-14 md:py-16 bg-white font-sans relative overflow-hidden">
+    <section className="w-full py-14 md:py-16 bg-[#f0f4f9] font-sans relative overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Section Header */}

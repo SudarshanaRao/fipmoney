@@ -64,7 +64,7 @@ export default function Footer({ onNavigate }: FooterProps) {
   };
 
   return (
-    <footer className="bg-[#fafafa] relative overflow-hidden pt-10 md:pt-12 flex flex-col" id="contact">
+    <footer className="bg-[#eef2f8] border-t border-indigo-100/60 relative overflow-hidden pt-10 md:pt-12 flex flex-col" id="contact">
       <div className="container mx-auto px-6 lg:px-12 flex-1 pb-8">
         
         {/* Top 4 Columns */}
@@ -72,10 +72,10 @@ export default function Footer({ onNavigate }: FooterProps) {
           
           {/* Brand Section */}
           <div className="md:col-span-12 lg:col-span-4 space-y-5">
-            <div className="flex items-center space-x-4 cursor-pointer" onClick={() => onNavigate?.('home')}>
-              <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-14 w-auto object-contain" />
+            <div className="flex items-center space-x-4 cursor-pointer group" onClick={() => onNavigate?.('home')}>
+              <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-14 w-auto object-contain transition-transform group-hover:scale-105" />
               <div className="flex flex-col">
-                <span className="text-2xl font-black text-[#ffbf00] tracking-tight font-outfit">FipMoney</span>
+                <span className="text-2xl font-black text-[#1e1b4b] group-hover:text-[#312e81] transition-colors tracking-tight font-outfit">FipMoney</span>
                 <span className="text-[10px] font-bold text-gray-900/60 tracking-[0.2em] uppercase mt-0.5">Digital Gold & Payments</span>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               India's trusted digital gold and payments platform. Buy, sell, and store digital gold and silver starting from just ₹1. Secured in 100% insured physical vaults by Brink's and protected by independent Security Trustee Vistra.
             </p>
             
-            <div className="w-12 h-0.5 bg-amber-200 rounded-full mt-5 mb-5"></div>
+            <div className="w-12 h-0.5 bg-indigo-200 rounded-full mt-5 mb-5"></div>
             
             <div className="flex items-center gap-3">
               {[
@@ -98,7 +98,7 @@ export default function Footer({ onNavigate }: FooterProps) {
                   href={item.href} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="w-10 h-10 rounded-full bg-white border border-amber-100 flex items-center justify-center text-[#ffbf00] hover:bg-[#ffbf00] hover:text-white hover:border-[#ffbf00] transition-all cursor-pointer shadow-sm"
+                  className="w-10 h-10 rounded-full bg-white border border-indigo-150 flex items-center justify-center text-[#1e1b4b] hover:bg-[#1e1b4b] hover:text-white hover:border-[#1e1b4b] transition-all cursor-pointer shadow-xs"
                 >
                   <item.Icon className="w-4 h-4" />
                 </a>
@@ -111,15 +111,15 @@ export default function Footer({ onNavigate }: FooterProps) {
             {linkGroups.map((group) => (
               <div key={group.title} className="space-y-5">
                 <div className="flex flex-col items-start gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-[#ffbf00]">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-150 flex items-center justify-center text-[#1e1b4b]">
                     <group.icon className="w-5 h-5" strokeWidth={1.5} />
                   </div>
-                  <h4 className="text-[#ffbf00] font-black text-[11px] uppercase tracking-widest">{group.title}</h4>
+                  <h4 className="text-[#1e1b4b] font-black text-[11px] uppercase tracking-widest">{group.title}</h4>
                 </div>
                 <ul className="space-y-3.5">
                   {group.links.map((link) => (
                     <li key={link.label} className="flex items-center group cursor-pointer" onClick={handleLinkClick(link)}>
-                      <span className="text-slate-600 text-[13px] font-semibold group-hover:text-[#ffbf00] transition-colors">
+                      <span className="text-slate-600 text-[13px] font-semibold group-hover:text-[#1e1b4b] transition-colors">
                         {link.label}
                       </span>
                     </li>
@@ -131,7 +131,7 @@ export default function Footer({ onNavigate }: FooterProps) {
         </div>
 
         {/* Middle Banner (Trust Badges) */}
-        <div className="bg-white rounded-[24px] shadow-sm border border-slate-200/60 p-5 md:p-7 mt-10 mb-2">
+        <div className="bg-white rounded-[24px] shadow-xs border border-indigo-100 p-5 md:p-7 mt-10 mb-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
             {[
               { title: 'VERIFIED PLATFORM', subtitle: '100% trusted & verified', icon: Shield, logo: null },
@@ -140,15 +140,15 @@ export default function Footer({ onNavigate }: FooterProps) {
               { title: 'VISTRA TRUSTEE', subtitle: 'Independent legal safeguard', icon: Coins, logo: '/vistra-logo.svg' }
             ].map((item, idx) => (
               <div key={idx} className={`flex items-center gap-4 ${idx !== 0 ? 'pt-5 sm:pt-0 sm:pl-5 lg:pl-7' : ''}`}>
-                <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0 p-2">
+                <div className="w-12 h-12 rounded-full bg-indigo-50 border border-indigo-150 flex items-center justify-center shrink-0 p-2">
                   {item.logo ? (
                     <img src={item.logo} alt={item.title} className="w-full h-full object-contain" />
                   ) : (
-                    <item.icon className="w-5 h-5 text-[#ffbf00]" />
+                    <item.icon className="w-5 h-5 text-[#1e1b4b]" />
                   )}
                 </div>
                 <div>
-                  <h5 className="text-[#ffbf00] font-bold text-[11px] uppercase tracking-wider">{item.title}</h5>
+                  <h5 className="text-[#1e1b4b] font-bold text-[11px] uppercase tracking-wider">{item.title}</h5>
                   <p className="text-slate-500 text-[12px] font-medium mt-0.5">{item.subtitle}</p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export default function Footer({ onNavigate }: FooterProps) {
       </div>
 
       {/* Dark Gold/Navy Bottom Bar */}
-      <div className="bg-gradient-to-r from-[#030213] via-[#090729] to-[#030213] relative z-10 w-full overflow-hidden">
+      <div className="bg-gradient-to-r from-[#0b0922] via-[#120e3d] to-[#0b0922] relative z-10 w-full overflow-hidden">
         {/* Absolute Background Pattern */}
         <div className="absolute inset-0 opacity-10 pointer-events-none">
            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" className="absolute bottom-0 w-full h-full">
@@ -195,7 +195,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               <div className="font-black text-6xl md:text-[4.5rem] lg:text-[6rem] text-white/5 group-hover:text-white/10 transition-colors select-none tracking-tighter leading-none font-outfit uppercase">
                 FIPMONEY
               </div>
-              <div className="mt-2 text-[#ffbf00]/40 font-bold uppercase tracking-[0.4em] text-[8px] md:text-[9px]">
+              <div className="mt-2 text-indigo-200/50 font-bold uppercase tracking-[0.4em] text-[8px] md:text-[9px]">
                 Digital Gold & Payments • Est. 2025
               </div>
             </div>

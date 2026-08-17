@@ -105,14 +105,24 @@ export default function AboutUs({ onBack }: AboutUsProps) {
 
       {/* Header spanning full width */}
       <header className="w-full px-6 md:px-12 lg:px-20 py-6 flex justify-between items-center relative z-20">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-4">
           {/* Fipmoney Logo */}
-          <div className="flex items-center gap-2 cursor-pointer" onClick={onBack}>
-            <span className="text-slate-900 text-2xl font-black tracking-wider flex items-center">
-              <span className="font-extrabold text-[#c59325] mr-1">FM</span> Fipmoney
-            </span>
+          <div className="flex items-center cursor-pointer" onClick={onBack}>
+            <img
+              src="/fipmoney_logo_final.png"
+              alt="FipMoney Logo"
+              className="h-12 md:h-14 w-auto object-contain"
+            />
           </div>
+
+          <div className="h-6 w-[1.5px] bg-slate-200/80" />
+
+          {/* About Us Heading */}
+          <span className="text-[#c59325] text-xs md:text-sm font-black uppercase tracking-wider bg-amber-50/90 border border-amber-200/80 px-3.5 py-1 rounded-full shadow-2xs">
+            ABOUT US
+          </span>
         </div>
+
         <button
           onClick={onBack}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-slate-200 bg-white font-extrabold text-xs text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-sm hover:shadow z-30"
@@ -129,10 +139,6 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           {/* Left Text */}
           <div className="lg:col-span-7 space-y-8 text-left">
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="text-[#c59325] text-xs font-black uppercase tracking-wider">ABOUT US</span>
-                <div className="w-16 h-[2px] bg-[#c59325]/40" />
-              </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-tight tracking-tight">
                 Fipmoney is built to<br />

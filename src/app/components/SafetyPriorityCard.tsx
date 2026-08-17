@@ -6,7 +6,7 @@ import securityIllustration from "../../assets/security_banner_illustration.png"
 
 export default function SafetyPriorityCard() {
   return (
-    <section className="py-14 md:py-16 bg-white font-sans w-full flex items-center justify-center overflow-hidden">
+    <section className="py-14 md:py-16 bg-[#f0f4f9] font-sans w-full flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           className="rounded-3xl bg-gradient-to-r from-[#fdfaf2] via-[#fffdf9] to-white border border-[#f5ebd0] p-8 md:p-10 relative overflow-hidden shadow-xs"

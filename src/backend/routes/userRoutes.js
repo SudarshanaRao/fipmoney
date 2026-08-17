@@ -632,6 +632,7 @@ router.get('/profile/image', getProfileImageUrl);
 router.get('/profile-image', getProfileImageUrl);
 router.delete('/profile/image', deleteProfileImage);
 router.delete('/profile-image', deleteProfileImage);
+router.post('/profile/image/delete', deleteProfileImage);
 
 router.post('/profile-image', upload.single('image'), uploadProfileImage);
 

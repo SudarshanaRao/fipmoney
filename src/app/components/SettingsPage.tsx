@@ -736,10 +736,30 @@ export default function SettingsPage() {
   const handleRemovePhoto = () => {
     showConfirm(
       "Are you sure you want to remove your profile photo?",
-      () => {
-        setAvatar("");
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem(`fm_user_avatar_${loggedInMobile}`);
+      async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/profile/image`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mobile: loggedInMobile }),
+          });
+          const data = await res.json();
+          setAvatar("");
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(`fm_user_avatar_${loggedInMobile}`);
+          }
+          if (res.ok && data.success) {
+            showAlert("Profile photo removed from database & cloud storage successfully.", "success", "Photo Removed");
+          } else {
+            showAlert(data.message || "Profile photo removed", "info");
+          }
+        } catch (err) {
+          console.error("Error deleting profile photo:", err);
+          setAvatar("");
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(`fm_user_avatar_${loggedInMobile}`);
+          }
+          showAlert("Profile photo removed", "info");
         }
       },
       { title: "Remove Photo", confirmText: "Remove", cancelText: "Keep" }
@@ -843,10 +863,17 @@ export default function SettingsPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Settings</h1>
-            <p className="text-sm text-gray-500 font-semibold mt-1">Manage your financial profile and account configurations</p>
+            <p className="text-sm text-gray-500 font-semibold mt-1 flex flex-wrap items-center gap-2">
+              <span>Manage your financial profile and account configurations</span>
+              <span className="text-gray-300 hidden sm:inline">•</span>
+              <span className="inline-flex items-center gap-1.5 text-amber-800 bg-amber-50/90 border border-amber-200/80 px-2.5 py-0.5 rounded-full text-xs font-bold shadow-2xs">
+                <Sparkles size={12} className="text-amber-500 animate-pulse" />
+                Auto-saves in real-time
+              </span>
+            </p>
           </div>
 
-          <div className="flex flex-col items-start md:items-end gap-2">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
               disabled={isSaving}
@@ -861,10 +888,6 @@ export default function SettingsPage() {
               )}
               {saveSuccess ? "Saved!" : "Save Changes"}
             </button>
-            <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-2xs">
-              <Sparkles size={13} className="text-amber-500 animate-pulse" />
-              Note: Any changes made will auto-save automatically in real-time, so you don't need to worry about manually saving!
-            </span>
           </div>
         </div>
 

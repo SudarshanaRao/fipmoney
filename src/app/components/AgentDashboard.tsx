@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Clock,
   ArrowUpRight,
+  ArrowLeft,
   Sparkles,
   Download,
   Copy,
@@ -221,15 +222,17 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFDFD] text-slate-900 flex flex-col font-sans selection:bg-[#1e1b4b] selection:text-white">
+    <div className="h-screen bg-[#FCFDFD] text-slate-900 flex flex-col font-sans selection:bg-[#1e1b4b] selection:text-white overflow-hidden">
       
       {/* Top Agent Bar Header (User Dashboard Themed) */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xs">
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 shrink-0 px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xs z-30">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1e1b4b] p-0.5 shadow-md shadow-[#1e1b4b]/20 flex items-center justify-center">
-              <span className="font-black text-amber-400 text-lg">FM</span>
-            </div>
+            <img
+              src="/fipmoney_logo_final.png"
+              alt="FipMoney Logo"
+              className="h-10 w-auto object-contain"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-black text-slate-900 text-base tracking-tight">DGA Partner Console</span>
@@ -252,17 +255,10 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                 window.location.reload();
               }
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 font-extrabold text-xs transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 hover:from-slate-800 hover:to-indigo-900 text-white font-extrabold text-xs transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 border border-indigo-900/50"
           >
-            ← Return to User Dashboard
-          </button>
-
-          <button
-            onClick={handleCopyLink}
-            className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 font-extrabold text-xs transition-all cursor-pointer shadow-2xs"
-          >
-            {copiedLink ? <Check size={14} className="text-purple-700" /> : <Share2 size={14} />}
-            {copiedLink ? "Link Copied!" : "Share Agent Link"}
+            <ArrowLeft size={14} className="text-amber-400" />
+            <span>Switch to User Dashboard</span>
           </button>
 
           <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
@@ -294,10 +290,10 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
       </header>
 
       {/* Main Body with Sidebar Layout */}
-      <div className="flex-1 flex flex-col md:flex-row max-w-[1700px] w-full mx-auto">
+      <div className="flex-1 flex flex-col md:flex-row max-w-[1700px] w-full mx-auto overflow-hidden">
         
-        {/* Left Navigation Sidebar */}
-        <aside className="w-full md:w-64 bg-white border-r border-slate-200/90 p-4 shrink-0 shadow-xs flex flex-col justify-between">
+        {/* Left Navigation Sidebar (Sticky / Fixed) */}
+        <aside className="w-full md:w-64 bg-white border-r border-slate-200/90 p-4 shrink-0 shadow-xs flex flex-col justify-between overflow-y-auto h-auto md:h-full">
           <nav className="space-y-1.5">
             
             <div className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -384,7 +380,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
         </aside>
 
         {/* Right Tab Content View */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-8 overflow-y-auto h-full">
           
           {/* TAB 0: DONEZO DASHBOARD TAB */}
           {activeTab === "dashboard" && (
@@ -399,10 +395,11 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setShowAddLeadModal(true)}
+                    onClick={handleCopyLink}
                     className="px-5 py-2.5 rounded-full bg-[#1e1b4b] hover:bg-[#111827] text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center gap-2 border-none outline-none"
                   >
-                    <Plus size={16} /> Add Project
+                    {copiedLink ? <Check size={16} className="text-amber-400" /> : <Share2 size={16} />}
+                    {copiedLink ? "Link Copied!" : "Share Agent Link"}
                   </button>
 
                   <button

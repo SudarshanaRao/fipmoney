@@ -56,7 +56,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
   const currentData = carouselData[currentSlide];
 
   return (
-    <section className="bg-white relative overflow-hidden pt-28 md:pt-32 pb-12">
+    <section className="bg-gradient-to-b from-[#eef2f9] via-[#f0f4f9] to-[#f4f7fd] relative overflow-hidden pt-28 md:pt-32 pb-12 border-b border-indigo-100/60">
       {/* Dynamic Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <motion.div 
@@ -102,18 +102,12 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                 transition={{ duration: 0.8 }}
               >
                 <motion.div
-                  className={`inline-flex items-center px-4 py-2 rounded-full mb-6 transition-all duration-500 ${
-                    currentData.id === "gold" 
-                      ? "bg-[#fff8dc] text-[#b38200]" 
-                      : currentData.id === "silver" 
-                        ? "bg-indigo-50 text-indigo-700" 
-                        : "bg-sky-50 text-sky-700"
-                  }`}
+                  className="inline-flex items-center px-4 py-2 rounded-full mb-6 transition-all duration-500 bg-purple-50 text-purple-900 border border-purple-200 text-xs font-black"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
+                  <Sparkles className="w-4 h-4 mr-2 text-purple-700" />
                   {currentData.badge}
                 </motion.div>
 
@@ -148,11 +142,11 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
             >
               <Button
                 size="lg"
-                className={`bg-gradient-to-r ${currentData.gradient} hover:opacity-90 text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-6 text-lg`}
+                className="bg-gradient-to-r from-[#1e1b4b] to-[#312e81] hover:from-[#111827] hover:to-[#1e1b4b] text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-6 text-lg font-black rounded-2xl cursor-pointer flex items-center"
                 onClick={() => onNavigate?.('signup')}
               >
-                <TrendingUp className="w-5 h-5 mr-2" />
-                Start Savings Now
+                <TrendingUp className="w-5 h-5 mr-2 text-amber-400" />
+                <span>Start Savings Now</span>
               </Button>
             </motion.div>
           </div>
