@@ -69,10 +69,10 @@ export default function PlatformTrustSection() {
   ];
 
   return (
-    <section className="py-14 md:py-16 bg-[#f0f4f9] text-slate-900 relative overflow-hidden">
+    <section className="py-14 md:py-16 bg-white text-slate-900 relative overflow-hidden">
       
       {/* LIGHT GRADIENT BLURS */}
-      <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-gradient-to-br from-[#fff7d6]/60 via-[#ffeed0]/30 to-transparent rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-gradient-to-br from-blue-100/40 via-indigo-50/20 to-transparent rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-emerald-100/50 via-teal-50/40 to-transparent rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">

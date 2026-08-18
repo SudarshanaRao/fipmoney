@@ -67,7 +67,7 @@ const savingsPlans = [
     suggestedBoxBg: "bg-[#F0F3FF] border-[#E0E7FF]",
     amountColor: "text-[#1e1b4b]",
     projected: "₹52,000/yr",
-    image: "/weekly_savings.png",
+    image: "/dga_gold_asset.png",
     subIcon: TrendingUp,
     subIconBg: "bg-indigo-100/70 text-[#1e1b4b]",
     subTextTitle: "Stay Consistent",
@@ -102,7 +102,7 @@ export default function HomeSavingsSection({ onNavigate }: HomeSavingsSectionPro
   };
 
   return (
-    <section className="w-full py-14 md:py-16 bg-[#f0f4f9] font-sans relative overflow-hidden">
+    <section className="w-full py-14 md:py-16 bg-white font-sans relative overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Section Header */}

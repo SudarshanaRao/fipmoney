@@ -39,7 +39,9 @@ import {
   Play,
   Square,
   Calendar,
-  BarChart3
+  BarChart3,
+  MoreVertical,
+  ChevronDown
 } from "lucide-react";
 import { getLoggedInAgent, clearAgentSession, DgaAgent } from "../utils/agentStorage";
 
@@ -77,6 +79,74 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
   // Time Tracker State for Donezo Dashboard
   const [timeTrackerSeconds, setTimeTrackerSeconds] = useState(5048); // 01:24:08
   const [isTimerRunning, setIsTimerRunning] = useState(true);
+
+  // Earnings Card Timeframe State (Daily, Weekly, Monthly, Quarterly, Custom)
+  const [earningsTimeframe, setEarningsTimeframe] = useState<'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom'>('monthly');
+
+  const earningsDataMap = {
+    daily: {
+      title: "Daily Earnings",
+      periodLabel: "Today",
+      totalAmount: "₹1,250",
+      growthText: "12.4% vs yesterday",
+      breakdown: [
+        { label: "Gold Sales Commission", amount: "₹800", pct: "64%" },
+        { label: "SIP Commission", amount: "₹300", pct: "24%" },
+        { label: "Referral Bonus", amount: "₹110", pct: "9%" },
+        { label: "Other Incentives", amount: "₹40", pct: "3%" }
+      ]
+    },
+    weekly: {
+      title: "Weekly Earnings",
+      periodLabel: "This Week",
+      totalAmount: "₹7,850",
+      growthText: "15.2% vs last week",
+      breakdown: [
+        { label: "Gold Sales Commission", amount: "₹5,024", pct: "64%" },
+        { label: "SIP Commission", amount: "₹1,884", pct: "24%" },
+        { label: "Referral Bonus", amount: "₹706", pct: "9%" },
+        { label: "Other Incentives", amount: "₹236", pct: "3%" }
+      ]
+    },
+    monthly: {
+      title: "Monthly Earnings",
+      periodLabel: "This Month",
+      totalAmount: "₹28,450",
+      growthText: "18.6% vs last month",
+      breakdown: [
+        { label: "Gold Sales Commission", amount: "₹18,250", pct: "64%" },
+        { label: "SIP Commission", amount: "₹6,850", pct: "24%" },
+        { label: "Referral Bonus", amount: "₹2,700", pct: "9%" },
+        { label: "Other Incentives", amount: "₹650", pct: "3%" }
+      ]
+    },
+    quarterly: {
+      title: "Quarterly Earnings",
+      periodLabel: "This Quarter",
+      totalAmount: "₹84,200",
+      growthText: "22.8% vs last quarter",
+      breakdown: [
+        { label: "Gold Sales Commission", amount: "₹53,888", pct: "64%" },
+        { label: "SIP Commission", amount: "₹20,208", pct: "24%" },
+        { label: "Referral Bonus", amount: "₹7,578", pct: "9%" },
+        { label: "Other Incentives", amount: "₹2,526", pct: "3%" }
+      ]
+    },
+    custom: {
+      title: "Custom Earnings",
+      periodLabel: "Custom",
+      totalAmount: "₹1,45,000",
+      growthText: "24.5% vs prev range",
+      breakdown: [
+        { label: "Gold Sales Commission", amount: "₹92,800", pct: "64%" },
+        { label: "SIP Commission", amount: "₹34,800", pct: "24%" },
+        { label: "Referral Bonus", amount: "₹13,050", pct: "9%" },
+        { label: "Other Incentives", amount: "₹4,350", pct: "3%" }
+      ]
+    }
+  };
+
+  const currentEarnings = earningsDataMap[earningsTimeframe];
 
   useEffect(() => {
     let interval: any = null;
@@ -233,14 +303,18 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
               alt="FipMoney Logo"
               className="h-10 w-auto object-contain"
             />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-slate-900 text-base tracking-tight">DGA Partner Console</span>
+            <div className="flex flex-col gap-1">
+              <h1 className="font-black text-slate-900 text-base sm:text-lg tracking-tight leading-none">
+                DGA Partner Console
+              </h1>
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="bg-purple-50 text-purple-900 border border-purple-200 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
                   <Award size={12} className="text-purple-700" /> {agent.tier} Agent
                 </span>
+                <span className="bg-slate-100 text-slate-700 border border-slate-200/80 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  Agent ID: <span className="text-slate-900 font-black">{agent.agentCode}</span>
+                </span>
               </div>
-              <span className="text-xs text-slate-500 font-bold">Agent ID: <strong className="text-slate-900 font-black">{agent.agentCode}</strong></span>
             </div>
           </div>
         </div>
@@ -897,35 +971,35 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   </div>
 
                   {/* Semi-Circular Arch Gauge Chart */}
-                  <div className="flex flex-col items-center justify-center py-2 relative">
-                    <div className="w-56 h-28 relative overflow-hidden flex items-end justify-center">
+                  <div className="flex flex-col items-center justify-center py-4 relative">
+                    <div className="w-56 h-30 relative flex items-end justify-center pt-2">
                       {/* SVG Semi-Circle Arch */}
-                      <svg viewBox="0 0 200 100" className="w-56 h-28">
+                      <svg viewBox="0 0 200 110" className="w-56 h-30 overflow-visible">
                         <defs>
                           <pattern id="hatchedArch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
                             <line x1="0" y1="0" x2="0" y2="8" stroke="#CBD5E1" strokeWidth="3" />
                           </pattern>
                         </defs>
-                        {/* Background Hatched Arch */}
+                        {/* Background Full Hatched Arch - Rendered FIRST (Underneath) */}
                         <path
-                          d="M 15 100 A 85 85 0 0 1 185 100"
+                          d="M 18 102 A 82 82 0 0 1 182 102"
                           fill="none"
                           stroke="url(#hatchedArch)"
-                          strokeWidth="28"
+                          strokeWidth="24"
                           strokeLinecap="round"
                         />
-                        {/* Foreground Completed Arch (#1e1b4b) */}
+                        {/* Foreground Completed Arch (#1e1b4b) - Rendered SECOND (On Top) */}
                         <path
-                          d="M 15 100 A 85 85 0 0 1 142 22"
+                          d="M 18 102 A 82 82 0 0 1 146 34"
                           fill="none"
                           stroke="#1e1b4b"
-                          strokeWidth="28"
+                          strokeWidth="24"
                           strokeLinecap="round"
                         />
                       </svg>
 
                       {/* Inner Percentage Readout */}
-                      <div className="absolute bottom-0 text-center">
+                      <div className="absolute bottom-0 text-center pb-1">
                         <div className="text-3xl font-black text-slate-900 leading-none">69%</div>
                         <div className="text-[11px] font-bold text-slate-400 mt-1">Completed</div>
                       </div>
@@ -951,45 +1025,84 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   </div>
                 </div>
 
-                {/* Time Tracker Card (Royal Indigo Gradient Card) */}
-                <div className="lg:col-span-3 p-6 rounded-[28px] bg-gradient-to-r from-[#1e1b4b] to-[#312e81] text-white shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[220px]">
-                  {/* Background Decorative Wavy Pattern */}
-                  <div className="absolute inset-0 opacity-15 pointer-events-none">
-                    <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                      <path d="M0,50 Q25,30 50,50 T100,50 V100 H0 Z" fill="white" />
-                      <path d="M0,70 Q25,50 50,70 T100,70 V100 H0 Z" fill="white" opacity="0.5" />
-                    </svg>
-                  </div>
-
-                  <div className="relative z-10">
-                    <span className="text-xs font-semibold text-indigo-200 tracking-wide">Time Tracker</span>
-                    <div className="text-4xl sm:text-5xl font-black font-mono tracking-wider mt-4 text-white drop-shadow-sm">
-                      {formatTimeTracker(timeTrackerSeconds)}
+                {/* Earnings Card (Matching Reference Design) */}
+                <div className="lg:col-span-3 p-6 rounded-[28px] bg-gradient-to-b from-[#241c6e] via-[#1c1757] to-[#141042] text-white shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4 border border-purple-900/40 min-h-[340px]">
+                  
+                  {/* Top Header Row */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <h3 className="font-extrabold text-white text-base tracking-tight">
+                      {currentEarnings.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={earningsTimeframe}
+                          onChange={(e) => setEarningsTimeframe(e.target.value as any)}
+                          className="bg-[#3b2f96]/80 hover:bg-[#483ba6] text-slate-100 font-bold text-[11px] pl-2.5 pr-6 py-1 rounded-full cursor-pointer appearance-none outline-none border border-purple-400/30 transition-all"
+                        >
+                          <option value="daily" className="bg-[#1c1757] text-white">Daily</option>
+                          <option value="weekly" className="bg-[#1c1757] text-white">This Week</option>
+                          <option value="monthly" className="bg-[#1c1757] text-white">This Month</option>
+                          <option value="quarterly" className="bg-[#1c1757] text-white">This Quarter</option>
+                          <option value="custom" className="bg-[#1c1757] text-white">Custom</option>
+                        </select>
+                        <ChevronDown size={11} className="absolute right-2 pointer-events-none text-slate-300" />
+                      </div>
+                      <button className="text-slate-300 hover:text-white transition-colors cursor-pointer p-0.5 border-none bg-transparent">
+                        <MoreVertical size={16} />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-start gap-4 relative z-10 pt-4">
-                    {/* Pause / Play Button */}
-                    <button
-                      onClick={() => setIsTimerRunning(!isTimerRunning)}
-                      className="w-12 h-12 rounded-full bg-white text-[#1e1b4b] hover:bg-slate-100 flex items-center justify-center transition-transform hover:scale-105 cursor-pointer border-none outline-none shadow-md"
-                      title={isTimerRunning ? "Pause Timer" : "Resume Timer"}
-                    >
-                      {isTimerRunning ? <Pause size={20} fill="#1e1b4b" /> : <Play size={20} fill="#1e1b4b" className="ml-0.5" />}
-                    </button>
+                  {/* Main Amount & 3D Gold Graphic Section */}
+                  <div className="flex items-center justify-between relative z-10 py-1">
+                    <div>
+                      <div className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
+                        {currentEarnings.totalAmount}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-300 mt-1">
+                        Total Earnings
+                      </div>
+                      <div className="text-xs font-black text-[#34d399] flex items-center gap-1 mt-2">
+                        <span>▲</span>
+                        <span>{currentEarnings.growthText}</span>
+                      </div>
+                    </div>
 
-                    {/* Record / Stop Button */}
-                    <button
-                      onClick={() => {
-                        setIsTimerRunning(false);
-                        setTimeTrackerSeconds(0);
-                      }}
-                      className="w-12 h-12 rounded-full bg-[#EF4444] text-white hover:bg-red-600 flex items-center justify-center transition-transform hover:scale-105 cursor-pointer border-none outline-none shadow-md"
-                      title="Reset / Stop Timer"
-                    >
-                      <Square size={16} fill="white" />
-                    </button>
+                    {/* 3D Gold Bars Illustration */}
+                    <div className="relative shrink-0 w-24 h-24 flex items-center justify-center">
+                      <img
+                        src="/dga_gold_asset.png"
+                        alt="Gold Bars Rewards"
+                        className="w-22 h-auto object-contain drop-shadow-[0_10px_20px_rgba(251,191,36,0.3)]"
+                      />
+                    </div>
                   </div>
+
+                  {/* Inner Dark Translucent Breakdown Box */}
+                  <div className="bg-[#282075]/70 border border-purple-400/20 rounded-2xl p-4 space-y-2.5 shadow-inner relative z-10">
+                    {currentEarnings.breakdown.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-200">{item.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-white">{item.amount}</span>
+                          <span className="bg-[#523bb8] text-purple-100 font-extrabold text-[10px] px-2 py-0.5 rounded-md min-w-[36px] text-center shadow-2xs">
+                            {item.pct}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Bottom CTA Button */}
+                  <button
+                    onClick={() => setActiveTab("earnings")}
+                    className="w-full py-3 px-4 rounded-2xl bg-[#3f3299] hover:bg-[#4d3ebc] text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer border-none outline-none group relative z-10"
+                  >
+                    <span>View Earnings & Payouts</span>
+                    <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+
                 </div>
 
               </div>

@@ -52,7 +52,7 @@ export default function MandatoryDisclosures() {
   ];
 
   return (
-    <section className="py-14 md:py-16 bg-[#f0f4f9] font-sans">
+    <section className="py-14 md:py-16 bg-white font-sans">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px]">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-2">

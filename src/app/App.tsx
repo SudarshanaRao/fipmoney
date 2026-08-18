@@ -479,7 +479,7 @@ export default function App() {
             <Header onNavigate={navigateToPage} />
 
             {/* Main Content */}
-            <main className="bg-[#f0f4f9]">
+            <main className="bg-white">
               {/* Hero Section */}
               <HeroSection onNavigate={navigateToPage} />
 

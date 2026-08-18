@@ -56,13 +56,13 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
   const currentData = carouselData[currentSlide];
 
   return (
-    <section className="bg-gradient-to-b from-[#eef2f9] via-[#f0f4f9] to-[#f4f7fd] relative overflow-hidden pt-28 md:pt-32 pb-12 border-b border-indigo-100/60">
+    <section className="bg-white relative overflow-hidden pt-28 md:pt-32 pb-12 border-b border-indigo-100/60">
       {/* Dynamic Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <motion.div 
           className={`absolute top-20 left-10 w-32 h-32 rounded-full blur-3xl transition-all duration-1000 ${
             currentData.id === "gold" 
-              ? "bg-[#ffbf00]" 
+              ? "bg-[#3b82f6]" 
               : currentData.id === "silver" 
                 ? "bg-[#4f46e5]" 
                 : "bg-[#0ea5e9]"
@@ -76,7 +76,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
         <motion.div 
           className={`absolute bottom-20 right-10 w-40 h-40 rounded-full blur-3xl transition-all duration-1000 ${
             currentData.id === "gold" 
-              ? "bg-[#ffd152]" 
+              ? "bg-[#2563eb]" 
               : currentData.id === "silver" 
                 ? "bg-[#7c3aed]" 
                 : "bg-[#2563eb]"

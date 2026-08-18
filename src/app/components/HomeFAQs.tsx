@@ -200,11 +200,11 @@ export default function HomeFAQs() {
   };
 
   return (
-    <section className="relative py-14 md:py-16 font-sans w-full flex items-center justify-center overflow-hidden bg-[#f0f4f9]">
+    <section className="relative py-14 md:py-16 font-sans w-full flex items-center justify-center overflow-hidden bg-white">
       {/* Decorative blurred circles using brand colors */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-amber-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
+      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
       <div className="absolute bottom-20 right-10 w-64 h-64 bg-purple-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
 
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
         

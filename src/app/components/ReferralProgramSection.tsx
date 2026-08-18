@@ -9,7 +9,7 @@ const ReferralProgramSection = ({ onNavigate }: { onNavigate?: (page: string) =>
   const referralLink = `https://fipmoney.com/ref/${referralCode}`;
 
   return (
-    <section className="w-full py-14 md:py-16 bg-[#f0f4f9] font-sans">
+    <section className="w-full py-14 md:py-16 bg-white font-sans">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col space-y-6">
         
         {/* Section Header */}
@@ -77,29 +77,29 @@ const ReferralProgramSection = ({ onNavigate }: { onNavigate?: (page: string) =>
             
             {/* Left: Link Icon, Text, Input */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-6 w-full xl:w-auto">
-              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-white to-amber-50 flex items-center justify-center shadow-[0_8px_24px_rgba(251,199,64,0.15)] shrink-0 relative border border-amber-100/50">
-                <svg className="w-9 h-9 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-white to-blue-50 flex items-center justify-center shadow-[0_8px_24px_rgba(59,130,246,0.15)] shrink-0 relative border border-blue-100/50">
+                <svg className="w-9 h-9 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                 </svg>
-                <div className="absolute top-2.5 left-2.5 w-1.5 h-1.5 bg-amber-400 rounded-full rotate-45"></div>
-                <div className="absolute bottom-4 right-2.5 w-2 h-2 bg-amber-400 rounded-full rotate-45"></div>
+                <div className="absolute top-2.5 left-2.5 w-1.5 h-1.5 bg-blue-400 rounded-full rotate-45"></div>
+                <div className="absolute bottom-4 right-2.5 w-2 h-2 bg-blue-400 rounded-full rotate-45"></div>
               </div>
               
               <div className="flex flex-col items-center sm:items-start w-full">
                 <h3 className="text-[28px] md:text-3xl font-extrabold text-slate-800 tracking-tight">
-                  Your <span className="text-amber-500">Referral</span> Link
+                  Your <span className="text-indigo-600">Referral</span> Link
                 </h3>
                 <p className="text-[15px] text-slate-500 mt-1.5 mb-6">Share with friends to start earning rewards together!</p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-                  <div className="bg-[#fffcf5] border border-amber-200/60 rounded-xl px-4 py-3.5 w-full sm:w-[340px]">
+                  <div className="bg-[#f8fafc] border border-slate-200/80 rounded-xl px-4 py-3.5 w-full sm:w-[340px]">
                     <span className="text-slate-700 font-bold text-sm truncate block w-full text-center sm:text-left">
                       {isLoggedIn ? referralLink : "Login to view referral code"}
                     </span>
                   </div>
                   {isLoggedIn ? (
-                    <button className="w-full sm:w-auto flex items-center justify-center gap-2 border border-amber-200 text-amber-600 font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-amber-50 transition-colors shadow-sm bg-white cursor-pointer">
+                    <button className="w-full sm:w-auto flex items-center justify-center gap-2 border border-indigo-200 text-indigo-600 font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-indigo-50 transition-colors shadow-sm bg-white cursor-pointer">
                       <Copy size={18} /> Copy Link
                     </button>
                   ) : (
@@ -132,12 +132,12 @@ const ReferralProgramSection = ({ onNavigate }: { onNavigate?: (page: string) =>
             <div className="absolute left-0 right-0 top-[50%] -translate-y-1/2 h-[1px] border-t border-slate-100 -z-10"></div>
             
             <div className="flex items-center justify-center gap-4 bg-white px-6 z-10">
-              <div className="h-[2px] w-12 sm:w-20 bg-amber-200 relative">
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+              <div className="h-[2px] w-12 sm:w-20 bg-indigo-200 relative">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
               </div>
               <h3 className="text-xl md:text-[22px] font-black text-[#1B1147]">How It Works</h3>
-              <div className="h-[2px] w-12 sm:w-20 bg-amber-200 relative">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+              <div className="h-[2px] w-12 sm:w-20 bg-indigo-200 relative">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
               </div>
             </div>
           </div>
