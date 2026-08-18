@@ -11,6 +11,7 @@ import {
 import { API_BASE_URL } from "../utils/apiConfig";
 import { LoadingSpinner } from "./LottiePlayer";
 import AgentDashboard from "./AgentDashboard";
+import AgentOtpModal from "./AgentOtpModal";
 
 const LANGUAGES = [
   "Select your preferred language",
@@ -254,14 +255,24 @@ export default function BecomeAgentPage() {
 
           <button
             onClick={() => {
-              window.history.pushState({}, '', '/agent-dashboard');
-              window.dispatchEvent(new Event('popstate'));
+              setShowAgentOtpModal(true);
             }}
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 cursor-pointer transition-all flex items-center justify-center gap-2 border-none outline-none"
           >
             🚀 Launch Standalone Agent Dashboard Environment <ArrowRight size={18} />
           </button>
         </div>
+
+        {/* Agent Access OTP Modal */}
+        <AgentOtpModal
+          isOpen={showAgentOtpModal}
+          onClose={() => setShowAgentOtpModal(false)}
+          onSuccess={() => {
+            setShowAgentOtpModal(false);
+            window.history.pushState({}, '', '/agent-dashboard');
+            window.dispatchEvent(new Event('popstate'));
+          }}
+        />
       </div>
     );
   }

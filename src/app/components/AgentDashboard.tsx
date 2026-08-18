@@ -433,6 +433,22 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
             >
               <Building2 size={16} /> Agent Settings
             </button>
+
+            <button
+              onClick={() => {
+                clearAgentSession();
+                if (onLogout) onLogout();
+                else {
+                  window.history.pushState({}, '', '/dashboard');
+                  window.location.reload();
+                }
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-extrabold text-xs text-white border border-red-400/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_16px_rgba(220,38,38,0.45)] bg-gradient-to-r from-[#dc2626] via-[#ef4444] to-[#991b1b] hover:from-[#ef4444] hover:via-[#f87171] hover:to-[#b91c1c] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_6px_22px_rgba(220,38,38,0.65)] cursor-pointer outline-none active:scale-[0.98] relative overflow-hidden group mt-2"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              <LogOut size={16} className="text-white drop-shadow-sm shrink-0" strokeWidth={2.5} />
+              <span className="tracking-wide relative z-10">Logout</span>
+            </button>
           </nav>
 
           {/* Download Mobile App Promo Widget (User Dashboard Indigo Palette) */}

@@ -23,6 +23,7 @@ import PortfolioPage from "./PortfolioPage";
 import ReferAndEarn from "./ReferAndEarn";
 import TermsAndConditions from "./TermsAndConditions";
 import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
+import AgentOtpModal from "./AgentOtpModal";
 import SavingsPage from "./SavingsPage";
 import BecomeAgentPage from "./BecomeAgentPage";
 import { clearUserSession, getLoggedInUser } from "../utils/userStorage";
@@ -160,6 +161,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   // Agent Modal state & Approved DGA state
   const [isApprovedDga, setIsApprovedDga] = useState(false);
   const [showAgentModal, setShowAgentModal] = useState(false);
+  const [showAgentOtpModal, setShowAgentOtpModal] = useState(false);
 
   useEffect(() => {
     const mobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") : null;
@@ -573,7 +575,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               <button
                 onClick={() => {
                   if (isApprovedDga) {
-                    onNavigate('agent-dashboard');
+                    setShowAgentOtpModal(true);
                   } else {
                     setTab("become-agent");
                   }
@@ -585,7 +587,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               <button
                 onClick={() => {
                   if (isApprovedDga) {
-                    onNavigate('agent-dashboard');
+                    setShowAgentOtpModal(true);
                   } else {
                     setTab("become-agent");
                   }
@@ -1302,6 +1304,16 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </div>
         )}
       </AnimatePresence>
+
+      {/* Agent Access OTP Modal */}
+      <AgentOtpModal
+        isOpen={showAgentOtpModal}
+        onClose={() => setShowAgentOtpModal(false)}
+        onSuccess={() => {
+          setShowAgentOtpModal(false);
+          onNavigate('agent-dashboard');
+        }}
+      />
       
       <style dangerouslySetInnerHTML={{__html: `
         .hide-scrollbar::-webkit-scrollbar { display: none; }
