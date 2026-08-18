@@ -26,7 +26,9 @@ import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
 import AgentOtpModal from "./AgentOtpModal";
 import SavingsPage from "./SavingsPage";
 import BecomeAgentPage from "./BecomeAgentPage";
-import { clearUserSession, getLoggedInUser } from "../utils/userStorage";
+import PersonalizedSuggestionCard from "./PersonalizedSuggestionCard";
+import ProfileCompletionWidget from "./ProfileCompletionWidget";
+import { clearUserSession, getLoggedInUser, getUserAvatar } from "../utils/userStorage";
 import { getTransactions } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
 import { decryptData256 } from "../utils/cryptoUtils";
@@ -232,8 +234,16 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const savedUsername = (typeof window !== 'undefined' && localStorage.getItem(`fm_username_${loggedInMobile}`)) || loggedInUser?.username || "";
   const userName = savedUsername ? savedUsername : (loggedInUser?.fullName || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_name_${loggedInMobile}`) || "Guest User" : "Guest User"));
   const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
-  const [userAvatar, setUserAvatar] = useState((typeof window !== 'undefined' && localStorage.getItem(`fm_user_avatar_${loggedInMobile}`)) || "https://i.pravatar.cc/150?img=11");
+  const [userAvatar, setUserAvatar] = useState<string | null>(() => getUserAvatar(loggedInMobile));
   const [kycStatus, setKycStatus] = useState(loggedInUser?.isKycCompleted ? "full kyc" : "pending");
+
+  useEffect(() => {
+    const handleAvatarChange = () => {
+      setUserAvatar(getUserAvatar(loggedInMobile));
+    };
+    window.addEventListener("fm_avatar_changed", handleAvatarChange);
+    return () => window.removeEventListener("fm_avatar_changed", handleAvatarChange);
+  }, [loggedInMobile]);
 
   const calcProfileCompletion = (): number => {
     let score = 0;
@@ -574,15 +584,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             <div className="flex items-center gap-3 relative z-10 shrink-0 self-start md:self-center">
               <button
                 onClick={() => {
-                  if (isApprovedDga) {
-                    setShowAgentOtpModal(true);
-                  } else {
-                    setTab("become-agent");
-                  }
+                  setTab("become-agent");
                 }}
                 className="px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm text-amber-900 bg-white/90 hover:bg-white border border-amber-300/80 hover:border-amber-400 transition-all shadow-xs cursor-pointer outline-none"
               >
-                {isApprovedDga ? "View Terminal" : "Learn More"}
+                Know More
               </button>
               <button
                 onClick={() => {
@@ -787,113 +793,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
          {/* RIGHT COLUMN */}
          <div className="w-full lg:w-[320px] xl:w-[350px] shrink-0 space-y-6">
             
-            {/* Premium Card Component */}
-            <div style={{ perspective: 1000 }}>
-              <motion.div 
-                className="w-full aspect-[1.586/1] relative cursor-pointer"
-                onClick={() => setIsFlipped(!isFlipped)}
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                 {/* FRONT */}
-                 <div className="absolute inset-0 rounded-[24px] p-6 text-white shadow-[0_10px_30px_rgba(30,27,75,0.15)] flex flex-col justify-between overflow-hidden" 
-                      style={{ backfaceVisibility: "hidden", background: '#1e1b4b' }}>
-                    {/* Pattern overlay */}
-                    <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at center, #4c1d95 2px, transparent 2px)', backgroundSize: '12px 12px' }} />
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-600/30 blur-3xl rounded-full pointer-events-none" />
-                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-600/30 blur-3xl rounded-full pointer-events-none" />
-                    
-                    {isLoadingCard && (
-                      <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-xl bg-[#1e1b4b]/50">
-                        <div className="text-center animate-pulse">
-                          <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                          <p className="text-sm font-bold text-white tracking-wide">Card Details Loading...!</p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="relative z-10 flex justify-between items-center">
-                       <span className="font-bold text-sm tracking-wide">Fipmoney Premium</span>
-                       <div className="flex items-center gap-2">
-                         <button 
-                           onClick={(e) => { e.stopPropagation(); setShowCardDetails(!showCardDetails); }} 
-                           className="bg-white/10 p-1.5 rounded-md text-indigo-200 hover:text-white border border-transparent hover:border-white/20 cursor-pointer backdrop-blur-sm transition-colors outline-none"
-                         >
-                           <Eye size={14} />
-                         </button>
-                         <span className="bg-white/10 px-2.5 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/10">Virtual Card</span>
-                       </div>
-                    </div>
-                    
-                    <div className="relative z-10 mb-2 mt-auto">
-                       <div className="w-[42px] h-[30px] rounded-[4px] bg-gradient-to-br from-[#fde047] via-[#eab308] to-[#a16207] mb-5 relative overflow-hidden shadow-sm border border-yellow-300/50">
-                          <div className="absolute inset-x-0 h-[1px] top-[40%] bg-yellow-700/40" />
-                          <div className="absolute inset-x-0 h-[1px] top-[60%] bg-yellow-700/40" />
-                          <div className="absolute inset-y-0 w-[1px] left-[35%] bg-yellow-700/40" />
-                          <div className="absolute inset-y-0 w-[1px] left-[65%] bg-yellow-700/40" />
-                       </div>
-                       <div className="font-mono text-[22px] tracking-[0.15em] mb-1 opacity-90 drop-shadow-md">
-                         {showCardDetails ? (virtualCard ? virtualCard.cardNumber.replace(/(.{4})/g, '$1 ').trim() : "**** **** **** ****") : (virtualCard ? "**** **** **** " + virtualCard.cardNumber.slice(-4) : "**** **** **** ****")}
-                       </div>
-                    </div>
-                    
-                    <div className="relative z-10 flex justify-between items-end">
-                       <div>
-                         <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Card Holder</div>
-                         <div className="text-[13px] font-bold tracking-wide uppercase">{virtualCard ? virtualCard.nameOnCard : ""}</div>
-                       </div>
-                       <div className="text-right">
-                         <div className="text-[8px] text-indigo-200 uppercase tracking-wider mb-1 font-semibold">Expires</div>
-                         <div className="text-[13px] font-bold tracking-wide">{virtualCard ? virtualCard.expiry : "**/**"}</div>
-                       </div>
-                       <Wifi className="rotate-90 opacity-60 ml-2 mb-1" size={24} />
-                    </div>
-                 </div>
-
-                 {/* BACK */}
-                 <div className="absolute inset-0 rounded-[24px] shadow-[0_10px_30px_rgba(30,27,75,0.15)] flex flex-col text-white overflow-hidden"
-                      style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: '#1e1b4b' }}>
-                    <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at center, #4c1d95 2px, transparent 2px)', backgroundSize: '12px 12px' }} />
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-600/30 blur-3xl rounded-full pointer-events-none" />
-                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-600/30 blur-3xl rounded-full pointer-events-none" />
-                    
-                    {isLoadingCard && (
-                      <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-xl bg-[#1e1b4b]/50">
-                        <div className="text-center animate-pulse">
-                          <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                          <p className="text-sm font-bold text-white tracking-wide">Card Details Loading...!</p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="w-full h-12 bg-black/85 relative z-10 mt-6 shadow-md" />
-                    
-                    <div className="px-6 mt-5 relative z-10 flex flex-col gap-1.5">
-                      <div className="text-[8px] uppercase tracking-wider opacity-80 text-indigo-200">Authorized Signature</div>
-                      <div className="w-full h-10 bg-white/95 flex items-center justify-between px-3 text-black font-mono rounded-sm shadow-inner relative overflow-hidden">
-                         <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 1px, transparent 10px)" }} />
-                         <span className="relative z-10 font-bold italic text-gray-700 text-[13px] tracking-wide">{virtualCard ? virtualCard.nameOnCard : ""}</span>
-                         <span className="relative z-10 font-bold bg-amber-500 text-white px-2 py-0.5 rounded shadow-sm text-[12px] font-mono tracking-wider">
-                           {virtualCard ? virtualCard.cvv : "***"}
-                         </span>
-                      </div>
-                    </div>
-                    
-                    <div className="px-6 pb-6 relative z-10 flex justify-between items-end mt-auto">
-                      <div className="max-w-[70%]">
-                        <p className="text-[7px] opacity-70 leading-relaxed text-indigo-100">
-                          This card is issued by Fipmoney strictly for authorized use. It remains the property of Fipmoney. If found, please return to Fipmoney.
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end opacity-95">
-                        <span className="text-xs font-extrabold italic tracking-tight mb-0.5">Fipmoney</span>
-                        <span className="text-[8px] font-bold uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded border border-white/10">Virtual Card</span>
-                      </div>
-                    </div>
-                 </div>
-              </motion.div>
-            </div>
+            {/* Personalized Suggestion Card (Replaces Fipmoney Virtual Card) */}
+            <PersonalizedSuggestionCard
+              userName={userName}
+              userId={loggedInUser?.userId || loggedInUser?.userCode}
+              mobileNumber={loggedInMobile}
+              onNavigate={(page) => setTab(page as any)}
+            />
             
             {/* Upgrade Card */}
             <div className="rounded-[24px] p-6 text-white relative overflow-hidden shadow-[0_10px_25px_rgba(76,29,149,0.15)]" style={{ background: 'linear-gradient(135deg, #4c1d95, #6d28d9)' }}>
@@ -1307,6 +1213,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
       {/* Agent Access OTP Modal */}
       <AgentOtpModal
+        mobileNumber={loggedInMobile || loggedInUser?.mobileNumber}
         isOpen={showAgentOtpModal}
         onClose={() => setShowAgentOtpModal(false)}
         onSuccess={() => {

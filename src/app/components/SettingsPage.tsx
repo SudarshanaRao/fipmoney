@@ -13,7 +13,9 @@ import {
 import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
 import { API_BASE_URL } from "../utils/apiConfig";
-import { getLoggedInUser } from "../utils/userStorage";
+import { getLoggedInUser, getUserAvatar, updateUserAvatar } from "../utils/userStorage";
+import ProfileCompletionWidget from "./ProfileCompletionWidget";
+import { calculateProfileCompletion } from "../utils/profileCompletionCalculator";
 
 type SettingsTab = "profile" | "bank" | "nominee" | "security" | "sessions";
 
@@ -304,8 +306,15 @@ export default function SettingsPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Profile Avatar
-  const initialSavedAvatar = typeof window !== 'undefined' ? localStorage.getItem(`fm_user_avatar_${loggedInMobile}`) : null;
-  const [avatar, setAvatar] = useState(initialSavedAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&auto=format");
+  const [avatar, setAvatar] = useState<string | null>(() => getUserAvatar(loggedInMobile));
+
+  useEffect(() => {
+    const handleAvatarChange = () => {
+      setAvatar(getUserAvatar(loggedInMobile));
+    };
+    window.addEventListener("fm_avatar_changed", handleAvatarChange);
+    return () => window.removeEventListener("fm_avatar_changed", handleAvatarChange);
+  }, [loggedInMobile]);
 
   // Dynamically calculate completion percentage based on exact user weights:
   // Personal & Basic Info: 40%
@@ -354,27 +363,31 @@ export default function SettingsPage() {
   }, [fullName, email, username, incomeRange, jobTitle, bankName, accountNumber, ifscCode, nomineeName, nomineeRelation, nomineeDob, loggedInMobile]);
 
   const getCompletionStats = () => {
-    const personalDone = Boolean(fullName.trim() && username.trim() && (email.trim() || mobileNumber.trim()));
-    const jobDone = Boolean((jobTitle.trim() || sourceOfFunds) && incomeRange);
-    const bankDone = Boolean(bankName.trim() && accountNumber.trim() && ifscCode.trim());
-    const nomineeDone = Boolean(nomineeName.trim() && nomineeDob.trim());
-
-    let score = 0;
-    if (personalDone) score += 40;
-    if (jobDone) score += 20;
-    if (bankDone) score += 20;
-    if (nomineeDone) score += 20;
+    const result = calculateProfileCompletion(loggedInUser, {
+      fullName,
+      email,
+      mobileNumber,
+      hasAvatar: Boolean(avatar && String(avatar).trim() !== ""),
+      accountNumber,
+      ifscCode,
+      nomineeName,
+      nomineeRelation,
+      nomineeDob,
+      panNumber,
+      aadhaarNumber,
+    });
 
     return {
-      percentage: score,
-      personalDone,
-      jobDone,
-      bankDone,
-      nomineeDone,
+      percentage: result.percentage,
+      personalDone: result.personalDone,
+      personalScore: result.personalScore,
+      bankDone: result.bankDone,
+      nomineeDone: result.nomineeDone,
+      kycDone: result.kycDone,
     };
   };
 
-  const { percentage, personalDone, jobDone, bankDone, nomineeDone } = getCompletionStats();
+  const { percentage, personalDone, personalScore, bankDone, nomineeDone, kycDone } = getCompletionStats();
 
   const handleSave = async () => {
     if (username.trim()) {
@@ -744,21 +757,17 @@ export default function SettingsPage() {
             body: JSON.stringify({ mobile: loggedInMobile }),
           });
           const data = await res.json();
-          setAvatar("");
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem(`fm_user_avatar_${loggedInMobile}`);
-          }
+          updateUserAvatar(null);
+          setAvatar(null);
           if (res.ok && data.success) {
-            showAlert("Profile photo removed from database & cloud storage successfully.", "success", "Photo Removed");
+            showAlert("Profile photo removed successfully.", "success", "Photo Removed");
           } else {
             showAlert(data.message || "Profile photo removed", "info");
           }
         } catch (err) {
           console.error("Error deleting profile photo:", err);
-          setAvatar("");
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem(`fm_user_avatar_${loggedInMobile}`);
-          }
+          updateUserAvatar(null);
+          setAvatar(null);
           showAlert("Profile photo removed", "info");
         }
       },
@@ -819,10 +828,8 @@ export default function SettingsPage() {
               if (confirmRes.ok) {
                 const confirmData = await confirmRes.json();
                 if (confirmData.imageUrl) {
+                  updateUserAvatar(confirmData.imageUrl);
                   setAvatar(confirmData.imageUrl);
-                  if (typeof window !== 'undefined') {
-                    localStorage.setItem(`fm_user_avatar_${loggedInMobile}`, confirmData.imageUrl);
-                  }
                 }
               }
               showAlert("Profile photo updated successfully!", "success");
@@ -843,7 +850,10 @@ export default function SettingsPage() {
 
         if (fallbackRes.ok) {
           const fallbackData = await fallbackRes.json();
-          if (fallbackData.imageUrl) setAvatar(fallbackData.imageUrl);
+          if (fallbackData.imageUrl) {
+            updateUserAvatar(fallbackData.imageUrl);
+            setAvatar(fallbackData.imageUrl);
+          }
         }
         showAlert("Profile photo updated successfully!", "success");
       } catch (error) {
@@ -935,13 +945,15 @@ export default function SettingsPage() {
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-6"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-gray-50 rounded-full border border-gray-100 text-gray-700">
-                       <User size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Profile Details</h3>
-                      <p className="text-sm text-gray-500 font-medium mt-0.5">Update your photo and personal details here.</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 bg-gray-50 rounded-full border border-gray-100 text-gray-700">
+                         <User size={24} />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Profile Details</h3>
+                        <p className="text-sm text-gray-500 font-medium mt-0.5">Update your photo and personal details here.</p>
+                      </div>
                     </div>
                   </div>
 
@@ -1771,62 +1783,58 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              {/* Progress checklist detail items */}
+              {/* Progress checklist detail items matching the 4 Settings sections */}
               <div className="w-full mt-6 space-y-3">
+                {/* 1. Personal & Basic Info (40%) */}
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     {personalDone ? (
                       <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : percentage <= 20 ? (
-                      <AlertCircle size={16} className="text-red-500 shrink-0" />
-                    ) : (
-                      <AlertTriangle size={16} className="text-orange-500 shrink-0" />
-                    )}
-                    <span className="text-gray-700 font-bold text-[13px]">Personal & Basic Info</span>
-                  </div>
-                  <span className={`text-xs font-black ${personalDone ? "text-emerald-600" : "text-gray-400"}`}>40%</span>
-                </div>
-
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <div className="flex items-center gap-2">
-                    {jobDone ? (
-                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : percentage <= 20 ? (
-                      <AlertCircle size={16} className="text-red-500 shrink-0" />
                     ) : (
                       <AlertTriangle size={16} className="text-amber-500 shrink-0" />
                     )}
-                    <span className="text-gray-700 font-bold text-[13px]">Job Title & Income Range</span>
+                    <span className="text-gray-700 font-bold text-[13px]">Personal & Basic Info</span>
                   </div>
-                  <span className={`text-xs font-black ${jobDone ? "text-emerald-600" : "text-gray-400"}`}>20%</span>
+                  <span className={`text-xs font-black ${personalDone ? "text-emerald-600" : "text-gray-400"}`}>{personalScore}%</span>
                 </div>
 
+                {/* 2. Link Bank Account (20%) */}
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     {bankDone ? (
                       <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : percentage <= 20 ? (
-                      <AlertCircle size={16} className="text-red-500 shrink-0" />
                     ) : (
                       <AlertTriangle size={16} className="text-amber-500 shrink-0" />
                     )}
                     <span className="text-gray-700 font-bold text-[13px]">Link Bank Account</span>
                   </div>
-                  <span className={`text-xs font-black ${bankDone ? "text-emerald-600" : "text-gray-400"}`}>20%</span>
+                  <span className={`text-xs font-black ${bankDone ? "text-emerald-600" : "text-gray-400"}`}>{bankDone ? "20%" : "0%"}</span>
                 </div>
 
+                {/* 3. Nominee Verification (20%) */}
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <div className="flex items-center gap-2">
                     {nomineeDone ? (
                       <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : percentage <= 20 ? (
-                      <AlertCircle size={16} className="text-red-500 shrink-0" />
                     ) : (
                       <AlertTriangle size={16} className="text-amber-500 shrink-0" />
                     )}
                     <span className="text-gray-700 font-bold text-[13px]">Nominee Verification</span>
                   </div>
-                  <span className={`text-xs font-black ${nomineeDone ? "text-emerald-600" : "text-gray-400"}`}>20%</span>
+                  <span className={`text-xs font-black ${nomineeDone ? "text-emerald-600" : "text-gray-400"}`}>{nomineeDone ? "20%" : "0%"}</span>
+                </div>
+
+                {/* 4. Security & KYC (20%) */}
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <div className="flex items-center gap-2">
+                    {kycDone ? (
+                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    ) : (
+                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
+                    )}
+                    <span className="text-gray-700 font-bold text-[13px]">Security & KYC</span>
+                  </div>
+                  <span className={`text-xs font-black ${kycDone ? "text-emerald-600" : "text-gray-400"}`}>{kycDone ? "20%" : "0%"}</span>
                 </div>
               </div>
             </div>

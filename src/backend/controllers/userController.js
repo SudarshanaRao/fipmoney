@@ -1397,6 +1397,27 @@ export const getDashboardData = async (req, res, next) => {
   }
 };
 // @desc    Get user profile settings data
+function calculateBackendProfileCompletion(user) {
+  if (!user) return { percentage: 0 };
+  let score = 0;
+  const hasPhoto = Boolean(user.profileImageKey || (user.profileImage && user.profileImage.trim() !== ""));
+  if (hasPhoto) score += 10;
+  if (user.fullName || user.username || user.firstName) score += 10;
+  if (user.email && user.email.includes('@') && !user.email.endsWith('@fipmoney.com')) score += 10;
+  if (user.occupation || user.annualIncome) score += 5;
+  if (user.bankAccount && (user.bankAccount.accountNumber || user.bankAccount.ifscCode)) score += 20;
+  if (user.nominee && (user.nominee.name || user.nominee.relationship)) score += 20;
+  if (user.isKycCompleted || user.isPanVerified || user.kycLevel === 'Min Kyc' || user.kycLevel === 'Full Kyc') score += 15;
+  if (user.isMobileVerified || user.isPinSet || user.isBiometricEnabled) score += 10;
+
+  return {
+    percentage: Math.min(100, score),
+    hasPhoto,
+    isKycCompleted: Boolean(user.isKycCompleted),
+  };
+}
+
+// @desc    GET Profile Settings
 // @route   GET /api/users/profile-settings
 export const getProfileSettings = async (req, res, next) => {
   try {
@@ -1422,6 +1443,7 @@ export const getProfileSettings = async (req, res, next) => {
 
     // Dynamically sign profile image URL
     const activeProfileImage = await getFreshProfileImageUrl(user);
+    const completionStats = calculateBackendProfileCompletion(user);
 
     // Return only profile-specific data needed for Settings page
     const profileData = {
@@ -1450,7 +1472,9 @@ export const getProfileSettings = async (req, res, next) => {
       nominee: user.nominee || null,
       isMobileVerified: user.isMobileVerified,
       isEmailVerified: user.isEmailVerified,
-      status: user.status
+      status: user.status,
+      profileCompletion: completionStats.percentage,
+      completionDetails: completionStats
     };
 
     return res.status(200).json({

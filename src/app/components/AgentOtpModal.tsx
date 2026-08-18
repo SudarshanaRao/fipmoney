@@ -2,7 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShieldCheck, Lock, X, ArrowRight, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { Lock, X, ArrowRight, RefreshCw, AlertCircle } from "lucide-react";
+import { API_BASE_URL } from "../utils/apiConfig";
+import { getLoggedInUser } from "../utils/userStorage";
 
 interface AgentOtpModalProps {
   isOpen: boolean;
@@ -11,20 +13,72 @@ interface AgentOtpModalProps {
   mobileNumber?: string;
 }
 
+function getActiveUserMobile(providedMobile?: string): string {
+  if (providedMobile) {
+    const clean = providedMobile.replace(/\D/g, "").slice(-10);
+    if (clean && clean.length === 10) return clean;
+  }
+  if (typeof window !== "undefined") {
+    const sessionMobile = sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile");
+    if (sessionMobile) {
+      const clean = sessionMobile.replace(/\D/g, "").slice(-10);
+      if (clean && clean.length === 10) return clean;
+    }
+  }
+  const loggedInUser = typeof window !== "undefined" ? getLoggedInUser() : null;
+  if (loggedInUser && loggedInUser.mobileNumber) {
+    const clean = loggedInUser.mobileNumber.replace(/\D/g, "").slice(-10);
+    if (clean && clean.length === 10) return clean;
+  }
+  return "";
+}
+
 export default function AgentOtpModal({
   isOpen,
   onClose,
   onSuccess,
-  mobileNumber = "+91 9490841941"
+  mobileNumber
 }: AgentOtpModalProps) {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
   const [resendTimer, setResendTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Focus first box when modal opens & reset timer
+  const activeMobile = getActiveUserMobile(mobileNumber);
+  const displayMobile = activeMobile ? `+91 ${activeMobile}` : "your registered mobile number";
+
+  // Function to send OTP via DLT Template 1277178696497004597 & SenderId FIPMNY
+  const triggerSendOtp = async () => {
+    const cleanDigits = getActiveUserMobile(mobileNumber);
+    if (!cleanDigits) {
+      setError("Registered mobile number not found. Please log in to continue.");
+      return;
+    }
+
+    setIsSending(true);
+    setError("");
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent-waitlist/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile: cleanDigits })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || "Failed to send OTP to registered mobile number.");
+      }
+    } catch (err: any) {
+      console.warn("[DGA OTP Send Fetch Notice]:", err?.message || err);
+      setError("Network error while sending OTP. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  // Focus first box when modal opens, reset timer, & trigger OTP dispatch
   useEffect(() => {
     if (isOpen) {
       setOtp(["", "", "", "", "", ""]);
@@ -32,11 +86,15 @@ export default function AgentOtpModal({
       setIsSubmitting(false);
       setResendTimer(30);
       setCanResend(false);
+      
+      // Send real DLT SMS OTP to user's registered mobile number
+      triggerSendOtp();
+
       setTimeout(() => {
         inputRefs.current[0]?.focus();
       }, 150);
     }
-  }, [isOpen]);
+  }, [isOpen, mobileNumber]);
 
   // Countdown timer for Resend OTP
   useEffect(() => {
@@ -52,7 +110,6 @@ export default function AgentOtpModal({
   }, [isOpen, resendTimer]);
 
   const handleChange = (index: number, value: string) => {
-    // Only accept numeric characters
     const cleanVal = value.replace(/[^0-9]/g, "");
     if (!cleanVal) {
       const newOtp = [...otp];
@@ -61,14 +118,12 @@ export default function AgentOtpModal({
       return;
     }
 
-    // Handle single digit entry
     const digit = cleanVal.slice(-1);
     const newOtp = [...otp];
     newOtp[index] = digit;
     setOtp(newOtp);
     setError("");
 
-    // Auto-advance to next input
     if (index < 5 && digit) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -96,23 +151,18 @@ export default function AgentOtpModal({
     }
   };
 
-  const handleFillDemo = () => {
-    setOtp(["1", "2", "3", "4", "5", "6"]);
-    setError("");
-    inputRefs.current[5]?.focus();
-  };
-
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     setResendTimer(30);
     setCanResend(false);
     setOtp(["", "", "", "", "", ""]);
     setError("");
+    await triggerSendOtp();
     setTimeout(() => {
       inputRefs.current[0]?.focus();
     }, 100);
   };
 
-  const handleVerify = (e?: React.FormEvent) => {
+  const handleVerify = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const fullOtp = otp.join("");
     if (fullOtp.length < 6) {
@@ -120,14 +170,33 @@ export default function AgentOtpModal({
       return;
     }
 
+    const cleanDigits = getActiveUserMobile(mobileNumber);
+    if (!cleanDigits) {
+      setError("Registered mobile number not found. Please log in again.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
 
-    // Simulate OTP Verification
-    setTimeout(() => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/agent-waitlist/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mobile: cleanDigits, otp: fullOtp })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsSubmitting(false);
+        onSuccess();
+      } else {
+        setIsSubmitting(false);
+        setError(data.message || "Invalid OTP entered. Please check and try again.");
+      }
+    } catch (err: any) {
       setIsSubmitting(false);
-      onSuccess();
-    }, 800);
+      setError("Failed to verify OTP. Please try again.");
+    }
   };
 
   if (!isOpen) return null;
@@ -150,7 +219,7 @@ export default function AgentOtpModal({
             <X size={18} />
           </button>
 
-          {/* Header Badge (User Dashboard Bluish / Indigo Theme) */}
+          {/* Header Badge */}
           <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center mx-auto mb-5 shadow-xs">
             <Lock size={28} className="text-indigo-600" />
           </div>
@@ -160,19 +229,15 @@ export default function AgentOtpModal({
           </h3>
           
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1.5 leading-relaxed max-w-xs mx-auto">
-            Please enter the 6-digit verification code sent to your registered mobile number <strong className="text-slate-900 font-bold">{mobileNumber}</strong>.
+            Please enter the 6-digit verification code sent to your registered mobile number <strong className="text-slate-900 font-bold">{displayMobile}</strong>.
           </p>
 
-          {/* Demo OTP Helper Pill */}
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={handleFillDemo}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-indigo-50/80 border border-indigo-200/80 text-indigo-700 text-[11px] font-black hover:bg-indigo-100/80 transition-colors cursor-pointer"
-            >
-              <CheckCircle2 size={12} className="text-indigo-600" /> Auto-fill Demo OTP (123456)
-            </button>
-          </div>
+          {/* Sending Status Indicator */}
+          {isSending && (
+            <div className="mt-2 text-[11px] font-bold text-indigo-600 animate-pulse">
+              Sending SMS OTP to your registered mobile number...
+            </div>
+          )}
 
           {/* OTP Input Form */}
           <form onSubmit={handleVerify} className="mt-6 space-y-6">
@@ -216,9 +281,10 @@ export default function AgentOtpModal({
                 <button
                   type="button"
                   onClick={handleResendOtp}
-                  className="text-indigo-700 hover:text-indigo-800 font-extrabold flex items-center gap-1 cursor-pointer bg-transparent border-none"
+                  disabled={isSending}
+                  className="text-indigo-700 hover:text-indigo-800 font-extrabold flex items-center gap-1 cursor-pointer bg-transparent border-none disabled:opacity-50"
                 >
-                  <RefreshCw size={13} /> Resend OTP Code
+                  <RefreshCw size={13} className={isSending ? "animate-spin" : ""} /> Resend OTP Code
                 </button>
               ) : (
                 <span>
@@ -227,7 +293,7 @@ export default function AgentOtpModal({
               )}
             </div>
 
-            {/* Action Buttons (User Dashboard Royal Indigo Palette) */}
+            {/* Action Buttons */}
             <div className="pt-2">
               <button
                 type="submit"

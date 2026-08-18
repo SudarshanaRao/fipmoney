@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Copy, Gift, Clock, Users, Trophy, ArrowRight, Share2, MessageCircle, Send, Facebook, Twitter, MoreHorizontal, UserPlus, Wallet, FileText, Maximize2, ThumbsUp, ThumbsDown, ChevronDown } from "lucide-react";
-import { getLoggedInUser } from "../utils/userStorage";
+import { getLoggedInUser, getUserAvatar } from "../utils/userStorage";
 import { API_BASE_URL } from "../utils/apiConfig";
 
 interface ReferAndEarnProps {
@@ -24,6 +24,16 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
     availableBalance: 0
   });
   const [expandedReferralId, setExpandedReferralId] = useState<string | null>(null);
+
+  const [myAvatar, setMyAvatar] = useState<string | null>(() => getUserAvatar(loggedInUser?.mobileNumber));
+
+  useEffect(() => {
+    const handleAvatarChange = () => {
+      setMyAvatar(getUserAvatar(loggedInUser?.mobileNumber));
+    };
+    window.addEventListener("fm_avatar_changed", handleAvatarChange);
+    return () => window.removeEventListener("fm_avatar_changed", handleAvatarChange);
+  }, [loggedInUser?.mobileNumber]);
 
   useEffect(() => {
     if (!userId || userId === "guest") return;
@@ -312,9 +322,9 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
                       >
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shrink-0 uppercase overflow-hidden relative shadow-xs">
                           <span>{(user.name || "U").charAt(0)}</span>
-                          {user.profileImage && (
+                          {((user.mobileNumber === loggedInUser?.mobileNumber || user.isYou) ? myAvatar : (user.profileImage && user.profileImage.trim() !== "" ? user.profileImage : null)) && (
                             <img
-                              src={user.profileImage}
+                              src={(user.mobileNumber === loggedInUser?.mobileNumber || user.isYou) ? (myAvatar || "") : user.profileImage}
                               alt={user.name}
                               className="absolute inset-0 w-full h-full object-cover"
                               onError={(e) => {

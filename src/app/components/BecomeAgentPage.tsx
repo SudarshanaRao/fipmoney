@@ -6,7 +6,7 @@ import {
   Award, ShieldCheck, Sparkles, CheckCircle2, ChevronRight, Gift,
   TrendingUp, Users, DollarSign, Download, Share2, HelpCircle, ArrowRight,
   BookOpen, Video, FileText, Check, AlertCircle, Phone, Mail, MapPin, Globe,
-  ShieldAlert, RefreshCw, Layers, CheckSquare, Trophy, Lock, Zap, Clock
+  ShieldAlert, RefreshCw, Layers, CheckSquare, Trophy, Lock, Zap, Clock, Plus
 } from "lucide-react";
 import { API_BASE_URL } from "../utils/apiConfig";
 import { LoadingSpinner } from "./LottiePlayer";
@@ -57,6 +57,10 @@ export default function BecomeAgentPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isApprovedAgent, setIsApprovedAgent] = useState(false);
+  const [showAgentOtpModal, setShowAgentOtpModal] = useState(false);
+  const [showAgentDashboard, setShowAgentDashboard] = useState(false);
+  const [copiedReferral, setCopiedReferral] = useState(false);
+  const [referralCode, setReferralCode] = useState("FIP12345");
   const [waitlistResult, setWaitlistResult] = useState<{
     waitlistNumber: number;
     formattedWaitlistNumber?: string;
@@ -68,6 +72,27 @@ export default function BecomeAgentPage() {
     email?: string;
     city?: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userStr = localStorage.getItem("fm_logged_in_user");
+      if (userStr) {
+        try {
+          const parsed = JSON.parse(userStr);
+          if (parsed.referralCode || parsed.userCode) {
+            setReferralCode(parsed.referralCode || parsed.userCode);
+          }
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  const handleCopyAgentLink = () => {
+    const link = typeof window !== "undefined" ? `${window.location.origin}/?ref=${referralCode}` : `https://fipmoney.com/?ref=${referralCode}`;
+    navigator.clipboard.writeText(link);
+    setCopiedReferral(true);
+    setTimeout(() => setCopiedReferral(false), 2500);
+  };
 
   useEffect(() => {
     const mobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") : null;
@@ -219,52 +244,173 @@ export default function BecomeAgentPage() {
   };
 
   if (isApprovedAgent) {
+    const agentReferralLink = typeof window !== "undefined" ? `${window.location.origin}/?ref=${referralCode}` : `https://fipmoney.com/?ref=${referralCode}`;
+
     return (
-      <div className="flex-1 min-h-screen bg-slate-50 p-6 lg:p-12 flex items-center justify-center font-sans">
-        <div className="max-w-2xl w-full bg-white border border-amber-200/90 rounded-[32px] p-8 sm:p-12 shadow-xl text-center space-y-6 relative overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-100/60 rounded-full blur-3xl pointer-events-none" />
+      <div className="flex-1 h-screen overflow-y-auto bg-[#fafbfc] pb-24 text-slate-800 font-sans hide-scrollbar">
+        <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
           
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 via-amber-500 to-amber-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20 text-3xl font-bold">
-            👑
+          {/* Executive Header Banner */}
+          <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-gray-150 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
+            <div className="space-y-2 relative z-10 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+                <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
+                <span>Verified Approved DGA</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl lg:text-3xl font-black text-gray-900 tracking-tight">
+                Digital Gold Agent (DGA) Console
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed">
+                Welcome back! Your DGA account is fully verified. Access your agent terminal, track client portfolios, and share your referral link to earn instant commissions.
+              </p>
+            </div>
+
+            {/* Launch Button & Medal Graphic */}
+            <div className="flex items-center gap-4 relative z-10 shrink-0">
+              <button
+                onClick={() => setShowAgentOtpModal(true)}
+                className="px-6 py-3.5 rounded-xl font-extrabold text-sm text-white bg-[#d97706] hover:bg-[#b45309] transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer border-none outline-none"
+              >
+                <Sparkles size={16} />
+                <span>Launch Agent Terminal</span>
+                <ChevronRight size={16} />
+              </button>
+
+              <div className="hidden sm:block shrink-0">
+                <img
+                  src="/digital_gold_agent.png"
+                  alt="Digital Gold Agent Medal"
+                  className="w-16 h-16 object-contain drop-shadow-sm"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider border border-emerald-300 mb-3">
-              <ShieldCheck size={14} className="text-emerald-600" /> Verified Approved DGA Partner
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Your Digital Gold Agent Terminal is Ready!</h1>
-            <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-2 max-w-lg mx-auto leading-relaxed">
-              Your application has been approved by admin. Access your standalone partner environment to manage client portfolios, track payouts, and view marketing resources.
-            </p>
+          {/* Performance Metrics Row (4 Clean Cards) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <span>Total Earned</span>
+                <DollarSign size={16} className="text-amber-500" />
+              </div>
+              <div className="text-2xl font-black text-gray-900">₹1,48,250</div>
+              <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                <TrendingUp size={12} /> +18.4% this month
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <span>Active Portfolio</span>
+                <Users size={16} className="text-blue-500" />
+              </div>
+              <div className="text-2xl font-black text-gray-900">42 Clients</div>
+              <div className="text-xs font-bold text-blue-600 flex items-center gap-1">
+                <Plus size={12} /> +6 new this week
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <span>Agent Status Tier</span>
+                <Award size={16} className="text-purple-500" />
+              </div>
+              <div className="text-2xl font-black text-purple-700">Diamond</div>
+              <div className="text-xs font-bold text-purple-600 flex items-center gap-1">
+                <Trophy size={12} /> Top 2% Partner Tier
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
+                <span>Commission Rate</span>
+                <Zap size={16} className="text-emerald-500" />
+              </div>
+              <div className="text-2xl font-black text-emerald-600">2.00% / Txn</div>
+              <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                <CheckCircle2 size={12} /> Instant Bank Payout
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
-            <div>
-              <div className="text-lg font-black text-amber-600">₹1,48,250</div>
-              <div className="text-[10px] text-slate-500 font-bold uppercase">Total Earned</div>
+          {/* Agent Referral Sharing Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-150 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-base font-extrabold text-gray-900">Share Your Official DGA Agent Referral Link</h3>
+                <p className="text-xs text-gray-500 font-medium mt-0.5">Earn ₹50 instant reward + up to 2% commission on every Digital Gold buy request.</p>
+              </div>
+              <span className="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 w-fit">
+                Unlimited Earnings
+              </span>
             </div>
-            <div>
-              <div className="text-lg font-black text-slate-900">42 Clients</div>
-              <div className="text-[10px] text-slate-500 font-bold uppercase">Portfolio</div>
-            </div>
-            <div>
-              <div className="text-lg font-black text-emerald-600">Diamond</div>
-              <div className="text-[10px] text-slate-500 font-bold uppercase">Agent Tier</div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                readOnly
+                value={agentReferralLink}
+                className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-mono font-bold text-gray-800 outline-none select-all"
+              />
+              <button
+                type="button"
+                onClick={handleCopyAgentLink}
+                className="px-6 py-3 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer border-none shrink-0"
+              >
+                {copiedReferral ? <Check size={16} /> : <Share2 size={16} />}
+                <span>{copiedReferral ? "Copied to Clipboard!" : "Copy Agent Link"}</span>
+              </button>
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              setShowAgentOtpModal(true);
-            }}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 cursor-pointer transition-all flex items-center justify-center gap-2 border-none outline-none"
-          >
-            🚀 Launch Standalone Agent Dashboard Environment <ArrowRight size={18} />
-          </button>
+          {/* Quick Access Tools Grid (3 Cards) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-3xl border border-gray-150 shadow-2xs space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                <Users size={20} />
+              </div>
+              <h4 className="text-sm font-extrabold text-gray-900">Client Management</h4>
+              <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                Track client onboardings, active gold balances, and daily transaction activities.
+              </p>
+              <button onClick={() => setShowAgentOtpModal(true)} className="text-xs font-bold text-amber-700 hover:text-amber-800 bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer">
+                Manage Clients <ChevronRight size={14} />
+              </button>
+            </div>
+
+            <div className="bg-white p-6 rounded-3xl border border-gray-150 shadow-2xs space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                <DollarSign size={20} />
+              </div>
+              <h4 className="text-sm font-extrabold text-gray-900">Payout Settlements</h4>
+              <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                Automated instant payouts settled directly to your registered bank account.
+              </p>
+              <button onClick={() => setShowAgentOtpModal(true)} className="text-xs font-bold text-amber-700 hover:text-amber-800 bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer">
+                View Payouts <ChevronRight size={14} />
+              </button>
+            </div>
+
+            <div className="bg-white p-6 rounded-3xl border border-gray-150 shadow-2xs space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <Download size={20} />
+              </div>
+              <h4 className="text-sm font-extrabold text-gray-900">Free Marketing Kit</h4>
+              <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                Download posters, WhatsApp creatives, banners, and promotional video kits.
+              </p>
+              <button onClick={() => setShowAgentOtpModal(true)} className="text-xs font-bold text-amber-700 hover:text-amber-800 bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer">
+                Download Kits <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+
         </div>
 
         {/* Agent Access OTP Modal */}
         <AgentOtpModal
+          mobileNumber={typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || undefined) : undefined}
           isOpen={showAgentOtpModal}
           onClose={() => setShowAgentOtpModal(false)}
           onSuccess={() => {
@@ -647,8 +793,66 @@ export default function BecomeAgentPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
             
-            {/* LEFT SIDE: FORM (FOR NEW USER) OR CONFIRMATION CARD (IF ALREADY JOINED) */}
-            {waitlistResult ? (
+            {/* LEFT SIDE: APPROVED DGA PARTNER CARD (FORM DISABLED) OR WAITLIST TICKET OR NEW APPLICATION FORM */}
+            {isApprovedAgent || waitlistResult?.isApproved || waitlistResult?.status === 'approved' || waitlistResult?.status === 'APPROVED' ? (
+              <div className="space-y-5 bg-gradient-to-br from-amber-50 via-yellow-50/60 to-orange-50/40 rounded-3xl p-6 sm:p-8 border border-amber-300/80 shadow-md">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+                    <CheckCircle2 size={26} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-black text-amber-900 uppercase tracking-wider bg-amber-200/80 px-2.5 py-0.5 rounded-full border border-amber-300">
+                        ✓ Verified Digital Gold Agent (DGA)
+                      </span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 mt-1 tracking-tight">
+                      You are an Approved Digital Gold Agent (DGA)! 🎉
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="bg-white/95 backdrop-blur rounded-2xl p-5 border border-amber-200/80 space-y-4 shadow-xs">
+                  <p className="text-xs text-slate-700 font-semibold leading-relaxed">
+                    Your account is fully verified and active as an official Digital Gold Agent Partner. You do not need to register or submit the waitlist application form again.
+                  </p>
+
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <label className="text-[11px] font-extrabold text-amber-900 uppercase tracking-wider block">
+                      Refer Now with Your Official Agent Referral Link:
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 truncate shadow-2xs">
+                        {typeof window !== 'undefined' ? `${window.location.origin}/?ref=${referralCode}` : `https://fipmoney.com/?ref=${referralCode}`}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyAgentLink}
+                        className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none shrink-0"
+                      >
+                        {copiedReferral ? <Check size={16} /> : <Share2 size={16} />}
+                        <span>{copiedReferral ? "Copied!" : "Copy Link"}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
+                    <ShieldCheck size={18} className="text-amber-600" />
+                    <span>Agent Identifier: {waitlistResult?.formattedWaitlistNumber || formatWaitlistNumber(waitlistResult?.waitlistNumber) || "DGA0001"}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAgentOtpModal(true)}
+                    className="px-5 py-2.5 bg-slate-950 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border-none"
+                  >
+                    <span>Open Agent Dashboard</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+            ) : waitlistResult ? (
               <div className="space-y-4 bg-gradient-to-br from-purple-50/70 via-amber-50/40 to-slate-50 rounded-3xl p-6 sm:p-8 border border-purple-100 shadow-xs">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">

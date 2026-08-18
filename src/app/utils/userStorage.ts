@@ -281,5 +281,36 @@ export function clearUserSession(): void {
     sessionStorage.removeItem("fm_logged_in_mobile");
     sessionStorage.removeItem("fm_session_id");
     localStorage.removeItem("fm_session_id");
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("fm_suggestion_index_")) {
+        sessionStorage.removeItem(key);
+      }
+    });
   }
+}
+
+export function getUserAvatar(mobile?: string): string | null {
+  if (typeof window === "undefined") return null;
+  const cleanMobile = mobile || sessionStorage.getItem("fm_logged_in_mobile") || "";
+  const saved = localStorage.getItem(`fm_user_avatar_${cleanMobile}`);
+  if (saved && saved.trim() !== "") return saved;
+  const user = getLoggedInUser();
+  if (user && user.profileImage && user.profileImage.trim() !== "") return user.profileImage;
+  return null;
+}
+
+export function updateUserAvatar(avatarUrl: string | null): void {
+  if (typeof window === "undefined") return;
+  const cleanMobile = sessionStorage.getItem("fm_logged_in_mobile") || "";
+  const user = getLoggedInUser();
+  if (user) {
+    user.profileImage = avatarUrl || "";
+    saveLoggedInUser(user);
+  }
+  if (avatarUrl && avatarUrl.trim() !== "") {
+    localStorage.setItem(`fm_user_avatar_${cleanMobile}`, avatarUrl);
+  } else {
+    localStorage.removeItem(`fm_user_avatar_${cleanMobile}`);
+  }
+  window.dispatchEvent(new CustomEvent("fm_avatar_changed", { detail: { avatarUrl: avatarUrl || null } }));
 }

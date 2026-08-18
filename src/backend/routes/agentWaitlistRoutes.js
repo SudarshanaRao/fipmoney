@@ -1,5 +1,6 @@
 import express from 'express';
 import AgentWaitlist from '../models/AgentWaitlist.js';
+import Otp from '../models/Otp.js';
 
 const router = express.Router();
 
@@ -256,5 +257,120 @@ router.delete('/admin/:id', async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+// @desc    Send OTP to Digital Gold Agent registered mobile number
+// @route   POST /api/agent-waitlist/send-otp
+// @access  Public
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { mobile } = req.body;
+    if (!mobile) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required' });
+    }
+
+    const cleanMobile = String(mobile).replace(/\D/g, '').slice(-10);
+    if (!cleanMobile || cleanMobile.length !== 10) {
+      return res.status(400).json({ success: false, message: 'Invalid 10-digit mobile number' });
+    }
+
+    // Generate random 6-digit OTP
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Upsert in Otp model
+    await Otp.findOneAndUpdate(
+      { mobileNumber: cleanMobile },
+      { otp: generatedOtp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send SMS via SMSCountry DLT Template 1277178696497004597 & Sender ID FIPMNY
+    await sendAgentSmsOtp(cleanMobile, generatedOtp);
+
+    return res.status(200).json({
+      success: true,
+      message: `OTP sent successfully to registered mobile number +91 ${cleanMobile}`,
+    });
+  } catch (error) {
+    console.error('[DGA Send OTP Error]:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Verify OTP for Digital Gold Agent
+// @route   POST /api/agent-waitlist/verify-otp
+// @access  Public
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+    if (!mobile || !otp) {
+      return res.status(400).json({ success: false, message: 'Mobile number and OTP are required' });
+    }
+
+    const cleanMobile = String(mobile).replace(/\D/g, '').slice(-10);
+    const cleanOtp = String(otp).trim();
+
+    const otpRecord = await Otp.findOne({ mobileNumber: cleanMobile });
+    if (!otpRecord) {
+      return res.status(400).json({ success: false, message: 'OTP expired or not found. Please request a new OTP.' });
+    }
+
+    if (otpRecord.otp !== cleanOtp) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP entered. Please check and try again.' });
+    }
+
+    // Delete verified OTP record
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Agent OTP verified successfully.',
+    });
+  } catch (error) {
+    console.error('[DGA Verify OTP Error]:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+async function sendAgentSmsOtp(mobile, otpCode) {
+  const authKey = process.env.SMSCOUNTRY_AUTH_KEY;
+  const authToken = process.env.SMSCOUNTRY_AUTH_TOKEN;
+  const senderId = process.env.SMSCOUNTRY_SENDER_ID || "FIPMNY";
+  const templateId = "1277178696497004597";
+  
+  const messageText = `Dear Digital Gold Agent, Your Fipmoney login OTP is ${otpCode} . Valid for 10 minutes. Never share this OTP with anyone. - Finpages Tech`;
+
+  if (!authKey || !authToken) {
+    console.log(`[DGA SMS OTP Mock Fallback - No Credentials] Digital Gold Agent OTP for ${mobile} is ${otpCode}`);
+    return;
+  }
+
+  const credentials = Buffer.from(`${authKey}:${authToken}`).toString('base64');
+  const endpoint = `https://restapi.smscountry.com/v0.1/Accounts/${authKey}/SMSes/`;
+
+  const payload = {
+    Text: messageText,
+    Number: `91${mobile}`,
+    SenderId: senderId,
+    Tool: "API",
+    TemplateId: templateId,
+    DLT_TE_ID: templateId
+  };
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${credentials}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    console.log(`[SMSCountry DGA OTP] Send response for ${mobile}:`, result);
+  } catch (err) {
+    console.error(`[SMSCountry DGA OTP Error] Failed to send SMS to ${mobile}:`, err.message);
+  }
+}
 
 export default router;
