@@ -41,7 +41,8 @@ import {
   Calendar,
   BarChart3,
   MoreVertical,
-  ChevronDown
+  ChevronDown,
+  Crown
 } from "lucide-react";
 import { getLoggedInAgent, clearAgentSession, DgaAgent } from "../utils/agentStorage";
 
@@ -219,11 +220,11 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
 
   const getHeatmapColorClass = (level: number) => {
     switch (level) {
-      case 4: return "bg-[#1e1b4b] shadow-xs"; // >10g: Dark Royal Indigo Blue
-      case 3: return "bg-[#2563eb]";           // 5g-9.9g: Medium Blue
-      case 2: return "bg-[#3b82f6]";           // 3g-4.9g: Sky/Cobalt Blue
-      case 1: return "bg-[#93c5fd]";           // 0.1g-2g: Light Blue
-      default: return "bg-slate-100/90 border border-slate-200/50"; // 0g: No Color
+      case 4: return "bg-gradient-to-tr from-[#926C15] via-[#C9980B] to-[#FFC300] shadow-[0_1px_4px_rgba(201,152,11,0.5)] border border-[#FFE169]/80"; // >10g: Deep Burnished Metallic Gold (#926C15, #C9980B, #FFC300)
+      case 3: return "bg-gradient-to-tr from-[#FFC300] via-[#C9980B] to-[#926C15] shadow-2xs border border-[#FFE169]/60";           // 5g-9.9g: Satin Sheen Metallic Gold (#FFC300, #C9980B, #926C15)
+      case 2: return "bg-gradient-to-tr from-[#FFD235] to-[#FFC300] shadow-2xs border border-[#FFE169]/50";                           // 3g-4.9g: Sunglow to Mikado Yellow Gold (#FFD235, #FFC300)
+      case 1: return "bg-[#FFE169] border border-[#FFD235]/60";                                                                     // 0.1g-2g: Naples Yellow Metallic Light Gold (#FFE169)
+      default: return "bg-slate-100/90 border border-slate-200/50";                                                                 // 0g: No Color
     }
   };
 
@@ -470,7 +471,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
         </aside>
 
         {/* Right Tab Content View */}
-        <main className="flex-1 p-4 sm:p-8 overflow-y-auto h-full">
+        <main className="flex-1 p-4 sm:p-8 overflow-y-auto h-full overscroll-contain transform-gpu">
           
           {/* TAB 0: DONEZO DASHBOARD TAB */}
           {activeTab === "dashboard" && (
@@ -716,21 +717,21 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
 
               </div>
 
-              {/* Middle Section Grid: Project Analytics (Full Width Heatmap), Reminders, Project List */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              {/* Middle Section Grid: Earnings Analytics, Reminders, Monthly Earnings */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch transform-gpu">
                 
-                {/* Project Analytics Card - 6 Months GitHub Style Heatmap (Half Width) */}
-                <div className="lg:col-span-6 p-5 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-2">
+                {/* Earnings Analytics Card - 6 Months GitHub Style Heatmap (Half Width) */}
+                <div className="lg:col-span-6 p-5 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-2 lg:h-[350px] transform-gpu [will-change:transform] isolate">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-slate-900 text-base tracking-tight">Project Analytics</h3>
-                      <span className="bg-blue-50 text-blue-900 border border-blue-200 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      <h3 className="font-extrabold text-slate-900 text-base tracking-tight">Earnings Analytics</h3>
+                      <span className="bg-gradient-to-r from-[#FFE169]/40 via-[#FFD235]/30 to-[#C9980B]/20 text-[#735104] border border-[#C9980B]/40 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-2xs">
                         6 Months
                       </span>
                     </div>
 
-                    <div className="bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-xl text-[11px] font-black text-slate-700">
-                      Managed: <strong className="text-blue-800 font-black">{agent.totalGoldGramsManaged}g</strong>
+                    <div className="bg-gradient-to-r from-[#FFE169]/30 via-[#FFD235]/20 to-[#C9980B]/15 border border-[#C9980B]/40 px-3 py-1 rounded-xl text-[11px] font-black text-slate-700 shadow-2xs">
+                      Managed: <strong className="text-[#926C15] font-black">{agent.totalGoldGramsManaged}g</strong>
                     </div>
                   </div>
 
@@ -762,21 +763,21 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                           {heatmapDays.map((day) => (
                             <div
                               key={day.id}
-                              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[2.5px] transition-all cursor-pointer hover:scale-125 hover:z-20 relative group ${getHeatmapColorClass(day.level)}`}
+                              className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-[2.5px] transition-all duration-150 cursor-pointer hover:ring-2 hover:ring-[#FFD235] hover:brightness-125 hover:z-30 relative group ${getHeatmapColorClass(day.level)}`}
                             >
                               {/* Hover Tooltip */}
-                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:flex flex-col items-center pointer-events-none z-30 whitespace-nowrap">
-                                <div className="bg-slate-900 text-white text-[10px] font-extrabold py-1 px-2.5 rounded-md shadow-xl border border-slate-700">
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-40 whitespace-nowrap select-none">
+                                <div className="bg-slate-900 text-white text-[10px] font-extrabold py-1 px-2.5 rounded-md shadow-xl border border-slate-700 pointer-events-none">
                                   {day.grams > 0 ? (
-                                    <span className="flex items-center gap-1.5">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                                    <span className="flex items-center gap-1.5 pointer-events-none">
+                                      <span className="w-2 h-2 rounded-full bg-gradient-to-r from-[#FFD235] to-[#C9980B] border border-[#FFE169]" />
                                       <strong>{day.grams}g Gold</strong> on {day.date}
                                     </span>
                                   ) : (
-                                    <span className="text-slate-300">No purchases on {day.date}</span>
+                                    <span className="text-slate-300 pointer-events-none">No purchases on {day.date}</span>
                                   )}
                                 </div>
-                                <div className="w-1.5 h-1.5 bg-slate-900 rotate-45 -mt-1" />
+                                <div className="w-1.5 h-1.5 bg-slate-900 rotate-45 -mt-1 pointer-events-none" />
                               </div>
                             </div>
                           ))}
@@ -801,10 +802,10 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                       
                       <div className="flex items-center gap-0.5">
                         <div className="w-2.5 h-2.5 rounded-[2px] bg-slate-100/90 border border-slate-200/50" title="0g (No purchases)" />
-                        <div className="w-2.5 h-2.5 rounded-[2px] bg-[#93c5fd]" title="0.1g - 2g (Light Blue)" />
-                        <div className="w-2.5 h-2.5 rounded-[2px] bg-[#3b82f6]" title="3g - 4.9g (Medium-Light Blue)" />
-                        <div className="w-2.5 h-2.5 rounded-[2px] bg-[#2563eb]" title="5g - 9.9g (Medium Blue)" />
-                        <div className="w-2.5 h-2.5 rounded-[2px] bg-[#1e1b4b]" title="10g+ (Dark Royal Blue)" />
+                        <div className="w-2.5 h-2.5 rounded-[2px] bg-[#FFE169] border border-[#FFD235]/60" title="0.1g - 2g (Naples Yellow Gold)" />
+                        <div className="w-2.5 h-2.5 rounded-[2px] bg-gradient-to-tr from-[#FFD235] to-[#FFC300] border border-[#FFE169]/50" title="3g - 4.9g (Sunglow Gold)" />
+                        <div className="w-2.5 h-2.5 rounded-[2px] bg-gradient-to-tr from-[#FFC300] via-[#C9980B] to-[#926C15] border border-[#FFE169]/60" title="5g - 9.9g (Satin Sheen Metallic Gold)" />
+                        <div className="w-2.5 h-2.5 rounded-[2px] bg-gradient-to-tr from-[#926C15] via-[#C9980B] to-[#FFC300] border border-[#FFE169]/80 shadow-2xs" title="10g+ (Deep Burnished Metallic Gold)" />
                       </div>
 
                       <span className="text-[10px] font-bold text-slate-400">More</span>
@@ -813,7 +814,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                 </div>
 
                 {/* Reminders Card */}
-                <div className="lg:col-span-3 p-5 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div className="lg:col-span-3 p-5 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between lg:h-[350px] transform-gpu [will-change:transform] isolate">
                   <div className="flex items-center justify-between mb-2.5">
                     <h3 className="font-bold text-slate-900 text-base">Reminders</h3>
                     <span className="bg-emerald-50 text-emerald-800 font-extrabold text-[10px] px-2 py-0.5 rounded-full border border-emerald-200">
@@ -864,63 +865,93 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   </div>
                 </div>
 
-                {/* Top Clients Card (Sorted by Highest Gold Holdings) */}
-                <div className="lg:col-span-3 p-5 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-bold text-slate-900 text-base">Top Clients</h3>
-                      <button
-                        onClick={() => setActiveTab("clients")}
-                        className="text-[10px] font-extrabold text-purple-700 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2 py-0.5 rounded-full cursor-pointer transition-colors"
-                      >
-                        View All
+                {/* Monthly Earnings Container (Fixed Hard-Locked Dimensions) */}
+                <div className="lg:col-span-3 p-6 rounded-[28px] bg-gradient-to-b from-[#241c6e] via-[#1c1757] to-[#141042] text-white shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4 border border-purple-900/40 lg:h-[350px] transform-gpu [will-change:transform] isolate">
+                  
+                  {/* Top Header Row */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <h3 className="font-extrabold text-white text-base tracking-tight">
+                      {currentEarnings.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={earningsTimeframe}
+                          onChange={(e) => setEarningsTimeframe(e.target.value as any)}
+                          className="bg-[#3b2f96]/80 hover:bg-[#483ba6] text-slate-100 font-bold text-[11px] pl-2.5 pr-6 py-1 rounded-full cursor-pointer appearance-none outline-none border border-purple-400/30 transition-colors"
+                        >
+                          <option value="daily" className="bg-[#1c1757] text-white">Daily</option>
+                          <option value="weekly" className="bg-[#1c1757] text-white">This Week</option>
+                          <option value="monthly" className="bg-[#1c1757] text-white">This Month</option>
+                          <option value="quarterly" className="bg-[#1c1757] text-white">This Quarter</option>
+                          <option value="custom" className="bg-[#1c1757] text-white">Custom</option>
+                        </select>
+                        <ChevronDown size={11} className="absolute right-2 pointer-events-none text-slate-300" />
+                      </div>
+                      <button className="text-slate-300 hover:text-white transition-colors cursor-pointer p-0.5 border-none bg-transparent">
+                        <MoreVertical size={16} />
                       </button>
-                    </div>
-
-                    <div className="space-y-2.5">
-                      {[...clients]
-                        .sort((a, b) => b.goldGrams - a.goldGrams)
-                        .slice(0, 3)
-                        .map((client, idx) => (
-                          <div key={client.id} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 border border-slate-100/80 hover:bg-slate-100/60 transition-colors">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs shrink-0 shadow-2xs ${
-                                idx === 0 ? "bg-amber-400 text-amber-950" :
-                                idx === 1 ? "bg-slate-300 text-slate-900" :
-                                "bg-amber-700/20 text-amber-900"
-                              }`}>
-                                #{idx + 1}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-xs font-black text-slate-900 truncate">{client.name}</div>
-                                <div className="text-[10px] text-slate-500 font-bold">{client.totalSIP}</div>
-                              </div>
-                            </div>
-
-                            <div className="text-right shrink-0">
-                              <div className="text-xs font-black text-emerald-700">{client.goldGrams}g</div>
-                              <div className="text-[9px] font-bold text-slate-400">24K Gold</div>
-                            </div>
-                          </div>
-                        ))}
                     </div>
                   </div>
 
+                  {/* Main Amount & 3D Gold Graphic Section */}
+                  <div className="flex items-center justify-between relative z-10 py-1">
+                    <div>
+                      <div className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
+                        {currentEarnings.totalAmount}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-300 mt-1">
+                        Total Earnings
+                      </div>
+                      <div className="text-xs font-black text-[#34d399] flex items-center gap-1 mt-2">
+                        <span>▲</span>
+                        <span>{currentEarnings.growthText}</span>
+                      </div>
+                    </div>
+
+                    {/* 3D Gold Bars Illustration */}
+                    <div className="relative shrink-0 w-20 h-20 flex items-center justify-center pointer-events-none select-none">
+                      <img
+                        src="/dga_gold_asset.png"
+                        alt="Gold Bars Rewards"
+                        className="w-20 h-20 object-contain shadow-md shrink-0 pointer-events-none select-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Inner Dark Translucent Breakdown Box */}
+                  <div className="bg-[#282075]/70 border border-purple-400/20 rounded-2xl p-4 space-y-2.5 shadow-inner relative z-10">
+                    {currentEarnings.breakdown.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-200">{item.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-white">{item.amount}</span>
+                          <span className="bg-[#523bb8] text-purple-100 font-extrabold text-[10px] px-2 py-0.5 rounded-md min-w-[36px] text-center shadow-2xs">
+                            {item.pct}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Bottom CTA Button */}
                   <button
-                    onClick={() => setActiveTab("clients")}
-                    className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs flex items-center justify-center gap-1 cursor-pointer transition-colors border-none outline-none"
+                    onClick={() => setActiveTab("commissions")}
+                    className="w-full py-3 px-4 rounded-2xl bg-[#3f3299] hover:bg-[#4d3ebc] text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md cursor-pointer border-none outline-none group relative z-10"
                   >
-                    View All {clients.length} Clients <ChevronRight size={14} />
+                    <span>View Earnings & Payouts</span>
+                    <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                   </button>
+
                 </div>
 
               </div>
 
-              {/* Bottom Section Grid: Team Collaboration, Project Progress, Time Tracker */}
+              {/* Bottom Section Grid: Client Activity & Referral Progress */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 
                 {/* Recent Client Transactions Card */}
-                <div className="lg:col-span-5 p-6 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-4">
+                <div className="lg:col-span-7 p-6 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-slate-900 text-base">Recent Client Transactions</h3>
@@ -978,7 +1009,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                 </div>
 
                 {/* Referral Progress Gauge Card */}
-                <div className="lg:col-span-4 p-6 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-4">
+                <div className="lg:col-span-5 p-6 rounded-[28px] bg-white border border-slate-100 shadow-sm flex flex-col justify-between space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-slate-900 text-base">Referral Progress</h3>
                     <span className="bg-indigo-50 text-[#1e1b4b] font-extrabold text-[10px] px-2.5 py-0.5 rounded-full border border-indigo-100">
@@ -1039,86 +1070,6 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                       <span className="text-slate-700">Pending <strong className="text-slate-900 font-black ml-0.5">(3)</strong></span>
                     </div>
                   </div>
-                </div>
-
-                {/* Earnings Card (Matching Reference Design) */}
-                <div className="lg:col-span-3 p-6 rounded-[28px] bg-gradient-to-b from-[#241c6e] via-[#1c1757] to-[#141042] text-white shadow-xl relative overflow-hidden flex flex-col justify-between space-y-4 border border-purple-900/40 min-h-[340px]">
-                  
-                  {/* Top Header Row */}
-                  <div className="flex items-center justify-between relative z-10">
-                    <h3 className="font-extrabold text-white text-base tracking-tight">
-                      {currentEarnings.title}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={earningsTimeframe}
-                          onChange={(e) => setEarningsTimeframe(e.target.value as any)}
-                          className="bg-[#3b2f96]/80 hover:bg-[#483ba6] text-slate-100 font-bold text-[11px] pl-2.5 pr-6 py-1 rounded-full cursor-pointer appearance-none outline-none border border-purple-400/30 transition-all"
-                        >
-                          <option value="daily" className="bg-[#1c1757] text-white">Daily</option>
-                          <option value="weekly" className="bg-[#1c1757] text-white">This Week</option>
-                          <option value="monthly" className="bg-[#1c1757] text-white">This Month</option>
-                          <option value="quarterly" className="bg-[#1c1757] text-white">This Quarter</option>
-                          <option value="custom" className="bg-[#1c1757] text-white">Custom</option>
-                        </select>
-                        <ChevronDown size={11} className="absolute right-2 pointer-events-none text-slate-300" />
-                      </div>
-                      <button className="text-slate-300 hover:text-white transition-colors cursor-pointer p-0.5 border-none bg-transparent">
-                        <MoreVertical size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Main Amount & 3D Gold Graphic Section */}
-                  <div className="flex items-center justify-between relative z-10 py-1">
-                    <div>
-                      <div className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
-                        {currentEarnings.totalAmount}
-                      </div>
-                      <div className="text-xs font-semibold text-slate-300 mt-1">
-                        Total Earnings
-                      </div>
-                      <div className="text-xs font-black text-[#34d399] flex items-center gap-1 mt-2">
-                        <span>▲</span>
-                        <span>{currentEarnings.growthText}</span>
-                      </div>
-                    </div>
-
-                    {/* 3D Gold Bars Illustration */}
-                    <div className="relative shrink-0 w-24 h-24 flex items-center justify-center">
-                      <img
-                        src="/dga_gold_asset.png"
-                        alt="Gold Bars Rewards"
-                        className="w-22 h-auto object-contain drop-shadow-[0_10px_20px_rgba(251,191,36,0.3)]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Inner Dark Translucent Breakdown Box */}
-                  <div className="bg-[#282075]/70 border border-purple-400/20 rounded-2xl p-4 space-y-2.5 shadow-inner relative z-10">
-                    {currentEarnings.breakdown.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-200">{item.label}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-black text-white">{item.amount}</span>
-                          <span className="bg-[#523bb8] text-purple-100 font-extrabold text-[10px] px-2 py-0.5 rounded-md min-w-[36px] text-center shadow-2xs">
-                            {item.pct}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Bottom CTA Button */}
-                  <button
-                    onClick={() => setActiveTab("earnings")}
-                    className="w-full py-3 px-4 rounded-2xl bg-[#3f3299] hover:bg-[#4d3ebc] text-white font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer border-none outline-none group relative z-10"
-                  >
-                    <span>View Earnings & Payouts</span>
-                    <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-
                 </div>
 
               </div>
