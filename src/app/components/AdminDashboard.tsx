@@ -619,6 +619,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
   const [isSendingCampaign, setIsSendingCampaign] = useState<boolean>(false);
   const [previewTab, setPreviewTab] = useState<"editor" | "preview">("editor");
+  const [isEditorFullscreen, setIsEditorFullscreen] = useState<boolean>(false);
 
   const fetchEmailCampaigns = async () => {
     setIsLoadingCampaigns(true);
@@ -4494,20 +4495,39 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         </button>
                       </div>
 
-                      <div className="text-[10px] text-slate-400 font-semibold">
-                        Variables: <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; userName &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; mobileNumber &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; referralCode &#125;&#125;</code>
+                      <div className="flex items-center gap-3">
+                        <div className="text-[10px] text-slate-400 font-semibold hidden sm:block">
+                          Variables: <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; userName &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; mobileNumber &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; referralCode &#125;&#125;</code>
+                        </div>
+
+                        {previewTab === "editor" && (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditorFullscreen(!isEditorFullscreen)}
+                            className="bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-200 cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Maximize2 size={13} />
+                            <span>{isEditorFullscreen ? "Minimize" : "Enlarge Screen"}</span>
+                          </button>
+                        )}
                       </div>
                     </div>
 
                     {previewTab === "editor" ? (
-                      <textarea
-                        rows={10}
-                        value={campaignForm.htmlContent}
-                        onChange={(e) => setCampaignForm({ ...campaignForm, htmlContent: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 font-mono text-xs text-slate-800 bg-slate-900 text-emerald-400 focus:outline-none"
-                      />
+                      <div className="relative">
+                        <textarea
+                          rows={12}
+                          value={campaignForm.htmlContent}
+                          onChange={(e) => setCampaignForm({ ...campaignForm, htmlContent: e.target.value })}
+                          className="w-full px-4 py-3 rounded-2xl border border-slate-300 font-mono text-xs text-slate-900 bg-slate-50/70 focus:bg-white focus:border-purple-600 focus:outline-none leading-relaxed shadow-inner"
+                          placeholder="Type or paste your HTML email code here..."
+                        />
+                        <div className="text-[10px] text-slate-400 font-medium text-right mt-1">
+                          Light Theme Active | High Visibility Code Editor
+                        </div>
+                      </div>
                     ) : (
-                      <div className="w-full p-4 rounded-xl border border-slate-200 bg-slate-100 min-h-[250px]">
+                      <div className="w-full p-4 rounded-2xl border border-slate-200 bg-slate-100 min-h-[250px]">
                         <div
                           className="bg-white rounded-xl shadow-xs p-4 max-w-xl mx-auto"
                           dangerouslySetInnerHTML={{
@@ -4522,6 +4542,50 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       </div>
                     )}
                   </div>
+
+                  {/* FULLSCREEN ENLARGED HTML CODE EDITOR OVERLAY */}
+                  <AnimatePresence>
+                    {isEditorFullscreen && (
+                      <div className="fixed inset-4 sm:inset-8 z-[100] bg-white rounded-3xl p-6 shadow-2xl flex flex-col border border-slate-300">
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-black text-slate-900 text-base">Enlarged HTML Code Editor (Light Theme)</h3>
+                            <span className="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Full Screen Mode</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditorFullscreen(false)}
+                            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-1.5 rounded-xl border-none cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Minimize2 size={14} />
+                            <span>Minimize / Return</span>
+                          </button>
+                        </div>
+
+                        <div className="flex-1 flex flex-col">
+                          <textarea
+                            value={campaignForm.htmlContent}
+                            onChange={(e) => setCampaignForm({ ...campaignForm, htmlContent: e.target.value })}
+                            className="w-full flex-1 p-5 rounded-2xl border border-slate-300 font-mono text-sm text-slate-900 bg-slate-50 focus:bg-white focus:border-purple-600 focus:outline-none leading-relaxed shadow-inner"
+                            placeholder="Type or paste HTML code..."
+                          />
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs text-slate-500">
+                          <div>
+                            Variables available: <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; userName &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; mobileNumber &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; referralCode &#125;&#125;</code>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditorFullscreen(false)}
+                            className="bg-[#6d28d9] text-white font-extrabold text-xs px-4 py-2 rounded-xl border-none cursor-pointer"
+                          >
+                            Done Editing
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Send Test Email Row */}
                   <div className="bg-purple-50 border border-purple-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
