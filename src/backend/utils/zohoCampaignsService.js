@@ -196,7 +196,7 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
       params.append('list_details', JSON.stringify({ [listId]: [] }));
     }
 
-    const createRes = await fetch(createUrl, {
+    let createRes = await fetch(createUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Zoho-oauthtoken ${accessToken}`,
@@ -205,8 +205,33 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
       body: params,
     });
 
-    const createData = await createRes.json();
+    let createData = await createRes.json();
     console.log('[Zoho Campaigns Create API Response]:', createData);
+
+    // If crawler could not reach content_url, fallback to passing direct html_content parameter
+    if (createData?.Code === 'UNABLE_TO_IMPORT' || (createData?.status === 'error' && !createData?.campaignKey)) {
+      console.log('[Zoho Campaigns Service] content_url fetch failed. Retrying with direct html_content parameter...');
+      const fallbackParams = new URLSearchParams();
+      fallbackParams.append('resfmt', 'JSON');
+      fallbackParams.append('campaignname', campaignName);
+      fallbackParams.append('from_email', fromEmail || 'info@fipmoney.com');
+      fallbackParams.append('from_name', fromName || 'Fipmoney');
+      fallbackParams.append('subject', subject);
+      fallbackParams.append('html_content', htmlContent);
+      if (topicId) fallbackParams.append('topicId', topicId);
+      if (listId) fallbackParams.append('list_details', JSON.stringify({ [listId]: [] }));
+
+      const retryRes = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Zoho-oauthtoken ${accessToken}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: fallbackParams,
+      });
+      createData = await retryRes.json();
+      console.log('[Zoho Campaigns Create API Retry Response]:', createData);
+    }
 
     const campaignKey = createData?.campaignKey || createData?.campaign_details?.campaignKey || '';
 
