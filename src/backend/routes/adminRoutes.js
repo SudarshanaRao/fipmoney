@@ -963,6 +963,7 @@ router.post('/email-campaigns/send', async (req, res) => {
 
     // 1. Try sending via Zoho Campaigns REST API first if OAuth credentials configured
     const zohoRes = await sendZohoMarketingCampaign({
+      campaignId: campaign.campaignId,
       campaignName: campaign.title,
       subject: campaign.subject,
       fromEmail: campaign.fromEmail || 'info@fipmoney.com',
@@ -1039,6 +1040,7 @@ router.post('/email-campaigns/test', async (req, res) => {
 
     // 1. Try sending test email via Zoho Campaigns REST API first if configured
     const zohoRes = await sendZohoMarketingCampaign({
+      campaignId: 'TEST_' + Date.now(),
       campaignName: `[TEST] ${subject}`,
       subject: `[TEST] ${subject}`,
       fromEmail: fromEmail || 'info@fipmoney.com',

@@ -121,7 +121,7 @@ export const campaignHtmlStore = new Map();
 /**
  * Create and send an email marketing campaign via Zoho Campaigns API
  */
-export async function sendZohoMarketingCampaign({ campaignName, subject, fromEmail, fromName, htmlContent, recipients = [] }) {
+export async function sendZohoMarketingCampaign({ campaignId, campaignName, subject, fromEmail, fromName, htmlContent, recipients = [] }) {
   const clientId = process.env.ZOHO_CAMPAIGNS_CLIENT_ID;
   const refreshToken = process.env.ZOHO_CAMPAIGNS_REFRESH_TOKEN;
 
@@ -139,7 +139,7 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
     const campaignsApiDomain = getZohoCampaignsApiDomain();
 
     // 1. Store HTML content for Zoho crawler to fetch via content_url
-    const contentId = 'c_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+    const contentId = campaignId || ('c_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8));
     campaignHtmlStore.set(contentId, htmlContent);
 
     // Host URL for Zoho Campaigns content crawler
