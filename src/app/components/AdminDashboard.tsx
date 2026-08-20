@@ -561,18 +561,47 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     isConfigured: false,
   });
 
+  const fetchZohoConfig = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/zoho-oauth/config`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          setZohoKeys(prev => ({
+            clientId: json.clientId || prev.clientId || "1000.PMRTP5XBN4CO5WRCRP9ZN21050JTIH",
+            clientSecret: json.clientSecret || prev.clientSecret || "fdb4cca311ed40f747f1188e9e75fd7c4be99a70f9",
+            dataCenter: json.dataCenter || prev.dataCenter || "in",
+          }));
+          if (json.isConfigured !== undefined) {
+            setRedirectUriInfo(prev => ({ ...prev, isConfigured: json.isConfigured }));
+          }
+        }
+      }
+    } catch (err) {
+      console.error("[AdminDashboard] Error fetching Zoho config:", err);
+    }
+  };
+
+  React.useEffect(() => {
+    if (showZohoConnectModal || activeNav === "Email Marketing") {
+      fetchZohoConfig();
+    }
+  }, [showZohoConnectModal, activeNav]);
+
   const handleConnectZohoAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!zohoKeys.clientId || !zohoKeys.clientSecret) {
-      triggerToast("Client ID and Client Secret are required.");
-      return;
-    }
+    const cId = zohoKeys.clientId || "1000.PMRTP5XBN4CO5WRCRP9ZN21050JTIH";
+    const cSecret = zohoKeys.clientSecret || "fdb4cca311ed40f747f1188e9e75fd7c4be99a70f9";
 
     try {
       const saveRes = await fetch(`${API_BASE_URL}/admin/zoho-oauth/save-keys`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(zohoKeys),
+        body: JSON.stringify({
+          clientId: cId,
+          clientSecret: cSecret,
+          dataCenter: zohoKeys.dataCenter,
+        }),
       });
 
       const json = await saveRes.json();
@@ -615,9 +644,11 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     targetAudience: "ALL_USERS",
     targetEmailsText: "",
   });
-  const [testEmailAddress, setTestEmailAddress] = useState<string>("admin@fipmoney.com");
+  const [testEmailAddress, setTestEmailAddress] = useState<string>("support@fipmoney.com");
   const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
   const [isSendingCampaign, setIsSendingCampaign] = useState<boolean>(false);
+  const [selectedCampaignToSend, setSelectedCampaignToSend] = useState<any>(null);
+  const [showSendConfirmModal, setShowSendConfirmModal] = useState<boolean>(false);
   const [previewTab, setPreviewTab] = useState<"editor" | "variables" | "preview">("editor");
   const [isEditorFullscreen, setIsEditorFullscreen] = useState<boolean>(false);
   const [templateVarValues, setTemplateVarValues] = useState<Record<string, string>>({});
@@ -803,11 +834,17 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
   };
 
-  const handleSendCampaignNow = async (cId: string) => {
-    if (!window.confirm("Are you sure you want to broadcast this email campaign to the target audience now?")) return;
+  const promptSendCampaignModal = (campaign: any) => {
+    setSelectedCampaignToSend(campaign);
+    setShowSendConfirmModal(true);
+  };
 
+  const confirmAndExecuteBroadcast = async () => {
+    if (!selectedCampaignToSend) return;
+    const cId = selectedCampaignToSend.campaignId;
+    setShowSendConfirmModal(false);
     setIsSendingCampaign(true);
-    triggerToast("Broadcasting email campaign to target audience...");
+    triggerToast("Broadcasting email campaign via Zoho Campaigns API...");
 
     try {
       const res = await fetch(`${API_BASE_URL}/admin/email-campaigns/send`, {
@@ -828,6 +865,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       triggerToast("Server connection error broadcasting campaign");
     } finally {
       setIsSendingCampaign(false);
+      setSelectedCampaignToSend(null);
     }
   };
 
@@ -4405,7 +4443,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           </td>
                           <td className="p-3.5 text-right space-x-1.5 flex items-center justify-end">
                             <button
-                              onClick={() => handleSendCampaignNow(c.campaignId)}
+                              onClick={() => promptSendCampaignModal(c)}
                               disabled={isSendingCampaign}
                               className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-lg border-none cursor-pointer disabled:opacity-50 flex items-center gap-1"
                               title="Send Email Campaign"
@@ -4747,7 +4785,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   {/* Send Test Email Row */}
                   <div className="bg-purple-50 border border-purple-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div className="flex-1 w-full">
-                      <label className="block text-xs font-bold text-purple-900 mb-1">Send Test Email To Admin</label>
+                      <label className="block text-xs font-bold text-purple-900 mb-1">Send Test Email To Support (support@fipmoney.com)</label>
                       <input
                         type="email"
                         placeholder="Enter email to receive test copy"
@@ -4915,6 +4953,79 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       <span>Save Keys & Connect Zoho Campaigns Account in 1-Click</span>
                     </button>
                   </form>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* CUSTOM BROADCAST CAMPAIGN CONFIRMATION MODAL */}
+        <AnimatePresence>
+          {showSendConfirmModal && selectedCampaignToSend && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-purple-100"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-700 shrink-0">
+                    <Send size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-slate-900">Broadcast Email Campaign?</h3>
+                    <p className="text-xs text-slate-500 font-medium">Confirm sending marketing broadcast via Zoho Campaigns API</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-semibold">Campaign Title:</span>
+                    <span className="font-bold text-slate-900">{selectedCampaignToSend.title}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-semibold">Subject Line:</span>
+                    <span className="font-bold text-purple-700 truncate max-w-xs">{selectedCampaignToSend.subject}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-semibold">Sender Email:</span>
+                    <span className="font-mono text-slate-700">{selectedCampaignToSend.fromEmail || "info@fipmoney.com"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-semibold">Target Audience:</span>
+                    <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      {selectedCampaignToSend.targetAudience === "ALL_USERS" ? "All Platform Users" :
+                       selectedCampaignToSend.targetAudience === "KYC_VERIFIED" ? "KYC Verified Users" :
+                       selectedCampaignToSend.targetAudience === "DGA_AGENTS" ? "DGA Waitlist Agents" : "Specific Users List"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50/70 border border-purple-200 p-3 rounded-xl text-[11px] text-purple-900 font-medium leading-relaxed">
+                  ✨ <strong>Automated Contact List Syncing:</strong> All target recipients will be automatically subscribed into your Zoho Campaigns Mailing List and dispatched seamlessly!
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSendConfirmModal(false);
+                      setSelectedCampaignToSend(null);
+                    }}
+                    className="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs border-none cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmAndExecuteBroadcast}
+                    disabled={isSendingCampaign}
+                    className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs border-none cursor-pointer shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    <Send size={14} />
+                    <span>{isSendingCampaign ? "Broadcasting..." : "Yes, Broadcast Campaign"}</span>
+                  </button>
                 </div>
               </motion.div>
             </div>

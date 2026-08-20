@@ -43,6 +43,8 @@ router.get('/zoho-oauth/config', (req, res) => {
     localRedirectUri: 'http://localhost:5000/api/admin/zoho-oauth/callback',
     productionRedirectUri: 'https://www.fipmoney.com/api/admin/zoho-oauth/callback',
     clientId: process.env.ZOHO_CAMPAIGNS_CLIENT_ID || '',
+    clientSecret: process.env.ZOHO_CAMPAIGNS_CLIENT_SECRET || '',
+    dataCenter: process.env.ZOHO_DATA_CENTER || 'in',
     isConfigured: Boolean(process.env.ZOHO_CAMPAIGNS_CLIENT_ID && process.env.ZOHO_CAMPAIGNS_REFRESH_TOKEN),
   });
 });
@@ -50,7 +52,11 @@ router.get('/zoho-oauth/config', (req, res) => {
 // @desc    Save Client ID and Client Secret in memory/env
 // @route   POST /api/admin/zoho-oauth/save-keys
 router.post('/zoho-oauth/save-keys', (req, res) => {
-  const { clientId, clientSecret, dataCenter } = req.body;
+  let { clientId, clientSecret, dataCenter } = req.body;
+
+  if (!clientId) clientId = process.env.ZOHO_CAMPAIGNS_CLIENT_ID;
+  if (!clientSecret) clientSecret = process.env.ZOHO_CAMPAIGNS_CLIENT_SECRET;
+
   if (!clientId || !clientSecret) {
     return res.status(400).json({ success: false, message: 'Client ID and Client Secret are required.' });
   }

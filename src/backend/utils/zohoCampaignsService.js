@@ -180,6 +180,33 @@ export async function sendZohoMarketingCampaign({ campaignId, campaignName, subj
       }
     }
 
+    // 1b. Automatically subscribe campaign recipients into Zoho Campaigns Mailing List
+    if (listId && Array.isArray(recipients) && recipients.length > 0) {
+      console.log(`[Zoho Campaigns Service] Syncing ${recipients.length} contact(s) to Mailing List key: ${listId}...`);
+      for (const r of recipients) {
+        if (!r?.toEmail || !r.toEmail.includes('@')) continue;
+        try {
+          const subParams = new URLSearchParams();
+          subParams.append('resfmt', 'JSON');
+          subParams.append('listkey', listId);
+          subParams.append('contactinfo', JSON.stringify({
+            'Contact Email': r.toEmail.trim(),
+            'First Name': r.userName || 'User',
+          }));
+          await fetch(`${campaignsApiDomain}/api/v1.1/json/listsubscribe`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Zoho-oauthtoken ${accessToken}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: subParams,
+          });
+        } catch (subErr) {
+          console.warn(`[Zoho Contact Sync Warning for ${r.toEmail}]:`, subErr.message);
+        }
+      }
+    }
+
     // 2. Create Campaign in Zoho Campaigns using content_url
     const createUrl = `${campaignsApiDomain}/api/v1.1/createCampaign`;
     const params = new URLSearchParams();
