@@ -692,6 +692,41 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
   }, [activeNav]);
 
+  const handleDeleteCampaign = async (campaignId: string) => {
+    if (!window.confirm("Are you sure you want to delete this email campaign?")) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/email-campaigns/${campaignId}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast("Campaign deleted successfully!");
+        fetchEmailCampaigns();
+      } else {
+        triggerToast(json.message || "Failed to delete campaign");
+      }
+    } catch (err) {
+      console.error("[AdminDashboard] Error deleting campaign:", err);
+      triggerToast("Server error deleting campaign");
+    }
+  };
+
+  const handleRefreshCampaignStats = async (campaignId: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/email-campaigns/${campaignId}/stats`);
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast("Refreshed live campaign analytics from Zoho Campaigns!");
+        fetchEmailCampaigns();
+      } else {
+        triggerToast(json.message || "Failed to refresh stats");
+      }
+    } catch (err) {
+      console.error("[AdminDashboard] Error refreshing stats:", err);
+      triggerToast("Server connection error refreshing stats");
+    }
+  };
+
   const handleSaveCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!campaignForm.title || !campaignForm.subject || !campaignForm.htmlContent) {
@@ -4373,14 +4408,26 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <td className="p-3.5 text-slate-400 text-[11px]">
                             {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "Today"}
                           </td>
-                          <td className="p-3.5 text-right space-x-1.5">
+                          <td className="p-3.5 text-right space-x-1.5 flex items-center justify-end">
                             <button
                               onClick={() => handleSendCampaignNow(c.campaignId)}
                               disabled={isSendingCampaign}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-lg border-none cursor-pointer disabled:opacity-50"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-lg border-none cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                              title="Send Email Campaign"
                             >
-                              Send Now
+                              <Send size={11} />
+                              <span>Send Now</span>
                             </button>
+                            {c.zohoCampaignId && (
+                              <button
+                                onClick={() => handleRefreshCampaignStats(c.campaignId)}
+                                className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-[11px] px-2 py-1 rounded-lg border border-purple-200 cursor-pointer flex items-center gap-1"
+                                title="Sync Live Stats from Zoho Campaigns"
+                              >
+                                <RefreshCw size={11} />
+                                <span>Stats</span>
+                              </button>
+                            )}
                             <button
                               onClick={() => {
                                 setCampaignForm({
@@ -4395,9 +4442,17 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                                 });
                                 setShowCampaignModal(true);
                               }}
-                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] px-2.5 py-1 rounded-lg border-none cursor-pointer"
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] px-2 py-1 rounded-lg border-none cursor-pointer flex items-center gap-1"
                             >
-                              Edit
+                              <Edit2 size={11} />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCampaign(c.campaignId)}
+                              className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[11px] px-2 py-1 rounded-lg border border-rose-200 cursor-pointer flex items-center gap-1"
+                              title="Delete Campaign"
+                            >
+                              <Trash2 size={11} />
                             </button>
                           </td>
                         </tr>

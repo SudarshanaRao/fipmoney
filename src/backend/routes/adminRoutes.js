@@ -3,7 +3,7 @@ import EmailCampaign from '../models/EmailCampaign.js';
 import User from '../models/User.js';
 import AgentWaitlist from '../models/AgentWaitlist.js';
 import { sendCustomEmail } from '../utils/emailService.js';
-import { sendZohoMarketingCampaign, exchangeGrantCodeForTokens, campaignHtmlStore } from '../utils/zohoCampaignsService.js';
+import { sendZohoMarketingCampaign, exchangeGrantCodeForTokens, campaignHtmlStore, getZohoCampaignDetails, deleteZohoCampaign } from '../utils/zohoCampaignsService.js';
 import {
   checkAdminExists,
   verifyAdminCode,
@@ -1079,20 +1079,96 @@ router.post('/email-campaigns/test', async (req, res) => {
   }
 });
 
-// @desc    Serve HTML content for Zoho Campaigns crawler
+// @desc    Serve HTML content for Zoho Campaigns crawler (with DB fallback)
 // @route   GET /api/admin/zoho-oauth/campaign-content/:contentId
-router.get('/zoho-oauth/campaign-content/:contentId', (req, res) => {
-  const html = campaignHtmlStore.get(req.params.contentId);
+router.get('/zoho-oauth/campaign-content/:contentId', async (req, res) => {
+  let html = campaignHtmlStore.get(req.params.contentId);
+  
+  // DB Fallback if server process restarted
+  if (!html) {
+    try {
+      const campaign = await EmailCampaign.findOne({
+        $or: [
+          { campaignId: req.params.contentId },
+          { zohoCampaignId: req.params.contentId }
+        ]
+      });
+      if (campaign && campaign.htmlContent) {
+        html = campaign.htmlContent;
+      }
+    } catch (e) {
+      console.error('[Campaign Content Route Error]:', e.message);
+    }
+  }
+
   if (!html) {
     return res.status(404).send('<!DOCTYPE html><html><body><h1>Campaign Content Expired or Not Found</h1></body></html>');
   }
+
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'public, max-age=86400');
   res.send(html);
 });
 
-// @desc    Get Zoho OAuth Configuration & Redirect URIs
+// @desc    Fetch Live Campaign Stats & Analytics from Zoho Campaigns
+// @route   GET /api/admin/email-campaigns/:id/stats
+router.get('/email-campaigns/:id/stats', async (req, res) => {
+  try {
+    const campaign = await EmailCampaign.findOne({ campaignId: req.params.id });
+    if (!campaign) {
+      return res.status(404).json({ success: false, message: 'Campaign not found' });
+    }
+
+    if (campaign.zohoCampaignId) {
+      const zohoStats = await getZohoCampaignDetails(campaign.zohoCampaignId);
+      if (zohoStats && zohoStats.campaign_details) {
+        const details = zohoStats.campaign_details;
+        campaign.stats = {
+          sentCount: parseInt(details.sent_count || campaign.stats.sentCount || 0),
+          openedCount: parseInt(details.opened_count || campaign.stats.openedCount || 0),
+          clickedCount: parseInt(details.clicked_count || campaign.stats.clickedCount || 0),
+          bouncedCount: parseInt(details.bounced_count || campaign.stats.bouncedCount || 0),
+          unsubscribedCount: parseInt(details.unsubscribed_count || campaign.stats.unsubscribedCount || 0),
+        };
+        await campaign.save();
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      data: campaign.stats,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Delete Campaign from MongoDB and Zoho Campaigns
+// @route   DELETE /api/admin/email-campaigns/:id
+router.delete('/email-campaigns/:id', async (req, res) => {
+  try {
+    const campaign = await EmailCampaign.findOne({ campaignId: req.params.id });
+    if (!campaign) {
+      return res.status(404).json({ success: false, message: 'Campaign not found' });
+    }
+
+    if (campaign.zohoCampaignId) {
+      await deleteZohoCampaign(campaign.zohoCampaignId);
+    }
+
+    await EmailCampaign.deleteOne({ campaignId: req.params.id });
+
+    res.status(200).json({
+      success: true,
+      message: 'Campaign deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Delete Admin User
 router.delete('/:id', deleteAdmin);
 
 export default router;

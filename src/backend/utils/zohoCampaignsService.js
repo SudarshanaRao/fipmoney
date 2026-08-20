@@ -279,3 +279,54 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
     };
   }
 }
+
+/**
+ * Fetch campaign details and analytics report from Zoho Campaigns API
+ */
+export async function getZohoCampaignDetails(campaignKey) {
+  if (!campaignKey) return null;
+  try {
+    const accessToken = await getZohoCampaignsAccessToken();
+    const campaignsApiDomain = getZohoCampaignsApiDomain();
+    const url = `${campaignsApiDomain}/api/v1.1/getcampaigndetails?resfmt=JSON&campaignkey=${encodeURIComponent(campaignKey)}`;
+
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Zoho-oauthtoken ${accessToken}` }
+    });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error('[Zoho Campaigns Get Details Error]:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Delete a campaign from Zoho Campaigns API
+ */
+export async function deleteZohoCampaign(campaignKey) {
+  if (!campaignKey) return false;
+  try {
+    const accessToken = await getZohoCampaignsAccessToken();
+    const campaignsApiDomain = getZohoCampaignsApiDomain();
+    const url = `${campaignsApiDomain}/api/v1.1/deletecampaign`;
+
+    const params = new URLSearchParams();
+    params.append('resfmt', 'JSON');
+    params.append('campaignkey', campaignKey);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params,
+    });
+    const data = await res.json();
+    return data?.status === 'success' || data?.code === '200';
+  } catch (err) {
+    console.error('[Zoho Campaigns Delete Error]:', err.message);
+    return false;
+  }
+}
