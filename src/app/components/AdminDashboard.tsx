@@ -10,7 +10,7 @@ import {
   Headphones, ChevronRight, RefreshCw, LogOut, ArrowRight, Eye, ShieldAlert, X,
   Plus, Edit2, Edit3, Trash2, Check, AlertCircle, Filter, Lock, Unlock, Send, Sliders,
   DollarSign, CheckCircle, XCircle, FileSpreadsheet, Layers, Shield, Sparkles, AlertTriangle,
-  Award, Zap, ShieldQuestion, CheckSquare, Save, Mail, Smartphone, Monitor, Maximize2, ExternalLink, Receipt
+  Award, Zap, ShieldQuestion, CheckSquare, Save, Mail, Smartphone, Monitor, Maximize2, Minimize2, ExternalLink, Receipt
 } from "lucide-react";
 import {
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
