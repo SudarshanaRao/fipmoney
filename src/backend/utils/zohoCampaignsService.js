@@ -269,13 +269,16 @@ export async function sendZohoMarketingCampaign({ campaignId, campaignName, subj
     const campaignKey = createData?.campaignKey || createData?.campaign_details?.campaignKey || '';
 
     if (campaignKey) {
-      // 3. Trigger Send Campaign via lowercase /api/v1.1/sendcampaign
+      // 3. Wait 3 seconds for Zoho's background crawler to complete fetching content_url before calling sendcampaign
+      console.log('[Zoho Campaigns Service] Waiting 3s for Zoho crawler content indexing...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
       const sendUrl = `${campaignsApiDomain}/api/v1.1/sendcampaign`;
       const sendParams = new URLSearchParams();
       sendParams.append('resfmt', 'JSON');
       sendParams.append('campaignkey', campaignKey);
 
-      const sendRes = await fetch(sendUrl, {
+      let sendRes = await fetch(sendUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Zoho-oauthtoken ${accessToken}`,
@@ -284,12 +287,28 @@ export async function sendZohoMarketingCampaign({ campaignId, campaignName, subj
         body: sendParams,
       });
 
-      const sendData = await sendRes.json();
+      let sendData = await sendRes.json();
       console.log('[Zoho Campaigns Send API Response]:', sendData);
+
+      // If Zoho is still parsing content (code 6607), retry sendcampaign once more after 3 seconds
+      if (sendData?.code === '6607') {
+        console.log('[Zoho Campaigns Service] Retrying sendcampaign in 3 seconds for content indexing...');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const retrySendRes = await fetch(sendUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Zoho-oauthtoken ${accessToken}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: sendParams,
+        });
+        sendData = await retrySendRes.json();
+        console.log('[Zoho Campaigns Send API Retry Response]:', sendData);
+      }
 
       return {
         isZohoCampaignsConfigured: true,
-        success: true,
+        success: sendData?.status === 'success' || sendData?.code === '200' || sendData?.campaign_status === 'InProgress',
         campaignKey,
         data: sendData,
         message: `Campaign '${campaignName}' successfully created & triggered in Zoho Campaigns!`,
