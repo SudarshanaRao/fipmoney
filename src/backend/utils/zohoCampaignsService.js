@@ -207,11 +207,17 @@ export async function sendZohoMarketingCampaign({ campaignId, campaignName, subj
       }
     }
 
+    // Sanitize campaignname to prevent Code 7006 (CampaignName cannot contain special characters)
+    const safeCampaignName = (campaignName || 'Fipmoney Campaign')
+      .replace(/[^a-zA-Z0-9\s\-_]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim() || ('Fipmoney Campaign ' + Date.now());
+
     // 2. Create Campaign in Zoho Campaigns using content_url
     const createUrl = `${campaignsApiDomain}/api/v1.1/createCampaign`;
     const params = new URLSearchParams();
     params.append('resfmt', 'JSON');
-    params.append('campaignname', campaignName);
+    params.append('campaignname', safeCampaignName);
     params.append('from_email', fromEmail || 'info@fipmoney.com');
     params.append('from_name', fromName || 'Fipmoney');
     params.append('subject', subject);
@@ -240,7 +246,7 @@ export async function sendZohoMarketingCampaign({ campaignId, campaignName, subj
       console.log('[Zoho Campaigns Service] content_url fetch failed. Retrying with direct html_content parameter...');
       const fallbackParams = new URLSearchParams();
       fallbackParams.append('resfmt', 'JSON');
-      fallbackParams.append('campaignname', campaignName);
+      fallbackParams.append('campaignname', safeCampaignName);
       fallbackParams.append('from_email', fromEmail || 'info@fipmoney.com');
       fallbackParams.append('from_name', fromName || 'Fipmoney');
       fallbackParams.append('subject', subject);
