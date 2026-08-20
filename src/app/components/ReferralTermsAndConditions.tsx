@@ -11,8 +11,8 @@ export default function ReferralTermsAndConditions({ onBack }: ReferralTermsAndC
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-[800px] mx-auto px-4 py-4 flex items-center gap-4">
-          <button 
-            onClick={onBack} 
+          <button
+            onClick={onBack}
             className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer border-none outline-none"
           >
             <ArrowLeft size={20} />
@@ -25,7 +25,7 @@ export default function ReferralTermsAndConditions({ onBack }: ReferralTermsAndC
       </div>
 
       <div className="max-w-[800px] mx-auto px-4 py-8 space-y-8">
-        
+
         {/* Eligibility Criteria */}
         <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
           <h2 className="text-lg font-bold text-slate-800 mb-4">Eligibility Criteria:</h2>
@@ -45,8 +45,8 @@ export default function ReferralTermsAndConditions({ onBack }: ReferralTermsAndC
           <ul className="list-disc pl-5 text-sm text-slate-600 space-y-3">
             <li>Fipmoney FKYC customers are eligible for availing the benefits of the referral program.</li>
             <li>There is absolutely no limit to the number of friends you can refer and the rewards you can earn.</li>
-            <li>The referrer is only entitled to a reward given that the referee creates a Fipmoney account, successfully purchases a minimum of ₹250 worth of digital gold, and both parties adhere to the guidelines and conditions set for this program.</li>
-            <li>Both the Referrer and Referee will receive ₹50 worth of digital gold upon the successful completion of the referee's first purchase of ₹250+ digital gold.</li>
+            <li>The referrer is only entitled to a reward given that the referee creates a Fipmoney account, successfully purchases a minimum of ₹500 worth of digital gold, and both parties adhere to the guidelines and conditions set for this program.</li>
+            <li>Both the Referrer and Referee will receive ₹50 worth of digital gold upon the successful completion of the referee's first purchase of ₹500+ digital gold.</li>
             <li>Fipmoney retains the right to award the reward to its eligible customers who complete all steps required for a successful referral.</li>
             <li>Fipmoney maintains the right to credit the reward directly to the user's digital gold vault within 72 hours of the successful transaction.</li>
             <li>Fipmoney is not responsible for any device or technical limitation or errors that limit the ability to claim the referral reward.</li>
@@ -67,7 +67,7 @@ export default function ReferralTermsAndConditions({ onBack }: ReferralTermsAndC
             <li>Fipmoney reserves the right to disqualify any User who does not meet the requirements or for any other reason including but not limited to any misuse of the program or on the ground of fraud or suspicious transaction/activity.</li>
             <li>Fipmoney reserves the right to discontinue or change or issue any new form of rewards offered at any time, at its sole discretion.</li>
             <li>The referral link shared with the referee has a 30-day expiry from the day of creation. Using this link post expiry will not entail a referral reward to either party.</li>
-            <li>The referee MUST complete their first digital gold transaction of ₹250+ within 30 days of account creation. Transactions made after this period will not be eligible for the referral bonus.</li>
+            <li>The referee MUST complete their first digital gold transaction of ₹500+ within 30 days of account creation. Transactions made after this period will not be eligible for the referral bonus.</li>
           </ul>
         </div>
 
