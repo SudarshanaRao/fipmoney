@@ -10,7 +10,7 @@ import {
   Headphones, ChevronRight, RefreshCw, LogOut, ArrowRight, Eye, ShieldAlert, X,
   Plus, Edit2, Edit3, Trash2, Check, AlertCircle, Filter, Lock, Unlock, Send, Sliders,
   DollarSign, CheckCircle, XCircle, FileSpreadsheet, Layers, Shield, Sparkles, AlertTriangle,
-  Award, Zap, ShieldQuestion, CheckSquare, Save, Mail, Smartphone, Monitor, Maximize2, ExternalLink
+  Award, Zap, ShieldQuestion, CheckSquare, Save, Mail, Smartphone, Monitor, Maximize2, ExternalLink, Receipt
 } from "lucide-react";
 import {
   LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -199,6 +199,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     "Referrals": "referrals",
     "DGA Waitlist": "dga-waitlist",
     "Reports & Analytics": "reports",
+    "BBPS & Recharges": "bbps",
     "Ledger & Settlements": "ledger",
     "Fees & Charges": "fees",
     "Notifications": "notifications",
@@ -346,8 +347,337 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
   };
 
+  // DASHBOARD TELEMETRY SUMMARY DYNAMIC STATES & HANDLERS
+  const [dashboardTelemetry, setDashboardTelemetry] = useState<any>({
+    metrics: {
+      activeInvestments: { count: 12458, growth: '+8.42% vs last month' },
+      totalInvestment: { formattedAmount: '₹12.45 Cr', growth: '+10.21% vs last month' },
+      goldAccumulated: { formattedWeight: '3.152 kg', growth: '+7.31% vs last month' },
+      returnsGenerated: { formattedAmount: '₹78.45 L', growth: '+9.18% vs last month' },
+      avgUserAmtScore: { score: 88.4, maxScore: 100, riskProfile: 'Low Risk Profile' },
+    },
+    planDistribution: [
+      { name: 'Daily Savings', value: 4231, percentage: '33.9%', color: '#7C3AED' },
+      { name: 'Weekly Savings', value: 3452, percentage: '27.7%', color: '#10B981' },
+      { name: 'Monthly Savings', value: 3102, percentage: '24.9%', color: '#F97316' },
+      { name: 'Wealth Builder', value: 1673, percentage: '13.5%', color: '#F59E0B' },
+    ],
+    kycStatusDistribution: [
+      { name: 'Verified', value: 6352, percentage: '72.8%', color: '#10B981' },
+      { name: 'Pending', value: 1542, percentage: '17.7%', color: '#3B82F6' },
+      { name: 'Rejected', value: 838, percentage: '9.6%', color: '#EF4444' },
+    ],
+    amtSecurityTelemetry: {
+      highRiskCount: 1,
+      flaggedUsers: [{ name: 'Deepak Mehra', score: 34, mobile: '+91 95001 23456' }],
+    },
+    overviewTrend: [
+      { date: '08 May', val: 0.2 },
+      { date: '11 May', val: 0.4 },
+      { date: '15 May', val: 0.65 },
+      { date: '18 May', val: 0.8 },
+      { date: '22 May', val: 1.1 },
+      { date: '25 May', val: 1.25 },
+      { date: '29 May', val: 1.05 },
+      { date: '01 Jun', val: 1.35 },
+      { date: '05 Jun', val: 1.2 },
+      { date: '08 Jun', val: 1.45 }
+    ],
+  });
+  const [isLoadingDashboardTelemetry, setIsLoadingDashboardTelemetry] = useState<boolean>(false);
+
+  const fetchDashboardTelemetry = async () => {
+    setIsLoadingDashboardTelemetry(true);
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/dashboard`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          setDashboardTelemetry(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching dashboard summary telemetry:', err);
+    } finally {
+      setIsLoadingDashboardTelemetry(false);
+    }
+  };
+
+  const [isLoadingSipPlans, setIsLoadingSipPlans] = useState<boolean>(false);
+  const [editingPlan, setEditingPlan] = useState<any>(null);
+
+  const fetchSipPlans = async () => {
+    setIsLoadingSipPlans(true);
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/sip-plans`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setSipPlans(json.data);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching SIP plans:', err);
+    } finally {
+      setIsLoadingSipPlans(false);
+    }
+  };
+
+  // BBPS Bills & Recharges State
+  interface BbpsTxn {
+    _id?: string;
+    txnId: string;
+    userId: string;
+    userName: string;
+    userPhone: string;
+    billerName: string;
+    category: string;
+    accountNumber: string;
+    amount: number;
+    goldCashbackEarned?: number;
+    goldCashbackFormatted?: string;
+    paymentGateway: string;
+    bbpsRefNo: string;
+    status: 'Success' | 'Pending' | 'Failed' | 'Refunded';
+    createdAt?: string;
+    paymentDate?: string;
+  }
+
+  const [bbpsTxns, setBbpsTxns] = useState<BbpsTxn[]>([]);
+  const [bbpsSummary, setBbpsSummary] = useState<any>({
+    totalCount: 0,
+    totalVolume: '₹0',
+    totalGoldCashback: '0.000 g Gold',
+    successRate: '100%',
+    npciStatus: 'ONLINE (99.98% Uptime)'
+  });
+  const [isLoadingBbps, setIsLoadingBbps] = useState<boolean>(false);
+  const [bbpsCategoryFilter, setBbpsCategoryFilter] = useState<string>('All');
+  const [bbpsStatusFilter, setBbpsStatusFilter] = useState<string>('All');
+  const [bbpsSearchQuery, setBbpsSearchQuery] = useState<string>('');
+  const [selectedBbpsReceipt, setSelectedBbpsReceipt] = useState<BbpsTxn | null>(null);
+  const [showSimulateBbpsModal, setShowSimulateBbpsModal] = useState<boolean>(false);
+  const [newBbpsForm, setNewBbpsForm] = useState({
+    userName: '',
+    userPhone: '',
+    billerName: 'Airtel India Prepaid',
+    category: 'Mobile Recharge',
+    accountNumber: '',
+    amount: 349,
+    paymentGateway: 'Setu BBPS NPCI',
+    status: 'Success'
+  });
+
+  const fetchBbpsTransactions = async () => {
+    setIsLoadingBbps(true);
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/bbps-transactions`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setBbpsTxns(json.data);
+          if (json.summary) setBbpsSummary(json.summary);
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching BBPS transactions:', err);
+    } finally {
+      setIsLoadingBbps(false);
+    }
+  };
+
+  const handleSimulateBbpsTxn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/bbps-transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBbpsForm)
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast(`BBPS Transaction ${json.data.txnId} processed successfully!`);
+        addAuditLog(`Simulated BBPS ${newBbpsForm.category} transaction for ${newBbpsForm.billerName}`, 'BBPS Financials', 'Info');
+        setShowSimulateBbpsModal(false);
+        setNewBbpsForm({
+          userName: '',
+          userPhone: '',
+          billerName: 'Airtel India Prepaid',
+          category: 'Mobile Recharge',
+          accountNumber: '',
+          amount: 349,
+          paymentGateway: 'Setu BBPS NPCI',
+          status: 'Success'
+        });
+        fetchBbpsTransactions();
+      } else {
+        triggerToast(json.message || 'Failed to simulate BBPS transaction');
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error creating BBPS txn:', err);
+      triggerToast('Server connection error while creating BBPS transaction');
+    }
+  };
+
+  const handleUpdateBbpsStatus = async (txnId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/bbps-transactions/${txnId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast(`Updated BBPS transaction status to ${newStatus}`);
+        addAuditLog(`Updated status of BBPS Txn ${txnId} to ${newStatus}`, 'BBPS Financials', 'Warning');
+        fetchBbpsTransactions();
+        if (selectedBbpsReceipt && (selectedBbpsReceipt.txnId === txnId || selectedBbpsReceipt._id === txnId)) {
+          setSelectedBbpsReceipt({ ...selectedBbpsReceipt, status: newStatus as any });
+        }
+      } else {
+        triggerToast(json.message || 'Failed to update BBPS status');
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error updating BBPS status:', err);
+    }
+  };
+
+  // GOLD HOLDINGS & VAULT TREASURY STATE & API HANDLERS
+  interface VaultAuditLog {
+    _id?: string;
+    auditRefId: string;
+    vaultLocation: string;
+    custodian: string;
+    movementType: string;
+    weightKg: number;
+    weightFormatted: string;
+    purityCert: string;
+    auditStatus: 'Verified & Insured' | 'Audited & Verified' | 'Dispatched to Doorstep' | 'Pending Verification';
+    createdAt?: string;
+  }
+
+  const [liveGoldRate, setLiveGoldRate] = useState<number>(7815.00);
+  const [goldHoldingsSummary, setGoldHoldingsSummary] = useState<any>({
+    liveGoldRate: 7815.00,
+    totalPhysicalVaultGoldKg: "154.850 kg",
+    vaultReserveCoverageRatio: "102.4%",
+    totalVaultAssetValue: "₹121.02 Cr",
+    unallocatedLiquidSurplus: "20.200 kg",
+    custodians: [
+      { id: "brinks", name: "Brink's Vault Logistics", location: "Mumbai & Delhi Secure Vaults", badge: "Primary Custodian", weight: "92.450 kg", valuation: "₹72.25 Cr" },
+      { id: "vistra", name: "Vistra Security Trustee", location: "Bangalore Vault Reserve", badge: "Legal Trustee", weight: "42.100 kg", valuation: "₹32.90 Cr" },
+      { id: "mmtc", name: "Augmont & MMTC Mint", location: "Hyderabad Minting Reserve", badge: "Mint Custody", weight: "20.300 kg", valuation: "₹15.86 Cr" }
+    ],
+    formFactorBreakdown: [
+      { name: "24K Gold Coins (1g, 5g, 10g)", desc: "Minted & Sealed in Tamper-Proof Blisters", weight: "64.200 kg", percentage: "41.4%" },
+      { name: "24K Bullion Bars (50g, 100g, 1kg)", desc: "Hallmarked 99.99% Institutional Bars", weight: "70.450 kg", percentage: "45.5%" },
+      { name: "Unallocated Vault Reserve", desc: "Liquid Gold Balance for Daily SIPs", weight: "20.200 kg", percentage: "13.1%" }
+    ],
+    priceHistory: [
+      { day: 'Mon', price: 7680 },
+      { day: 'Tue', price: 7710 },
+      { day: 'Wed', price: 7695 },
+      { day: 'Thu', price: 7750 },
+      { day: 'Fri', price: 7790 },
+      { day: 'Sat', price: 7815 },
+      { day: 'Sun (Live)', price: 7815.00 }
+    ]
+  });
+  const [goldAuditJournal, setGoldAuditJournal] = useState<VaultAuditLog[]>([]);
+  const [isLoadingGoldHoldings, setIsLoadingGoldHoldings] = useState<boolean>(false);
+
+  const fetchGoldHoldings = async () => {
+    setIsLoadingGoldHoldings(true);
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/gold-holdings`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          if (json.summary) {
+            setGoldHoldingsSummary(json.summary);
+            if (json.summary.liveGoldRate) setLiveGoldRate(json.summary.liveGoldRate);
+          }
+          if (Array.isArray(json.data)) {
+            setGoldAuditJournal(json.data);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error fetching gold holdings:', err);
+    } finally {
+      setIsLoadingGoldHoldings(false);
+    }
+  };
+
+  const handleUpdateBenchmarkGoldRate = async (newRate: number) => {
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/gold-holdings/rate`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rate: newRate })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setLiveGoldRate(newRate);
+        triggerToast(`Live 24K Gold Benchmark rate updated to ₹${newRate.toFixed(2)}/g`);
+        addAuditLog(`Updated Live 24K Gold Rate Benchmark to ₹${newRate}/g`, 'Rate Change', 'Warning');
+        fetchGoldHoldings();
+      } else {
+        triggerToast(json.message || 'Failed to update benchmark rate');
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error updating gold benchmark rate:', err);
+      triggerToast('Server connection error updating gold rate');
+    }
+  };
+
+  const handleTriggerTrusteeAuditScan = async () => {
+    try {
+      triggerToast('Initiating SEBI Vistra Trustee Audit Scan...');
+      let res = await fetch(`${API_BASE_URL}/admin/gold-holdings/trigger-audit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast(json.message || 'Trustee Audit Scan completed & logged!');
+        addAuditLog('Executed Instant SEBI Vistra Trustee Audit Scan', 'Gold Vault Audit', 'Success');
+        fetchGoldHoldings();
+      } else {
+        triggerToast(json.message || 'Failed to execute trustee audit');
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error triggering trustee audit:', err);
+      triggerToast('Server error executing trustee audit');
+    }
+  };
+
   React.useEffect(() => {
-    if (activeNav === "DGA Waitlist") {
+    if (activeNav === "Dashboard") {
+      fetchDashboardTelemetry();
+      const interval = setInterval(() => {
+        fetchDashboardTelemetry();
+      }, 5000);
+      return () => clearInterval(interval);
+    } else if (activeNav === "SIP Plans") {
+      fetchSipPlans();
+      const interval = setInterval(() => {
+        fetchSipPlans();
+      }, 5000);
+      return () => clearInterval(interval);
+    } else if (activeNav === "BBPS & Recharges") {
+      fetchBbpsTransactions();
+      const interval = setInterval(() => {
+        fetchBbpsTransactions();
+      }, 5000);
+      return () => clearInterval(interval);
+    } else if (activeNav === "Gold Holdings") {
+      fetchGoldHoldings();
+      const interval = setInterval(() => {
+        fetchGoldHoldings();
+      }, 5000);
+      return () => clearInterval(interval);
+    } else if (activeNav === "DGA Waitlist") {
       fetchDgaWaitlist();
       const interval = setInterval(() => {
         fetchDgaWaitlist();
@@ -541,8 +871,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     }
   };
 
-  // Live Benchmark Rate Manual Control
-  const [liveGoldRate, setLiveGoldRate] = useState<number>(7850.00);
+  // Live Benchmark Rate Manual Control (declared above with Gold Holdings API state)
 
   // Modals & Search Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -990,37 +1319,121 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   };
 
   // Action Handlers for Full Admin Control
-  const handleCreatePlan = (e: React.FormEvent) => {
+  const handleCreatePlan = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPlan.name) return;
-    const planItem = {
-      id: `SIP-${Math.floor(100 + Math.random() * 900)}`,
-      name: newPlan.name,
-      minAmount: Number(newPlan.minAmount),
-      category: newPlan.category,
-      activeUsers: 0,
-      totalInvested: "₹0",
-      goldGram: "0.000 kg",
-      returnsRate: newPlan.returnsRate,
-      status: "Active",
-      description: newPlan.description || "Custom FipMoney Gold SIP Plan"
-    };
-    setSipPlans([planItem, ...sipPlans]);
-    setShowCreatePlanModal(false);
-    addAuditLog(`Created new SIP Plan: ${newPlan.name}`, 'System', 'Info');
-    triggerToast(`Success! Created new SIP Plan: "${newPlan.name}"`);
-    setNewPlan({ name: "", minAmount: 100, category: "Daily Micro-SIP", description: "", returnsRate: "8.5%" });
+
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/sip-plans`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newPlan.name,
+          minAmount: Number(newPlan.minAmount),
+          category: newPlan.category,
+          description: newPlan.description || "Custom FipMoney Gold SIP Plan",
+          returnsRate: newPlan.returnsRate,
+          status: "Active"
+        })
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `Success! Created new SIP Plan: "${newPlan.name}"`);
+        fetchSipPlans();
+        setShowCreatePlanModal(false);
+        setNewPlan({ name: "", minAmount: 100, category: "Daily Micro-SIP", description: "", returnsRate: "8.5%" });
+        addAuditLog(`Created new SIP Plan: ${newPlan.name}`, 'System', 'Info');
+      } else {
+        const errJson = await res.json();
+        triggerToast(`Error creating plan: ${errJson.message || 'Failed'}`);
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error creating SIP plan:', err);
+    }
   };
 
-  const handleTogglePlanStatus = (id: string) => {
-    setSipPlans(sipPlans.map(p => p.id === id ? { ...p, status: p.status === "Active" ? "Paused" : "Active" } : p));
-    triggerToast(`Updated SIP Plan status for ${id}`);
+  const handleUpdatePlan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPlan || !editingPlan.name) return;
+
+    const targetId = editingPlan._id || editingPlan.planId || editingPlan.id;
+
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/sip-plans/${targetId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editingPlan.name,
+          minAmount: Number(editingPlan.minAmount),
+          category: editingPlan.category,
+          description: editingPlan.description,
+          returnsRate: editingPlan.returnsRate,
+          status: editingPlan.status
+        })
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `SIP Plan '${editingPlan.name}' updated!`);
+        fetchSipPlans();
+        setEditingPlan(null);
+        addAuditLog(`Updated SIP Plan: ${editingPlan.name}`, 'System', 'Info');
+      } else {
+        const errJson = await res.json();
+        triggerToast(`Error updating plan: ${errJson.message}`);
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error updating SIP plan:', err);
+    }
+  };
+
+  const handleTogglePlanStatus = async (id: string) => {
+    const currentPlan = sipPlans.find(p => p.id === id || p._id === id || p.planId === id);
+    const targetId = currentPlan?._id || currentPlan?.planId || id;
+    const newStatus = currentPlan?.status === "Active" ? "Paused" : "Active";
+
+    // Optimistic UI update
+    setSipPlans(sipPlans.map(p => (p.id === id || p._id === id || p.planId === id) ? { ...p, status: newStatus } : p));
+
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/sip-plans/${targetId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `Updated SIP Plan status for ${id}`);
+        fetchSipPlans();
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error toggling SIP plan status:', err);
+    }
     addAuditLog(`Toggled SIP Plan status for ${id}`, 'System', 'Info');
   };
 
-  const handleDeletePlan = (id: string) => {
-    setSipPlans(sipPlans.filter(p => p.id !== id));
-    triggerToast(`Deleted SIP Plan ${id}`);
+  const handleDeletePlan = async (id: string) => {
+    if (!window.confirm(`Are you sure you want to delete SIP plan ${id}?`)) return;
+
+    const currentPlan = sipPlans.find(p => p.id === id || p._id === id || p.planId === id);
+    const targetId = currentPlan?._id || currentPlan?.planId || id;
+
+    // Optimistic UI update
+    setSipPlans(sipPlans.filter(p => p.id !== id && p._id !== id && p.planId !== id));
+
+    try {
+      let res = await fetch(`${API_BASE_URL}/admin/sip-plans/${targetId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        const json = await res.json();
+        triggerToast(json.message || `Deleted SIP Plan ${id}`);
+        fetchSipPlans();
+      }
+    } catch (err) {
+      console.error('[AdminDashboard] Error deleting SIP plan:', err);
+    }
     addAuditLog(`Deleted SIP Plan ${id}`, 'System', 'Warning');
   };
 
@@ -1248,6 +1661,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
             {[
               { id: "Reports & Analytics", label: "Reports & Analytics", icon: BarChart3 },
+              { id: "BBPS & Recharges", label: "BBPS & Recharges", icon: Receipt },
               { id: "Ledger & Settlements", label: "Ledger & Settlements", icon: Building2 },
               { id: "Fees & Charges", label: "Fees & Charges", icon: Percent }
             ].map(item => {
@@ -1405,7 +1819,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <div>
                   <h4 className="text-xs font-black text-slate-900">AMT Security Risk Telemetry</h4>
                   <p className="text-[11px] font-semibold text-slate-600">
-                    1 User Account (Deepak Mehra - USR-7708) is flagged with High Risk AMT Score (34/100).
+                    {dashboardTelemetry.amtSecurityTelemetry?.highRiskCount || 1} User Account ({dashboardTelemetry.amtSecurityTelemetry?.flaggedUsers?.[0]?.name || 'Deepak Mehra'}) is flagged with High Risk AMT Score ({dashboardTelemetry.amtSecurityTelemetry?.flaggedUsers?.[0]?.score || 34}/100).
                   </p>
                 </div>
               </div>
@@ -1422,8 +1836,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-[11px] font-bold text-slate-500">Active Investments</div>
-                  <div className="text-xl font-black text-slate-900 tracking-tight">12,458</div>
-                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ 8.42% <span className="text-slate-400 font-normal">vs last month</span></div>
+                  <div className="text-xl font-black text-slate-900 tracking-tight">{dashboardTelemetry.metrics?.activeInvestments?.count?.toLocaleString() || '12,458'}</div>
+                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ {dashboardTelemetry.metrics?.activeInvestments?.growth || '8.42% vs last month'}</div>
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-purple-100/80 text-[#7C3AED] flex items-center justify-center shrink-0">
                   <TrendingUp size={18} strokeWidth={2.5} />
@@ -1433,8 +1847,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-[11px] font-bold text-slate-500">Total Investment</div>
-                  <div className="text-xl font-black text-slate-900 tracking-tight">₹12.45 Cr</div>
-                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ 10.21% <span className="text-slate-400 font-normal">vs last month</span></div>
+                  <div className="text-xl font-black text-slate-900 tracking-tight">{dashboardTelemetry.metrics?.totalInvestment?.formattedAmount || '₹12.45 Cr'}</div>
+                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ {dashboardTelemetry.metrics?.totalInvestment?.growth || '10.21% vs last month'}</div>
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-emerald-100/80 text-emerald-600 flex items-center justify-center shrink-0">
                   <CreditCard size={18} strokeWidth={2.5} />
@@ -1444,8 +1858,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-[11px] font-bold text-slate-500">Gold Accumulated</div>
-                  <div className="text-xl font-black text-slate-900 tracking-tight">3.152 kg</div>
-                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ 7.31% <span className="text-slate-400 font-normal">vs last month</span></div>
+                  <div className="text-xl font-black text-slate-900 tracking-tight">{dashboardTelemetry.metrics?.goldAccumulated?.formattedWeight || '3.152 kg'}</div>
+                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ {dashboardTelemetry.metrics?.goldAccumulated?.growth || '7.31% vs last month'}</div>
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-amber-100/80 text-amber-600 flex items-center justify-center shrink-0">
                   <Coins size={18} strokeWidth={2.5} />
@@ -1455,8 +1869,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-[11px] font-bold text-slate-500">Returns Generated</div>
-                  <div className="text-xl font-black text-slate-900 tracking-tight">₹78.45 L</div>
-                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ 9.18% <span className="text-slate-400 font-normal">vs last month</span></div>
+                  <div className="text-xl font-black text-slate-900 tracking-tight">{dashboardTelemetry.metrics?.returnsGenerated?.formattedAmount || '₹78.45 L'}</div>
+                  <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">▲ {dashboardTelemetry.metrics?.returnsGenerated?.growth || '9.18% vs last month'}</div>
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-orange-100/80 text-orange-600 flex items-center justify-center shrink-0">
                   <BarChart3 size={18} strokeWidth={2.5} />
@@ -1466,8 +1880,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-[11px] font-bold text-slate-500">Avg User AMT Score</div>
-                  <div className="text-xl font-black text-emerald-600 tracking-tight">88.4 / 100</div>
-                  <div className="text-[10px] font-bold text-emerald-600">Low Risk Profile</div>
+                  <div className="text-xl font-black text-emerald-600 tracking-tight">{dashboardTelemetry.metrics?.avgUserAmtScore?.score || 88.4} / 100</div>
+                  <div className="text-[10px] font-bold text-emerald-600">{dashboardTelemetry.metrics?.avgUserAmtScore?.riskProfile || 'Low Risk Profile'}</div>
                 </div>
                 <div className="w-9 h-9 rounded-xl bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0">
                   <ShieldCheck size={18} strokeWidth={2.5} />
@@ -1484,7 +1898,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </div>
                 <div className="h-36 w-full my-1">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={overviewChartData}>
+                    <AreaChart data={dashboardTelemetry.overviewTrend || overviewChartData}>
                       <defs>
                         <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.3} />
@@ -1506,18 +1920,18 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <div className="relative h-32 w-full flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={planDistributionData} innerRadius={38} outerRadius={54} paddingAngle={3} dataKey="value">
-                        {planDistributionData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                      <Pie data={dashboardTelemetry.planDistribution || planDistributionData} innerRadius={38} outerRadius={54} paddingAngle={3} dataKey="value">
+                        {(dashboardTelemetry.planDistribution || planDistributionData).map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute text-center">
                     <div className="text-[9px] font-bold text-slate-400 uppercase">Total</div>
-                    <div className="text-xs font-black text-slate-900">12,458</div>
+                    <div className="text-xs font-black text-slate-900">{(dashboardTelemetry.planDistribution || planDistributionData).reduce((sum: number, i: any) => sum + (i.value || 0), 0).toLocaleString()}</div>
                   </div>
                 </div>
                 <div className="space-y-1 pt-1 text-[11px]">
-                  {planDistributionData.map((item) => (
+                  {(dashboardTelemetry.planDistribution || planDistributionData).map((item: any) => (
                     <div key={item.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
@@ -1660,13 +2074,13 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={kycStatusData}
+                        data={dashboardTelemetry.kycStatusDistribution || kycStatusData}
                         innerRadius={45}
                         outerRadius={65}
                         paddingAngle={3}
                         dataKey="value"
                       >
-                        {kycStatusData.map((entry, index) => (
+                        {(dashboardTelemetry.kycStatusDistribution || kycStatusData).map((entry: any, index: number) => (
                           <Cell key={`kyc-cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
@@ -1674,12 +2088,12 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   </ResponsiveContainer>
                   <div className="absolute text-center">
                     <div className="text-[10px] font-bold text-slate-400 uppercase">Total Users</div>
-                    <div className="text-sm font-black text-slate-900">8,732</div>
+                    <div className="text-sm font-black text-slate-900">{(dashboardTelemetry.kycStatusDistribution || kycStatusData).reduce((sum: number, item: any) => sum + (item.value || 0), 0).toLocaleString()}</div>
                   </div>
                 </div>
 
                 <div className="space-y-1.5 pt-2 text-xs">
-                  {kycStatusData.map((item) => (
+                  {(dashboardTelemetry.kycStatusDistribution || kycStatusData).map((item: any) => (
                     <div key={item.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
@@ -1804,7 +2218,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     <span className="text-[11px] font-mono font-bold text-slate-400">{plan.id}</span>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => triggerToast(`Editing configuration for ${plan.name}...`)}
+                        onClick={() => setEditingPlan({ ...plan })}
                         className="text-xs font-extrabold text-[#7C3AED] hover:underline cursor-pointer border-none bg-transparent flex items-center gap-1"
                       >
                         <Edit2 size={13} />
@@ -1911,9 +2325,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   onClick={() => {
                     const newRate = prompt("Enter new Live 24K Gold Rate per gram (₹):", liveGoldRate.toString());
                     if (newRate && !isNaN(Number(newRate))) {
-                      setLiveGoldRate(Number(newRate));
-                      triggerToast(`Live 24K Gold Benchmark rate updated to ₹${Number(newRate).toFixed(2)}/g`);
-                      addAuditLog(`Updated Live 24K Gold Rate Benchmark to ₹${newRate}/g`, 'Rate Change', 'Warning');
+                      handleUpdateBenchmarkGoldRate(Number(newRate));
                     }
                   }}
                   className="bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl border-none cursor-pointer flex items-center gap-1.5 shadow-sm transition-all"
@@ -1931,7 +2343,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <Coins size={54} />
                 </div>
                 <div className="text-[10px] font-black uppercase tracking-wider opacity-90">TOTAL PHYSICAL VAULT GOLD</div>
-                <div className="text-3xl font-black mt-1">154.850 kg</div>
+                <div className="text-3xl font-black mt-1">{goldHoldingsSummary?.totalPhysicalVaultGoldKg || "154.850 kg"}</div>
                 <div className="text-[11px] mt-2 font-bold opacity-95 flex items-center gap-1">
                   <CheckCircle size={12} /> 100% Insured at Brink's & Vistra Vaults
                 </div>
@@ -1939,7 +2351,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
               <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-wider">VAULT RESERVE COVERAGE RATIO</div>
-                <div className="text-2xl font-black text-slate-900 mt-1">102.4% Coverage</div>
+                <div className="text-2xl font-black text-slate-900 mt-1">{goldHoldingsSummary?.vaultReserveCoverageRatio || "102.4%"} Coverage</div>
                 <div className="text-[11px] font-bold text-emerald-600 mt-2 flex items-center gap-1">
                   <ShieldCheck size={13} /> Audited Daily by Vistra Trustee
                 </div>
@@ -1947,13 +2359,13 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
               <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-wider">TOTAL VAULT ASSET VALUE</div>
-                <div className="text-2xl font-black text-slate-900 mt-1">₹121.55 Cr</div>
+                <div className="text-2xl font-black text-slate-900 mt-1">{goldHoldingsSummary?.totalVaultAssetValue || `₹${((154.85 * 1000 * liveGoldRate) / 10000000).toFixed(2)} Cr`}</div>
                 <div className="text-[11px] font-bold text-slate-500 mt-2">Based on ₹{liveGoldRate.toFixed(2)}/g live rate</div>
               </div>
 
               <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-wider">UNALLOCATED LIQUID SURPLUS</div>
-                <div className="text-2xl font-black text-amber-600 mt-1">20.200 kg</div>
+                <div className="text-2xl font-black text-amber-600 mt-1">{goldHoldingsSummary?.unallocatedLiquidSurplus || "20.200 kg"}</div>
                 <div className="text-[11px] font-bold text-slate-500 mt-2">Available for instant SIP fulfillment</div>
               </div>
             </div>
@@ -1966,86 +2378,45 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                {/* Brink's Vault */}
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:border-blue-300 transition-all">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center font-black text-blue-700 text-xs">
-                        BRINKS
+                {(goldHoldingsSummary?.custodians || [
+                  { id: "brinks", name: "Brink's Vault Logistics", location: "Mumbai & Delhi Secure Vaults", badge: "Primary Custodian", weight: "92.450 kg", valuation: "₹72.25 Cr" },
+                  { id: "vistra", name: "Vistra Security Trustee", location: "Bangalore Vault Reserve", badge: "Legal Trustee", weight: "42.100 kg", valuation: "₹32.90 Cr" },
+                  { id: "mmtc", name: "Augmont & MMTC Mint", location: "Hyderabad Minting Reserve", badge: "Mint Custody", weight: "20.300 kg", valuation: "₹15.86 Cr" }
+                ]).map((c: any, i: number) => (
+                  <div key={c.id || i} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:border-purple-300 transition-all">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${
+                          c.id === 'brinks' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
+                          c.id === 'vistra' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' :
+                          'bg-amber-50 border border-amber-200 text-amber-700'
+                        }`}>
+                          {c.id ? c.id.toUpperCase() : 'VAULT'}
+                        </div>
+                        <div>
+                          <div className="text-xs font-black text-slate-900">{c.name}</div>
+                          <div className="text-[10px] font-bold text-slate-400">{c.location}</div>
+                        </div>
                       </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        c.id === 'brinks' ? 'bg-blue-100 text-blue-700' :
+                        c.id === 'vistra' ? 'bg-emerald-100 text-emerald-700' :
+                        'bg-amber-100 text-amber-700'
+                      }`}>{c.badge}</span>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                       <div>
-                        <div className="text-xs font-black text-slate-900">Brink's Vault Logistics</div>
-                        <div className="text-[10px] font-bold text-slate-400">Mumbai & Delhi Secure Vaults</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase">Holding Weight</div>
+                        <div className="text-base font-black text-slate-900">{c.weight}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase">Valuation</div>
+                        <div className="text-base font-black text-purple-600">{c.valuation}</div>
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold">Primary Custodian</span>
                   </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Holding Weight</div>
-                      <div className="text-base font-black text-slate-900">92.450 kg</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Valuation</div>
-                      <div className="text-base font-black text-blue-600">₹72.57 Cr</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Vistra Trustee */}
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:border-emerald-300 transition-all">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center font-black text-emerald-700 text-xs">
-                        VISTRA
-                      </div>
-                      <div>
-                        <div className="text-xs font-black text-slate-900">Vistra Security Trustee</div>
-                        <div className="text-[10px] font-bold text-slate-400">Bangalore Vault Reserve</div>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-extrabold">Legal Trustee</span>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Holding Weight</div>
-                      <div className="text-base font-black text-slate-900">42.100 kg</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Valuation</div>
-                      <div className="text-base font-black text-emerald-600">₹33.05 Cr</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Augmont / MMTC Mint */}
-                <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:border-purple-300 transition-all">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center font-black text-amber-700 text-[10px]">
-                        MMTC
-                      </div>
-                      <div>
-                        <div className="text-xs font-black text-slate-900">Augmont & MMTC Mint</div>
-                        <div className="text-[10px] font-bold text-slate-400">Hyderabad Minting Reserve</div>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-extrabold">Mint Custody</span>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Holding Weight</div>
-                      <div className="text-base font-black text-slate-900">20.300 kg</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase">Valuation</div>
-                      <div className="text-base font-black text-amber-600">₹15.93 Cr</div>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -2068,7 +2439,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
                 <div className="h-56 w-full pt-2">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={[
+                    <AreaChart data={goldHoldingsSummary?.priceHistory || [
                       { day: 'Mon', price: 7680 },
                       { day: 'Tue', price: 7710 },
                       { day: 'Wed', price: 7695 },
@@ -2101,38 +2472,22 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </h3>
 
                 <div className="space-y-3 pt-1">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-black text-slate-800">24K Gold Coins (1g, 5g, 10g)</div>
-                      <div className="text-[10px] font-bold text-slate-400">Minted & Sealed in Tamper-Proof Blisters</div>
+                  {(goldHoldingsSummary?.formFactorBreakdown || [
+                    { name: "24K Gold Coins (1g, 5g, 10g)", desc: "Minted & Sealed in Tamper-Proof Blisters", weight: "64.200 kg", percentage: "41.4%" },
+                    { name: "24K Bullion Bars (50g, 100g, 1kg)", desc: "Hallmarked 99.99% Institutional Bars", weight: "70.450 kg", percentage: "45.5%" },
+                    { name: "Unallocated Vault Reserve", desc: "Liquid Gold Balance for Daily SIPs", weight: "20.200 kg", percentage: "13.1%" }
+                  ]).map((item: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                      <div>
+                        <div className="text-xs font-black text-slate-800">{item.name}</div>
+                        <div className="text-[10px] font-bold text-slate-400">{item.desc}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs font-black text-amber-600">{item.weight}</div>
+                        <div className="text-[10px] font-bold text-slate-400">{item.percentage}</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-xs font-black text-amber-600">64.200 kg</div>
-                      <div className="text-[10px] font-bold text-slate-400">41.4%</div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-black text-slate-800">24K Bullion Bars (50g, 100g, 1kg)</div>
-                      <div className="text-[10px] font-bold text-slate-400">Hallmarked 99.99% Institutional Bars</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-black text-amber-600">70.450 kg</div>
-                      <div className="text-[10px] font-bold text-slate-400">45.5%</div>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-black text-slate-800">Unallocated Vault Reserve</div>
-                      <div className="text-[10px] font-bold text-slate-400">Liquid Gold Balance for Daily SIPs</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-black text-amber-600">20.200 kg</div>
-                      <div className="text-[10px] font-bold text-slate-400">13.1%</div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -2150,14 +2505,14 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => triggerToast("Generating Vault Reserve Audit PDF Report...")}
+                    onClick={() => triggerToast("Exporting Vault Reserve Audit Ledger CSV...")}
                     className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer flex items-center gap-1.5"
                   >
                     <Download size={13} />
                     <span>Export Ledger CSV</span>
                   </button>
                   <button
-                    onClick={() => triggerToast("Requesting Instant Vistra Trustee Audit Scan...")}
+                    onClick={handleTriggerTrusteeAuditScan}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black px-3.5 py-1.5 rounded-xl border-none cursor-pointer flex items-center gap-1.5"
                   >
                     <ShieldCheck size={13} />
@@ -2180,25 +2535,25 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {[
-                      { id: "VLT-2026-9812", vault: "Mumbai Brink's Vault", custodian: "Brink's India", type: "Bullion Deposit", weight: "+15.500 kg", cert: "BIS Hallmarked #MMTC-8921", status: "Verified & Insured" },
-                      { id: "VLT-2026-9804", vault: "Bangalore Vistra Vault", custodian: "Vistra Trustee", type: "Trustee Audit Scan", weight: "42.100 kg", cert: "SEBI Audit Cert #VST-4491", status: "Audited & Verified" },
-                      { id: "VLT-2026-9799", vault: "Delhi Brink's Vault", custodian: "Brink's India", type: "SIP Reserve Allocation", weight: "+8.250 kg", cert: "Augmont Hallmarked #AUG-3329", status: "Verified & Insured" },
-                      { id: "VLT-2026-9788", vault: "Hyderabad Mint Reserve", custodian: "MMTC-PAMP", type: "Mint Coin Dispatch", weight: "-2.400 kg", cert: "Mint Assay Cert #PAMP-9912", status: "Dispatched to Doorstep" },
-                      { id: "VLT-2026-9775", vault: "Mumbai Brink's Vault", custodian: "Brink's India", type: "Monthly Bullion Deposit", weight: "+25.000 kg", cert: "BIS Hallmarked #MMTC-7718", status: "Verified & Insured" },
-                    ].map((row, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50">
-                        <td className="p-3.5 font-black text-slate-900 font-mono">{row.id}</td>
-                        <td className="p-3.5 font-bold text-slate-800">{row.vault}</td>
+                    {(goldAuditJournal.length > 0 ? goldAuditJournal : [
+                      { auditRefId: "VLT-2026-9812", vaultLocation: "Mumbai Brink's Vault", custodian: "Brink's India", movementType: "Bullion Deposit", weightFormatted: "+15.500 kg", purityCert: "BIS Hallmarked #MMTC-8921", auditStatus: "Verified & Insured" },
+                      { auditRefId: "VLT-2026-9804", vaultLocation: "Bangalore Vistra Vault", custodian: "Vistra Trustee", movementType: "Trustee Audit Scan", weightFormatted: "42.100 kg", purityCert: "SEBI Audit Cert #VST-4491", auditStatus: "Audited & Verified" },
+                      { auditRefId: "VLT-2026-9799", vaultLocation: "Delhi Brink's Vault", custodian: "Brink's India", movementType: "SIP Reserve Allocation", weightFormatted: "+8.250 kg", purityCert: "Augmont Hallmarked #AUG-3329", auditStatus: "Verified & Insured" },
+                      { auditRefId: "VLT-2026-9788", vaultLocation: "Hyderabad Mint Reserve", custodian: "MMTC-PAMP", movementType: "Mint Coin Dispatch", weightFormatted: "-2.400 kg", purityCert: "Mint Assay Cert #PAMP-9912", auditStatus: "Dispatched to Doorstep" },
+                      { auditRefId: "VLT-2026-9775", vaultLocation: "Mumbai Brink's Vault", custodian: "Brink's India", movementType: "Monthly Bullion Deposit", weightFormatted: "+25.000 kg", purityCert: "BIS Hallmarked #MMTC-7718", auditStatus: "Verified & Insured" },
+                    ]).map((row: any, idx: number) => (
+                      <tr key={row._id || row.auditRefId || idx} className="hover:bg-slate-50">
+                        <td className="p-3.5 font-black text-slate-900 font-mono">{row.auditRefId}</td>
+                        <td className="p-3.5 font-bold text-slate-800">{row.vaultLocation}</td>
                         <td className="p-3.5 font-semibold text-slate-700">{row.custodian}</td>
-                        <td className="p-3.5 font-semibold text-slate-600">{row.type}</td>
-                        <td className={`p-3.5 font-black ${row.weight.startsWith('+') ? 'text-emerald-600' : row.weight.startsWith('-') ? 'text-purple-600' : 'text-amber-600'}`}>
-                          {row.weight}
+                        <td className="p-3.5 font-semibold text-slate-600">{row.movementType}</td>
+                        <td className={`p-3.5 font-black ${String(row.weightFormatted).startsWith('+') ? 'text-emerald-600' : String(row.weightFormatted).startsWith('-') ? 'text-purple-600' : 'text-amber-600'}`}>
+                          {row.weightFormatted}
                         </td>
-                        <td className="p-3.5 font-mono text-[11px] text-slate-500">{row.cert}</td>
+                        <td className="p-3.5 font-mono text-[11px] text-slate-500">{row.purityCert}</td>
                         <td className="p-3.5">
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
-                            {row.status}
+                            {row.auditStatus}
                           </span>
                         </td>
                       </tr>
@@ -2777,6 +3132,251 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* BBPS BILLS & RECHARGES PAGE */}
+        {activeNav === "BBPS & Recharges" && (
+          <div className="space-y-6">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-slate-900">BBPS Bills & Recharges Control Desk</h2>
+                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    NPCI BBPS Active
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-slate-500">Monitor live bill payments, mobile recharges, NPCI settlement statuses, and 24K Gold cashback rewards.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchBbpsTransactions()}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer border-none transition-all"
+                >
+                  <RefreshCw size={14} className={isLoadingBbps ? "animate-spin" : ""} />
+                  <span>Refresh</span>
+                </button>
+                <button
+                  onClick={() => setShowSimulateBbpsModal(true)}
+                  className="bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-purple-600/30 transition-all cursor-pointer outline-none border-none"
+                >
+                  <Plus size={16} />
+                  <span>Simulate BBPS Txn</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Summary Metrics Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-extrabold text-slate-500">Total BBPS Volume</span>
+                  <div className="w-8 h-8 rounded-xl bg-purple-100 text-[#7C3AED] flex items-center justify-center">
+                    <Receipt size={17} />
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-slate-900">{bbpsSummary.totalVolume || "₹0"}</div>
+                <div className="text-[11px] font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                  <ArrowUpRight size={13} />
+                  <span>+18.4% this month</span>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-extrabold text-slate-500">Total Transactions</span>
+                  <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <Smartphone size={17} />
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-slate-900">{bbpsSummary.totalCount || bbpsTxns.length}</div>
+                <div className="text-[11px] font-bold text-slate-500 mt-1">
+                  Success Rate: <span className="text-emerald-600 font-extrabold">{bbpsSummary.successRate || "98.4%"}</span>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-extrabold text-slate-500">24K Gold Cashback</span>
+                  <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                    <Coins size={17} />
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-slate-900">{bbpsSummary.totalGoldCashback || "0.000 g Gold"}</div>
+                <div className="text-[11px] font-bold text-amber-600 mt-1">
+                  Rewarded directly to user gold lockers
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-2xs">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-extrabold text-slate-500">NPCI Network Latency</span>
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <Zap size={17} />
+                  </div>
+                </div>
+                <div className="text-xl font-black text-slate-900">{bbpsSummary.npciStatus || "ONLINE"}</div>
+                <div className="text-[11px] font-bold text-emerald-600 mt-1">
+                  Avg response: 120 ms
+                </div>
+              </div>
+            </div>
+
+            {/* Filter and Search Bar */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+                <div className="relative w-full md:w-80">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by Txn ID, User Name, Biller, Mobile..."
+                    value={bbpsSearchQuery}
+                    onChange={(e) => setBbpsSearchQuery(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
+                  <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Category:</span>
+                  {['All', 'Mobile Recharge', 'Electricity', 'DTH', 'LPG Gas', 'Fastag', 'Water Bill', 'Broadband'].map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setBbpsCategoryFilter(cat)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap cursor-pointer transition-all border-none ${
+                        bbpsCategoryFilter === cat
+                          ? 'bg-[#7C3AED] text-white shadow-md'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                  <span className="text-xs font-bold text-slate-500">Status:</span>
+                  <select
+                    value={bbpsStatusFilter}
+                    onChange={(e) => setBbpsStatusFilter(e.target.value)}
+                    className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Success">Success</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                    <option value="Refunded">Refunded</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Transactions Table */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-700">
+                  <thead className="bg-slate-50 text-slate-400 font-black text-[10px] uppercase border-b border-slate-200">
+                    <tr>
+                      <th className="p-3.5">Txn ID & NPCI Ref</th>
+                      <th className="p-3.5">User Details</th>
+                      <th className="p-3.5">Biller & Category</th>
+                      <th className="p-3.5">Consumer / Acc No</th>
+                      <th className="p-3.5">Amount Paid</th>
+                      <th className="p-3.5">24K Gold Cashback</th>
+                      <th className="p-3.5">Gateway</th>
+                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {isLoadingBbps && bbpsTxns.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="p-8 text-center">
+                          <LoadingSpinner />
+                          <span className="block mt-2 font-bold text-slate-500">Loading BBPS Bill Transactions...</span>
+                        </td>
+                      </tr>
+                    ) : bbpsTxns.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="p-8 text-center text-slate-400 font-bold">
+                          No BBPS transactions found.
+                        </td>
+                      </tr>
+                    ) : (
+                      bbpsTxns
+                        .filter(t => {
+                          const matchesSearch =
+                            t.txnId.toLowerCase().includes(bbpsSearchQuery.toLowerCase()) ||
+                            t.userName.toLowerCase().includes(bbpsSearchQuery.toLowerCase()) ||
+                            t.billerName.toLowerCase().includes(bbpsSearchQuery.toLowerCase()) ||
+                            t.accountNumber.includes(bbpsSearchQuery);
+                          const matchesCategory = bbpsCategoryFilter === 'All' || t.category === bbpsCategoryFilter;
+                          const matchesStatus = bbpsStatusFilter === 'All' || t.status === bbpsStatusFilter;
+                          return matchesSearch && matchesCategory && matchesStatus;
+                        })
+                        .map((t) => (
+                          <tr key={t._id || t.txnId} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="p-3.5 font-mono font-bold text-slate-900">
+                              {t.txnId}
+                              <div className="text-[10px] text-slate-400 font-normal">{t.bbpsRefNo}</div>
+                            </td>
+                            <td className="p-3.5">
+                              <div className="font-extrabold text-slate-900">{t.userName}</div>
+                              <div className="text-[10px] font-semibold text-slate-400">{t.userPhone}</div>
+                            </td>
+                            <td className="p-3.5">
+                              <div className="font-bold text-slate-800">{t.billerName}</div>
+                              <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-purple-50 text-[#7C3AED]">
+                                {t.category}
+                              </span>
+                            </td>
+                            <td className="p-3.5 font-mono font-semibold text-slate-700">{t.accountNumber}</td>
+                            <td className="p-3.5 font-black text-slate-900">₹{t.amount.toLocaleString('en-IN')}</td>
+                            <td className="p-3.5">
+                              {t.goldCashbackEarned && t.goldCashbackEarned > 0 ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                                  <Coins size={12} className="text-amber-500" />
+                                  {t.goldCashbackFormatted || `+${t.goldCashbackEarned} g Gold`}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 text-[10px] font-semibold">No Gold Cashback</span>
+                              )}
+                            </td>
+                            <td className="p-3.5 font-bold text-slate-600 text-[11px]">{t.paymentGateway}</td>
+                            <td className="p-3.5">
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase inline-flex items-center gap-1 ${
+                                  t.status === 'Success'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : t.status === 'Pending'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : t.status === 'Failed'
+                                    ? 'bg-rose-100 text-rose-800'
+                                    : 'bg-slate-100 text-slate-700'
+                                }`}
+                              >
+                                {t.status}
+                              </span>
+                            </td>
+                            <td className="p-3.5">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setSelectedBbpsReceipt(t)}
+                                  className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-[#7C3AED] font-extrabold text-[11px] border-none cursor-pointer flex items-center gap-1"
+                                >
+                                  <Eye size={12} />
+                                  <span>Receipt</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
@@ -4054,6 +4654,354 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   </button>
                   <button type="submit" className="px-5 py-2 rounded-xl bg-[#7C3AED] text-white font-extrabold border-none cursor-pointer shadow-md">
                     Create Plan
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* EDIT SIP PLAN MODAL */}
+      <AnimatePresence>
+        {editingPlan && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-base font-black text-slate-900">Edit Gold SIP Plan</h3>
+                <button onClick={() => setEditingPlan(null)} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center border-none cursor-pointer">
+                  <X size={15} />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpdatePlan} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Plan Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingPlan.name || ""}
+                    onChange={e => setEditingPlan({ ...editingPlan, name: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Min Deposit (₹)</label>
+                    <input
+                      type="number"
+                      required
+                      value={editingPlan.minAmount || 10}
+                      onChange={e => setEditingPlan({ ...editingPlan, minAmount: Number(e.target.value) })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Category</label>
+                    <select
+                      value={editingPlan.category || "Daily Micro-SIP"}
+                      onChange={e => setEditingPlan({ ...editingPlan, category: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    >
+                      <option>Daily Micro-SIP</option>
+                      <option>Weekly SIP</option>
+                      <option>Monthly SIP</option>
+                      <option>Long-term Wealth</option>
+                      <option>High Networth</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Return Yield</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingPlan.returnsRate || "8.5%"}
+                      onChange={e => setEditingPlan({ ...editingPlan, returnsRate: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Status</label>
+                    <select
+                      value={editingPlan.status || "Active"}
+                      onChange={e => setEditingPlan({ ...editingPlan, status: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    >
+                      <option>Active</option>
+                      <option>Paused</option>
+                      <option>Inactive</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Description</label>
+                  <textarea
+                    rows={2}
+                    value={editingPlan.description || ""}
+                    onChange={e => setEditingPlan({ ...editingPlan, description: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button type="button" onClick={() => setEditingPlan(null)} className="px-4 py-2 rounded-xl bg-slate-100 font-bold text-slate-600 border-none cursor-pointer">
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-5 py-2 rounded-xl bg-[#7C3AED] text-white font-extrabold border-none cursor-pointer shadow-md">
+                    Update Plan
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* BBPS RECEIPT & AUDIT MODAL */}
+      <AnimatePresence>
+        {selectedBbpsReceipt && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Receipt className="text-[#7C3AED]" size={20} />
+                  <h3 className="text-base font-black text-slate-900">BBPS Official Payment Receipt</h3>
+                </div>
+                <button onClick={() => setSelectedBbpsReceipt(null)} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center border-none cursor-pointer">
+                  <X size={15} />
+                </button>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3 text-xs">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="font-extrabold text-slate-500">NPCI Ref Number</span>
+                  <span className="font-mono font-black text-slate-900">{selectedBbpsReceipt.bbpsRefNo}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="font-extrabold text-slate-500">Transaction ID</span>
+                  <span className="font-mono font-black text-[#7C3AED]">{selectedBbpsReceipt.txnId}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="font-extrabold text-slate-500">Biller Name</span>
+                  <span className="font-extrabold text-slate-900">{selectedBbpsReceipt.billerName}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="font-extrabold text-slate-500">Consumer Account / Mobile</span>
+                  <span className="font-mono font-bold text-slate-800">{selectedBbpsReceipt.accountNumber}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="font-extrabold text-slate-500">User Name & Mobile</span>
+                  <span className="font-bold text-slate-800">{selectedBbpsReceipt.userName} ({selectedBbpsReceipt.userPhone})</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="font-extrabold text-slate-500">Amount Paid</span>
+                  <span className="font-black text-slate-900 text-sm">₹{selectedBbpsReceipt.amount.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <span className="font-extrabold text-slate-500">24K Gold Cashback</span>
+                  <span className="font-extrabold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    {selectedBbpsReceipt.goldCashbackFormatted || `${selectedBbpsReceipt.goldCashbackEarned || 0} g Gold`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-slate-500">Current Status</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                    selectedBbpsReceipt.status === 'Success' ? 'bg-emerald-100 text-emerald-800' :
+                    selectedBbpsReceipt.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
+                    selectedBbpsReceipt.status === 'Failed' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    {selectedBbpsReceipt.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status Override Controls for Admin */}
+              <div className="space-y-2 pt-1">
+                <label className="font-extrabold text-slate-700 text-xs block">Update NPCI Transaction Status:</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {['Success', 'Pending', 'Failed', 'Refunded'].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => handleUpdateBbpsStatus(selectedBbpsReceipt.txnId || selectedBbpsReceipt._id || '', st)}
+                      disabled={selectedBbpsReceipt.status === st}
+                      className={`py-2 rounded-xl font-extrabold text-xs cursor-pointer border-none transition-all ${
+                        selectedBbpsReceipt.status === st
+                          ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                          : st === 'Success' ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                          : st === 'Pending' ? 'bg-amber-500 text-white hover:bg-amber-600'
+                          : st === 'Failed' ? 'bg-rose-600 text-white hover:bg-rose-700'
+                          : 'bg-purple-600 text-white hover:bg-purple-700'
+                      }`}
+                    >
+                      Mark {st}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => setSelectedBbpsReceipt(null)}
+                  className="px-5 py-2 rounded-xl bg-slate-100 font-bold text-slate-600 border-none cursor-pointer"
+                >
+                  Close Receipt
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* SIMULATE BBPS TRANSACTION MODAL */}
+      <AnimatePresence>
+        {showSimulateBbpsModal && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Plus className="text-[#7C3AED]" size={20} />
+                  <h3 className="text-base font-black text-slate-900">Simulate BBPS Bill Payment</h3>
+                </div>
+                <button onClick={() => setShowSimulateBbpsModal(false)} className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center border-none cursor-pointer">
+                  <X size={15} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSimulateBbpsTxn} className="space-y-3 text-xs">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">User Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ramesh Kumar"
+                    value={newBbpsForm.userName}
+                    onChange={e => setNewBbpsForm({ ...newBbpsForm, userName: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">User Mobile</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="+91 98000 11223"
+                      value={newBbpsForm.userPhone}
+                      onChange={e => setNewBbpsForm({ ...newBbpsForm, userPhone: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Category</label>
+                    <select
+                      value={newBbpsForm.category}
+                      onChange={e => setNewBbpsForm({ ...newBbpsForm, category: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    >
+                      <option>Mobile Recharge</option>
+                      <option>Electricity</option>
+                      <option>DTH</option>
+                      <option>LPG Gas</option>
+                      <option>Fastag</option>
+                      <option>Water Bill</option>
+                      <option>Broadband</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Biller Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Airtel Prepaid / BSES Rajdhani"
+                    value={newBbpsForm.billerName}
+                    onChange={e => setNewBbpsForm({ ...newBbpsForm, billerName: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Consumer / Acc No</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 9800011223 or 10029384"
+                      value={newBbpsForm.accountNumber}
+                      onChange={e => setNewBbpsForm({ ...newBbpsForm, accountNumber: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Amount (₹)</label>
+                    <input
+                      type="number"
+                      required
+                      min={10}
+                      value={newBbpsForm.amount}
+                      onChange={e => setNewBbpsForm({ ...newBbpsForm, amount: Number(e.target.value) })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Payment Gateway</label>
+                    <select
+                      value={newBbpsForm.paymentGateway}
+                      onChange={e => setNewBbpsForm({ ...newBbpsForm, paymentGateway: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    >
+                      <option>Setu BBPS NPCI</option>
+                      <option>Razorpay BBPS</option>
+                      <option>FipMoney Wallet</option>
+                      <option>Axis UPI BBPS</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 block mb-1">Status</label>
+                    <select
+                      value={newBbpsForm.status}
+                      onChange={e => setNewBbpsForm({ ...newBbpsForm, status: e.target.value })}
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 font-semibold focus:outline-none focus:border-purple-500"
+                    >
+                      <option>Success</option>
+                      <option>Pending</option>
+                      <option>Failed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2">
+                  <button type="button" onClick={() => setShowSimulateBbpsModal(false)} className="px-4 py-2 rounded-xl bg-slate-100 font-bold text-slate-600 border-none cursor-pointer">
+                    Cancel
+                  </button>
+                  <button type="submit" className="px-5 py-2 rounded-xl bg-[#7C3AED] text-white font-extrabold border-none cursor-pointer shadow-md">
+                    Process Transaction
                   </button>
                 </div>
               </form>
