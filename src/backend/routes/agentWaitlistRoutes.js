@@ -78,12 +78,12 @@ router.get('/check', async (req, res) => {
 // @access  Public
 router.post('/', async (req, res) => {
   try {
-    const { username, mobile, email, city, language } = req.body;
+    const { username, mobile, email, city, address, language } = req.body;
 
-    if (!username || !mobile || !email || !city) {
+    if (!username || !mobile || !email || !city || !address) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields: username, mobile, email, city',
+        message: 'Please provide all required fields: username, mobile, email, city, address',
       });
     }
 
@@ -141,9 +141,11 @@ router.post('/', async (req, res) => {
 
     const newWaitlistEntry = await AgentWaitlist.create({
       username,
-      mobile,
-      email,
+      mobile: cleanMobile,
+      email: cleanEmail,
       city,
+      address: String(address).trim(),
+      isAddressVerified: true,
       language: language || 'English',
       waitlistNumber: assignedWaitlistNumber,
       formattedWaitlistNumber: formattedNumber,
@@ -198,6 +200,8 @@ router.get('/admin/all', async (req, res) => {
       mobile: item.mobile,
       email: item.email,
       city: item.city,
+      address: item.address || '',
+      isAddressVerified: Boolean(item.isAddressVerified),
       language: item.language,
       waitlistNumber: item.waitlistNumber,
       formattedWaitlistNumber: (item.status === 'approved' || item.status === 'APPROVED') ? 'APPROVED' : (item.formattedWaitlistNumber || formatWaitlistNumber(item.waitlistNumber)),

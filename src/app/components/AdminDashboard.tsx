@@ -203,6 +203,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     "Ledger & Settlements": "ledger",
     "Fees & Charges": "fees",
     "Notifications": "notifications",
+    "Email Marketing": "email-marketing",
     "Email Templates": "email-templates",
     "System Settings": "settings",
     "Admin Users": "admin-users"
@@ -539,6 +540,209 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       }
     } catch (err) {
       console.error('[AdminDashboard] Error updating BBPS status:', err);
+      triggerToast('Server connection error while updating status');
+    }
+  };
+
+  // EMAIL MARKETING & CAMPAIGNS STATES & HANDLERS
+  const [emailCampaigns, setEmailCampaigns] = useState<any[]>([]);
+  const [isLoadingCampaigns, setIsLoadingCampaigns] = useState<boolean>(false);
+  const [showCampaignModal, setShowCampaignModal] = useState<boolean>(false);
+  const [showZohoConnectModal, setShowZohoConnectModal] = useState<boolean>(false);
+  const [zohoKeys, setZohoKeys] = useState({
+    clientId: "",
+    clientSecret: "",
+    dataCenter: "in",
+  });
+  const [redirectUriInfo, setRedirectUriInfo] = useState({
+    redirectUri: typeof window !== "undefined" ? `${window.location.origin}/api/admin/zoho-oauth/callback` : "http://localhost:5000/api/admin/zoho-oauth/callback",
+    localRedirectUri: "http://localhost:5000/api/admin/zoho-oauth/callback",
+    productionRedirectUri: "https://www.fipmoney.com/api/admin/zoho-oauth/callback",
+    isConfigured: false,
+  });
+
+  const handleConnectZohoAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!zohoKeys.clientId || !zohoKeys.clientSecret) {
+      triggerToast("Client ID and Client Secret are required.");
+      return;
+    }
+
+    try {
+      const saveRes = await fetch(`${API_BASE_URL}/admin/zoho-oauth/save-keys`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(zohoKeys),
+      });
+
+      const json = await saveRes.json();
+      if (!saveRes.ok || !json.success) {
+        triggerToast(json.message || "Failed to save Zoho API keys");
+        return;
+      }
+
+      // Open Zoho OAuth authorization popup
+      const dcDomain = zohoKeys.dataCenter === "com" || zohoKeys.dataCenter === "us" ? "https://accounts.zoho.com" : "https://accounts.zoho.in";
+      const authUrl = `${dcDomain}/oauth/v2/auth?scope=ZohoCampaigns.campaign.ALL,ZohoCampaigns.contact.ALL&client_id=${encodeURIComponent(zohoKeys.clientId.trim())}&response_type=code&access_type=offline&redirect_uri=${encodeURIComponent(redirectUriInfo.redirectUri)}`;
+
+      window.open(authUrl, "ZohoOAuthAuth", "width=600,height=700,scrollbars=yes");
+      triggerToast("Opened Zoho Authorization Window! Please approve permissions.");
+    } catch (err) {
+      console.error("[AdminDashboard] Error connecting Zoho account:", err);
+      triggerToast("Server connection error");
+    }
+  };
+  const [campaignForm, setCampaignForm] = useState({
+    campaignId: "",
+    title: "",
+    subject: "",
+    category: "Marketing",
+    fromEmail: "info@fipmoney.com",
+    htmlContent: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+  <div style="text-align: center; margin-bottom: 24px;">
+    <h2 style="color: #6d28d9; margin: 0; font-size: 24px;">Fipmoney Digital Gold</h2>
+    <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Instant 24K Gold Savings & SIP</p>
+  </div>
+  <h3 style="color: #1e293b; font-size: 18px;">Hello {{ userName }},</h3>
+  <p style="color: #334155; line-height: 1.6; font-size: 14px;">We are excited to share an exclusive update! Start your 24K Digital Gold SIP on Fipmoney today and earn instant gold rewards directly into your vault.</p>
+  <div style="text-align: center; margin: 32px 0;">
+    <a href="{{ baseUrl }}" style="background-color: #6d28d9; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; display: inline-block;">Start 24K Gold SIP Now</a>
+  </div>
+  <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+  <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">Your Referral Code: <strong>{{ referralCode }}</strong> | Need help? Contact {{ supportEmail }}</p>
+</div>`,
+    targetAudience: "ALL_USERS",
+    targetEmailsText: "",
+  });
+  const [testEmailAddress, setTestEmailAddress] = useState<string>("admin@fipmoney.com");
+  const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
+  const [isSendingCampaign, setIsSendingCampaign] = useState<boolean>(false);
+  const [previewTab, setPreviewTab] = useState<"editor" | "preview">("editor");
+
+  const fetchEmailCampaigns = async () => {
+    setIsLoadingCampaigns(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/email-campaigns`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setEmailCampaigns(json.data);
+        }
+      }
+    } catch (err) {
+      console.error("[AdminDashboard] Error fetching email campaigns:", err);
+    } finally {
+      setIsLoadingCampaigns(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (activeNav === "Email Marketing") {
+      fetchEmailCampaigns();
+    }
+  }, [activeNav]);
+
+  const handleSaveCampaign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!campaignForm.title || !campaignForm.subject || !campaignForm.htmlContent) {
+      triggerToast("Title, Subject, and HTML Content are required.");
+      return;
+    }
+
+    const targetEmails = campaignForm.targetAudience === "SPECIFIC_USERS"
+      ? campaignForm.targetEmailsText.split(/[\n,]+/).map(s => s.trim()).filter(Boolean)
+      : [];
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/email-campaigns`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          campaignId: campaignForm.campaignId || undefined,
+          title: campaignForm.title,
+          subject: campaignForm.subject,
+          category: campaignForm.category,
+          fromEmail: campaignForm.fromEmail,
+          htmlContent: campaignForm.htmlContent,
+          targetAudience: campaignForm.targetAudience,
+          targetEmails,
+        }),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast("Email Campaign saved successfully!");
+        setShowCampaignModal(false);
+        fetchEmailCampaigns();
+      } else {
+        triggerToast(json.message || "Failed to save email campaign");
+      }
+    } catch (err) {
+      console.error("[AdminDashboard] Error saving campaign:", err);
+      triggerToast("Server error saving campaign");
+    }
+  };
+
+  const handleSendTestEmail = async (campaignToTest?: any) => {
+    const target = campaignToTest || campaignForm;
+    if (!testEmailAddress || !target.subject || !target.htmlContent) {
+      triggerToast("Please enter a test email address, subject, and content.");
+      return;
+    }
+
+    setIsSendingTest(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/email-campaigns/test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          testEmail: testEmailAddress,
+          subject: target.subject,
+          htmlContent: target.htmlContent,
+          fromEmail: target.fromEmail || "info@fipmoney.com",
+          category: target.category || "Marketing",
+        }),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast(`Test email sent successfully to ${testEmailAddress}!`);
+      } else {
+        triggerToast(json.message || "Failed to send test email");
+      }
+    } catch (err) {
+      console.error("[AdminDashboard] Error sending test email:", err);
+      triggerToast("Server connection error sending test email");
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
+  const handleSendCampaignNow = async (cId: string) => {
+    if (!window.confirm("Are you sure you want to broadcast this email campaign to the target audience now?")) return;
+
+    setIsSendingCampaign(true);
+    triggerToast("Broadcasting email campaign to target audience...");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/email-campaigns/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ campaignId: cId }),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success) {
+        triggerToast(json.message || "Campaign broadcast executed successfully!");
+        fetchEmailCampaigns();
+      } else {
+        triggerToast(json.message || "Failed to broadcast campaign");
+      }
+    } catch (err) {
+      console.error("[AdminDashboard] Error broadcasting campaign:", err);
+      triggerToast("Server connection error broadcasting campaign");
+    } finally {
+      setIsSendingCampaign(false);
     }
   };
 
@@ -1690,6 +1894,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
             {[
               { id: "Notifications", label: "Notifications", icon: Bell },
+              { id: "Email Marketing", label: "Email Marketing", icon: Mail },
               { id: "Email Templates", label: "Email Templates", icon: Send },
               { id: "System Settings", label: "System Settings", icon: Settings },
               { id: "Admin Users", label: "Admin Users", icon: UserCheck }
@@ -3926,6 +4131,574 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
           </div>
         )}
 
+        {/* EMAIL MARKETING & CAMPAIGNS PAGE */}
+        {activeNav === "Email Marketing" && (
+          <div className="space-y-6">
+            {/* Header Desk */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-slate-900">Email Marketing & Zoho Campaign Desk</h2>
+                  <span className="bg-purple-100 text-purple-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span>
+                    Zoho ZeptoMail Active
+                  </span>
+                </div>
+                <p className="text-xs font-semibold text-slate-500 mt-1">
+                  Create HTML marketing campaigns, target specific user groups (All Users, KYC Verified, DGA Waitlist, Custom List), preview email layouts, and broadcast live campaigns.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(`${API_BASE_URL}/admin/zoho-oauth/config`);
+                      const json = await res.json();
+                      if (json.success) {
+                        setRedirectUriInfo(json);
+                        if (json.clientId) setZohoKeys(prev => ({ ...prev, clientId: json.clientId }));
+                      }
+                    } catch (e) {}
+                    setShowZohoConnectModal(true);
+                  }}
+                  className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 border border-purple-200 cursor-pointer"
+                >
+                  <Settings size={14} />
+                  <span>Zoho API Keys & Redirect URIs</span>
+                </button>
+
+                <button
+                  onClick={fetchEmailCampaigns}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 border-none cursor-pointer"
+                >
+                  <RefreshCw size={14} className={isLoadingCampaigns ? "animate-spin" : ""} />
+                  <span>Refresh List</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCampaignForm({
+                      campaignId: "",
+                      title: "",
+                      subject: "",
+                      category: "Marketing",
+                      fromEmail: "info@fipmoney.com",
+                      htmlContent: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+  <div style="text-align: center; margin-bottom: 24px;">
+    <h2 style="color: #6d28d9; margin: 0; font-size: 24px;">Fipmoney Digital Gold</h2>
+    <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Instant 24K Gold Savings & SIP</p>
+  </div>
+  <h3 style="color: #1e293b; font-size: 18px;">Hello {{ userName }},</h3>
+  <p style="color: #334155; line-height: 1.6; font-size: 14px;">We are excited to share an exclusive update! Start your 24K Digital Gold SIP on Fipmoney today and earn instant gold rewards directly into your vault.</p>
+  <div style="text-align: center; margin: 32px 0;">
+    <a href="{{ baseUrl }}" style="background-color: #6d28d9; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; display: inline-block;">Start 24K Gold SIP Now</a>
+  </div>
+  <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+  <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">Your Referral Code: <strong>{{ referralCode }}</strong> | Need help? Contact {{ supportEmail }}</p>
+</div>`,
+                      targetAudience: "ALL_USERS",
+                      targetEmailsText: "",
+                    });
+                    setShowCampaignModal(true);
+                  }}
+                  className="bg-[#6d28d9] hover:bg-[#5b21b6] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md cursor-pointer border-none"
+                >
+                  <Plus size={16} />
+                  <span>Create Campaign</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-slate-400 uppercase">Total Campaigns</div>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{emailCampaigns.length}</div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-black">
+                  <Mail size={22} />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-emerald-500 uppercase">Sent / Broadcasted</div>
+                  <div className="text-2xl font-black text-emerald-600 mt-1">
+                    {emailCampaigns.filter(c => c.status === "SENT").length}
+                  </div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black">
+                  <Send size={22} />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-blue-500 uppercase">Sender Email</div>
+                  <div className="text-xs font-black text-blue-700 mt-1 truncate max-w-[150px]" title="info@fipmoney.com">
+                    info@fipmoney.com
+                  </div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black">
+                  <ShieldCheck size={22} />
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-extrabold text-amber-500 uppercase">Delivery Network</div>
+                  <div className="text-xs font-black text-amber-700 mt-1">Zoho ZeptoMail API</div>
+                </div>
+                <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black">
+                  <Zap size={22} />
+                </div>
+              </div>
+            </div>
+
+            {/* Campaign Table */}
+            <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-700">
+                  <thead className="bg-slate-100 text-slate-400 font-black text-[10px] uppercase border-b border-slate-200">
+                    <tr>
+                      <th className="p-3.5">Campaign Title & Subject</th>
+                      <th className="p-3.5">Target Audience</th>
+                      <th className="p-3.5">Sender Email</th>
+                      <th className="p-3.5">Delivery Stats</th>
+                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5">Date Created</th>
+                      <th className="p-3.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {isLoadingCampaigns ? (
+                      <tr>
+                        <td colSpan={7} className="p-10 text-center">
+                          <LoadingSpinner size={40} className="mx-auto" />
+                          <div className="text-xs font-bold text-slate-500 mt-2">Loading email campaigns...</div>
+                        </td>
+                      </tr>
+                    ) : emailCampaigns.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-10 text-center text-slate-400 font-semibold">
+                          No email marketing campaigns created yet. Click "Create Campaign" to set up your first email broadcast!
+                        </td>
+                      </tr>
+                    ) : (
+                      emailCampaigns.map(c => (
+                        <tr key={c._id || c.campaignId} className="hover:bg-purple-50/30 transition-colors">
+                          <td className="p-3.5">
+                            <div className="font-bold text-slate-900">{c.title}</div>
+                            <div className="text-[11px] text-slate-500 truncate max-w-xs">{c.subject}</div>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded text-[11px] border border-purple-200">
+                              {c.targetAudience === "ALL_USERS" ? "All Platform Users" :
+                               c.targetAudience === "KYC_VERIFIED" ? "KYC Verified Users" :
+                               c.targetAudience === "DGA_AGENTS" ? "DGA Waitlist Agents" : "Specific Users List"}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-slate-700 font-mono text-[11px]">{c.fromEmail || "info@fipmoney.com"}</td>
+                          <td className="p-3.5">
+                            {c.stats?.sentCount !== undefined ? (
+                              <div className="text-xs">
+                                <span className="font-bold text-emerald-600">{c.stats.sentCount} Sent</span>
+                                {c.stats.failedCount > 0 && <span className="text-rose-500 font-bold ml-1">({c.stats.failedCount} Failed)</span>}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400">Not Sent</span>
+                            )}
+                          </td>
+                          <td className="p-3.5">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                              c.status === "SENT" ? "bg-emerald-100 text-emerald-800" :
+                              c.status === "SENDING" ? "bg-amber-100 text-amber-800 animate-pulse" :
+                              "bg-slate-100 text-slate-600"
+                            }`}>
+                              {c.status}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-slate-400 text-[11px]">
+                            {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "Today"}
+                          </td>
+                          <td className="p-3.5 text-right space-x-1.5">
+                            <button
+                              onClick={() => handleSendCampaignNow(c.campaignId)}
+                              disabled={isSendingCampaign}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-lg border-none cursor-pointer disabled:opacity-50"
+                            >
+                              Send Now
+                            </button>
+                            <button
+                              onClick={() => {
+                                setCampaignForm({
+                                  campaignId: c.campaignId,
+                                  title: c.title,
+                                  subject: c.subject,
+                                  category: c.category || "Marketing",
+                                  fromEmail: c.fromEmail || "info@fipmoney.com",
+                                  htmlContent: c.htmlContent,
+                                  targetAudience: c.targetAudience || "ALL_USERS",
+                                  targetEmailsText: Array.isArray(c.targetEmails) ? c.targetEmails.join("\n") : "",
+                                });
+                                setShowCampaignModal(true);
+                              }}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] px-2.5 py-1 rounded-lg border-none cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CREATE / EDIT EMAIL CAMPAIGN MODAL */}
+        <AnimatePresence>
+          {showCampaignModal && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+              >
+                {/* Modal Header */}
+                <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-base">
+                      {campaignForm.campaignId ? "Edit Email Campaign" : "Create New Email Marketing Campaign"}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">Design HTML email template and configure broadcast audience</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCampaignModal(false)}
+                    className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-700 border-none cursor-pointer"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 overflow-y-auto flex-1 space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Campaign Title (Internal Name)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Festival 24K Gold Offer 2026"
+                        value={campaignForm.title}
+                        onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Subject Line (With Dynamic Tags)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Special Gold Reward for {{ userName }}!"
+                        value={campaignForm.subject}
+                        onChange={(e) => setCampaignForm({ ...campaignForm, subject: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Sender Email</label>
+                      <select
+                        value={campaignForm.fromEmail}
+                        onChange={(e) => setCampaignForm({ ...campaignForm, fromEmail: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-white"
+                      >
+                        <option value="info@fipmoney.com">info@fipmoney.com (Marketing)</option>
+                        <option value="support@fipmoney.com">support@fipmoney.com (Support)</option>
+                        <option value="payments@fipmoney.com">payments@fipmoney.com (Payments)</option>
+                        <option value="no-reply@fipmoney.com">no-reply@fipmoney.com (No-Reply)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
+                      <select
+                        value={campaignForm.category}
+                        onChange={(e) => setCampaignForm({ ...campaignForm, category: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-white"
+                      >
+                        <option value="Marketing">Marketing / Promotional</option>
+                        <option value="Newsletter">Newsletter / Announcement</option>
+                        <option value="Agent Updates">Agent & Partner Updates</option>
+                        <option value="Transactional">Transactional Update</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Target Audience</label>
+                      <select
+                        value={campaignForm.targetAudience}
+                        onChange={(e) => setCampaignForm({ ...campaignForm, targetAudience: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-white"
+                      >
+                        <option value="ALL_USERS">All Platform Users</option>
+                        <option value="KYC_VERIFIED">KYC Verified Users Only</option>
+                        <option value="DGA_AGENTS">DGA Waitlist Agents</option>
+                        <option value="SPECIFIC_USERS">Specific Target Email List</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {campaignForm.targetAudience === "SPECIFIC_USERS" && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Specific Target Email List (Comma or Line Separated)</label>
+                      <textarea
+                        rows={3}
+                        placeholder="user1@domain.com, user2@domain.com"
+                        value={campaignForm.targetEmailsText}
+                        onChange={(e) => setCampaignForm({ ...campaignForm, targetEmailsText: e.target.value })}
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600"
+                      />
+                    </div>
+                  )}
+
+                  {/* HTML Content Editor & Live Visual Preview Tabs */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewTab("editor")}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer ${
+                            previewTab === "editor" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          HTML Code Editor
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPreviewTab("preview")}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer ${
+                            previewTab === "preview" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          Visual Email Preview
+                        </button>
+                      </div>
+
+                      <div className="text-[10px] text-slate-400 font-semibold">
+                        Variables: <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; userName &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; mobileNumber &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; referralCode &#125;&#125;</code>
+                      </div>
+                    </div>
+
+                    {previewTab === "editor" ? (
+                      <textarea
+                        rows={10}
+                        value={campaignForm.htmlContent}
+                        onChange={(e) => setCampaignForm({ ...campaignForm, htmlContent: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 font-mono text-xs text-slate-800 bg-slate-900 text-emerald-400 focus:outline-none"
+                      />
+                    ) : (
+                      <div className="w-full p-4 rounded-xl border border-slate-200 bg-slate-100 min-h-[250px]">
+                        <div
+                          className="bg-white rounded-xl shadow-xs p-4 max-w-xl mx-auto"
+                          dangerouslySetInnerHTML={{
+                            __html: campaignForm.htmlContent
+                              .replace(/\{\{\s*userName\s*\}\}/g, "John Doe")
+                              .replace(/\{\{\s*mobileNumber\s*\}\}/g, "+91 98765 43210")
+                              .replace(/\{\{\s*referralCode\s*\}\}/g, "FIP2026")
+                              .replace(/\{\{\s*baseUrl\s*\}\}/g, "#")
+                              .replace(/\{\{\s*supportEmail\s*\}\}/g, "support@fipmoney.com")
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Send Test Email Row */}
+                  <div className="bg-purple-50 border border-purple-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex-1 w-full">
+                      <label className="block text-xs font-bold text-purple-900 mb-1">Send Test Email To Admin</label>
+                      <input
+                        type="email"
+                        placeholder="Enter email to receive test copy"
+                        value={testEmailAddress}
+                        onChange={(e) => setTestEmailAddress(e.target.value)}
+                        className="w-full px-3.5 py-1.5 rounded-xl border border-purple-200 text-xs font-semibold text-slate-800 bg-white"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSendTestEmail()}
+                      disabled={isSendingTest}
+                      className="bg-purple-700 hover:bg-purple-800 text-white font-extrabold text-xs px-4 py-2 rounded-xl border-none cursor-pointer disabled:opacity-50 shrink-0 self-end sm:self-auto"
+                    >
+                      {isSendingTest ? "Sending Test..." : "Send Test Email"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50">
+                  <button
+                    type="button"
+                    onClick={() => setShowCampaignModal(false)}
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl border-none cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveCampaign}
+                      className="bg-[#6d28d9] hover:bg-[#5b21b6] text-white font-extrabold text-xs px-5 py-2 rounded-xl border-none cursor-pointer shadow-md"
+                    >
+                      Save Campaign Draft
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* ZOHO CAMPAIGNS API KEYS & AUTHORIZED REDIRECT URIS MODAL */}
+        <AnimatePresence>
+          {showZohoConnectModal && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+              >
+                {/* Modal Header */}
+                <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-base">Zoho Campaigns API Keys & Authorized Redirect URIs</h3>
+                    <p className="text-xs text-slate-500 font-medium">Use these Redirect URIs when registering your application in Zoho Developer Console</p>
+                  </div>
+                  <button
+                    onClick={() => setShowZohoConnectModal(false)}
+                    className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-700 border-none cursor-pointer"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 overflow-y-auto flex-1 space-y-5">
+                  {/* AUTHORIZED REDIRECT URIS DISPLAY CARDS */}
+                  <div className="space-y-3">
+                    <label className="block text-xs font-black text-slate-900 uppercase tracking-wider">
+                      Authorized Redirect URIs (Copy to Zoho Developer Console)
+                    </label>
+
+                    {/* Dev Server Redirect URI */}
+                    <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="text-[10px] font-bold text-purple-600 uppercase">Dev Server Redirect URI</div>
+                        <code className="text-xs font-mono font-bold text-purple-900 select-all block mt-0.5">
+                          https://dev-server.fipmoney.com/api/admin/zoho-oauth/callback
+                        </code>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText("https://dev-server.fipmoney.com/api/admin/zoho-oauth/callback");
+                          triggerToast("Copied Dev Server Redirect URI!");
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer shrink-0"
+                      >
+                        Copy Dev URI
+                      </button>
+                    </div>
+
+                    {/* Production Domain Redirect URI */}
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase">Production Domain Redirect URI</div>
+                        <code className="text-xs font-mono font-bold text-emerald-700 select-all block mt-0.5">
+                          https://www.fipmoney.com/api/admin/zoho-oauth/callback
+                        </code>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText("https://www.fipmoney.com/api/admin/zoho-oauth/callback");
+                          triggerToast("Copied Production Redirect URI!");
+                        }}
+                        className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl border-none cursor-pointer shrink-0"
+                      >
+                        Copy URI
+                      </button>
+                    </div>
+                  </div>
+
+                  <hr className="border-slate-100" />
+
+                  {/* ZOHO KEYS INPUT FORM */}
+                  <form onSubmit={handleConnectZohoAccount} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Zoho Client ID (ZOHO_CAMPAIGNS_CLIENT_ID)</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. 1000.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                        value={zohoKeys.clientId}
+                        onChange={(e) => setZohoKeys({ ...zohoKeys, clientId: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Zoho Client Secret (ZOHO_CAMPAIGNS_CLIENT_SECRET)</label>
+                      <input
+                        type="password"
+                        required
+                        placeholder="e.g. XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                        value={zohoKeys.clientSecret}
+                        onChange={(e) => setZohoKeys({ ...zohoKeys, clientSecret: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Zoho Data Center Domain</label>
+                      <select
+                        value={zohoKeys.dataCenter}
+                        onChange={(e) => setZohoKeys({ ...zohoKeys, dataCenter: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-white"
+                      >
+                        <option value="in">India Data Center (zoho.in)</option>
+                        <option value="com">US / Global Data Center (zoho.com)</option>
+                        <option value="eu">Europe Data Center (zoho.eu)</option>
+                        <option value="au">Australia Data Center (zoho.com.au)</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full py-3 rounded-2xl font-bold text-xs text-white bg-[#6d28d9] hover:bg-[#5b21b6] transition-all shadow-md cursor-pointer border-none flex items-center justify-center gap-2"
+                    >
+                      <ExternalLink size={14} />
+                      <span>Save Keys & Connect Zoho Campaigns Account in 1-Click</span>
+                    </button>
+                  </form>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* 14. SYSTEM SETTINGS PAGE */}
         {activeNav === "System Settings" && (
           <div className="space-y-6">
@@ -4272,7 +5045,12 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                             </td>
 
                             <td className="p-3.5 text-xs font-bold text-slate-700">
-                              {item.city || 'N/A'}
+                              <div>{item.city || 'N/A'}</div>
+                              {item.address && (
+                                <div className="text-[10px] text-slate-500 font-normal mt-0.5 max-w-[200px] truncate" title={item.address}>
+                                  📍 {item.address}
+                                </div>
+                              )}
                             </td>
 
                             <td className="p-3.5 text-xs font-semibold text-slate-600">

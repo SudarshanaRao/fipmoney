@@ -1,4 +1,9 @@
 import express from 'express';
+import EmailCampaign from '../models/EmailCampaign.js';
+import User from '../models/User.js';
+import AgentWaitlist from '../models/AgentWaitlist.js';
+import { sendCustomEmail } from '../utils/emailService.js';
+import { sendZohoMarketingCampaign, exchangeGrantCodeForTokens } from '../utils/zohoCampaignsService.js';
 import {
   checkAdminExists,
   verifyAdminCode,
@@ -23,6 +28,104 @@ import {
 } from '../controllers/adminController.js';
 
 const router = express.Router();
+
+// @desc    Get Zoho OAuth Configuration & Redirect URIs
+// @route   GET /api/admin/zoho-oauth/config
+router.get('/zoho-oauth/config', (req, res) => {
+  const protocol = req.protocol || 'https';
+  const host = req.get('host') || 'dev-server.fipmoney.com';
+  const redirectUri = `${protocol}://${host}/api/admin/zoho-oauth/callback`;
+
+  res.status(200).json({
+    success: true,
+    redirectUri,
+    devServerRedirectUri: 'https://dev-server.fipmoney.com/api/admin/zoho-oauth/callback',
+    localRedirectUri: 'http://localhost:5000/api/admin/zoho-oauth/callback',
+    productionRedirectUri: 'https://www.fipmoney.com/api/admin/zoho-oauth/callback',
+    clientId: process.env.ZOHO_CAMPAIGNS_CLIENT_ID || '',
+    isConfigured: Boolean(process.env.ZOHO_CAMPAIGNS_CLIENT_ID && process.env.ZOHO_CAMPAIGNS_REFRESH_TOKEN),
+  });
+});
+
+// @desc    Save Client ID and Client Secret in memory/env
+// @route   POST /api/admin/zoho-oauth/save-keys
+router.post('/zoho-oauth/save-keys', (req, res) => {
+  const { clientId, clientSecret, dataCenter } = req.body;
+  if (!clientId || !clientSecret) {
+    return res.status(400).json({ success: false, message: 'Client ID and Client Secret are required.' });
+  }
+
+  process.env.ZOHO_CAMPAIGNS_CLIENT_ID = clientId.trim();
+  process.env.ZOHO_CAMPAIGNS_CLIENT_SECRET = clientSecret.trim();
+  if (dataCenter) process.env.ZOHO_DATA_CENTER = dataCenter.trim();
+
+  res.status(200).json({
+    success: true,
+    message: 'Zoho API keys saved successfully in server configuration.',
+  });
+});
+
+// @desc    Zoho OAuth Callback Endpoint (Authorized Redirect URI)
+// @route   GET /api/admin/zoho-oauth/callback
+router.get('/zoho-oauth/callback', async (req, res) => {
+  const code = req.query.code;
+  const error = req.query.error;
+
+  if (error || !code) {
+    return res.status(400).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Zoho Connection Failed</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #e11d48;">❌ Zoho OAuth Authorization Failed</h2>
+          <p style="color: #64748b;">Reason: ${error || 'No authorization code received'}</p>
+          <button onclick="window.close()" style="padding: 10px 20px; background: #6d28d9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Close Window</button>
+        </body>
+      </html>
+    `);
+  }
+
+  const protocol = req.protocol || 'https';
+  const host = req.get('host') || 'dev-server.fipmoney.com';
+  const redirectUri = `${protocol}://${host}/api/admin/zoho-oauth/callback`;
+
+  try {
+    const result = await exchangeGrantCodeForTokens(code, redirectUri);
+
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Zoho Connection Successful</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8fafc;">
+          <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+            <h2 style="color: #10b981; margin-bottom: 10px;">🎉 Zoho Campaigns Connected!</h2>
+            <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+              Fipmoney has successfully generated and saved your permanent <strong>Zoho Campaigns Refresh Token</strong>.
+            </p>
+            <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; font-family: monospace; font-size: 12px; word-break: break-all; margin: 20px 0; color: #475569;">
+              Token: ${result.refreshToken.slice(0, 15)}...${result.refreshToken.slice(-10)}
+            </div>
+            <button onclick="if(window.opener){window.opener.location.reload();} window.close();" style="padding: 12px 24px; background: #6d28d9; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px;">
+              Return to Admin Dashboard
+            </button>
+          </div>
+        </body>
+      </html>
+    `);
+  } catch (err) {
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Zoho OAuth Error</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #e11d48;">❌ Token Exchange Error</h2>
+          <p style="color: #64748b;">${err.message}</p>
+          <button onclick="window.close()" style="padding: 10px 20px; background: #6d28d9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Close Window</button>
+        </body>
+      </html>
+    `);
+  }
+});
 
 /**
  * @openapi
@@ -723,6 +826,233 @@ router.post('/gold-holdings/audit', createVaultAuditEntry);
  */
 router.post('/gold-holdings/trigger-audit', triggerTrusteeAudit);
 
+// ==========================================
+// EMAIL MARKETING & CAMPAIGNS API ROUTES
+// ==========================================
+
+// @desc    Get all Email Marketing Campaigns
+// @route   GET /api/admin/email-campaigns
+router.get('/email-campaigns', async (req, res) => {
+  try {
+    const campaigns = await EmailCampaign.find({}).sort({ createdAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: campaigns,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Create or update Email Campaign draft
+// @route   POST /api/admin/email-campaigns
+router.post('/email-campaigns', async (req, res) => {
+  try {
+    const { campaignId, title, subject, category, fromEmail, htmlContent, targetAudience, targetEmails } = req.body;
+
+    if (!title || !subject || !htmlContent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, Subject, and HTML Content are required.',
+      });
+    }
+
+    const cId = campaignId || 'CMP' + Date.now();
+
+    let campaign = await EmailCampaign.findOne({ campaignId: cId });
+    if (campaign) {
+      campaign.title = title;
+      campaign.subject = subject;
+      campaign.category = category || 'Marketing';
+      campaign.fromEmail = fromEmail || 'info@fipmoney.com';
+      campaign.htmlContent = htmlContent;
+      campaign.targetAudience = targetAudience || 'ALL_USERS';
+      if (Array.isArray(targetEmails)) campaign.targetEmails = targetEmails;
+      await campaign.save();
+    } else {
+      campaign = await EmailCampaign.create({
+        campaignId: cId,
+        title,
+        subject,
+        category: category || 'Marketing',
+        fromEmail: fromEmail || 'info@fipmoney.com',
+        htmlContent,
+        targetAudience: targetAudience || 'ALL_USERS',
+        targetEmails: Array.isArray(targetEmails) ? targetEmails : [],
+        status: 'DRAFT',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Campaign saved successfully',
+      data: campaign,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Send Email Campaign to target audience
+// @route   POST /api/admin/email-campaigns/send
+router.post('/email-campaigns/send', async (req, res) => {
+  try {
+    const { campaignId } = req.body;
+
+    let campaign = await EmailCampaign.findOne({ campaignId });
+    if (!campaign) {
+      return res.status(404).json({ success: false, message: 'Campaign not found' });
+    }
+
+    // Resolve target audience recipients
+    let recipients = [];
+    const audience = campaign.targetAudience || 'ALL_USERS';
+
+    if (audience === 'ALL_USERS') {
+      const users = await User.find({ email: { $exists: true, $ne: '' } });
+      recipients = users.map(u => ({
+        toEmail: u.email,
+        userName: u.fullName || u.username || 'Valued User',
+        mobileNumber: u.mobileNumber || '',
+        referralCode: u.referralCode || 'FIP2026',
+      }));
+    } else if (audience === 'KYC_VERIFIED') {
+      const users = await User.find({ isKycCompleted: true, email: { $exists: true, $ne: '' } });
+      recipients = users.map(u => ({
+        toEmail: u.email,
+        userName: u.fullName || u.username || 'Valued User',
+        mobileNumber: u.mobileNumber || '',
+        referralCode: u.referralCode || 'FIP2026',
+      }));
+    } else if (audience === 'DGA_AGENTS') {
+      const agents = await AgentWaitlist.find({ email: { $exists: true, $ne: '' } });
+      recipients = agents.map(a => ({
+        toEmail: a.email,
+        userName: a.username || 'DGA Partner',
+        mobileNumber: a.mobile || '',
+        referralCode: 'DGA2026',
+      }));
+    } else if (audience === 'SPECIFIC_USERS') {
+      const rawList = campaign.targetEmails || [];
+      recipients = rawList.filter(e => e && e.includes('@')).map(e => ({
+        toEmail: e.trim(),
+        userName: 'Valued User',
+        mobileNumber: '',
+        referralCode: 'FIP2026',
+      }));
+    }
+
+    if (recipients.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid recipient email addresses found for the selected target audience.',
+      });
+    }
+
+    // Mark as SENDING
+    campaign.status = 'SENDING';
+    campaign.stats.totalRecipients = recipients.length;
+    await campaign.save();
+
+    // 1. Try sending via Zoho Campaigns REST API first if OAuth credentials configured
+    const zohoRes = await sendZohoMarketingCampaign({
+      campaignName: campaign.title,
+      subject: campaign.subject,
+      fromEmail: campaign.fromEmail || 'info@fipmoney.com',
+      fromName: 'Fipmoney Marketing',
+      htmlContent: campaign.htmlContent,
+      recipients,
+    });
+
+    if (zohoRes.isZohoCampaignsConfigured && zohoRes.success) {
+      campaign.status = 'SENT';
+      campaign.sentAt = new Date();
+      campaign.zohoCampaignId = zohoRes.campaignKey || '';
+      campaign.stats.sentCount = recipients.length;
+      campaign.stats.failedCount = 0;
+      await campaign.save();
+
+      return res.status(200).json({
+        success: true,
+        message: `Campaign '${campaign.title}' successfully triggered via Zoho Campaigns API!`,
+        data: campaign,
+      });
+    }
+
+    // 2. Fallback / Direct broadcast sending
+    let sentCount = 0;
+    let failedCount = 0;
+
+    for (const r of recipients) {
+      try {
+        const sendRes = await sendCustomEmail(
+          r.toEmail,
+          campaign.subject,
+          campaign.htmlContent,
+          campaign.fromEmail,
+          campaign.category,
+          {
+            userName: r.userName,
+            mobileNumber: r.mobileNumber,
+            referralCode: r.referralCode,
+          }
+        );
+        if (sendRes.success) sentCount++;
+        else failedCount++;
+      } catch (err) {
+        failedCount++;
+      }
+    }
+
+    campaign.status = 'SENT';
+    campaign.sentAt = new Date();
+    campaign.stats.sentCount = sentCount;
+    campaign.stats.failedCount = failedCount;
+    await campaign.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Email Campaign executed! Sent: ${sentCount}, Failed: ${failedCount}. Total: ${recipients.length}`,
+      data: campaign,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Send Test Email for Campaign
+// @route   POST /api/admin/email-campaigns/test
+router.post('/email-campaigns/test', async (req, res) => {
+  try {
+    const { testEmail, subject, htmlContent, fromEmail, category } = req.body;
+
+    if (!testEmail || !subject || !htmlContent) {
+      return res.status(400).json({ success: false, message: 'testEmail, subject, and htmlContent are required.' });
+    }
+
+    const result = await sendCustomEmail(
+      testEmail,
+      `[TEST] ${subject}`,
+      htmlContent,
+      fromEmail || 'info@fipmoney.com',
+      category || 'Marketing',
+      {
+        userName: 'Test Admin User',
+        mobileNumber: '9999999999',
+        referralCode: 'FIPTEST',
+      }
+    );
+
+    res.status(200).json({
+      success: result.success,
+      message: result.message,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @desc    Get Zoho OAuth Configuration & Redirect URIs
 router.delete('/:id', deleteAdmin);
 
 export default router;

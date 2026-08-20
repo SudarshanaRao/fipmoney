@@ -23,6 +23,15 @@ const agentWaitlistSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    address: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    isAddressVerified: {
+      type: Boolean,
+      default: false,
+    },
     language: {
       type: String,
       required: true,

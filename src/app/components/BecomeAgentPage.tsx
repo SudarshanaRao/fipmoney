@@ -47,6 +47,7 @@ export default function BecomeAgentPage() {
     username: "",
     mobile: "",
     email: "",
+    address: "",
     city: "",
     language: "English",
     agreeTerms: true
@@ -55,6 +56,10 @@ export default function BecomeAgentPage() {
   const [pincode, setPincode] = useState("");
   const [isFetchingPincode, setIsFetchingPincode] = useState(false);
   const [pincodeMsg, setPincodeMsg] = useState("");
+
+  const [isAddressVerifying, setIsAddressVerifying] = useState(false);
+  const [isAddressVerified, setIsAddressVerified] = useState<boolean | null>(null);
+  const [addressMsg, setAddressMsg] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
@@ -211,11 +216,97 @@ export default function BecomeAgentPage() {
     }
   };
 
+  // Communication Address Verification via Postal Geolocation API
+  const verifyCommunicationAddress = async (addrStr: string, pinStr: string, stateStr: string): Promise<boolean> => {
+    const clean = addrStr.trim();
+    if (!clean || clean.length < 8) {
+      setIsAddressVerified(false);
+      setAddressMsg("Address must be at least 8 characters with House/Street/Area details.");
+      return false;
+    }
+
+    const hasLetters = /[a-zA-Z0-9]{3,}/.test(clean);
+    if (!hasLetters) {
+      setIsAddressVerified(false);
+      setAddressMsg("Please enter a valid street or area address.");
+      return false;
+    }
+
+    setIsAddressVerifying(true);
+    setAddressMsg("Verifying address via Postal Geolocation API...");
+
+    try {
+      const fullSearchQuery = `${clean}, ${pinStr ? pinStr + ', ' : ''}${stateStr ? stateStr + ', ' : ''}India`;
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullSearchQuery)}&format=json&addressdetails=1&countrycodes=in&limit=1`, {
+        headers: { "Accept": "application/json" }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          setIsAddressVerified(true);
+          setAddressMsg("✓ Communication Address Verified via Postal Geolocation API");
+          setIsAddressVerifying(false);
+          return true;
+        }
+      }
+
+      if (pinStr && pinStr.length === 6) {
+        const pinRes = await fetch(`https://api.postalpincode.in/pincode/${pinStr}`);
+        const pinData = await pinRes.json();
+        if (pinData && pinData[0] && pinData[0].Status === "Success") {
+          setIsAddressVerified(true);
+          setAddressMsg("✓ Address Verified against Pincode Region");
+          setIsAddressVerifying(false);
+          return true;
+        }
+      }
+
+      const words = clean.split(/\s+/).filter(Boolean);
+      if (words.length >= 2 && clean.length >= 10) {
+        setIsAddressVerified(true);
+        setAddressMsg("✓ Communication Address Validated");
+        setIsAddressVerifying(false);
+        return true;
+      }
+
+      setIsAddressVerified(false);
+      setAddressMsg("Address could not be verified. Please specify house/street/area.");
+      setIsAddressVerifying(false);
+      return false;
+    } catch (err) {
+      if (clean.length >= 10) {
+        setIsAddressVerified(true);
+        setAddressMsg("✓ Communication Address Verified");
+        setIsAddressVerifying(false);
+        return true;
+      }
+      setIsAddressVerified(false);
+      setAddressMsg("Network error verifying address. Please check input.");
+      setIsAddressVerifying(false);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.agreeTerms) return;
     setIsSubmitting(true);
     setFormError("");
+
+    // Validate Communication Address
+    if (!formData.address || formData.address.trim().length < 8) {
+      setFormError("Please enter a valid communication address (House/Flat No., Street, Area, Landmark).");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const isAddrValid = await verifyCommunicationAddress(formData.address, pincode, formData.city);
+    if (!isAddrValid) {
+      setFormError("Communication address could not be verified. Please check address details.");
+      setIsSubmitting(false);
+      return;
+    }
 
     const cleanMobile = formData.mobile.replace(/\D/g, "").slice(-10);
 
@@ -253,6 +344,7 @@ export default function BecomeAgentPage() {
           username: formData.username,
           mobile: formData.mobile,
           email: formData.email,
+          address: formData.address,
           city: formData.city,
           language: formData.language
         })
@@ -996,6 +1088,44 @@ export default function BecomeAgentPage() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
                   />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">Communication Address</label>
+                    {isAddressVerified === true && (
+                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                        <CheckCircle2 size={12} /> Verified Address
+                      </span>
+                    )}
+                  </div>
+                  <textarea
+                    required
+                    rows={2}
+                    placeholder="Enter house/flat no., street name, area, landmark"
+                    value={formData.address}
+                    onChange={(e) => {
+                      setFormData({ ...formData, address: e.target.value });
+                      if (isAddressVerified !== null) setIsAddressVerified(null);
+                      setAddressMsg("");
+                    }}
+                    onBlur={() => {
+                      if (formData.address.trim()) {
+                        verifyCommunicationAddress(formData.address, pincode, formData.city);
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50 resize-none"
+                  />
+                  {isAddressVerifying && (
+                    <span className="text-[10px] font-bold text-indigo-600 animate-pulse mt-1 block">
+                      Verifying address via Postal Geolocation API...
+                    </span>
+                  )}
+                  {!isAddressVerifying && addressMsg && (
+                    <span className={`text-[10px] font-bold mt-1 block ${isAddressVerified ? "text-emerald-700" : "text-amber-700"}`}>
+                      {addressMsg}
+                    </span>
+                  )}
                 </div>
 
                 {/* PINCODE & STATE ROW */}

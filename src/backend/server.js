@@ -169,6 +169,7 @@ import agentWaitlistRoutes from './routes/agentWaitlistRoutes.js';
 import kycRoutes from './routes/kycRoutes.js';
 import referralRoutes from './routes/referralRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import { exchangeGrantCodeForTokens } from './utils/zohoCampaignsService.js';
 
 // API Routes
 app.use('/api/health', healthRoutes);
@@ -179,6 +180,68 @@ app.use('/api/email-templates', emailTemplateRoutes);
 app.use('/api/agent-waitlist', agentWaitlistRoutes);
 app.use('/api/kyc', kycRoutes);
 app.use('/api/referrals', referralRoutes);
+
+// Direct Top-Level Zoho OAuth Callback Handler (Guarantees zero 404s on dev-server.fipmoney.com)
+app.get('/api/admin/zoho-oauth/callback', async (req, res) => {
+  const code = req.query.code;
+  const error = req.query.error;
+
+  if (error || !code) {
+    return res.status(400).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Zoho Connection Failed</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #e11d48;">❌ Zoho OAuth Authorization Failed</h2>
+          <p style="color: #64748b;">Reason: ${error || 'No authorization code received'}</p>
+          <button onclick="window.close()" style="padding: 10px 20px; background: #6d28d9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Close Window</button>
+        </body>
+      </html>
+    `);
+  }
+
+  const protocol = req.protocol || 'https';
+  const host = req.get('host') || 'dev-server.fipmoney.com';
+  const redirectUri = `${protocol}://${host}/api/admin/zoho-oauth/callback`;
+
+  try {
+    const result = await exchangeGrantCodeForTokens(code, redirectUri);
+
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Zoho Connection Successful</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8fafc;">
+          <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+            <h2 style="color: #10b981; margin-bottom: 10px;">🎉 Zoho Campaigns Connected!</h2>
+            <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+              Fipmoney has successfully generated and saved your permanent <strong>Zoho Campaigns Refresh Token</strong>.
+            </p>
+            <div style="background: #f1f5f9; padding: 12px; border-radius: 10px; font-family: monospace; font-size: 12px; word-break: break-all; margin: 20px 0; color: #475569;">
+              Token: ${result.refreshToken.slice(0, 15)}...${result.refreshToken.slice(-10)}
+            </div>
+            <button onclick="if(window.opener){window.opener.location.reload();} window.close();" style="padding: 12px 24px; background: #6d28d9; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px;">
+              Return to Admin Dashboard
+            </button>
+          </div>
+        </body>
+      </html>
+    `);
+  } catch (err) {
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>Zoho OAuth Error</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #e11d48;">❌ Token Exchange Error</h2>
+          <p style="color: #64748b;">${err.message}</p>
+          <button onclick="window.close()" style="padding: 10px 20px; background: #6d28d9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Close Window</button>
+        </body>
+      </html>
+    `);
+  }
+});
+
 app.use('/api/admin', adminRoutes);
 
 // Error Handling Middleware
