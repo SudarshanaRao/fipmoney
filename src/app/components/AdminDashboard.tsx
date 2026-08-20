@@ -618,8 +618,56 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   const [testEmailAddress, setTestEmailAddress] = useState<string>("admin@fipmoney.com");
   const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
   const [isSendingCampaign, setIsSendingCampaign] = useState<boolean>(false);
-  const [previewTab, setPreviewTab] = useState<"editor" | "preview">("editor");
+  const [previewTab, setPreviewTab] = useState<"editor" | "variables" | "preview">("editor");
   const [isEditorFullscreen, setIsEditorFullscreen] = useState<boolean>(false);
+  const [templateVarValues, setTemplateVarValues] = useState<Record<string, string>>({});
+
+  // Auto-detect template variables enclosed in {{ variableName }}
+  const detectedVariables = React.useMemo(() => {
+    if (!campaignForm.htmlContent) return [];
+    const matches = campaignForm.htmlContent.match(/\{\{\s*([a-zA-Z0-9_\-]+)\s*\}\}/g);
+    if (!matches) return [];
+    const uniqueVars = Array.from(new Set(matches.map(m => m.replace(/[\{\}\s]/g, ''))));
+    return uniqueVars;
+  }, [campaignForm.htmlContent]);
+
+  const getVarDefaultValue = React.useCallback((varName: string): string => {
+    const origin = typeof window !== 'undefined' && window.location && window.location.origin
+      ? window.location.origin
+      : 'https://www.fipmoney.com';
+
+    const defaults: Record<string, string> = {
+      FIPMONEY_HOME_URL: origin,
+      FIPMONEY_LOGO_URL: `${origin}/fipmoney_logo_final.png`,
+      DGA_HERO_IMAGE_URL: `${origin}/hero_banner_digital_gold.png`,
+      DGA_URL: `${origin}/become-agent`,
+      FIPMONEY_ABOUT_URL: `${origin}/about`,
+      FIPMONEY_CONTACT_URL: `${origin}/contact`,
+      FIPMONEY_FAQ_URL: `${origin}/faq`,
+      FIPMONEY_TERMS_URL: `${origin}/terms`,
+      FIPMONEY_PRIVACY_URL: `${origin}/privacy`,
+      currentYear: new Date().getFullYear().toString(),
+      supportEmail: 'support@fipmoney.com',
+      baseUrl: origin,
+      userName: 'Valued User',
+      mobileNumber: '+91 98765 43210',
+      referralCode: 'FIP2026',
+    };
+
+    return defaults[varName] !== undefined ? defaults[varName] : '';
+  }, []);
+
+  const renderedHtmlPreview = React.useMemo(() => {
+    let html = campaignForm.htmlContent || '';
+    detectedVariables.forEach(vName => {
+      const val = templateVarValues[vName] !== undefined && templateVarValues[vName] !== ''
+        ? templateVarValues[vName]
+        : getVarDefaultValue(vName);
+      const regex = new RegExp(`\\{\\{\\s*${vName}\\s*\\}\\}`, 'g');
+      html = html.replace(regex, val);
+    });
+    return html;
+  }, [campaignForm.htmlContent, detectedVariables, templateVarValues, getVarDefaultValue]);
 
   const fetchEmailCampaigns = async () => {
     setIsLoadingCampaigns(true);
@@ -665,7 +713,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
           subject: campaignForm.subject,
           category: campaignForm.category,
           fromEmail: campaignForm.fromEmail,
-          htmlContent: campaignForm.htmlContent,
+          htmlContent: renderedHtmlPreview,
           targetAudience: campaignForm.targetAudience,
           targetEmails,
         }),
@@ -700,7 +748,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
         body: JSON.stringify({
           testEmail: testEmailAddress,
           subject: target.subject,
-          htmlContent: target.htmlContent,
+          htmlContent: campaignToTest ? target.htmlContent : renderedHtmlPreview,
           fromEmail: target.fromEmail || "info@fipmoney.com",
           category: target.category || "Marketing",
         }),
@@ -4486,6 +4534,18 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         </button>
                         <button
                           type="button"
+                          onClick={() => setPreviewTab("variables")}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer flex items-center gap-1 ${
+                            previewTab === "variables" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          <span>Template Variables</span>
+                          <span className="bg-white/20 text-current px-1.5 py-0.2 rounded-full text-[10px] font-black">
+                            {detectedVariables.length}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setPreviewTab("preview")}
                           className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer ${
                             previewTab === "preview" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
@@ -4497,7 +4557,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
                       <div className="flex items-center gap-3">
                         <div className="text-[10px] text-slate-400 font-semibold hidden sm:block">
-                          Variables: <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; userName &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; mobileNumber &#125;&#125;</code> <code className="text-purple-600 bg-purple-50 px-1 rounded">&#123;&#123; referralCode &#125;&#125;</code>
+                          Variables Detected: <span className="font-bold text-purple-600">{detectedVariables.length}</span>
                         </div>
 
                         {previewTab === "editor" && (
@@ -4522,21 +4582,71 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           className="w-full px-4 py-3 rounded-2xl border border-slate-300 font-mono text-xs text-slate-900 bg-slate-50/70 focus:bg-white focus:border-purple-600 focus:outline-none leading-relaxed shadow-inner"
                           placeholder="Type or paste your HTML email code here..."
                         />
-                        <div className="text-[10px] text-slate-400 font-medium text-right mt-1">
-                          Light Theme Active | High Visibility Code Editor
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium mt-1">
+                          <span>Detected {detectedVariables.length} template placeholders</span>
+                          <span>Light Theme Active | High Visibility Code Editor</span>
                         </div>
                       </div>
+                    ) : previewTab === "variables" ? (
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-4 max-h-[320px] overflow-y-auto">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-xs font-black text-slate-900">Detected Template Variables ({detectedVariables.length})</h4>
+                            <p className="text-[11px] text-slate-500">Fill custom values or URLs for all placeholders extracted from your HTML template</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const resetVals: Record<string, string> = {};
+                              detectedVariables.forEach(v => { resetVals[v] = getVarDefaultValue(v); });
+                              setTemplateVarValues(resetVals);
+                              triggerToast("Reset all template variables to default URLs");
+                            }}
+                            className="text-[11px] font-bold text-purple-700 hover:text-purple-900 cursor-pointer bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200"
+                          >
+                            Reset to Default URLs
+                          </button>
+                        </div>
+
+                        {detectedVariables.length === 0 ? (
+                          <div className="text-xs text-slate-400 text-center py-6">
+                            No dynamic variables like <code className="text-purple-600">&#123;&#123; VAR_NAME &#125;&#125;</code> detected in HTML code yet.
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {detectedVariables.map(vName => {
+                              const currentVal = templateVarValues[vName] !== undefined
+                                ? templateVarValues[vName]
+                                : getVarDefaultValue(vName);
+                              return (
+                                <div key={vName} className="bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-[11px] font-extrabold text-purple-900 font-mono">
+                                      &#123;&#123; {vName} &#125;&#125;
+                                    </label>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase bg-slate-100 px-1.5 py-0.5 rounded">
+                                      {templateVarValues[vName] ? "Custom" : "Auto Default"}
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="text"
+                                    value={currentVal}
+                                    placeholder={getVarDefaultValue(vName) || `Enter ${vName} value`}
+                                    onChange={(e) => setTemplateVarValues({ ...templateVarValues, [vName]: e.target.value })}
+                                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     ) : (
-                      <div className="w-full p-4 rounded-2xl border border-slate-200 bg-slate-100 min-h-[250px]">
+                      <div className="w-full p-4 rounded-2xl border border-slate-200 bg-slate-100 min-h-[300px]">
                         <div
-                          className="bg-white rounded-xl shadow-xs p-4 max-w-xl mx-auto"
+                          className="bg-white rounded-xl shadow-xs p-4 max-w-xl mx-auto overflow-x-auto"
                           dangerouslySetInnerHTML={{
-                            __html: campaignForm.htmlContent
-                              .replace(/\{\{\s*userName\s*\}\}/g, "John Doe")
-                              .replace(/\{\{\s*mobileNumber\s*\}\}/g, "+91 98765 43210")
-                              .replace(/\{\{\s*referralCode\s*\}\}/g, "FIP2026")
-                              .replace(/\{\{\s*baseUrl\s*\}\}/g, "#")
-                              .replace(/\{\{\s*supportEmail\s*\}\}/g, "support@fipmoney.com")
+                            __html: renderedHtmlPreview
                           }}
                         />
                       </div>

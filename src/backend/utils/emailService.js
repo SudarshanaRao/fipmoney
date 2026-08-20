@@ -36,7 +36,7 @@ export function renderHtmlTemplate(html, variables = {}) {
   const mergedVars = { ...systemDefaults, ...variables };
 
   // Dynamically find and replace all {{ placeholder }} tags in content
-  return html.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, key) => {
+  return html.replace(/\{\{\s*([a-zA-Z0-9_\-]+)\s*\}\}/g, (match, key) => {
     if (Object.prototype.hasOwnProperty.call(mergedVars, key) && mergedVars[key] !== undefined && mergedVars[key] !== null) {
       return String(mergedVars[key]);
     }
