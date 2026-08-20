@@ -1,6 +1,7 @@
 import express from 'express';
 import AgentWaitlist from '../models/AgentWaitlist.js';
 import Otp from '../models/Otp.js';
+import User from '../models/User.js';
 
 const router = express.Router();
 
@@ -86,10 +87,41 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Check if user already registered with mobile or email (Single chance per user)
-    const existingAgent = await AgentWaitlist.findOne({
-      $or: [{ mobile }, { email }],
-    });
+    const cleanMobile = String(mobile).replace(/\D/g, '').slice(-10);
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    // 1. Check if email is already registered in User database by another user/mobile
+    if (cleanEmail) {
+      const userWithEmail = await User.findOne({
+        email: cleanEmail,
+        mobileNumber: { $ne: cleanMobile }
+      });
+
+      if (userWithEmail) {
+        return res.status(400).json({
+          success: false,
+          message: 'This email address is already registered by another user in the database. Please use a different email address.',
+        });
+      }
+    }
+
+    // 2. Check if email is registered on Waitlist by another mobile number
+    if (cleanEmail) {
+      const agentWithEmail = await AgentWaitlist.findOne({
+        email: cleanEmail,
+        mobile: { $ne: cleanMobile }
+      });
+
+      if (agentWithEmail) {
+        return res.status(400).json({
+          success: false,
+          message: 'This email address is already registered on the waitlist under a different mobile number. Please use a different email address.',
+        });
+      }
+    }
+
+    // 3. Check if user already registered with mobile number
+    const existingAgent = await AgentWaitlist.findOne({ mobile: cleanMobile });
 
     if (existingAgent) {
       const formattedNumber = existingAgent.formattedWaitlistNumber || formatWaitlistNumber(existingAgent.waitlistNumber);

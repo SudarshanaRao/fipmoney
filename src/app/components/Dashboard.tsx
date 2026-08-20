@@ -167,6 +167,21 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
   useEffect(() => {
     const mobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") : null;
+    const saved = typeof window !== 'undefined' ? localStorage.getItem("fm_dga_waitlist_data") : null;
+
+    let localIsApproved = false;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.mobile && mobile && parsed.mobile !== mobile) {
+          localStorage.removeItem("fm_dga_waitlist_data");
+        } else if (parsed.isApproved || parsed.status === 'approved' || parsed.status === 'APPROVED') {
+          localIsApproved = true;
+        }
+      } catch (e) {}
+    }
+    setIsApprovedDga(localIsApproved);
+
     if (mobile) {
       fetch(`${API_BASE_URL}/agent-waitlist/check?mobile=${encodeURIComponent(mobile)}`)
         .then(res => res.json())
@@ -174,7 +189,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           if (data && data.success && data.alreadyRegistered) {
             if (data.isApproved || data.status === 'approved' || data.status === 'APPROVED') {
               setIsApprovedDga(true);
+            } else {
+              setIsApprovedDga(false);
             }
+          } else if (data && data.success && !data.alreadyRegistered) {
+            setIsApprovedDga(false);
+            localStorage.removeItem("fm_dga_waitlist_data");
           }
         })
         .catch(() => {});

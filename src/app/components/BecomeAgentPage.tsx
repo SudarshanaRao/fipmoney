@@ -12,6 +12,7 @@ import { API_BASE_URL } from "../utils/apiConfig";
 import { LoadingSpinner } from "./LottiePlayer";
 import AgentDashboard from "./AgentDashboard";
 import AgentOtpModal from "./AgentOtpModal";
+import { getLoggedInUser, saveLoggedInUser } from "../utils/userStorage";
 
 const LANGUAGES = [
   "Select your preferred language",
@@ -56,6 +57,7 @@ export default function BecomeAgentPage() {
   const [pincodeMsg, setPincodeMsg] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
   const [isApprovedAgent, setIsApprovedAgent] = useState(false);
   const [showAgentOtpModal, setShowAgentOtpModal] = useState(false);
   const [showAgentDashboard, setShowAgentDashboard] = useState(false);
@@ -73,8 +75,23 @@ export default function BecomeAgentPage() {
     city?: string;
   } | null>(null);
 
+  // Pre-fill user data directly from logged-in session profile
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const loggedUser = getLoggedInUser();
+      const sessionMobile = sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || loggedUser?.mobileNumber || "";
+      const cleanMobile = sessionMobile.replace(/\D/g, "").slice(-10);
+
+      const defaultUsername = loggedUser?.fullName || loggedUser?.username || (cleanMobile ? localStorage.getItem(`fm_user_name_${cleanMobile}`) : "") || "";
+      const defaultEmail = loggedUser?.email || (cleanMobile ? localStorage.getItem(`fm_user_email_${cleanMobile}`) : "") || "";
+
+      setFormData(prev => ({
+        ...prev,
+        username: prev.username || defaultUsername,
+        mobile: cleanMobile || prev.mobile,
+        email: prev.email || defaultEmail,
+      }));
+
       const userStr = localStorage.getItem("fm_logged_in_user");
       if (userStr) {
         try {
@@ -102,11 +119,26 @@ export default function BecomeAgentPage() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setWaitlistResult(parsed);
-        if (parsed.isApproved || parsed.status === 'approved' || parsed.status === 'APPROVED') {
-          setIsApprovedAgent(true);
+        if (parsed.mobile && mobile && parsed.mobile !== mobile) {
+          localStorage.removeItem("fm_dga_waitlist_data");
+          setWaitlistResult(null);
+          setIsApprovedAgent(false);
+        } else {
+          setWaitlistResult(parsed);
+          if (parsed.isApproved || parsed.status === 'approved' || parsed.status === 'APPROVED') {
+            setIsApprovedAgent(true);
+          } else {
+            setIsApprovedAgent(false);
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        localStorage.removeItem("fm_dga_waitlist_data");
+        setWaitlistResult(null);
+        setIsApprovedAgent(false);
+      }
+    } else {
+      setWaitlistResult(null);
+      setIsApprovedAgent(false);
     }
 
     // Always poll live check endpoint to get updated waitlist number & approval status
@@ -116,9 +148,7 @@ export default function BecomeAgentPage() {
         .then(data => {
           if (data && data.success && data.alreadyRegistered) {
             const isAppr = data.isApproved || data.status === 'approved' || data.status === 'APPROVED';
-            if (isAppr) {
-              setIsApprovedAgent(true);
-            }
+            setIsApprovedAgent(isAppr);
             const updatedObj = {
               waitlistNumber: data.waitlistNumber,
               formattedWaitlistNumber: data.formattedWaitlistNumber,
@@ -132,6 +162,10 @@ export default function BecomeAgentPage() {
             };
             setWaitlistResult(updatedObj);
             localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(updatedObj));
+          } else if (data && data.success && !data.alreadyRegistered) {
+            setIsApprovedAgent(false);
+            setWaitlistResult(null);
+            localStorage.removeItem("fm_dga_waitlist_data");
           }
         })
         .catch(() => {});
@@ -181,7 +215,36 @@ export default function BecomeAgentPage() {
     e.preventDefault();
     if (!formData.agreeTerms) return;
     setIsSubmitting(true);
+    setFormError("");
 
+    const cleanMobile = formData.mobile.replace(/\D/g, "").slice(-10);
+
+    // 1. First validate & update email in MongoDB User model if provided
+    if (formData.email && cleanMobile) {
+      try {
+        const updateRes = await fetch(`${API_BASE_URL}/users/update-profile`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mobileNumber: cleanMobile,
+            email: formData.email,
+            username: formData.username,
+            fullName: formData.username,
+          })
+        });
+
+        const updateData = await updateRes.json();
+        if (!updateRes.ok || !updateData.success) {
+          setFormError(updateData.message || "This email address is already registered by another user.");
+          setIsSubmitting(false);
+          return;
+        }
+      } catch (err: any) {
+        console.warn("[DGA Profile Sync Error]:", err?.message || err);
+      }
+    }
+
+    // 2. Submit to Agent Waitlist API
     try {
       const response = await fetch(`${API_BASE_URL}/agent-waitlist`, {
         method: "POST",
@@ -197,47 +260,46 @@ export default function BecomeAgentPage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        const num = data.waitlistNumber || 1;
-        const formatted = data.formattedWaitlistNumber || formatWaitlistNumber(num);
-        const resultObj = {
-          waitlistNumber: num,
-          formattedWaitlistNumber: formatted,
-          username: formData.username,
-          alreadyRegistered: data.alreadyRegistered,
-          mobile: formData.mobile,
-          email: formData.email,
-          city: formData.city,
-        };
-        setWaitlistResult(resultObj);
-        localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(resultObj));
-      } else {
-        const fallbackNum = 1;
-        const formatted = formatWaitlistNumber(fallbackNum);
-        const resultObj = {
-          waitlistNumber: fallbackNum,
-          formattedWaitlistNumber: formatted,
-          username: formData.username,
-          mobile: formData.mobile,
-          email: formData.email,
-          city: formData.city,
-        };
-        setWaitlistResult(resultObj);
-        localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(resultObj));
+      if (!response.ok || !data.success) {
+        setFormError(data.message || "Failed to register on waitlist. Please check details.");
+        setIsSubmitting(false);
+        return;
       }
-    } catch (error) {
-      const fallbackNum = 1;
-      const formatted = formatWaitlistNumber(fallbackNum);
+
+      // Sync local storage user state on success
+      if (formData.email && typeof window !== "undefined") {
+        const loggedUser = getLoggedInUser();
+        if (loggedUser) {
+          loggedUser.email = formData.email;
+          if (formData.username && (!loggedUser.fullName || loggedUser.fullName === "")) {
+            loggedUser.fullName = formData.username;
+          }
+          saveLoggedInUser(loggedUser);
+        }
+        if (cleanMobile) {
+          localStorage.setItem(`fm_user_email_${cleanMobile}`, formData.email);
+          if (formData.username) {
+            localStorage.setItem(`fm_user_name_${cleanMobile}`, formData.username);
+          }
+        }
+        window.dispatchEvent(new CustomEvent("fm_profile_updated", { detail: { email: formData.email, username: formData.username } }));
+      }
+
+      const num = data.waitlistNumber || 1;
+      const formatted = data.formattedWaitlistNumber || formatWaitlistNumber(num);
       const resultObj = {
-        waitlistNumber: fallbackNum,
+        waitlistNumber: num,
         formattedWaitlistNumber: formatted,
         username: formData.username,
+        alreadyRegistered: data.alreadyRegistered,
         mobile: formData.mobile,
         email: formData.email,
         city: formData.city,
       };
       setWaitlistResult(resultObj);
       localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(resultObj));
+    } catch (error: any) {
+      setFormError(error?.message || "Failed to submit waitlist application. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -915,10 +977,10 @@ export default function BecomeAgentPage() {
                       <input
                         type="tel"
                         required
+                        readOnly
                         placeholder="Enter your mobile number"
                         value={formData.mobile}
-                        onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-slate-100/90 cursor-not-allowed outline-none select-none shadow-2xs"
                       />
                     </div>
                   </div>
@@ -982,6 +1044,13 @@ export default function BecomeAgentPage() {
                     ))}
                   </select>
                 </div>
+
+                {formError && (
+                  <div className="flex items-center gap-2 text-xs font-bold text-red-600 bg-red-50 p-3 rounded-xl border border-red-200 shadow-2xs">
+                    <AlertCircle size={16} className="shrink-0 text-red-500" />
+                    <span>{formError}</span>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-2 pt-1">
                   <input

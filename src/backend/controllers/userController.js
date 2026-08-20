@@ -1151,7 +1151,22 @@ export const updateProfile = async (req, res, next) => {
     }
 
     if (fullName !== undefined) user.fullName = fullName;
-    if (email !== undefined) user.email = email;
+    
+    if (email !== undefined) {
+      const cleanEmail = String(email).trim().toLowerCase();
+      if (cleanEmail !== '' && cleanEmail !== (user.email || '').toLowerCase()) {
+        const existingEmailUser = await User.findOne({
+          email: cleanEmail,
+          _id: { $ne: user._id }
+        });
+        if (existingEmailUser) {
+          res.status(400);
+          throw new Error('This email address is already registered by another user in the database. Please use a different email address.');
+        }
+        user.email = cleanEmail;
+      }
+    }
+
     if (occupation !== undefined) user.occupation = occupation;
     if (annualIncome !== undefined) user.annualIncome = annualIncome;
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { Home, Wallet, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight } from "lucide-react";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
+import { API_BASE_URL } from "../utils/apiConfig";
 
 const G_LT = "#efb652";
 const G_DK = "#b87312";
@@ -29,14 +30,37 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent, profi
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
+      const mobile = sessionStorage.getItem("fm_logged_in_mobile");
       const saved = localStorage.getItem("fm_dga_waitlist_data");
+      
+      let localIsApproved = false;
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (parsed.isApproved || parsed.status === 'approved' || parsed.status === 'APPROVED') {
-            setIsApprovedDga(true);
+          if (parsed.mobile && mobile && parsed.mobile !== mobile) {
+            localStorage.removeItem("fm_dga_waitlist_data");
+          } else if (parsed.isApproved || parsed.status === 'approved' || parsed.status === 'APPROVED') {
+            localIsApproved = true;
           }
-        } catch (e) {}
+        } catch (e) {
+          localStorage.removeItem("fm_dga_waitlist_data");
+        }
+      }
+      setIsApprovedDga(localIsApproved);
+
+      if (mobile) {
+        fetch(`${API_BASE_URL}/agent-waitlist/check?mobile=${encodeURIComponent(mobile)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.success && data.alreadyRegistered) {
+              const isAppr = data.isApproved || data.status === 'approved' || data.status === 'APPROVED';
+              setIsApprovedDga(isAppr);
+            } else if (data && data.success && !data.alreadyRegistered) {
+              setIsApprovedDga(false);
+              localStorage.removeItem("fm_dga_waitlist_data");
+            }
+          })
+          .catch(() => {});
       }
     }
   }, [activeTab]);
