@@ -255,6 +255,8 @@ app.get('/api/admin/zoho-oauth/campaign-content/:contentId', (req, res) => {
     return res.status(404).send('<!DOCTYPE html><html><body><h1>Campaign Content Expired or Not Found</h1></body></html>');
   }
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
   res.send(html);
 });
 
