@@ -3,7 +3,7 @@ import EmailCampaign from '../models/EmailCampaign.js';
 import User from '../models/User.js';
 import AgentWaitlist from '../models/AgentWaitlist.js';
 import { sendCustomEmail } from '../utils/emailService.js';
-import { sendZohoMarketingCampaign, exchangeGrantCodeForTokens } from '../utils/zohoCampaignsService.js';
+import { sendZohoMarketingCampaign, exchangeGrantCodeForTokens, campaignHtmlStore } from '../utils/zohoCampaignsService.js';
 import {
   checkAdminExists,
   verifyAdminCode,
@@ -1077,6 +1077,17 @@ router.post('/email-campaigns/test', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
+});
+
+// @desc    Serve HTML content for Zoho Campaigns crawler
+// @route   GET /api/admin/zoho-oauth/campaign-content/:contentId
+router.get('/zoho-oauth/campaign-content/:contentId', (req, res) => {
+  const html = campaignHtmlStore.get(req.params.contentId);
+  if (!html) {
+    return res.status(404).send('<!DOCTYPE html><html><body><h1>Campaign Content Expired or Not Found</h1></body></html>');
+  }
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
 });
 
 // @desc    Get Zoho OAuth Configuration & Redirect URIs

@@ -116,6 +116,8 @@ export async function getZohoCampaignsAccessToken() {
   }
 }
 
+export const campaignHtmlStore = new Map();
+
 /**
  * Create and send an email marketing campaign via Zoho Campaigns API
  */
@@ -136,6 +138,14 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
     const accessToken = await getZohoCampaignsAccessToken();
     const campaignsApiDomain = getZohoCampaignsApiDomain();
 
+    // 1. Store HTML content for Zoho crawler to fetch via content_url
+    const contentId = 'c_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+    campaignHtmlStore.set(contentId, htmlContent);
+
+    // Host URL for Zoho Campaigns content crawler
+    const baseHost = process.env.APP_BASE_URL || 'https://dev-server.fipmoney.com';
+    const contentUrl = `${baseHost}/api/admin/zoho-oauth/campaign-content/${contentId}`;
+
     // Dynamically resolve listId if not set in .env
     let listId = process.env.ZOHO_CAMPAIGNS_LIST_ID || '';
     if (!listId) {
@@ -153,7 +163,24 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
       }
     }
 
-    // 1. Create Campaign in Zoho Campaigns
+    // Dynamically resolve topicId if not set in .env
+    let topicId = process.env.ZOHO_CAMPAIGNS_TOPIC_ID || '';
+    if (!topicId) {
+      try {
+        const topicRes = await fetch(`${campaignsApiDomain}/api/v1.1/topics?resfmt=JSON`, {
+          headers: { 'Authorization': `Zoho-oauthtoken ${accessToken}` }
+        });
+        const topicData = await topicRes.json();
+        if (topicData?.topicDetails && topicData.topicDetails.length > 0) {
+          topicId = topicData.topicDetails[0].topicId;
+          process.env.ZOHO_CAMPAIGNS_TOPIC_ID = topicId;
+        }
+      } catch (tErr) {
+        console.warn('[Zoho Campaigns Service] Topic ID fetch warning:', tErr.message);
+      }
+    }
+
+    // 2. Create Campaign in Zoho Campaigns using content_url
     const createUrl = `${campaignsApiDomain}/api/v1.1/createCampaign`;
     const params = new URLSearchParams();
     params.append('resfmt', 'JSON');
@@ -161,7 +188,10 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
     params.append('from_email', fromEmail || 'info@fipmoney.com');
     params.append('from_name', fromName || 'Fipmoney');
     params.append('subject', subject);
-    params.append('html_content', htmlContent);
+    params.append('content_url', contentUrl);
+    if (topicId) {
+      params.append('topicId', topicId);
+    }
     if (listId) {
       params.append('list_details', JSON.stringify({ [listId]: [] }));
     }
@@ -181,8 +211,8 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
     const campaignKey = createData?.campaignKey || createData?.campaign_details?.campaignKey || '';
 
     if (campaignKey) {
-      // 2. Trigger Send Campaign
-      const sendUrl = `${campaignsApiDomain}/api/v1.1/sendCampaign`;
+      // 3. Trigger Send Campaign via lowercase /api/v1.1/sendcampaign
+      const sendUrl = `${campaignsApiDomain}/api/v1.1/sendcampaign`;
       const sendParams = new URLSearchParams();
       sendParams.append('resfmt', 'JSON');
       sendParams.append('campaignkey', campaignKey);
@@ -220,6 +250,7 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
       isZohoCampaignsConfigured: true,
       success: false,
       error: err.message,
+      message: 'Zoho Campaigns Dispatch Exception',
     };
   }
 }

@@ -169,7 +169,7 @@ import agentWaitlistRoutes from './routes/agentWaitlistRoutes.js';
 import kycRoutes from './routes/kycRoutes.js';
 import referralRoutes from './routes/referralRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import { exchangeGrantCodeForTokens } from './utils/zohoCampaignsService.js';
+import { exchangeGrantCodeForTokens, campaignHtmlStore } from './utils/zohoCampaignsService.js';
 
 // API Routes
 app.use('/api/health', healthRoutes);
@@ -247,6 +247,15 @@ app.get('/api/admin/zoho-oauth/callback', async (req, res) => {
       </html>
     `);
   }
+});
+
+app.get('/api/admin/zoho-oauth/campaign-content/:contentId', (req, res) => {
+  const html = campaignHtmlStore.get(req.params.contentId);
+  if (!html) {
+    return res.status(404).send('<!DOCTYPE html><html><body><h1>Campaign Content Expired or Not Found</h1></body></html>');
+  }
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
 });
 
 app.use('/api/admin', adminRoutes);
