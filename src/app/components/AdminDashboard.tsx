@@ -581,9 +581,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
         return;
       }
 
-      // Open Zoho OAuth authorization popup
+      // Open Zoho OAuth authorization popup matching Zoho Console configuration
+      const targetRedirectUri = "https://dev-server.fipmoney.com/api/admin/zoho-oauth/callback";
       const dcDomain = zohoKeys.dataCenter === "com" || zohoKeys.dataCenter === "us" ? "https://accounts.zoho.com" : "https://accounts.zoho.in";
-      const authUrl = `${dcDomain}/oauth/v2/auth?scope=ZohoCampaigns.campaign.ALL,ZohoCampaigns.contact.ALL&client_id=${encodeURIComponent(zohoKeys.clientId.trim())}&response_type=code&access_type=offline&redirect_uri=${encodeURIComponent(redirectUriInfo.redirectUri)}`;
+      const authUrl = `${dcDomain}/oauth/v2/auth?scope=ZohoCampaigns.campaign.ALL,ZohoCampaigns.contact.ALL&client_id=${encodeURIComponent(zohoKeys.clientId.trim())}&response_type=code&access_type=offline&redirect_uri=${encodeURIComponent(targetRedirectUri)}`;
 
       window.open(authUrl, "ZohoOAuthAuth", "width=600,height=700,scrollbars=yes");
       triggerToast("Opened Zoho Authorization Window! Please approve permissions.");
@@ -4141,7 +4142,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <h2 className="text-lg font-black text-slate-900">Email Marketing & Zoho Campaign Desk</h2>
                   <span className="bg-purple-100 text-purple-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse"></span>
-                    Zoho ZeptoMail Active
+                    Zoho Campaigns Service Active
                   </span>
                 </div>
                 <p className="text-xs font-semibold text-slate-500 mt-1">

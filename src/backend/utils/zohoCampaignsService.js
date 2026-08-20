@@ -26,7 +26,7 @@ function getZohoCampaignsApiDomain() {
 /**
  * Exchange Grant Code for Refresh Token during OAuth Callback
  */
-export async function exchangeGrantCodeForTokens(code, primaryRedirectUri) {
+export async function exchangeGrantCodeForTokens(code, redirectUri) {
   const clientId = process.env.ZOHO_CAMPAIGNS_CLIENT_ID;
   const clientSecret = process.env.ZOHO_CAMPAIGNS_CLIENT_SECRET;
 
@@ -37,50 +37,35 @@ export async function exchangeGrantCodeForTokens(code, primaryRedirectUri) {
   const accountsDomain = getZohoAccountsDomain();
   const tokenUrl = `${accountsDomain}/oauth/v2/token`;
 
-  const candidateUris = Array.from(new Set([
-    primaryRedirectUri,
-    'https://dev-server.fipmoney.com/api/admin/zoho-oauth/callback',
-    'http://dev-server.fipmoney.com/api/admin/zoho-oauth/callback',
-    'http://localhost:5000/api/admin/zoho-oauth/callback',
-    'https://www.fipmoney.com/api/admin/zoho-oauth/callback',
-  ])).filter(Boolean);
+  const params = new URLSearchParams();
+  params.append('grant_type', 'authorization_code');
+  params.append('client_id', clientId);
+  params.append('client_secret', clientSecret);
+  params.append('redirect_uri', redirectUri);
+  params.append('code', code);
 
-  let lastError = null;
+  console.log(`[Zoho OAuth] Attempting token exchange with redirect_uri: ${redirectUri}`);
 
-  for (const uri of candidateUris) {
-    try {
-      const params = new URLSearchParams();
-      params.append('grant_type', 'authorization_code');
-      params.append('client_id', clientId);
-      params.append('client_secret', clientSecret);
-      params.append('redirect_uri', uri);
-      params.append('code', code);
+  const res = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params,
+  });
 
-      const res = await fetch(tokenUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params,
-      });
+  const data = await res.json();
+  console.log('[Zoho OAuth Token Response]:', data);
 
-      const data = await res.json();
-
-      if (data.refresh_token) {
-        process.env.ZOHO_CAMPAIGNS_REFRESH_TOKEN = data.refresh_token;
-        return {
-          success: true,
-          refreshToken: data.refresh_token,
-          accessToken: data.access_token,
-          data,
-        };
-      } else {
-        lastError = data.error || JSON.stringify(data);
-      }
-    } catch (err) {
-      lastError = err.message;
-    }
+  if (data.refresh_token) {
+    process.env.ZOHO_CAMPAIGNS_REFRESH_TOKEN = data.refresh_token;
+    return {
+      success: true,
+      refreshToken: data.refresh_token,
+      accessToken: data.access_token,
+      data,
+    };
+  } else {
+    throw new Error(data.error || JSON.stringify(data));
   }
-
-  throw new Error(lastError || 'Failed to exchange authorization code for refresh token');
 }
 
 /**

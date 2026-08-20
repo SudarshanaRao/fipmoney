@@ -85,9 +85,9 @@ router.get('/zoho-oauth/callback', async (req, res) => {
     `);
   }
 
-  const protocol = req.protocol || 'https';
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
   const host = req.get('host') || 'dev-server.fipmoney.com';
-  const redirectUri = `${protocol}://${host}/api/admin/zoho-oauth/callback`;
+  const redirectUri = `${proto}://${host}${req.path}`;
 
   try {
     const result = await exchangeGrantCodeForTokens(code, redirectUri);
@@ -117,10 +117,17 @@ router.get('/zoho-oauth/callback', async (req, res) => {
       <!DOCTYPE html>
       <html>
         <head><title>Zoho OAuth Error</title></head>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-          <h2 style="color: #e11d48;">❌ Token Exchange Error</h2>
-          <p style="color: #64748b;">${err.message}</p>
-          <button onclick="window.close()" style="padding: 10px 20px; background: #6d28d9; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Close Window</button>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f8fafc;">
+          <div style="max-width: 550px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+            <h2 style="color: #e11d48; margin-bottom: 10px;">❌ Token Exchange Error</h2>
+            <div style="background: #fff1f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 10px; font-family: monospace; font-size: 13px; color: #9f1239; margin: 15px 0;">
+              ${err.message}
+            </div>
+            <p style="color: #64748b; font-size: 13px;">
+              <strong>Note:</strong> Zoho authorization codes can only be used <strong>once</strong>. If you reloaded the page or re-used an old link, please click <em>Authorize</em> again to generate a new code.
+            </p>
+            <button onclick="window.close()" style="padding: 12px 24px; background: #6d28d9; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;">Close Window</button>
+          </div>
         </body>
       </html>
     `);
