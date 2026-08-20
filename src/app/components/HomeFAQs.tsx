@@ -93,7 +93,7 @@ const faqs: FAQ[] = [
     answer: "DGIPL appoints specialized **Intermediaries** including an independent **Trustee Administrator** and **Vault Keeper**. The Trustee Administrator monitors vaulted metal on your behalf and holds a **legal first charge** over it. In case of default or unpaid charges affecting order fulfillment, the Trustee Administrator is authorized to sell a portion of the bullion to cover expenses and protect customer entitlements.",
     category: "insurance-trustee"
   },
-  
+
   // Withdrawal Issues FAQs
   {
     id: "9",
@@ -158,7 +158,7 @@ const faqs: FAQ[] = [
   {
     id: "19",
     question: "When will I receive my referral bonus?",
-    answer: "You will receive your **₹50 digital gold referral bonus** within **24-48 hours** after your friend successfully completes a digital gold purchase of at least **₹250** within **30 days** of account creation.",
+    answer: "You will receive your **₹50 digital gold referral bonus** within **24-48 hours** after your friend successfully completes a digital gold purchase of at least **₹500** within **30 days** of account creation.",
     category: "referral-program"
   },
   {
@@ -170,7 +170,7 @@ const faqs: FAQ[] = [
   {
     id: "21",
     question: "What happens if my friend purchases gold after 30 days?",
-    answer: "The referral reward is only applicable if the referee completes their first **₹250+ digital gold purchase** within **30 days** of account creation.",
+    answer: "The referral reward is only applicable if the referee completes their first **₹500+ digital gold purchase** within **30 days** of account creation.",
     category: "referral-program"
   },
   {
@@ -207,7 +207,7 @@ export default function HomeFAQs() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
 
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        
+
         {/* Header */}
         <div className="text-center mb-12 max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tight mb-4">
@@ -220,7 +220,7 @@ export default function HomeFAQs() {
 
         {/* Two column layout */}
         <div className="flex flex-col lg:flex-row gap-6 md:gap-12">
-          
+
           {/* Left Column: Categories */}
           <div className="w-full lg:w-1/3 flex flex-col gap-3">
             {categories.map((category) => {
@@ -233,8 +233,8 @@ export default function HomeFAQs() {
                     setExpandedFAQ(null);
                   }}
                   className={`w-full flex items-center justify-between px-6 py-5 rounded-xl transition-all duration-300 font-semibold text-left
-                    ${isActive 
-                      ? 'bg-amber-100/50 text-[#4a2b75] shadow-sm border border-amber-200/50' 
+                    ${isActive
+                      ? 'bg-amber-100/50 text-[#4a2b75] shadow-sm border border-amber-200/50'
                       : 'bg-white/40 text-slate-500 hover:bg-white/60 border border-transparent'
                     }
                   `}
@@ -259,8 +259,8 @@ export default function HomeFAQs() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className={`rounded-xl overflow-hidden transition-all duration-300
-                      ${isExpanded 
-                        ? 'bg-white shadow-sm' 
+                      ${isExpanded
+                        ? 'bg-white shadow-sm'
                         : 'bg-white/40 hover:bg-white/60'
                       }
                     `}
@@ -280,7 +280,7 @@ export default function HomeFAQs() {
                         )}
                       </div>
                     </button>
-                    
+
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.div

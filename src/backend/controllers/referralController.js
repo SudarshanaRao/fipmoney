@@ -78,7 +78,7 @@ export const getAdminReferrals = async (req, res) => {
 
         const isKycCompleted = Boolean(kycRecord || refereeUser?.isVerified || refereeUser?.kycStatus === 'Verified');
 
-        // Check Digital Gold Purchase >= ₹250 for referee
+        // Check Digital Gold Purchase >= ₹500 for referee
         const goldTx = await VaultTransaction.findOne({
           mobileNumber: cleanRefereeMobile,
           type: 'BUY',
@@ -156,7 +156,7 @@ export const getAdminReferrals = async (req, res) => {
     // If MongoDB collection is empty, check dev_users with referredBy
     if (enrichedReferrals.length === 0) {
       const usersWithReferrals = await User.find({ referredBy: { $exists: true, $ne: '' } }).lean();
-      
+
       const fallbackList = await Promise.all(
         usersWithReferrals.map(async (u, idx) => {
           const referrer = await User.findOne({ referralCode: u.referredBy }).lean();
@@ -239,19 +239,19 @@ export const getAdminReferralStats = async (req, res) => {
   try {
     const totalReferralsCount = await Referral.countDocuments();
     const creditedReferrals = await Referral.find({ status: { $in: ['REWARD_CREDITED', 'Credited'] } }).lean();
-    
+
     // Total bonus distributed
     const totalRewardSum = creditedReferrals.reduce((sum, item) => sum + (item.rewardAmount || 100), 0);
-    
+
     // Distinct advocates
     const distinctReferrers = await Referral.distinct('referrerMobile');
-    
+
     // Flagged fraud count
     const flaggedFraudCount = await Referral.countDocuments({ status: { $in: ['FLAGGED_FRAUD', 'Flagged Fraud'] } });
 
     // Conversion rate
     const convertedCount = creditedReferrals.length;
-    const conversionRate = totalReferralsCount > 0 
+    const conversionRate = totalReferralsCount > 0
       ? ((convertedCount / totalReferralsCount) * 100).toFixed(1) + '%'
       : '0.0%';
 

@@ -104,7 +104,7 @@ export default function BecomeAgentPage() {
           if (parsed.referralCode || parsed.userCode) {
             setReferralCode(parsed.referralCode || parsed.userCode);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
     }
   }, []);
@@ -118,7 +118,7 @@ export default function BecomeAgentPage() {
 
   useEffect(() => {
     const mobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") : null;
-    
+
     // Check saved waitlist data locally first
     const saved = localStorage.getItem("fm_dga_waitlist_data");
     if (saved) {
@@ -173,7 +173,7 @@ export default function BecomeAgentPage() {
             localStorage.removeItem("fm_dga_waitlist_data");
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, []);
 
@@ -403,7 +403,7 @@ export default function BecomeAgentPage() {
     return (
       <div className="flex-1 h-screen overflow-y-auto bg-[#fafbfc] pb-24 text-slate-800 font-sans hide-scrollbar">
         <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
-          
+
           {/* Executive Header Banner */}
           <div className="bg-white rounded-[2rem] p-6 sm:p-8 border border-gray-150 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
             <div className="space-y-2 relative z-10 max-w-2xl">
@@ -579,11 +579,11 @@ export default function BecomeAgentPage() {
 
   return (
     <div className="flex-1 h-screen overflow-y-auto bg-[#fafafd] pb-20 text-slate-800 hide-scrollbar font-sans">
-      
+
       {/* 1. TOP HERO BANNER */}
       <div className="px-6 lg:px-12 pt-6 max-w-[1600px] mx-auto w-full">
         <div className="bg-gradient-to-r from-[#fffdf2] via-[#fff8e7] to-[#fff4d6] rounded-[32px] p-8 lg:p-12 border border-[#ffe5a3]/80 shadow-xs relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8">
-          
+
           {/* Ambient Glow & Confetti */}
           <div className="absolute top-0 right-1/3 w-72 h-72 bg-amber-200/40 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-300/30 rounded-full blur-2xl pointer-events-none" />
@@ -655,7 +655,7 @@ export default function BecomeAgentPage() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4.5">
-            
+
             {/* Card 1: why_dga_1.png */}
             <div className="bg-white rounded-[26px] p-6 sm:p-7 border border-slate-200/70 shadow-2xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 text-center flex flex-col items-center justify-between group min-h-[300px]">
               <div className="w-full h-32 sm:h-36 lg:h-40 flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-105">
@@ -733,7 +733,7 @@ export default function BecomeAgentPage() {
 
           <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-100 shadow-xs">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-              
+
               {/* Step 1 */}
               <div className="flex flex-col items-center text-center space-y-2 relative">
                 <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-lg border border-amber-200/60 shadow-xs">
@@ -761,9 +761,9 @@ export default function BecomeAgentPage() {
                 <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-lg border border-amber-200/60 shadow-xs">
                   <TrendingUp size={24} />
                 </div>
-                <h4 className="font-bold text-sm text-slate-900 pt-1">Min. ₹250 Investment</h4>
+                <h4 className="font-bold text-sm text-slate-900 pt-1">Min. ₹500 Investment</h4>
                 <p className="text-xs text-slate-500 font-medium max-w-xs">
-                  They need to invest a minimum of ₹250 in Digital Gold.
+                  They need to invest a minimum of ₹500 in Digital Gold.
                 </p>
               </div>
 
@@ -785,7 +785,7 @@ export default function BecomeAgentPage() {
 
         {/* 4. TARGET BASED COMMISSION & TOOLS & SUPPORT YOU GET (2 CARDS) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-          
+
           {/* Left Card: Target Based Commission Table */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs flex flex-col justify-between">
             <div>
@@ -829,7 +829,7 @@ export default function BecomeAgentPage() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="space-y-4 flex-1">
               <h3 className="text-lg font-black text-slate-900 mb-1">Tools & Support You Get</h3>
-              
+
               <div className="space-y-3 text-xs font-semibold">
                 <div className="flex items-start gap-3">
                   <ShieldCheck size={18} className="text-amber-600 shrink-0 mt-0.5" />
@@ -880,7 +880,7 @@ export default function BecomeAgentPage() {
 
         {/* 5. HIGHLIGHT STRIP (NO FEES PILLS + GOLDEN TROPHY CARD) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-center">
-          
+
           {/* 3 Pills */}
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex items-center gap-3">
@@ -930,7 +930,7 @@ export default function BecomeAgentPage() {
 
         {/* 6. JOIN THE DGA WAITLIST SECTION (FORM + TICKET GRAPHIC OVERLAY) */}
         <div id="join-waitlist-section" className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-sm space-y-6">
-          
+
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
@@ -946,7 +946,7 @@ export default function BecomeAgentPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
-            
+
             {/* LEFT SIDE: APPROVED DGA PARTNER CARD (FORM DISABLED) OR WAITLIST TICKET OR NEW APPLICATION FORM */}
             {isApprovedAgent || waitlistResult?.isApproved || waitlistResult?.status === 'approved' || waitlistResult?.status === 'APPROVED' ? (
               <div className="space-y-5 bg-gradient-to-br from-amber-50 via-yellow-50/60 to-orange-50/40 rounded-3xl p-6 sm:p-8 border border-amber-300/80 shadow-md">

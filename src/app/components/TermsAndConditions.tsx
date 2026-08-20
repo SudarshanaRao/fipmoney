@@ -165,7 +165,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               <p>
                 The Services are available only to those who have subscribed to the Platform by registering and creating an account with Us. You can register to the Platform by providing your personal information, including name, age, gender and registered mobile number. Registration will be validated by sending a one‑time password (OTP) to your registered mobile number.
               </p>
-              
+
               <p>
                 We may also ask You for certain financial information, including Your billing address, bank account details, or other payment‑related details or other standing instructions to process payments for the Platform Services. The Company may also ask You to provide certain additional information about Yourself on a case‑by‑case basis. If there is any change in Your account information, You shall promptly update Your account information on the Platform.
               </p>
@@ -735,7 +735,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
             <div className="space-y-6 text-gray-700">
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
                 <h4 className="font-bold text-gray-900 mb-2">Q: When will I receive my referral bonus?</h4>
-                <p>A: You will receive your ₹50 digital gold referral bonus within 24-48 hours after your friend successfully completes a digital gold purchase of at least ₹250 within 30 days of creating their account.</p>
+                <p>A: You will receive your ₹50 digital gold referral bonus within 24-48 hours after your friend successfully completes a digital gold purchase of at least ₹500 within 30 days of creating their account.</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
                 <h4 className="font-bold text-gray-900 mb-2">Q: Is there a limit to how many friends I can refer?</h4>
@@ -743,7 +743,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               </div>
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
                 <h4 className="font-bold text-gray-900 mb-2">Q: What happens if my friend purchases gold after 30 days?</h4>
-                <p>A: The referral reward is only applicable if the referee completes their first ₹250+ digital gold purchase within 30 days of account creation. Purchases made after this period will not qualify for the referral bonus.</p>
+                <p>A: The referral reward is only applicable if the referee completes their first ₹500+ digital gold purchase within 30 days of account creation. Purchases made after this period will not qualify for the referral bonus.</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
                 <h4 className="font-bold text-gray-900 mb-2">Q: Where can I see my referral earnings?</h4>

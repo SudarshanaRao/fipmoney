@@ -137,7 +137,7 @@ const faqs: FAQ[] = [
   {
     id: "24",
     question: "When will I receive my referral bonus?",
-    answer: "You will receive your **₹50 digital gold referral bonus** within **24-48 hours** after your friend successfully completes a digital gold purchase of at least **₹250** within **30 days** of account creation.",
+    answer: "You will receive your **₹50 digital gold referral bonus** within **24-48 hours** after your friend successfully completes a digital gold purchase of at least **₹500** within **30 days** of account creation.",
     category: "referral-program"
   },
   {
@@ -149,7 +149,7 @@ const faqs: FAQ[] = [
   {
     id: "26",
     question: "What happens if my friend purchases gold after 30 days?",
-    answer: "The referral reward is only applicable if the referee completes their first **₹250+ digital gold purchase** within **30 days** of account creation.",
+    answer: "The referral reward is only applicable if the referee completes their first **₹500+ digital gold purchase** within **30 days** of account creation.",
     category: "referral-program"
   },
   {
@@ -221,7 +221,7 @@ export default function FAQs({ onBack }: FAQsProps) {
   const filteredFAQs = faqs.filter(faq => {
     const matchesCategory = activeCategory === "all" || faq.category === activeCategory;
     const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -298,11 +298,10 @@ export default function FAQs({ onBack }: FAQsProps) {
             <motion.button
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
-              className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
-                activeCategory === category.id
+              className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${activeCategory === category.id
                   ? "bg-[#ffbf00] text-white shadow-lg transform scale-105"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
-              }`}
+                }`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index, duration: 0.6 }}
@@ -310,9 +309,8 @@ export default function FAQs({ onBack }: FAQsProps) {
               whileTap={{ scale: 0.95 }}
             >
               {category.name}
-              <span className={`ml-2 text-sm ${
-                activeCategory === category.id ? "text-white/80" : "text-gray-500"
-              }`}>
+              <span className={`ml-2 text-sm ${activeCategory === category.id ? "text-white/80" : "text-gray-500"
+                }`}>
                 ({category.count})
               </span>
             </motion.button>
@@ -352,7 +350,7 @@ export default function FAQs({ onBack }: FAQsProps) {
                     <ChevronDown className="w-5 h-5 text-[#ffbf00]" />
                   </motion.div>
                 </button>
-                
+
                 <AnimatePresence>
                   {expandedFAQ === faq.id && (
                     <motion.div

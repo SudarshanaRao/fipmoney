@@ -2641,11 +2641,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <div key={c.id || i} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:border-purple-300 transition-all">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${
-                          c.id === 'brinks' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
-                          c.id === 'vistra' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' :
-                          'bg-amber-50 border border-amber-200 text-amber-700'
-                        }`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${c.id === 'brinks' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
+                            c.id === 'vistra' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' :
+                              'bg-amber-50 border border-amber-200 text-amber-700'
+                          }`}>
                           {c.id ? c.id.toUpperCase() : 'VAULT'}
                         </div>
                         <div>
@@ -2653,11 +2652,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <div className="text-[10px] font-bold text-slate-400">{c.location}</div>
                         </div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                        c.id === 'brinks' ? 'bg-blue-100 text-blue-700' :
-                        c.id === 'vistra' ? 'bg-emerald-100 text-emerald-700' :
-                        'bg-amber-100 text-amber-700'
-                      }`}>{c.badge}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${c.id === 'brinks' ? 'bg-blue-100 text-blue-700' :
+                          c.id === 'vistra' ? 'bg-emerald-100 text-emerald-700' :
+                            'bg-amber-100 text-amber-700'
+                        }`}>{c.badge}</span>
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
@@ -3357,7 +3355,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                                 ) : (
                                   <span
                                     className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200 cursor-not-allowed inline-block"
-                                    title="Credit button enables only after referee completes KYC & buys ₹250+ Gold"
+                                    title="Credit button enables only after referee completes KYC & buys ₹500+ Gold"
                                   >
                                     Credit Locked
                                   </span>
@@ -3499,11 +3497,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     <button
                       key={cat}
                       onClick={() => setBbpsCategoryFilter(cat)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap cursor-pointer transition-all border-none ${
-                        bbpsCategoryFilter === cat
+                      className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap cursor-pointer transition-all border-none ${bbpsCategoryFilter === cat
                           ? 'bg-[#7C3AED] text-white shadow-md'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                        }`}
                     >
                       {cat}
                     </button>
@@ -3601,15 +3598,14 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                             <td className="p-3.5 font-bold text-slate-600 text-[11px]">{t.paymentGateway}</td>
                             <td className="p-3.5">
                               <span
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase inline-flex items-center gap-1 ${
-                                  t.status === 'Success'
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase inline-flex items-center gap-1 ${t.status === 'Success'
                                     ? 'bg-emerald-100 text-emerald-800'
                                     : t.status === 'Pending'
-                                    ? 'bg-amber-100 text-amber-800'
-                                    : t.status === 'Failed'
-                                    ? 'bg-rose-100 text-rose-800'
-                                    : 'bg-slate-100 text-slate-700'
-                                }`}
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : t.status === 'Failed'
+                                        ? 'bg-rose-100 text-rose-800'
+                                        : 'bg-slate-100 text-slate-700'
+                                  }`}
                               >
                                 {t.status}
                               </span>
@@ -4209,7 +4205,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         setRedirectUriInfo(json);
                         if (json.clientId) setZohoKeys(prev => ({ ...prev, clientId: json.clientId }));
                       }
-                    } catch (e) {}
+                    } catch (e) { }
                     setShowZohoConnectModal(true);
                   }}
                   className="bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 border border-purple-200 cursor-pointer"
@@ -4346,8 +4342,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <td className="p-3.5">
                             <span className="bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded text-[11px] border border-purple-200">
                               {c.targetAudience === "ALL_USERS" ? "All Platform Users" :
-                               c.targetAudience === "KYC_VERIFIED" ? "KYC Verified Users" :
-                               c.targetAudience === "DGA_AGENTS" ? "DGA Waitlist Agents" : "Specific Users List"}
+                                c.targetAudience === "KYC_VERIFIED" ? "KYC Verified Users" :
+                                  c.targetAudience === "DGA_AGENTS" ? "DGA Waitlist Agents" : "Specific Users List"}
                             </span>
                           </td>
                           <td className="p-3.5 text-slate-700 font-mono text-[11px]">{c.fromEmail || "info@fipmoney.com"}</td>
@@ -4362,11 +4358,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                             )}
                           </td>
                           <td className="p-3.5">
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                              c.status === "SENT" ? "bg-emerald-100 text-emerald-800" :
-                              c.status === "SENDING" ? "bg-amber-100 text-amber-800 animate-pulse" :
-                              "bg-slate-100 text-slate-600"
-                            }`}>
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${c.status === "SENT" ? "bg-emerald-100 text-emerald-800" :
+                                c.status === "SENDING" ? "bg-amber-100 text-amber-800 animate-pulse" :
+                                  "bg-slate-100 text-slate-600"
+                              }`}>
                               {c.status}
                             </span>
                           </td>
@@ -4526,18 +4521,16 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         <button
                           type="button"
                           onClick={() => setPreviewTab("editor")}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer ${
-                            previewTab === "editor" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
-                          }`}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer ${previewTab === "editor" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
+                            }`}
                         >
                           HTML Code Editor
                         </button>
                         <button
                           type="button"
                           onClick={() => setPreviewTab("variables")}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer flex items-center gap-1 ${
-                            previewTab === "variables" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
-                          }`}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer flex items-center gap-1 ${previewTab === "variables" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
+                            }`}
                         >
                           <span>Template Variables</span>
                           <span className="bg-white/20 text-current px-1.5 py-0.2 rounded-full text-[10px] font-black">
@@ -4547,9 +4540,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         <button
                           type="button"
                           onClick={() => setPreviewTab("preview")}
-                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer ${
-                            previewTab === "preview" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
-                          }`}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold border-none cursor-pointer ${previewTab === "preview" ? "bg-purple-600 text-white" : "bg-slate-100 text-slate-600"
+                            }`}
                         >
                           Visual Email Preview
                         </button>
@@ -5773,11 +5765,10 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="font-extrabold text-slate-500">Current Status</span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                    selectedBbpsReceipt.status === 'Success' ? 'bg-emerald-100 text-emerald-800' :
-                    selectedBbpsReceipt.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
-                    selectedBbpsReceipt.status === 'Failed' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
-                  }`}>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${selectedBbpsReceipt.status === 'Success' ? 'bg-emerald-100 text-emerald-800' :
+                      selectedBbpsReceipt.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
+                        selectedBbpsReceipt.status === 'Failed' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
+                    }`}>
                     {selectedBbpsReceipt.status}
                   </span>
                 </div>
@@ -5793,14 +5784,13 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       type="button"
                       onClick={() => handleUpdateBbpsStatus(selectedBbpsReceipt.txnId || selectedBbpsReceipt._id || '', st)}
                       disabled={selectedBbpsReceipt.status === st}
-                      className={`py-2 rounded-xl font-extrabold text-xs cursor-pointer border-none transition-all ${
-                        selectedBbpsReceipt.status === st
+                      className={`py-2 rounded-xl font-extrabold text-xs cursor-pointer border-none transition-all ${selectedBbpsReceipt.status === st
                           ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
                           : st === 'Success' ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          : st === 'Pending' ? 'bg-amber-500 text-white hover:bg-amber-600'
-                          : st === 'Failed' ? 'bg-rose-600 text-white hover:bg-rose-700'
-                          : 'bg-purple-600 text-white hover:bg-purple-700'
-                      }`}
+                            : st === 'Pending' ? 'bg-amber-500 text-white hover:bg-amber-600'
+                              : st === 'Failed' ? 'bg-rose-600 text-white hover:bg-rose-700'
+                                : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
                     >
                       Mark {st}
                     </button>
