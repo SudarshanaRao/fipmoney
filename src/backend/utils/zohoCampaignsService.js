@@ -1,4 +1,13 @@
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 /**
  * Zoho Campaigns Service
@@ -68,10 +77,17 @@ export async function exchangeGrantCodeForTokens(code, redirectUri) {
   }
 }
 
+let cachedAccessToken = null;
+let tokenExpiresAt = 0;
+
 /**
  * Exchange Refresh Token for a fresh OAuth Access Token from Zoho Accounts
  */
 export async function getZohoCampaignsAccessToken() {
+  if (cachedAccessToken && Date.now() < tokenExpiresAt) {
+    return cachedAccessToken;
+  }
+
   const clientId = process.env.ZOHO_CAMPAIGNS_CLIENT_ID;
   const clientSecret = process.env.ZOHO_CAMPAIGNS_CLIENT_SECRET;
   const refreshToken = process.env.ZOHO_CAMPAIGNS_REFRESH_TOKEN;
@@ -88,7 +104,9 @@ export async function getZohoCampaignsAccessToken() {
     const data = await res.json();
 
     if (data.access_token) {
-      return data.access_token;
+      cachedAccessToken = data.access_token;
+      tokenExpiresAt = Date.now() + ((data.expires_in || 3600) - 300) * 1000;
+      return cachedAccessToken;
     } else {
       throw new Error(`Zoho OAuth Error: ${data.error || JSON.stringify(data)}`);
     }
@@ -118,10 +136,25 @@ export async function sendZohoMarketingCampaign({ campaignName, subject, fromEma
     const accessToken = await getZohoCampaignsAccessToken();
     const campaignsApiDomain = getZohoCampaignsApiDomain();
 
+    // Dynamically resolve listId if not set in .env
+    let listId = process.env.ZOHO_CAMPAIGNS_LIST_ID || '';
+    if (!listId) {
+      try {
+        const listRes = await fetch(`${campaignsApiDomain}/api/v1.1/getmailinglists?resfmt=JSON`, {
+          headers: { 'Authorization': `Zoho-oauthtoken ${accessToken}` }
+        });
+        const listData = await listRes.json();
+        if (listData?.list_of_details && listData.list_of_details.length > 0) {
+          listId = listData.list_of_details[0].listkey;
+          process.env.ZOHO_CAMPAIGNS_LIST_ID = listId;
+        }
+      } catch (lErr) {
+        console.warn('[Zoho Campaigns Service] List key fetch warning:', lErr.message);
+      }
+    }
+
     // 1. Create Campaign in Zoho Campaigns
     const createUrl = `${campaignsApiDomain}/api/v1.1/createCampaign`;
-    const listId = process.env.ZOHO_CAMPAIGNS_LIST_ID || '';
-
     const params = new URLSearchParams();
     params.append('resfmt', 'JSON');
     params.append('campaignname', campaignName);

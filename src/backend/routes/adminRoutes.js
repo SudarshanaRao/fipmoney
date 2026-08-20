@@ -1037,6 +1037,26 @@ router.post('/email-campaigns/test', async (req, res) => {
       return res.status(400).json({ success: false, message: 'testEmail, subject, and htmlContent are required.' });
     }
 
+    // 1. Try sending test email via Zoho Campaigns REST API first if configured
+    const zohoRes = await sendZohoMarketingCampaign({
+      campaignName: `[TEST] ${subject}`,
+      subject: `[TEST] ${subject}`,
+      fromEmail: fromEmail || 'info@fipmoney.com',
+      fromName: 'Fipmoney Marketing Test',
+      htmlContent,
+      recipients: [{ toEmail: testEmail, userName: 'Test Admin User', mobileNumber: '9999999999', referralCode: 'FIPTEST' }],
+    });
+
+    if (zohoRes.isZohoCampaignsConfigured && zohoRes.success) {
+      console.log(`[Zoho Campaigns Service] Test email sent to ${testEmail} via Zoho Campaigns API!`);
+      return res.status(200).json({
+        success: true,
+        message: `Test email sent to ${testEmail} via Zoho Campaigns API!`,
+        data: zohoRes.data,
+      });
+    }
+
+    // 2. Fallback to sending via transactional email service
     const result = await sendCustomEmail(
       testEmail,
       `[TEST] ${subject}`,
@@ -1052,7 +1072,7 @@ router.post('/email-campaigns/test', async (req, res) => {
 
     res.status(200).json({
       success: result.success,
-      message: result.message,
+      message: `[Fallback Transactional Service] ${result.message}`,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
