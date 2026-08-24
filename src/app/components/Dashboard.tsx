@@ -187,11 +187,22 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         .then(res => res.json())
         .then(data => {
           if (data && data.success && data.alreadyRegistered) {
-            if (data.isApproved || data.status === 'approved' || data.status === 'APPROVED') {
-              setIsApprovedDga(true);
-            } else {
-              setIsApprovedDga(false);
-            }
+            const isAppr = data.isApproved || data.status === 'approved' || data.status === 'APPROVED';
+            setIsApprovedDga(isAppr);
+            try {
+              const existing = saved ? JSON.parse(saved) : {};
+              const updatedObj = {
+                ...existing,
+                waitlistNumber: data.waitlistNumber,
+                formattedWaitlistNumber: data.formattedWaitlistNumber,
+                username: data.data?.username || "Agent Partner",
+                alreadyRegistered: true,
+                isApproved: isAppr,
+                status: data.status,
+                mobile: data.data?.mobile || mobile,
+              };
+              localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(updatedObj));
+            } catch (e) {}
           } else if (data && data.success && !data.alreadyRegistered) {
             setIsApprovedDga(false);
             localStorage.removeItem("fm_dga_waitlist_data");
