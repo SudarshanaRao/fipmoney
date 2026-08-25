@@ -131,7 +131,7 @@ export default function Header({ onNavigate }: HeaderProps) {
       animate={{ y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <div className="container mx-auto px-4">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <motion.div
@@ -142,12 +142,12 @@ export default function Header({ onNavigate }: HeaderProps) {
             <motion.img
               src={fipMoneyLogo}
               alt="FipMoney Logo"
-              className="h-12 md:h-14 w-auto object-contain"
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain"
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.3 }}
             />
             <motion.span 
-              className="text-2xl md:text-3xl font-bold text-gray-900"
+              className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900"
               whileHover={{ color: "#1e1b4b" }}
               transition={{ duration: 0.3 }}
             >
@@ -156,7 +156,7 @@ export default function Header({ onNavigate }: HeaderProps) {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {/* Features Megamenu Trigger */}
             <div className="relative">
               <motion.button
@@ -176,7 +176,7 @@ export default function Header({ onNavigate }: HeaderProps) {
               <AnimatePresence>
                 {activeDropdown === 'features' && (
                   <motion.div
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[720px] bg-white rounded-2xl shadow-2xl border border-gray-150 p-6 z-50 grid grid-cols-4 gap-6"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[92vw] sm:w-[640px] md:w-[720px] max-w-[720px] bg-white rounded-2xl shadow-2xl border border-gray-150 p-5 md:p-6 z-50 grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -375,7 +375,7 @@ export default function Header({ onNavigate }: HeaderProps) {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="md:hidden bg-white shadow-xl border-t border-gray-200"
+            className="md:hidden bg-white shadow-xl border-t border-gray-200 max-h-[80vh] overflow-y-auto"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}

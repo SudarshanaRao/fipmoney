@@ -94,7 +94,7 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
         {/* bottom secure guarantee banner */}
         <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-[#1e1b4b] flex items-center justify-center shrink-0 border border-indigo-150">
               <ShieldCheck size={24} strokeWidth={2} />
             </div>
             <div>
@@ -107,7 +107,7 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
 
           <Button 
             onClick={() => onNavigate?.('login')}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-amber-500/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0 outline-none border-none cursor-pointer"
+            className="bg-gradient-to-r from-[#1e1b4b] via-[#2d2968] to-[#1e1b4b] hover:from-[#0b0922] hover:to-[#1e1b4b] text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-[#1e1b4b]/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0 outline-none border-none cursor-pointer transition-all"
           >
             Log In to Pay Bills
           </Button>

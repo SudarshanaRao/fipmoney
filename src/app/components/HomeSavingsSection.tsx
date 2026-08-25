@@ -112,10 +112,10 @@ export default function HomeSavingsSection({ onNavigate }: HomeSavingsSectionPro
             <span>GOLD SIP SAVINGS</span>
           </div>
           
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
             Automate Your Gold Savings
           </h2>
-          <p className="text-xs sm:text-sm font-semibold text-slate-500">
+          <p className="text-xs sm:text-sm md:text-base font-semibold text-slate-500">
             Start small. Stay consistent. Build long-term wealth in 24K Pure Digital Gold.
           </p>
         </div>

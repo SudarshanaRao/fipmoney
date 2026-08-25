@@ -65,7 +65,7 @@ export default function Footer({ onNavigate }: FooterProps) {
 
   return (
     <footer className="bg-[#eef2f8] border-t border-indigo-100/60 relative overflow-hidden pt-10 md:pt-12 flex flex-col" id="contact">
-      <div className="container mx-auto px-6 lg:px-12 flex-1 pb-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex-1 pb-8 w-full">
         
         {/* Top 4 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 mb-10">
@@ -166,7 +166,7 @@ export default function Footer({ onNavigate }: FooterProps) {
            </svg>
         </div>
 
-        <div className="container mx-auto px-6 lg:px-12 py-7 relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-7 relative z-10">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-8">
             
             {/* Left: Copyright & Links */}

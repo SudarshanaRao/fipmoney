@@ -5,28 +5,28 @@ export default function MandatoryDisclosures() {
   const disclosures = [
     {
       title: "Corporate Office",
-      icon: <Building2 className="w-4 h-4 text-amber-600" />,
+      icon: <Building2 className="w-4 h-4 text-[#1e1b4b]" />,
       content: [
         "#709, Gowra Fountain Head, HUDA Techno Enclave, Mindspace Rd, HITEC City, Hyderabad, Telangana 500081"
       ]
     },
     {
       title: "Registered Office",
-      icon: <MapPin className="w-4 h-4 text-amber-600" />,
+      icon: <MapPin className="w-4 h-4 text-[#1e1b4b]" />,
       content: [
         "8-3-231/A/278 & 279, Flat No. 404, Sri Krishna Nagar, Yousufguda, Khairatabad, Hyderabad – 500045, Telangana"
       ]
     },
     {
       title: "Company Legal Name",
-      icon: <FileText className="w-4 h-4 text-amber-600" />,
+      icon: <FileText className="w-4 h-4 text-[#1e1b4b]" />,
       content: [
         "FipMoney Private Limited"
       ]
     },
     {
       title: "Official Email IDs",
-      icon: <Mail className="w-4 h-4 text-amber-600" />,
+      icon: <Mail className="w-4 h-4 text-[#1e1b4b]" />,
       content: [
         "Official: info@fipmoney.com",
         "Support: support@fipmoney.com",
@@ -36,14 +36,14 @@ export default function MandatoryDisclosures() {
     },
     {
       title: "Corporate Identification No.",
-      icon: <Hash className="w-4 h-4 text-amber-600" />,
+      icon: <Hash className="w-4 h-4 text-[#1e1b4b]" />,
       content: [
         "U66190TS2024PTC183295"
       ]
     },
     {
       title: "Telephone Number",
-      icon: <Phone className="w-4 h-4 text-amber-600" />,
+      icon: <Phone className="w-4 h-4 text-[#1e1b4b]" />,
       content: [
         "9490841941 (Monday to Friday | 10:00 AM – 6:00 PM)",
         "WhatsApp Support (24/7) – https://wa.me/919491841941"
@@ -53,36 +53,36 @@ export default function MandatoryDisclosures() {
 
   return (
     <section className="py-14 md:py-16 bg-white font-sans">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px]">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-2">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10 md:mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tight mb-2">
             Mandatory Disclosures
           </h2>
-          <div className="w-16 h-1 bg-amber-500 mx-auto rounded-full mt-4"></div>
+          <div className="w-16 h-1 bg-indigo-600 mx-auto rounded-full mt-4"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {disclosures.map((item, index) => (
             <div 
               key={index} 
-              className="bg-white rounded-[20px] p-6 shadow-md hover:shadow-xl border border-slate-100 flex flex-col hover:-translate-y-1 transition-all duration-300"
+              className="bg-white rounded-[20px] p-5 sm:p-6 shadow-md hover:shadow-xl border border-slate-100 flex flex-col hover:-translate-y-1 transition-all duration-300"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-150 flex items-center justify-center shrink-0">
                   {item.icon}
                 </div>
-                <h3 className="text-sm font-bold text-slate-800">{item.title}</h3>
+                <h3 className="text-xs sm:text-sm font-bold text-slate-800">{item.title}</h3>
               </div>
               
               <div className="border-t border-dashed border-slate-200 mb-4" />
               
               <ul className="space-y-3 flex-1">
                 {item.content.map((text, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-slate-600 font-medium leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0 mt-2"></span>
+                  <li key={idx} className="flex items-start gap-2 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed break-words">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0 mt-1.5 sm:mt-2"></span>
                     {text.includes('http') ? (
                       <span className="break-all">
-                        {text.split('–')[0]} – <a href={text.split('–')[1].trim()} target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline">{text.split('–')[1].trim()}</a>
+                        {text.split('–')[0]} – <a href={text.split('–')[1].trim()} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">{text.split('–')[1].trim()}</a>
                       </span>
                     ) : (
                       <span>{text}</span>

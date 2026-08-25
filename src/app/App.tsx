@@ -511,25 +511,7 @@ export default function App() {
               <SafetyPriorityCard />
             </main>
 
-            {/* Scroll Progress Indicator */}
-            <motion.div
-              className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] transform-gpu z-50"
-              style={{
-                scaleX: 0,
-                transformOrigin: "0%",
-              }}
-              whileInView={{
-                scaleX: 1,
-              }}
-              transition={{
-                duration: 0.5,
-              }}
-              viewport={{
-                root: null,
-                rootMargin: "0px",
-                threshold: 0,
-              }}
-            />
+
 
             {/* Background Elements */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">

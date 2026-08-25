@@ -232,15 +232,15 @@ export default function HomeFAQs() {
                     setActiveCategory(category.id);
                     setExpandedFAQ(null);
                   }}
-                  className={`w-full flex items-center justify-between px-6 py-5 rounded-xl transition-all duration-300 font-semibold text-left
+                  className={`w-full flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5 rounded-xl transition-all duration-300 font-semibold text-left
                     ${isActive
-                      ? 'bg-amber-100/50 text-[#4a2b75] shadow-sm border border-amber-200/50'
+                      ? 'bg-indigo-50 text-[#1e1b4b] shadow-sm border border-indigo-200/70 font-bold'
                       : 'bg-white/40 text-slate-500 hover:bg-white/60 border border-transparent'
                     }
                   `}
                 >
-                  <span className="text-[15px]">{category.name}</span>
-                  <ChevronRight className={`w-5 h-5 transition-transform ${isActive ? 'text-[#ffbf00]' : 'text-slate-400'}`} />
+                  <span className="text-sm sm:text-[15px]">{category.name}</span>
+                  <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isActive ? 'text-[#1e1b4b]' : 'text-slate-400'}`} />
                 </button>
               );
             })}
@@ -260,8 +260,8 @@ export default function HomeFAQs() {
                     exit={{ opacity: 0, y: -10 }}
                     className={`rounded-xl overflow-hidden transition-all duration-300
                       ${isExpanded
-                        ? 'bg-white shadow-sm'
-                        : 'bg-white/40 hover:bg-white/60'
+                        ? 'bg-white shadow-sm border border-indigo-100/60'
+                        : 'bg-white/40 hover:bg-white/60 border border-transparent'
                       }
                     `}
                   >
@@ -269,12 +269,12 @@ export default function HomeFAQs() {
                       onClick={() => toggleFAQ(faq.id)}
                       className="w-full p-5 text-left flex items-start justify-between"
                     >
-                      <span className={`pr-4 font-semibold text-[15px] ${isExpanded ? 'text-[#4a2b75]' : 'text-slate-700'}`}>
+                      <span className={`pr-4 font-semibold text-[15px] ${isExpanded ? 'text-[#1e1b4b]' : 'text-slate-700'}`}>
                         {faq.question}
                       </span>
                       <div className="flex-shrink-0 mt-0.5">
                         {isExpanded ? (
-                          <X className="w-5 h-5 text-[#ffbf00]" />
+                          <X className="w-5 h-5 text-[#1e1b4b]" />
                         ) : (
                           <Plus className="w-5 h-5 text-slate-400" />
                         )}

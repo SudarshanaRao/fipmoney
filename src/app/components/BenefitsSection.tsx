@@ -70,24 +70,24 @@ const BenefitCard = ({ benefit, index }) => {
 
 export default function BenefitsSection() {
   return (
-    <section className="py-20 bg-gray-50 relative">
+    <section className="py-14 md:py-20 bg-gray-50 relative">
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-10 w-20 h-20 bg-[#ffbf00] rounded-full blur-2xl"></div>
         <div className="absolute bottom-10 right-10 w-32 h-32 bg-[#ffd152] rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
           <motion.div
-            className="inline-flex items-center bg-[#fff8dc] text-[#b38200] px-4 py-2 rounded-full mb-4"
+            className="inline-flex items-center bg-[#fff8dc] text-[#b38200] px-4 py-2 rounded-full mb-4 text-xs font-bold uppercase tracking-wider"
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
@@ -96,20 +96,20 @@ export default function BenefitsSection() {
             Why Choose FipMoney?
           </motion.div>
           
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
             The Smartest Way to{" "}
             <span className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] bg-clip-text text-transparent">
               Invest in Gold
             </span>
           </h2>
           
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm md:text-lg text-gray-600 max-w-2xl mx-auto">
             Experience the future of gold investment with our cutting-edge platform designed for modern investors.
           </p>
         </motion.div>
 
         {/* Benefits Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {benefits.map((benefit, index) => (
             <BenefitCard key={benefit.title} benefit={benefit} index={index} />
           ))}
@@ -117,28 +117,28 @@ export default function BenefitsSection() {
 
         {/* Trust Indicators */}
         <motion.div
-          className="mt-16 bg-white rounded-2xl p-8 shadow-lg"
+          className="mt-12 md:mt-16 bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           viewport={{ once: true }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-[#ffbf00] mb-2">Certified Partner</div>
-              <div className="text-sm text-gray-600">Certified Gold</div>
+              <div className="text-xl sm:text-2xl font-bold text-[#ffbf00] mb-1.5 sm:mb-2">Certified Partner</div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Certified Gold</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#ffbf00] mb-2">₹10Cr</div>
-              <div className="text-sm text-gray-600">Insurance Coverage</div>
+              <div className="text-xl sm:text-2xl font-bold text-[#ffbf00] mb-1.5 sm:mb-2">₹10Cr</div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Insurance Coverage</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#ffbf00] mb-2">24/7</div>
-              <div className="text-sm text-gray-600">Customer Support</div>
+              <div className="text-xl sm:text-2xl font-bold text-[#ffbf00] mb-1.5 sm:mb-2">24/7</div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Customer Support</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-[#ffbf00] mb-2">99.9%</div>
-              <div className="text-sm text-gray-600">Pure Gold</div>
+              <div className="text-xl sm:text-2xl font-bold text-[#ffbf00] mb-1.5 sm:mb-2">99.9%</div>
+              <div className="text-xs sm:text-sm text-gray-600 font-medium">Pure Gold</div>
             </div>
           </div>
         </motion.div>

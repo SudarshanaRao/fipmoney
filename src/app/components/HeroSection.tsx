@@ -112,7 +112,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                 </motion.div>
 
                 <motion.h1
-                  className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
@@ -124,7 +124,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                 </motion.h1>
 
                 <motion.p
-                  className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl"
+                  className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
@@ -142,7 +142,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
             >
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-[#1e1b4b] to-[#312e81] hover:from-[#111827] hover:to-[#1e1b4b] text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-8 py-6 text-lg font-black rounded-2xl cursor-pointer flex items-center"
+                className="w-full sm:w-auto bg-gradient-to-r from-[#1e1b4b] to-[#312e81] hover:from-[#111827] hover:to-[#1e1b4b] text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-black rounded-2xl cursor-pointer flex items-center justify-center"
                 onClick={() => onNavigate?.('signup')}
               >
                 <TrendingUp className="w-5 h-5 mr-2 text-amber-400" />
@@ -152,7 +152,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
           </div>
 
           {/* Right Content - Hero Carousel */}
-          <div className="relative">
+          <div className="relative mt-6 lg:mt-0">
             <AnimatePresence mode="popLayout">
               <motion.div
                 key={currentSlide}
@@ -168,26 +168,26 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                     <ImageWithFallback
                       src={currentData.image}
                       alt={currentData.alt}
-                      className="w-full max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto rounded-3xl shadow-2xl"
+                      className="w-full max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto rounded-3xl shadow-2xl max-h-[280px] sm:max-h-[360px] md:max-h-[440px] object-cover"
                     />
                   </div>
 
                   {/* Floating Elements */}
                   <motion.div
-                    className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-xl p-4 z-20"
+                    className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-white rounded-2xl shadow-xl p-2.5 sm:p-4 z-20"
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 }}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4 text-white" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center">
+                        <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-gray-900">
+                        <div className="text-xs sm:text-sm font-semibold text-gray-900">
                           {currentData.id === "gold" ? "+12.5%" : currentData.id === "silver" ? "+8.3%" : "Secure"}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-[10px] sm:text-xs text-gray-500">
                           {currentData.id === "bill" ? "Transactions" : "This Month"}
                         </div>
                       </div>
@@ -195,7 +195,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                   </motion.div>
 
                   <motion.div
-                    className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl p-4 z-20"
+                    className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 bg-white rounded-2xl shadow-xl p-2.5 sm:p-4 z-20"
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.6 }}

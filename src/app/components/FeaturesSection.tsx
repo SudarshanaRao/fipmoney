@@ -188,12 +188,6 @@ export default function FeaturesSection({ onNavigateToCalculator }: FeaturesSect
       component: AutoSaveFeature,
     },
     {
-      icon: Zap,
-      title: "Auto-Save Features",
-      description: "Automate your savings with round-ups, salary day investments, and smart triggers.",
-      component: AutoSaveFeature,
-    },
-    {
       icon: Target,
       title: "Goal-Based Savings",
       description: "Set financial goals and track your progress with dedicated savings buckets.",
@@ -204,18 +198,18 @@ export default function FeaturesSection({ onNavigateToCalculator }: FeaturesSect
   const ActiveComponent = features[activeFeature].component;
   
   return (
-    <section className="py-20 bg-gray-50" id="features">
-      <div className="container mx-auto px-4">
+    <section className="py-14 md:py-20 bg-gray-50" id="features">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
           <motion.div
-            className="inline-flex items-center bg-[#fff8dc] text-[#b38200] px-4 py-2 rounded-full mb-4"
+            className="inline-flex items-center bg-[#fff8dc] text-[#b38200] px-4 py-2 rounded-full mb-4 text-xs font-bold uppercase tracking-wider"
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
@@ -224,19 +218,19 @@ export default function FeaturesSection({ onNavigateToCalculator }: FeaturesSect
             Powerful Features
           </motion.div>
           
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
             Everything You Need to{" "}
             <span className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] bg-clip-text text-transparent">
               Succeed
             </span>
           </h2>
           
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm md:text-lg text-gray-600 max-w-2xl mx-auto">
             Powerful tools and features designed to help you build wealth systematically and achieve your financial goals.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Feature Cards */}
           <div className="space-y-4">
             {features.map((feature, index) => (
