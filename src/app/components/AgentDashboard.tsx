@@ -42,7 +42,9 @@ import {
   BarChart3,
   MoreVertical,
   ChevronDown,
-  Crown
+  Crown,
+  Menu,
+  X
 } from "lucide-react";
 import { getLoggedInAgent, clearAgentSession, DgaAgent } from "../utils/agentStorage";
 
@@ -74,6 +76,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
   });
 
   const [activeTab, setActiveTab] = useState<AgentTab>("dashboard");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showAddLeadModal, setShowAddLeadModal] = useState(false);
 
@@ -296,23 +299,33 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
     <div className="h-screen bg-[#FCFDFD] text-slate-900 flex flex-col font-sans selection:bg-[#1e1b4b] selection:text-white overflow-hidden">
       
       {/* Top Agent Bar Header (User Dashboard Themed) */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 shrink-0 px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xs z-30">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 shrink-0 px-3 sm:px-8 py-3 flex items-center justify-between shadow-2xs z-30 relative">
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Mobile 3-Lines Menu Toggle Button */}
+          <button
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            className="md:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer focus:outline-none"
+            aria-label="Toggle Menu"
+            title="Toggle Menu"
+          >
+            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+
+          <div className="flex items-center gap-2 sm:gap-3">
             <img
               src="/fipmoney_logo_final.png"
               alt="FipMoney Logo"
-              className="h-10 w-auto object-contain"
+              className="h-8 sm:h-10 w-auto object-contain"
             />
-            <div className="flex flex-col gap-1">
-              <h1 className="font-black text-slate-900 text-base sm:text-lg tracking-tight leading-none">
+            <div className="flex flex-col gap-0.5 sm:gap-1">
+              <h1 className="font-black text-slate-900 text-sm sm:text-lg tracking-tight leading-none">
                 DGA Partner Console
               </h1>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="bg-purple-50 text-purple-900 border border-purple-200 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                  <Award size={12} className="text-purple-700" /> {agent.tier} Agent
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="bg-purple-50 text-purple-900 border border-purple-200 text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <Award size={11} className="text-purple-700" /> {agent.tier} Agent
                 </span>
-                <span className="bg-slate-100 text-slate-700 border border-slate-200/80 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span className="hidden sm:flex bg-slate-100 text-slate-700 border border-slate-200/80 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full items-center gap-1">
                   Agent ID: <span className="text-slate-900 font-black">{agent.agentCode}</span>
                 </span>
               </div>
@@ -321,7 +334,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
         </div>
 
         {/* Quick Action Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => {
               if (onLogout) onLogout();
@@ -330,14 +343,15 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                 window.location.reload();
               }
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 hover:from-slate-800 hover:to-indigo-900 text-white font-extrabold text-xs transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 border border-indigo-900/50"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-950 hover:from-slate-800 hover:to-indigo-900 text-white font-extrabold text-[11px] sm:text-xs transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 border border-indigo-900/50"
           >
-            <ArrowLeft size={14} className="text-amber-400" />
-            <span>Switch to User Dashboard</span>
+            <ArrowLeft size={14} className="text-amber-400 shrink-0" />
+            <span className="hidden sm:inline">Switch to User Dashboard</span>
+            <span className="inline sm:hidden">User DB</span>
           </button>
 
-          <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#1e1b4b] to-[#312e81] text-white font-black text-sm flex items-center justify-center shadow-xs">
+          <div className="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-3 border-l border-slate-200">
+            <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-full bg-gradient-to-br from-[#1e1b4b] to-[#312e81] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-xs">
               {agent.name.charAt(0)}
             </div>
             <div className="hidden md:flex flex-col">
@@ -355,7 +369,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   window.location.reload();
                 }
               }}
-              className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
               title="Logout from Agent Console"
             >
               <LogOut size={18} />
@@ -365,12 +379,11 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
       </header>
 
       {/* Main Body with Sidebar Layout */}
-      <div className="flex-1 flex flex-col md:flex-row max-w-[1700px] w-full mx-auto overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row max-w-[1700px] w-full mx-auto overflow-hidden relative">
         
-        {/* Left Navigation Sidebar (Sticky / Fixed) */}
-        <aside className="w-full md:w-64 bg-white border-r border-slate-200/90 p-4 shrink-0 shadow-xs flex flex-col justify-between overflow-y-auto h-auto md:h-full">
+        {/* Desktop Navigation Sidebar */}
+        <aside className="hidden md:flex w-64 bg-white border-r border-slate-200/90 p-4 shrink-0 shadow-xs flex-col justify-between overflow-y-auto h-full">
           <nav className="space-y-1.5">
-            
             <div className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-wider">
               MENU
             </div>
@@ -452,7 +465,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
             </button>
           </nav>
 
-          {/* Download Mobile App Promo Widget (User Dashboard Indigo Palette) */}
+          {/* Download Mobile App Promo Widget */}
           <div className="mt-8 p-4 rounded-3xl bg-gradient-to-r from-[#1e1b4b] to-[#312e81] text-white space-y-3 relative overflow-hidden shadow-lg border border-purple-900/30">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
               📲
@@ -469,6 +482,146 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
             </button>
           </div>
         </aside>
+
+        {/* Mobile Navigation Drawer Overlay (Closed by Default) */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <>
+              {/* Dark Overlay Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMenuOpen(false)}
+                className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 md:hidden"
+              />
+
+              {/* Mobile Sliding Navigation Drawer */}
+              <motion.aside
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "spring", bounce: 0, duration: 0.25 }}
+                className="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 p-4 border-r border-slate-200 flex flex-col justify-between overflow-y-auto shadow-2xl md:hidden"
+              >
+                <div>
+                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <img src="/fipmoney_logo_final.png" alt="Logo" className="h-7 w-auto object-contain" />
+                      <span className="font-black text-slate-900 text-xs">Partner Console</span>
+                    </div>
+                    <button
+                      onClick={() => setIsMenuOpen(false)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <nav className="space-y-1">
+                    <div className="px-3 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                      <span>MENU</span>
+                      <span className="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        {agent.agentCode}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => { setActiveTab("dashboard"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "dashboard" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <LayoutGrid size={16} /> Dashboard
+                    </button>
+
+                    <button
+                      onClick={() => { setActiveTab("overview"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "overview" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <TrendingUp size={16} /> Tasks & Analytics
+                    </button>
+
+                    <button
+                      onClick={() => { setActiveTab("commissions"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "commissions" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <Wallet size={16} /> Commissions & Payouts
+                    </button>
+
+                    <button
+                      onClick={() => { setActiveTab("clients"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "clients" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <Users size={16} /> My Clients Portfolio ({clients.length})
+                    </button>
+
+                    <button
+                      onClick={() => { setActiveTab("leads"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "leads" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <UserCheck size={16} /> Lead Pipeline ({leads.length})
+                    </button>
+
+                    <button
+                      onClick={() => { setActiveTab("marketing"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "marketing" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <QrCode size={16} /> Marketing Kit & QR
+                    </button>
+
+                    <div className="px-3 pt-3 pb-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                      GENERAL
+                    </div>
+
+                    <button
+                      onClick={() => { setActiveTab("support"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "support" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <HelpCircle size={16} /> Help & Support
+                    </button>
+
+                    <button
+                      onClick={() => { setActiveTab("profile"); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "profile" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
+                    >
+                      <Building2 size={16} /> Agent Settings
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        clearAgentSession();
+                        if (onLogout) onLogout();
+                        else {
+                          window.history.pushState({}, '', '/dashboard');
+                          window.location.reload();
+                        }
+                      }}
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-300 font-extrabold text-xs text-white border border-red-400/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_16px_rgba(220,38,38,0.45)] bg-gradient-to-r from-[#dc2626] via-[#ef4444] to-[#991b1b] hover:from-[#ef4444] hover:via-[#f87171] hover:to-[#b91c1c] cursor-pointer outline-none active:scale-[0.98] relative overflow-hidden mt-2"
+                    >
+                      <LogOut size={16} className="text-white shrink-0" strokeWidth={2.5} />
+                      <span className="tracking-wide">Logout</span>
+                    </button>
+                  </nav>
+                </div>
+
+                {/* Download App Promo */}
+                <div className="mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-[#1e1b4b] to-[#312e81] text-white space-y-2 relative overflow-hidden shadow-lg border border-purple-900/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">📲</span>
+                    <h4 className="font-extrabold text-xs leading-tight text-white">Download Mobile App</h4>
+                  </div>
+                  <p className="text-[10px] text-indigo-200 font-medium">Manage portfolios on the go</p>
+                  <button
+                    onClick={() => alert("Downloading DGA Agent Mobile App APK...")}
+                    className="w-full py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[11px] cursor-pointer transition-colors shadow-sm border-none outline-none"
+                  >
+                    Download APK
+                  </button>
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Right Tab Content View */}
         <main className="flex-1 p-4 sm:p-8 overflow-y-auto h-full overscroll-contain transform-gpu">

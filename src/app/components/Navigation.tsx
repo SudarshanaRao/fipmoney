@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Wallet, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight } from "lucide-react";
+import { Home, Wallet, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight, X } from "lucide-react";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import { API_BASE_URL } from "../utils/apiConfig";
 
@@ -192,24 +192,183 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent, profi
   );
 };
 
-export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: Omit<NavProps, "onLogout">) => (
-  <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#1e1b4b] border-t border-white/10 flex justify-around items-center px-4 z-50 shadow-[0_-4px_24px_rgba(0,0,0,0.2)] pb-safe">
-    {navItems.filter(item => ['home', 'portfolio', 'sip', 'bills', 'history', 'settings'].includes(item.id)).map(({ id, Icon, label }) => {
-      const active = activeTab === id;
-      const showRedDot = id === 'settings' && profileCompletion < 50;
-      return (
-        <button key={id} onClick={() => onTabChange(id as Tab)} className="flex flex-col items-center gap-1 bg-transparent border-none outline-none cursor-pointer relative">
-          <div className={`p-1.5 rounded-xl transition-all duration-300 relative ${active ? 'bg-[#7c3aed] shadow-lg' : ''}`} style={active ? { color: 'white' } : { color: '#a5b4fc' }}>
-            <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-            {showRedDot && (
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1e1b4b] animate-pulse" />
-            )}
+interface MobileDrawerNavProps extends NavProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const MobileDrawerNav = ({
+  activeTab,
+  onTabChange,
+  onLogout,
+  onBecomeAgent,
+  profileCompletion = 100,
+  isOpen,
+  onClose,
+}: MobileDrawerNavProps) => {
+  const [isApprovedDga, setIsApprovedDga] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const mobile = sessionStorage.getItem("fm_logged_in_mobile");
+      const saved = localStorage.getItem("fm_dga_waitlist_data");
+      let localIsApproved = false;
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.isApproved || parsed.status === "approved" || parsed.status === "APPROVED") {
+            localIsApproved = true;
+          }
+        } catch (e) {}
+      }
+      setIsApprovedDga(localIsApproved);
+    }
+  }, []);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="lg:hidden">
+      {/* Backdrop Overlay */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[90] transition-opacity"
+      />
+
+      {/* Sliding Mobile Navigation Drawer */}
+      <div className="fixed top-0 left-0 bottom-0 w-72 bg-[#1e1b4b] text-white z-[91] p-5 flex flex-col justify-between overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-250">
+        <div>
+          {/* Header */}
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-indigo-900/60">
+            <div className="flex items-center gap-2">
+              <img src={fipMoneyLogo} alt="Fipmoney" className="w-10 h-10 object-contain shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-base font-black text-white leading-none">Fipmoney</span>
+                <span className="text-[10px] text-indigo-300 font-bold mt-0.5">User Dashboard</span>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-indigo-200 hover:text-white transition-colors cursor-pointer outline-none border-none"
+            >
+              <X size={18} />
+            </button>
           </div>
-          <span className={`text-[9px] font-bold transition-colors duration-300 ${active ? 'text-white' : 'text-indigo-200'}`}>
-            {label.split(' ')[0]}
-          </span>
-        </button>
-      );
-    })}
-  </div>
-);
+
+          {/* Nav Items */}
+          <nav className="space-y-1.5">
+            <div className="px-3 py-1 text-[10px] font-black text-indigo-300/70 uppercase tracking-wider">
+              MAIN MENU
+            </div>
+
+            {navItems.map(({ id, Icon, label }) => {
+              const active = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => {
+                    onTabChange(id as Tab);
+                    onClose();
+                  }}
+                  className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-medium text-xs transition-all outline-none border-none cursor-pointer ${
+                    active
+                      ? "text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6] font-bold"
+                      : "text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent"
+                  }`}
+                >
+                  <Icon size={18} strokeWidth={active ? 2.5 : 2} />
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+
+            <div className="px-3 pt-3 pb-1 text-[10px] font-black text-indigo-300/70 uppercase tracking-wider">
+              PREFERENCES & MORE
+            </div>
+
+            {[
+              { id: "refer-and-earn", label: "Referral Rewards", Icon: Gift },
+              { id: "settings", label: "Settings", Icon: Settings, hasAlert: profileCompletion < 50 },
+              { id: "help", label: "Help & Support", Icon: HelpCircle },
+            ].map((item, i) => {
+              const active = activeTab === item.id;
+              return (
+                <button
+                  key={i}
+                  onClick={() => {
+                    onTabChange(item.id as Tab);
+                    onClose();
+                  }}
+                  className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl font-medium text-xs transition-all outline-none border-none cursor-pointer ${
+                    active
+                      ? "text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6] font-bold"
+                      : "text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent"
+                  }`}
+                >
+                  <div className="flex items-center gap-3.5 relative">
+                    <div className="relative">
+                      <item.Icon size={18} strokeWidth={active ? 2.5 : 2} />
+                      {item.hasAlert && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1e1b4b] animate-pulse" />
+                      )}
+                    </div>
+                    <span>{item.label}</span>
+                  </div>
+                  {item.hasAlert && (
+                    <span className="text-[9px] font-black text-red-300 bg-red-500/20 px-1.5 py-0.5 rounded-full border border-red-400/30">
+                      &lt;50%
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Footer section: DGA card & Logout */}
+        <div className="space-y-3 pt-4 border-t border-indigo-900/60 mt-4">
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#2a2115] via-[#1a140d] to-[#0f0b07] border border-[#d97706]/70 shadow-md relative overflow-hidden">
+            <div className="flex items-center justify-between gap-1 mb-1">
+              <span className="font-extrabold text-xs text-[#fde047]">
+                {isApprovedDga ? "DGA Portal" : "Become an Agent"}
+              </span>
+              <span className="bg-[#5c2707]/90 text-[#fde047] border border-[#d97706]/80 text-[9px] font-black px-2 py-0.5 rounded-full">
+                {isApprovedDga ? "Verified" : "New"}
+              </span>
+            </div>
+            <p className="text-[10px] font-semibold text-[#fef3c7]/85 mb-2.5">
+              {isApprovedDga ? "Access verified DGA Portal & terminal." : "Earn commissions as a Digital Gold Agent."}
+            </p>
+            <button
+              onClick={() => {
+                onClose();
+                if (onBecomeAgent) onBecomeAgent();
+                else onTabChange("become-agent" as any);
+              }}
+              className="w-full py-2 px-3 rounded-xl font-black text-[11px] text-[#3a1a00] bg-gradient-to-r from-[#fbbf24] via-[#f59e0b] to-[#d97706] hover:from-[#fde047] active:scale-[0.98] transition-all flex items-center justify-center gap-1 border-none cursor-pointer outline-none"
+            >
+              <span>{isApprovedDga ? "Access DGA Portal" : "Become an Agent"}</span>
+              <ChevronRight size={13} strokeWidth={3.5} />
+            </button>
+          </div>
+
+          <button
+            onClick={() => {
+              onClose();
+              onLogout();
+            }}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl font-bold text-xs text-white border border-red-400/40 bg-gradient-to-r from-[#dc2626] via-[#ef4444] to-[#991b1b] hover:from-[#ef4444] cursor-pointer outline-none active:scale-[0.98] relative overflow-hidden"
+          >
+            <LogOut size={18} className="text-white shrink-0" strokeWidth={2.5} />
+            <span className="tracking-wide">Logout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: Omit<NavProps, "onLogout">) => {
+  return null;
+};
+

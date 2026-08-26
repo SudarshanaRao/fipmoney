@@ -8,9 +8,9 @@ import {
   Wallet, Zap, Eye, Send, Plus, CreditCard, ChevronRight,
   Shield, ShieldCheck, CheckCircle2, TrendingUp, ArrowUpRight, ArrowDownRight, User,
   Smartphone, MonitorPlay, GraduationCap, Gift, Play, Flame, Tv, Wifi, Droplets, Car, FileText, Home, AlertCircle,
-  Search, Bell, ChevronDown, Check, Building, RefreshCw, Grid, Award, Download, Clock, X, CheckCheck, Coins
+  Search, Bell, ChevronDown, Check, Building, RefreshCw, Grid, Award, Download, Clock, X, CheckCheck, Coins, Menu
 } from "lucide-react";
-import { Sidebar, MobileNav, Tab } from "./Navigation";
+import { Sidebar, MobileNav, MobileDrawerNav, Tab } from "./Navigation";
 import cardBgGold from "../../assets/card_bg_gold.jpg";
 import cardBgSilver from "../../assets/card_bg_silver.jpg";
 import SettingsPage from "./SettingsPage";
@@ -122,6 +122,7 @@ const getInitialUserTab = (): Tab => {
 
 export default function Dashboard({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [tab, setTabState] = useState<Tab>(() => getInitialUserTab());
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const setTab = (newTab: Tab) => {
     setTabState(newTab);
@@ -407,7 +408,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const MainDashboard = () => (
     <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-[#fcfdfd] flex flex-col">
        {/* Top Bar */}
-       <div className="h-[72px] border-b border-gray-100 flex items-center justify-between px-6 md:px-8 shrink-0 bg-white sticky top-0 z-20">
+       <div className="hidden lg:flex h-[72px] border-b border-gray-100 items-center justify-between px-6 md:px-8 shrink-0 bg-white sticky top-0 z-20">
          <div className="relative w-full max-w-md hidden md:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input type="text" placeholder="Search services, transactions..." className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-purple-200 transition-colors placeholder:text-gray-400 text-gray-700 font-medium" />
@@ -978,7 +979,66 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         }
         onNavigate("home");
       }} onBecomeAgent={() => setTab("become-agent")} />
+
+      <MobileDrawerNav
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        activeTab={tab}
+        onTabChange={setTab}
+        onLogout={() => {
+          if (typeof window !== 'undefined') {
+            clearUserSession();
+            sessionStorage.removeItem("fm_logged_in_name");
+          }
+          onNavigate("home");
+        }}
+        onBecomeAgent={() => setTab("become-agent")}
+        profileCompletion={profileCompletion}
+      />
+
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* Top Header Bar for Mobile Screens (lg:hidden) */}
+        <header className="lg:hidden bg-white border-b border-gray-100 shrink-0 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(prev => !prev)}
+              className="p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer outline-none border-none bg-transparent"
+              aria-label="Toggle Navigation Menu"
+              title="Toggle Menu"
+            >
+              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+
+            <div className="flex items-center gap-2">
+              <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-8 w-auto object-contain" />
+              <span className="font-black text-slate-900 text-sm tracking-tight">Fipmoney</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setShowNotifications(prev => !prev)}
+              className="relative border w-9 h-9 rounded-full flex items-center justify-center shadow-2xs bg-white border-gray-200 text-gray-600 cursor-pointer outline-none"
+            >
+              <Bell size={17} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[8px] text-white font-bold flex items-center justify-center border-2 border-white">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            <div
+              onClick={() => setTab("settings")}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative cursor-pointer shadow-2xs border border-gray-100"
+            >
+              <span>{(userName || "U").charAt(0)}</span>
+              {userAvatar && (
+                <img src={userAvatar} alt={userName} className="absolute inset-0 w-full h-full object-cover" />
+              )}
+            </div>
+          </div>
+        </header>
         {tab === "home" ? (
           <MainDashboard />
         ) : tab === "portfolio" ? (
