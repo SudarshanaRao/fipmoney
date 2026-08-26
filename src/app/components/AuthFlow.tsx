@@ -66,11 +66,11 @@ function OtpBoxes({ value, onChange }: { value: string; onChange: (v: string) =>
           return (
             <motion.div key={i} animate={{ scale: char ? 1.05 : 1 }}
               className={`flex items-center justify-center text-2xl font-black flex-1 rounded-xl transition-all border-2
-                ${isActive ? 'border-[#d89221] shadow-[0_0_0_4px_rgba(216,146,33,0.1)] bg-white' : char ? 'border-[#d89221]/40 bg-[#d89221]/5 text-[#1e1b4b]' : 'border-gray-200 bg-gray-50 text-gray-300'}
+                ${isActive ? 'border-indigo-600 shadow-[0_0_0_4px_rgba(79,70,229,0.1)] bg-white' : char ? 'border-indigo-600/40 bg-indigo-50/50 text-[#1e1b4b]' : 'border-gray-200 bg-gray-50 text-gray-300'}
               `}
             >
               {char || (isActive
-                ? <motion.div className="w-0.5 h-6 rounded-full bg-[#d89221]"
+                ? <motion.div className="w-0.5 h-6 rounded-full bg-indigo-600"
                     animate={{ opacity: [0,1,0] }} transition={{ duration: 1, repeat: Infinity }} />
                 : "·")}
             </motion.div>
@@ -338,7 +338,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   return (
     <div className="w-full min-h-screen flex font-sans bg-white overflow-hidden">
       {/* ── LEFT PANEL ── */}
-      <div className="hidden lg:flex w-[48%] flex-col relative overflow-hidden bg-gradient-to-br from-[#fffef7] via-[#fffbf0] to-[#faebcf]">
+      <div className="hidden lg:flex w-[48%] flex-col relative overflow-hidden bg-gradient-to-br from-[#f8fafc] via-[#eef2ff] to-[#e0e7ff]">
          {/* Ambient Background Effects */}
          <div className="absolute top-[10%] right-[20%] w-4 h-4 bg-white rounded-full blur-[2px] opacity-70 animate-pulse" />
          <div className="absolute top-[40%] right-[30%] w-6 h-6 bg-white/40 blur-[4px] rounded-full animate-pulse" />
@@ -363,7 +363,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               <div className="flex flex-col gap-6">
                  {/* Feature 1 */}
                  <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#fef2d6] flex items-center justify-center shrink-0 text-[#d89221] shadow-sm">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 shadow-xs">
                        <Shield size={24} strokeWidth={2} />
                     </div>
                     <div className="flex flex-col justify-center">
@@ -373,7 +373,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                  </div>
                  {/* Feature 2 */}
                  <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#fef2d6] flex items-center justify-center shrink-0 text-[#d89221] shadow-sm">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 shadow-xs">
                        <Coins size={24} strokeWidth={2} />
                     </div>
                     <div className="flex flex-col justify-center">
@@ -383,7 +383,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                  </div>
                  {/* Feature 3 */}
                  <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#fef2d6] flex items-center justify-center shrink-0 text-[#d89221] shadow-sm">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 shadow-xs">
                        <BarChart3 size={24} strokeWidth={2} />
                     </div>
                     <div className="flex flex-col justify-center">
@@ -403,7 +403,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
            <div className="absolute bottom-12 left-12 lg:left-16 z-20">
               <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[16px] px-6 py-4 flex gap-6 items-center shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                 <div className="flex gap-3 items-center">
-                   <div className="text-[#d89221]"><ShieldCheck size={20} /></div>
+                   <div className="text-indigo-600"><ShieldCheck size={20} /></div>
                    <div>
                       <div className="text-[#1e1b4b] text-[11px] font-black uppercase tracking-wider">Secure</div>
                       <div className="text-[#64748b] text-[10px] font-semibold mt-0.5 leading-[1.1]">Bank-grade<br/>Security</div>
@@ -411,7 +411,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                 </div>
                 <div className="w-px h-8 bg-gray-200" />
                 <div className="flex gap-3 items-center">
-                   <div className="text-[#d89221]"><User size={20} /></div>
+                   <div className="text-indigo-600"><User size={20} /></div>
                    <div>
                       <div className="text-[#1e1b4b] text-[11px] font-black uppercase tracking-wider">Trusted</div>
                       <div className="text-[#64748b] text-[10px] font-semibold mt-0.5 leading-[1.1]">By Millions of<br/>Users</div>
@@ -419,7 +419,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                 </div>
                 <div className="w-px h-8 bg-gray-200" />
                 <div className="flex gap-3 items-center">
-                   <div className="text-[#d89221]"><CheckCircle2 size={20} /></div>
+                   <div className="text-indigo-600"><CheckCircle2 size={20} /></div>
                    <div>
                       <div className="text-[#1e1b4b] text-[11px] font-black uppercase tracking-wider">Certified</div>
                       <div className="text-[#64748b] text-[10px] font-semibold mt-0.5 leading-[1.1]">Purity<br/>Assured</div>
@@ -452,9 +452,9 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                  </button>
                  {/* Dropdown menu */}
                  <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                    <button onClick={() => setLang('en')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'en' ? 'text-[#d89221] bg-amber-50/50' : 'text-gray-700'}`}>English</button>
-                    <button onClick={() => setLang('te')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'te' ? 'text-[#d89221] bg-amber-50/50' : 'text-gray-700'}`}>Telugu (తెలుగు)</button>
-                    <button onClick={() => setLang('hi')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'hi' ? 'text-[#d89221] bg-amber-50/50' : 'text-gray-700'}`}>Hindi (हिंदी)</button>
+                    <button onClick={() => setLang('en')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'en' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>English</button>
+                    <button onClick={() => setLang('te')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'te' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>Telugu (తెలుగు)</button>
+                    <button onClick={() => setLang('hi')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'hi' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>Hindi (हिंदी)</button>
                  </div>
                </div>
             </div>
@@ -491,19 +491,19 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
                   <div className="flex items-center justify-between relative w-full max-w-[220px] mx-auto">
                     <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gray-200 -z-10 -translate-y-1/2" />
-                    <motion.div className="absolute top-1/2 left-0 h-[2px] bg-[#d89221] -z-10 -translate-y-1/2" 
+                    <motion.div className="absolute top-1/2 left-0 h-[2px] bg-indigo-600 -z-10 -translate-y-1/2" 
                       initial={{ width: "0%" }}
                       animate={{ width: step === "tpin" ? "100%" : "0%" }}
                       transition={{ duration: 0.4 }}
                     />
                     
                     <div className="flex flex-col items-center gap-1.5 bg-white px-2">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "profile" || step === "tpin" ? "bg-[#d89221] text-white border-2 border-white shadow-amber-500/30" : "bg-gray-100 text-gray-400"}`}>1</div>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "profile" || step === "tpin" ? "bg-indigo-600 text-white border-2 border-white shadow-indigo-500/30" : "bg-gray-100 text-gray-400"}`}>1</div>
                       <span className={`text-[10px] font-bold ${step === "profile" || step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>{t.profile}</span>
                     </div>
                     
                     <div className="flex flex-col items-center gap-1.5 bg-white px-2">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "tpin" ? "bg-[#d89221] text-white border-2 border-white shadow-amber-500/30" : "bg-gray-100 text-gray-400"}`}>2</div>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm transition-colors ${step === "tpin" ? "bg-indigo-600 text-white border-2 border-white shadow-indigo-500/30" : "bg-gray-100 text-gray-400"}`}>2</div>
                       <span className={`text-[10px] font-bold ${step === "tpin" ? "text-[#1e1b4b]" : "text-gray-400"}`}>{t.security}</span>
                     </div>
                   </div>
@@ -548,7 +548,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
                     <div className="mb-6">
                        <label className="block text-[14px] font-bold text-[#1e1b4b] mb-2.5">{t.enterMobileNumber}</label>
-                       <div className={`flex items-center rounded-xl border-2 ${err ? 'border-red-400' : 'border-gray-200'} focus-within:border-[#d89221] transition-all bg-white h-[56px] relative`}>
+                       <div className={`flex items-center rounded-xl border-2 ${err ? 'border-red-400' : 'border-gray-200'} focus-within:border-indigo-600 transition-all bg-white h-[56px] relative`}>
                           <div className="flex items-center gap-2 px-4 border-r-2 border-gray-200 cursor-pointer h-full rounded-l-xl hover:bg-gray-50 transition-colors">
                              <span className="text-[18px]">🇮🇳</span>
                              <span className="text-[14px] font-bold text-[#1e1b4b]">+91</span>
@@ -561,7 +561,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                              className="flex-1 min-w-0 border-none outline-none bg-transparent px-4 text-[15px] font-bold text-[#1e1b4b] placeholder:font-medium placeholder:text-gray-400 h-full"
                           />
                           
-                          {checking && <div className="absolute right-4"><Loader2 size={18} className="animate-spin text-[#d89221]" /></div>}
+                          {checking && <div className="absolute right-4"><Loader2 size={18} className="animate-spin text-indigo-600" /></div>}
                        </div>
                        {err && <p className="text-red-500 text-[12px] mt-2 font-semibold">{err}</p>}
                        {!err && regStatus === "registered" && (
@@ -570,7 +570,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                            </p>
                         )}
                         {!err && regStatus === "new" && (
-                           <p className="text-[#d89221] text-[12px] mt-2 font-bold flex items-center justify-center gap-1 bg-amber-50 py-1.5 px-3 rounded-lg border border-amber-200/60">
+                           <p className="text-indigo-600 text-[12px] mt-2 font-bold flex items-center justify-center gap-1 bg-indigo-50 py-1.5 px-3 rounded-lg border border-indigo-200/60">
                               {t.newUserSetup}
                            </p>
                         )}
@@ -579,10 +579,10 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     <button 
                       onClick={handlePrimaryBtn}
                       disabled={mobile.length !== 10 || checking}
-                      className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${
+                      className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-md flex items-center justify-center border-none outline-none cursor-pointer ${
                           mobile.length !== 10 || checking 
-                             ? 'bg-[#d89221]/80 hover:bg-[#d89221]/90 opacity-80 cursor-not-allowed' 
-                             : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg active:scale-[0.99]'
+                             ? 'bg-indigo-300 opacity-80 cursor-not-allowed' 
+                             : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 active:scale-[0.99]'
                        }`}
                     >
                         {checking ? (
@@ -601,12 +601,9 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     <div className="mt-4 flex items-start justify-center gap-2 px-2">
                        <ShieldCheck size={16} className="text-gray-400 shrink-0 mt-0.5" />
                        <p className="text-[12px] font-medium text-gray-500 text-center leading-[1.5]">
-                          {t.byContinuing} <span className="text-[#d89221] font-bold cursor-pointer hover:underline">{t.termsOfService}</span><br/>{t.and} <span className="text-[#d89221] font-bold cursor-pointer hover:underline">{t.privacyPolicy}</span>
+                          {t.byContinuing} <span onClick={() => onNavigate("terms")} className="text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer hover:underline">{t.termsOfService}</span><br/>{t.and} <span onClick={() => onNavigate("privacy")} className="text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer hover:underline">{t.privacyPolicy}</span>
                        </p>
                     </div>
-
-
-                    
 
                  </FormSlide>
               )}
@@ -641,7 +638,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        
                        <div className="text-[14px] font-medium text-gray-500 text-center">
                          {canResend
-                           ? <button onClick={reset} className="flex items-center gap-1.5 border-none bg-transparent cursor-pointer font-bold text-[#d89221] outline-none hover:underline">
+                           ? <button onClick={reset} className="flex items-center gap-1.5 border-none bg-transparent cursor-pointer font-bold text-indigo-600 outline-none hover:underline">
                                <RefreshCw size={14} /> {t.resendOtp}
                              </button>
                            : <span>{t.resendIn}<strong className="text-[#1e1b4b]">0:{timer.toString().padStart(2,"0")}</strong></span>}
@@ -650,7 +647,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <button 
                          onClick={handleOtpVerify}
                          disabled={otp.length !== 6}
-                         className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${otp.length !== 6 ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
+                         className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-md flex items-center justify-center border-none outline-none cursor-pointer ${otp.length !== 6 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 active:scale-[0.99]'}`}
                        >
                          {isNew ? t.verifyAndContinue : t.verifyAndLogin}
                        </button>
@@ -676,7 +673,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                              onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 16))}
                              placeholder={t.usernamePlaceholder}
                              className={`w-full h-[56px] rounded-xl border-2 outline-none font-bold text-[14px] text-[#1e1b4b] px-4 pr-12 transition-all bg-white
-                                ${usernameStatus === 'taken' ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
+                                ${usernameStatus === 'taken' ? 'border-red-400' : 'border-gray-200 focus:border-indigo-600'}`}
                            />
                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
                               {usernameStatus === 'checking' && <Loader2 size={18} className="animate-spin text-gray-400" />}
@@ -691,7 +688,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                          <label className="block text-[13px] font-bold text-[#1e1b4b] mb-2">Date of Birth</label>
                          <input type="date" value={dateOfBirth}
                            onChange={e => setDateOfBirth(e.target.value)}
-                           className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none text-[14px] font-medium text-[#1e1b4b] px-4 focus:border-[#d89221] transition-all bg-white"
+                           className="w-full h-[56px] rounded-xl border-2 border-gray-200 outline-none text-[14px] font-medium text-[#1e1b4b] px-4 focus:border-indigo-600 transition-all bg-white"
                          />
                        </div>
 
@@ -701,7 +698,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                            <input type="text" value={referredBy}
                              onChange={e => setReferredBy(e.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase())} placeholder={t.referralPlaceholder}
                              className={`w-full h-[56px] rounded-xl border-2 outline-none text-[14px] font-bold text-[#1e1b4b] px-4 pr-12 transition-all bg-white uppercase
-                                ${referredByStatus === 'invalid' ? 'border-red-400' : 'border-gray-200 focus:border-[#d89221]'}`}
+                                ${referredByStatus === 'invalid' ? 'border-red-400' : 'border-gray-200 focus:border-indigo-600'}`}
                            />
                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
                               {referredByStatus === 'checking' && <Loader2 size={18} className="animate-spin text-gray-400" />}
@@ -716,13 +713,13 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <button 
                          onClick={handleProfileContinue}
                          disabled={usernameStatus !== 'available' || !dateOfBirth || referredByStatus === 'invalid'}
-                         className={`w-full h-[56px] mt-2 rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer ${(usernameStatus !== 'available' || !dateOfBirth || referredByStatus === 'invalid') ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
+                         className={`w-full h-[56px] mt-2 rounded-xl text-[15px] font-bold text-white transition-all shadow-md flex items-center justify-center border-none outline-none cursor-pointer ${(usernameStatus !== 'available' || !dateOfBirth || referredByStatus === 'invalid') ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 active:scale-[0.99]'}`}
                        >
                          {t.continueBtn}
                        </button>
 
                        <div className="text-center mt-4">
-                         <button onClick={() => setShowGuidelinesModal(true)} className="text-[12px] text-[#d89221] font-bold bg-transparent border-none outline-none cursor-pointer hover:underline">
+                         <button onClick={() => setShowGuidelinesModal(true)} className="text-[12px] text-indigo-600 font-bold bg-transparent border-none outline-none cursor-pointer hover:underline">
                             Read username & security instructions - Click here
                          </button>
                        </div>
@@ -757,11 +754,11 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                                return (
                                  <motion.div key={i} animate={{ scale: char ? 1.05 : 1 }}
                                    className={`flex items-center justify-center text-2xl font-black flex-1 rounded-xl transition-all border-2
-                                     ${isActive ? 'border-[#d89221] shadow-[0_0_0_4px_rgba(216,146,33,0.1)] bg-white' : char ? 'border-[#d89221]/40 bg-[#d89221]/5 text-[#1e1b4b]' : 'border-gray-200 bg-gray-50 text-gray-300'}
+                                     ${isActive ? 'border-indigo-600 shadow-[0_0_0_4px_rgba(79,70,229,0.1)] bg-white' : char ? 'border-indigo-600/40 bg-indigo-50/50 text-[#1e1b4b]' : 'border-gray-200 bg-gray-50 text-gray-300'}
                                    `}
                                  >
                                    {char ? (showTpin ? char : "•") : (isActive
-                                     ? <motion.div className="w-0.5 h-6 rounded-full bg-[#d89221]"
+                                     ? <motion.div className="w-0.5 h-6 rounded-full bg-indigo-600"
                                          animate={{ opacity: [0,1,0] }} transition={{ duration: 1, repeat: Infinity }} />
                                      : "·")}
                                  </motion.div>
@@ -783,7 +780,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                        <button 
                          onClick={handleCreateAccount}
                          disabled={tpin.length !== 4}
-                         className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-sm flex items-center justify-center border-none outline-none cursor-pointer mt-4 ${tpin.length !== 4 ? 'bg-gray-200 text-gray-400' : 'bg-[#d89221] hover:bg-[#c2811a] hover:shadow-lg'}`}
+                         className={`w-full h-[56px] rounded-xl text-[15px] font-bold text-white transition-all shadow-md flex items-center justify-center border-none outline-none cursor-pointer mt-4 ${tpin.length !== 4 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 active:scale-[0.99]'}`}
                        >
                          {t.continueBtn}
                        </button>
@@ -797,7 +794,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     <div className="text-center py-10">
                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}
                          transition={{ type: "spring", stiffness: 200, damping: 14 }}
-                         className="w-24 h-24 rounded-full mx-auto mb-8 flex items-center justify-center bg-[#d89221] shadow-[0_0_50px_rgba(216,146,33,0.3)] relative">
+                         className="w-24 h-24 rounded-full mx-auto mb-8 flex items-center justify-center bg-indigo-600 shadow-[0_0_50px_rgba(79,70,229,0.3)] relative">
                          <div className="absolute inset-1.5 border-2 border-white/40 rounded-full" />
                          <CheckCircle size={48} color="white" strokeWidth={2.5} />
                        </motion.div>
@@ -848,7 +845,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               </div>
               <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
                  <div>
-                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><User size={16} className="text-[#d89221]"/> Username Instructions</h4>
+                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><User size={16} className="text-indigo-600"/> Username Instructions</h4>
                     <ul className="text-[13px] text-gray-600 space-y-1.5 list-disc pl-5 m-0">
                        <li>Must be unique and not already taken.</li>
                        <li>Maximum 16 characters long.</li>
@@ -857,14 +854,14 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     </ul>
                  </div>
                  <div>
-                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><ShieldCheck size={16} className="text-[#d89221]"/> Password Strength</h4>
+                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><ShieldCheck size={16} className="text-indigo-600"/> Password Strength</h4>
                     <ul className="text-[13px] text-gray-600 space-y-1.5 list-disc pl-5 m-0">
                        <li>Must be at least 8 characters long.</li>
                        <li>Include at least one uppercase letter and one number for a "Strong" rating.</li>
                     </ul>
                  </div>
                  <div>
-                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><Shield size={16} className="text-[#d89221]"/> T-PIN Security</h4>
+                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><Shield size={16} className="text-indigo-600"/> T-PIN Security</h4>
                     <p className="text-[13px] text-gray-600 m-0 leading-relaxed">
                        Your 4-digit Transactional PIN is highly sensitive. We do not store the actual numbers in our database. Instead, it is secured using <strong>SHA-256 one-way cryptographic hashing</strong>. This means even our database administrators cannot see or decrypt your PIN.
                     </p>
