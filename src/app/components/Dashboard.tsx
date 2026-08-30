@@ -406,7 +406,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   };
 
   const MainDashboard = () => (
-    <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-[#fcfdfd] flex flex-col">
+    <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-[#fcfdfd] flex flex-col pb-24">
        {/* Top Bar */}
        <div className="hidden lg:flex h-[72px] border-b border-gray-100 items-center justify-between px-6 md:px-8 shrink-0 bg-white sticky top-0 z-20">
          <div className="relative w-full max-w-md hidden md:block">
@@ -998,7 +998,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Top Header Bar for Mobile Screens (lg:hidden) */}
-        <header className="lg:hidden bg-white border-b border-gray-100 shrink-0 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+        <header className="lg:hidden bg-white border-b border-gray-100 shrink-0 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between sticky top-0 z-30 shadow-2xs">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(prev => !prev)}

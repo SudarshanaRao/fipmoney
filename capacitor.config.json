@@ -13,5 +13,12 @@
       "www.fipmoney.com",
       "api.metalpriceapi.com"
     ]
+  },
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": false,
+      "style": "LIGHT",
+      "backgroundColor": "#ffffff"
+    }
   }
 }

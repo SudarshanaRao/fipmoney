@@ -474,31 +474,40 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
       {/* ── RIGHT PANEL ── */}
       <div className="flex-1 flex flex-col relative bg-white h-screen">
-         {/* Top right language dropdown & mobile logo */}
-         <div className="w-full p-6 lg:p-8 flex justify-between lg:justify-end items-center z-20 shrink-0">
-            <div className="flex lg:hidden items-center gap-2">
-              <img src={fipMoneyLogo} alt="FipMoney" className="h-7 object-contain" />
-              <span className="font-black text-xl text-[#1e1b4b]">Fipmoney</span>
-            </div>
+         {/* Top Header: Left Back button, Middle FipMoney Logo, Right Language dropdown */}
+         <div className="w-full px-4 sm:px-6 py-4 flex items-center justify-between z-20 shrink-0 border-b border-gray-100/60">
+            {/* Left: Back Button */}
+            <button 
+              onClick={() => onNavigate("home")} 
+              className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-all active:scale-95 cursor-pointer outline-none shadow-xs"
+            >
+              <ArrowLeft size={16} strokeWidth={2.5} />
+              <span>Back</span>
+            </button>
             
-            <div className="flex items-center gap-3 relative group">
-               <button onClick={() => onNavigate("home")} className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer outline-none shadow-sm">
-                 <ArrowLeft size={14} /> {t.backToHome}
-               </button>
-               
-               <div className="relative">
-                 <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 bg-white shadow-sm text-sm font-semibold text-[#1e1b4b] hover:bg-gray-50 transition-colors cursor-pointer outline-none group">
-                   <Globe size={16} className="text-gray-500" />
-                   {lang === 'en' ? 'English' : lang === 'te' ? 'Telugu' : 'Hindi'}
-                   <ChevronDown size={14} className="text-gray-500" />
-                 </button>
-                 {/* Dropdown menu */}
-                 <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                    <button onClick={() => setLang('en')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'en' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>English</button>
-                    <button onClick={() => setLang('te')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'te' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>Telugu (తెలుగు)</button>
-                    <button onClick={() => setLang('hi')} className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-gray-50 transition-colors ${lang === 'hi' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>Hindi (हिंदी)</button>
-                 </div>
-               </div>
+            {/* Middle: FipMoney Logo */}
+            <div 
+              onClick={() => onNavigate("home")}
+              className="flex items-center gap-2 cursor-pointer select-none hover:opacity-90 transition-opacity"
+            >
+              <img src={fipMoneyLogo} alt="FipMoney" className="h-8 w-auto object-contain" />
+              <span className="font-black text-xl tracking-tight text-[#1e1b4b]">Fipmoney</span>
+            </div>
+
+            {/* Right: Language Selector */}
+            <div className="relative group">
+              <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 bg-white shadow-xs text-xs font-bold text-[#1e1b4b] hover:bg-gray-50 transition-colors cursor-pointer outline-none">
+                <Globe size={15} className="text-gray-500" />
+                <span className="hidden sm:inline">{lang === 'en' ? 'English' : lang === 'te' ? 'Telugu' : 'Hindi'}</span>
+                <span className="sm:hidden">{lang.toUpperCase()}</span>
+                <ChevronDown size={13} className="text-gray-500" />
+              </button>
+              {/* Dropdown menu */}
+              <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                <button onClick={() => setLang('en')} className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-gray-50 transition-colors ${lang === 'en' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>English</button>
+                <button onClick={() => setLang('te')} className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-gray-50 transition-colors ${lang === 'te' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>Telugu (తెలుగు)</button>
+                <button onClick={() => setLang('hi')} className={`w-full text-left px-4 py-2 text-xs font-semibold hover:bg-gray-50 transition-colors ${lang === 'hi' ? 'text-indigo-600 bg-indigo-50/50' : 'text-gray-700'}`}>Hindi (हिंदी)</button>
+              </div>
             </div>
          </div>
 

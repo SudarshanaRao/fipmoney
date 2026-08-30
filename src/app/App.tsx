@@ -46,6 +46,8 @@ import { API_BASE_URL } from "./utils/apiConfig";
 import { clearUserSession } from "./utils/userStorage";
 import BiometricLockScreen from "./components/BiometricLockScreen";
 import { isBiometricLockEnabled } from "./utils/biometricService";
+import { Capacitor } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin' | 'agent/login' | 'agent/dashboard' | 'agent-login' | 'agent-dashboard' | 'agent';
 
@@ -142,6 +144,19 @@ export default function App() {
   });
 
   const isLoggedIn = typeof window !== 'undefined' ? !!sessionStorage.getItem("fm_logged_in_mobile") : false;
+
+  // Initialize Native Android & iOS Status Bar with Safe Insets & Light Theme
+  useEffect(() => {
+    if (typeof window !== 'undefined' && Capacitor.isNativePlatform()) {
+      try {
+        StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+        StatusBar.setStyle({ style: Style.Light }).catch(() => {});
+        StatusBar.setBackgroundColor({ color: '#ffffff' }).catch(() => {});
+      } catch (e) {
+        console.warn("StatusBar setup notice:", e);
+      }
+    }
+  }, []);
 
   // 1. Enforce Strict Route Protection Guard
   useEffect(() => {
