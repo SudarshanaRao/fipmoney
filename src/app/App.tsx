@@ -46,6 +46,7 @@ import { API_BASE_URL } from "./utils/apiConfig";
 import { clearUserSession } from "./utils/userStorage";
 import BiometricLockScreen from "./components/BiometricLockScreen";
 import { isBiometricLockEnabled } from "./utils/biometricService";
+import SplashScreen from "./components/SplashScreen";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 
@@ -142,6 +143,8 @@ export default function App() {
     }
     return false;
   });
+
+  const [showSplash, setShowSplash] = useState<boolean>(true);
 
   const isLoggedIn = typeof window !== 'undefined' ? !!sessionStorage.getItem("fm_logged_in_mobile") : false;
 
@@ -662,6 +665,13 @@ export default function App() {
       <AnimatePresence>
         {isAppLocked && (
           <BiometricLockScreen onUnlock={() => setIsAppLocked(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* App Splash Screen on Initial Load */}
+      <AnimatePresence>
+        {showSplash && (
+          <SplashScreen onFinish={() => setShowSplash(false)} />
         )}
       </AnimatePresence>
     </motion.div>
