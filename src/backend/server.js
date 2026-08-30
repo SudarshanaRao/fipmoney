@@ -28,9 +28,14 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5000',
+  'http://localhost',
+  'https://localhost',
+  'capacitor://localhost',
+  'ionic://localhost',
   'https://fipmoney.com',
   'https://www.fipmoney.com',
   'https://test.fipmoney.com',
+  'https://www.test.fipmoney.com',
   'http://test.fipmoney.com',
   'https://dev-server.fipmoney.com',
   'http://dev-server.fipmoney.com',
@@ -40,11 +45,16 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Dynamically allow any origin to bypass strict matching issues
-    callback(null, origin || true);
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('fipmoney.com') || origin.includes('localhost')) {
+      return callback(null, true);
+    }
+    return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id', 'Accept', 'Origin', 'X-Requested-With']
 }));
+app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

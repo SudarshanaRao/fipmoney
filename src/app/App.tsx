@@ -128,7 +128,8 @@ export default function App() {
   const [revokedMessage, setRevokedMessage] = useState("");
   const [isAppLocked, setIsAppLocked] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      return isBiometricLockEnabled();
+      const hasUserSession = !!sessionStorage.getItem("fm_logged_in_mobile");
+      return hasUserSession && isBiometricLockEnabled();
     }
     return false;
   });

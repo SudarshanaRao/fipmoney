@@ -13,6 +13,8 @@ import { toast } from "react-hot-toast";
 import { API_BASE_URL } from "../utils/apiConfig";
 import { authTranslations, Language } from "../utils/translations";
 import { LoadingSpinner } from "./LottiePlayer";
+import { Capacitor } from "@capacitor/core";
+import { checkBiometricAvailability, authenticateWithBiometrics, setBiometricLockEnabled } from "../utils/biometricService";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 type Step = "mobile" | "otp" | "profile" | "tpin" | "success";
@@ -283,6 +285,26 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
             localStorage.setItem("fm_session_id", data.sessionId);
           }
           toast.success("Welcome back!", { position: "top-center" });
+
+          // If running inside Mobile APK, trigger Biometric Authentication
+          if (Capacitor.isNativePlatform()) {
+            try {
+              const bioCheck = await checkBiometricAvailability();
+              if (bioCheck.isAvailable) {
+                const bioResult = await authenticateWithBiometrics(
+                  "Enable Fingerprint Login",
+                  "Touch the fingerprint sensor to enable instant biometric access"
+                );
+                if (bioResult.success) {
+                  setBiometricLockEnabled(true);
+                  toast.success("Fingerprint lock enabled for your device!", { position: "top-center" });
+                }
+              }
+            } catch (err) {
+              console.warn("Biometric enrollment skipped:", err);
+            }
+          }
+
           setTimeout(() => {
             setIsActionLoading(false);
             go(() => setStep("success"));
@@ -322,6 +344,26 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
           localStorage.setItem("fm_session_id", data.sessionId);
         }
         toast.success("Account created successfully!", { position: "top-center" });
+
+        // If running inside Mobile APK, trigger Biometric Authentication
+        if (Capacitor.isNativePlatform()) {
+          try {
+            const bioCheck = await checkBiometricAvailability();
+            if (bioCheck.isAvailable) {
+              const bioResult = await authenticateWithBiometrics(
+                "Enable Fingerprint Login",
+                "Touch the fingerprint sensor to enable instant biometric access"
+              );
+              if (bioResult.success) {
+                setBiometricLockEnabled(true);
+                toast.success("Fingerprint lock enabled for your device!", { position: "top-center" });
+              }
+            }
+          } catch (err) {
+            console.warn("Biometric enrollment skipped:", err);
+          }
+        }
+
         go(() => setStep("success"));
       } else {
         setErr("Registration failed: " + (data.message || "Unknown error"));

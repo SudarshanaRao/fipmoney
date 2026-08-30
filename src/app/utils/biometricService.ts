@@ -12,12 +12,13 @@ export interface BiometricCheckResult {
 
 /**
  * Checks if biometric authentication hardware (Fingerprint / Face ID) is available on the device.
+ * Only returns available if running natively on a mobile device (APK/iOS).
  */
 export const checkBiometricAvailability = async (): Promise<BiometricCheckResult> => {
   const isNative = Capacitor.isNativePlatform();
   if (!isNative) {
-    // In web browser preview, simulate available or check WebAuthn support
-    return { isAvailable: true, biometryType: "FINGERPRINT", isNative: false };
+    // Never trigger biometrics on the website
+    return { isAvailable: false, isNative: false };
   }
 
   try {
@@ -35,6 +36,7 @@ export const checkBiometricAvailability = async (): Promise<BiometricCheckResult
 
 /**
  * Prompts the user with the native Fingerprint / Face ID prompt.
+ * Only triggers if running natively in the APK.
  */
 export const authenticateWithBiometrics = async (
   title = "Fipmoney Security",
@@ -42,8 +44,8 @@ export const authenticateWithBiometrics = async (
 ): Promise<{ success: boolean; error?: string }> => {
   const isNative = Capacitor.isNativePlatform();
 
+  // If not on mobile APK (e.g. website), never trigger biometrics
   if (!isNative) {
-    // Simulated authentication for browser preview
     return { success: true };
   }
 
@@ -56,9 +58,9 @@ export const authenticateWithBiometrics = async (
     await NativeBiometric.verifyIdentity({
       reason,
       title,
-      subtitle: "Biometric Authentication",
+      subtitle: "Biometric Verification",
       description: "Touch the fingerprint sensor to continue",
-      negativeButtonText: "Use PIN",
+      negativeButtonText: "Cancel",
       maxAttempts: 3,
     });
 
@@ -74,9 +76,11 @@ export const authenticateWithBiometrics = async (
 
 /**
  * Checks if the user enabled Biometric / Fingerprint app lock in settings.
+ * Returns true ONLY if running in the mobile APK.
  */
 export const isBiometricLockEnabled = (): boolean => {
   if (typeof window === "undefined") return false;
+  if (!Capacitor.isNativePlatform()) return false; // NEVER trigger on website
   return localStorage.getItem(BIOMETRIC_ENABLED_KEY) === "true";
 };
 

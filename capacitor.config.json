@@ -3,6 +3,15 @@
   "appName": "Fipmoney",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "cleartext": true,
+    "allowNavigation": [
+      "dev-server.fipmoney.com",
+      "test.fipmoney.com",
+      "www.test.fipmoney.com",
+      "fipmoney.com",
+      "www.fipmoney.com",
+      "api.metalpriceapi.com"
+    ]
   }
 }
