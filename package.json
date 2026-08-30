@@ -6,7 +6,11 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "deploy": "npm run build && node deploy-s3.js"
+    "deploy": "npm run build && node deploy-s3.js",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:open": "npx cap open android",
+    "cap:run:android": "npm run build && npx cap run android",
+    "cap:build:android": "npm run build && npx cap sync && cd android && .\\gradlew.bat assembleDebug"
   },
   "dependencies": {
     "@aws-sdk/s3-request-presigner": "^3.1109.0",
@@ -75,6 +79,9 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1096.0",
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
     "dotenv": "^17.4.2",
