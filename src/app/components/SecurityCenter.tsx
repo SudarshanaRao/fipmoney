@@ -1,10 +1,10 @@
-"use client";
-
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Shield, Lock, Eye, Fingerprint, Smartphone, Server, CheckCircle, AlertTriangle, Key, Globe, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Shield, Lock, Eye, Fingerprint, Smartphone, Server, CheckCircle, AlertTriangle, Key, Globe, Mail, Phone, CheckCircle2, ShieldCheck, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
+import { isBiometricLockEnabled, setBiometricLockEnabled, authenticateWithBiometrics, checkBiometricAvailability } from "../utils/biometricService";
 
 interface SecurityCenterProps {
   onBack: () => void;
@@ -54,6 +54,56 @@ const BestPractice = ({ title, description, delay = 0 }) => (
 );
 
 export default function SecurityCenter({ onBack }: SecurityCenterProps) {
+  const [bioEnabled, setBioEnabled] = useState(false);
+  const [bioStatus, setBioStatus] = useState<string>("Checking...");
+  const [isTestingBio, setIsTestingBio] = useState(false);
+  const [testFeedback, setTestFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    setBioEnabled(isBiometricLockEnabled());
+    checkBiometricAvailability().then(res => {
+      if (res.isAvailable) {
+        setBioStatus(res.isNative ? "Hardware Supported" : "Supported (Browser Preview)");
+      } else {
+        setBioStatus("Sensor not detected / Not enrolled");
+      }
+    });
+  }, []);
+
+  const handleToggleBio = async () => {
+    if (!bioEnabled) {
+      const res = await authenticateWithBiometrics("Enable Fingerprint Lock", "Authenticate to turn on fingerprint lock");
+      if (res.success) {
+        setBiometricLockEnabled(true);
+        setBioEnabled(true);
+        setTestFeedback("Fingerprint lock enabled successfully!");
+      } else {
+        setTestFeedback(res.error || "Authentication cancelled or failed");
+      }
+    } else {
+      setBiometricLockEnabled(false);
+      setBioEnabled(false);
+      setTestFeedback("Fingerprint lock disabled.");
+    }
+  };
+
+  const handleTestSensor = async () => {
+    setIsTestingBio(true);
+    setTestFeedback(null);
+    try {
+      const res = await authenticateWithBiometrics("Sensor Test", "Scan fingerprint to verify sensor functionality");
+      if (res.success) {
+        setTestFeedback("Fingerprint sensor verified successfully!");
+      } else {
+        setTestFeedback(res.error || "Fingerprint scan cancelled or not recognized.");
+      }
+    } catch (e) {
+      setTestFeedback("Error testing fingerprint sensor.");
+    } finally {
+      setIsTestingBio(false);
+    }
+  };
+
   const securityFeatures = [
     {
       icon: Lock,
@@ -277,6 +327,67 @@ export default function SecurityCenter({ onBack }: SecurityCenterProps) {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
+              {/* Biometric & Fingerprint Lock Control Card */}
+              <Card className="p-6 border border-amber-200/80 bg-gradient-to-br from-amber-50/50 via-white to-amber-50/20 shadow-md">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#ffbf00] to-[#ffd152] flex items-center justify-center text-gray-900 shadow-sm">
+                      <Fingerprint className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-base">Fingerprint App Lock</h4>
+                      <p className="text-xs text-gray-500">{bioStatus}</p>
+                    </div>
+                  </div>
+                  <Badge className={bioEnabled ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-700"}>
+                    {bioEnabled ? "Enabled" : "Disabled"}
+                  </Badge>
+                </div>
+
+                <p className="text-xs text-gray-600 mb-5 leading-relaxed">
+                  Require your mobile fingerprint or Face ID whenever opening or accessing Fipmoney for enhanced account security.
+                </p>
+
+                {testFeedback && (
+                  <div className="p-3 mb-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span>{testFeedback}</span>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={handleToggleBio}
+                    className={`flex-1 font-semibold text-xs py-2.5 transition-all ${
+                      bioEnabled
+                        ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                        : "bg-gradient-to-r from-[#ffbf00] to-[#ffd152] text-gray-950 hover:from-[#e6a800] hover:to-[#ffbf00] shadow-sm"
+                    }`}
+                  >
+                    {bioEnabled ? "Turn Off Fingerprint" : "Enable Fingerprint Lock"}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={handleTestSensor}
+                    disabled={isTestingBio}
+                    className="flex-1 text-xs py-2.5 border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-1.5"
+                  >
+                    {isTestingBio ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        Scanning...
+                      </>
+                    ) : (
+                      <>
+                        <Fingerprint className="w-3.5 h-3.5 text-[#ffbf00]" />
+                        Test Sensor
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Card>
+
               {/* Security Alert */}
               <Card className="p-6 border-l-4 border-red-500 bg-red-50">
                 <div className="flex items-start space-x-3">

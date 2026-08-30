@@ -44,6 +44,8 @@ import { OBFUSCATED_ADMIN_PATH } from "./utils/adminStorage";
 import { LoadingSpinner } from "./components/LottiePlayer";
 import { API_BASE_URL } from "./utils/apiConfig";
 import { clearUserSession } from "./utils/userStorage";
+import BiometricLockScreen from "./components/BiometricLockScreen";
+import { isBiometricLockEnabled } from "./utils/biometricService";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin' | 'agent/login' | 'agent/dashboard' | 'agent-login' | 'agent-dashboard' | 'agent';
 
@@ -124,6 +126,12 @@ export default function App() {
   const homeScrollPosition = useRef(0);
   const [showRevokedModal, setShowRevokedModal] = useState(false);
   const [revokedMessage, setRevokedMessage] = useState("");
+  const [isAppLocked, setIsAppLocked] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return isBiometricLockEnabled();
+    }
+    return false;
+  });
 
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -631,6 +639,13 @@ export default function App() {
               </button>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Biometric / Fingerprint Lock Screen */}
+      <AnimatePresence>
+        {isAppLocked && (
+          <BiometricLockScreen onUnlock={() => setIsAppLocked(false)} />
         )}
       </AnimatePresence>
     </motion.div>
