@@ -46,7 +46,7 @@ import { API_BASE_URL } from "./utils/apiConfig";
 import { clearUserSession } from "./utils/userStorage";
 import BiometricLockScreen from "./components/BiometricLockScreen";
 import { isBiometricLockEnabled } from "./utils/biometricService";
-import SplashScreen from "./components/SplashScreen";
+import { SplashScreen as CapacitorSplashScreen } from "@capacitor/splash-screen";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 
@@ -143,20 +143,19 @@ export default function App() {
     }
     return false;
   });
-
-  const [showSplash, setShowSplash] = useState<boolean>(true);
-
+ 
   const isLoggedIn = typeof window !== 'undefined' ? !!sessionStorage.getItem("fm_logged_in_mobile") : false;
 
   // Initialize Native Android & iOS Status Bar with Safe Insets & Light Theme
   useEffect(() => {
     if (typeof window !== 'undefined' && Capacitor.isNativePlatform()) {
       try {
+        CapacitorSplashScreen.hide().catch(() => {});
         StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
         StatusBar.setStyle({ style: Style.Light }).catch(() => {});
         StatusBar.setBackgroundColor({ color: '#ffffff' }).catch(() => {});
       } catch (e) {
-        console.warn("StatusBar setup notice:", e);
+        console.warn("StatusBar/SplashScreen setup notice:", e);
       }
     }
   }, []);
@@ -665,13 +664,6 @@ export default function App() {
       <AnimatePresence>
         {isAppLocked && (
           <BiometricLockScreen onUnlock={() => setIsAppLocked(false)} />
-        )}
-      </AnimatePresence>
-
-      {/* App Splash Screen on Initial Load */}
-      <AnimatePresence>
-        {showSplash && (
-          <SplashScreen onFinish={() => setShowSplash(false)} />
         )}
       </AnimatePresence>
     </motion.div>
