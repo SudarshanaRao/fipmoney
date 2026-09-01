@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Wallet, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight, X, Sparkles, User } from "lucide-react";
+import { Home, Wallet, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight, X, Sparkles, User, PieChart, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Capacitor } from "@capacitor/core";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
@@ -371,175 +371,96 @@ export const MobileDrawerNav = ({
 };
 
 export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: Omit<NavProps, "onLogout">) => {
-  const [isFabOpen, setIsFabOpen] = React.useState(false);
-  const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
-
-  // If not on mobile APK (e.g. on website), NEVER render mobile bottom bar
-  if (!isNative) {
-    return null;
-  }
-
-  const quickActions = [
-    { label: "Digital Gold", icon: Sparkles, color: "from-amber-400 to-yellow-500", tab: "sip" },
-    { label: "Daily Savings", icon: PiggyBank, color: "from-emerald-400 to-teal-500", tab: "savings" },
-    { label: "Pay Bills", icon: Zap, color: "from-purple-500 to-indigo-600", tab: "bills" },
-    { label: "Help & Support", icon: HelpCircle, color: "from-blue-500 to-cyan-600", tab: "help" },
-  ];
-
   return (
-    <>
-      {/* Backdrop overlay when Quick Actions FAB is open */}
-      <AnimatePresence>
-        {isFabOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsFabOpen(false)}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Floating Radial Quick Action Menu */}
-      <AnimatePresence>
-        {isFabOpen && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center pointer-events-none w-full max-w-sm px-4">
-            <div className="relative pointer-events-auto flex items-center justify-between w-full bg-white/95 backdrop-blur-md p-3 rounded-3xl shadow-2xl border border-gray-100">
-              {quickActions.map((action, idx) => {
-                const Icon = action.icon;
-                return (
-                  <motion.button
-                    key={action.label}
-                    initial={{ scale: 0, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0, y: 20 }}
-                    transition={{ delay: idx * 0.05, type: "spring", stiffness: 300, damping: 20 }}
-                    onClick={() => {
-                      setIsFabOpen(false);
-                      onTabChange(action.tab as Tab);
-                    }}
-                    className="flex flex-col items-center gap-1 p-1 rounded-2xl hover:bg-gray-50 active:scale-95 transition-all outline-none border-none bg-transparent cursor-pointer"
-                  >
-                    <div className={`w-11 h-11 rounded-2xl bg-gradient-to-tr ${action.color} text-white flex items-center justify-center shadow-md shadow-amber-500/20`}>
-                      <Icon size={20} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[10px] font-bold text-gray-700 whitespace-nowrap">{action.label}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Curved FinTech Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 px-3 pb-3 pt-1 pointer-events-none select-none">
-        <div className="max-w-md mx-auto relative bg-white/95 backdrop-blur-xl border border-gray-200/80 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] rounded-3xl px-3 py-2 pointer-events-auto flex items-center justify-between">
+    <div className="lg:hidden">
+      {/* Android/iOS Bottom Navigation Bar matching screenshot */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] px-3 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0px))] rounded-t-3xl">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           
-          {/* 1. Dashboard / Home */}
+          {/* 1. Invest */}
           <button
-            onClick={() => {
-              setIsFabOpen(false);
-              onTabChange("home");
-            }}
-            className="flex-1 flex flex-col items-center justify-center py-1 relative cursor-pointer border-none bg-transparent outline-none"
+            onClick={() => onTabChange("sip")}
+            className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
-              activeTab === "home" ? "bg-gradient-to-tr from-[#1e1b4b] to-[#312e81] text-white shadow-md shadow-indigo-900/20 scale-105" : "text-gray-400 hover:text-gray-600"
+            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
+              activeTab === "sip" || activeTab === "savings" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
-              <Home size={20} strokeWidth={activeTab === "home" ? 2.5 : 2} />
+              <PieChart size={22} strokeWidth={activeTab === "sip" || activeTab === "savings" ? 2.5 : 2} />
             </div>
-            <span className={`text-[10px] mt-0.5 font-bold transition-colors ${
-              activeTab === "home" ? "text-indigo-950 font-extrabold" : "text-gray-400 font-medium"
-            }`}>
-              Home
-            </span>
-          </button>
-
-          {/* 2. Savings / Invest */}
-          <button
-            onClick={() => {
-              setIsFabOpen(false);
-              onTabChange("sip");
-            }}
-            className="flex-1 flex flex-col items-center justify-center py-1 relative cursor-pointer border-none bg-transparent outline-none"
-          >
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
-              activeTab === "sip" || activeTab === "savings" ? "bg-gradient-to-tr from-[#1e1b4b] to-[#312e81] text-white shadow-md shadow-indigo-900/20 scale-105" : "text-gray-400 hover:text-gray-600"
-            }`}>
-              <TrendingUp size={20} strokeWidth={activeTab === "sip" || activeTab === "savings" ? 2.5 : 2} />
-            </div>
-            <span className={`text-[10px] mt-0.5 font-bold transition-colors ${
-              activeTab === "sip" || activeTab === "savings" ? "text-indigo-950 font-extrabold" : "text-gray-400 font-medium"
+            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
+              activeTab === "sip" || activeTab === "savings" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
             }`}>
               Invest
             </span>
           </button>
 
-          {/* 3. Center Floating Action Button (FAB) */}
-          <div className="relative -top-5 flex flex-col items-center mx-1">
-            <motion.button
-              whileTap={{ scale: 0.92 }}
-              animate={{ rotate: isFabOpen ? 45 : 0 }}
-              onClick={() => setIsFabOpen(!isFabOpen)}
-              className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#ffbf00] via-[#ffd152] to-[#ffbf00] text-gray-950 flex items-center justify-center shadow-lg shadow-[#ffbf00]/40 border-4 border-white cursor-pointer outline-none transition-shadow hover:shadow-xl"
+          {/* 2. Portfolio */}
+          <button
+            onClick={() => onTabChange("portfolio")}
+            className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
+          >
+            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
+              activeTab === "portfolio" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
+            }`}>
+              <Wallet size={22} strokeWidth={activeTab === "portfolio" ? 2.5 : 2} />
+            </div>
+            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
+              activeTab === "portfolio" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
+            }`}>
+              Portfolio
+            </span>
+          </button>
+
+          {/* 3. Home (Centered Raised Active Button) */}
+          <div className="relative -top-3 flex flex-col items-center justify-center mx-1">
+            <button
+              onClick={() => onTabChange("home")}
+              className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 border-2 border-white cursor-pointer outline-none transition-transform active:scale-90"
             >
-              {isFabOpen ? (
-                <X size={24} strokeWidth={3} className="text-gray-950" />
-              ) : (
-                <Sparkles size={24} strokeWidth={2.5} className="text-gray-950" />
-              )}
-            </motion.button>
-            <span className="text-[9px] font-black text-amber-900 tracking-tight mt-0.5">Quick</span>
+              <Home size={22} strokeWidth={2.5} />
+            </button>
+            <span className="text-[10px] font-black text-amber-600 tracking-tight mt-0.5">
+              Home
+            </span>
           </div>
 
-          {/* 4. History / Transactions */}
+          {/* 4. History */}
           <button
-            onClick={() => {
-              setIsFabOpen(false);
-              onTabChange("history");
-            }}
-            className="flex-1 flex flex-col items-center justify-center py-1 relative cursor-pointer border-none bg-transparent outline-none"
+            onClick={() => onTabChange("history")}
+            className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
-              activeTab === "history" ? "bg-gradient-to-tr from-[#1e1b4b] to-[#312e81] text-white shadow-md shadow-indigo-900/20 scale-105" : "text-gray-400 hover:text-gray-600"
+            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
+              activeTab === "history" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
-              <Clock size={20} strokeWidth={activeTab === "history" ? 2.5 : 2} />
+              <Calendar size={22} strokeWidth={activeTab === "history" ? 2.5 : 2} />
             </div>
-            <span className={`text-[10px] mt-0.5 font-bold transition-colors ${
-              activeTab === "history" ? "text-indigo-950 font-extrabold" : "text-gray-400 font-medium"
+            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
+              activeTab === "history" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
             }`}>
               History
             </span>
           </button>
 
-          {/* 5. Profile / Settings */}
+          {/* 5. Rewards */}
           <button
-            onClick={() => {
-              setIsFabOpen(false);
-              onTabChange("settings");
-            }}
-            className="flex-1 flex flex-col items-center justify-center py-1 relative cursor-pointer border-none bg-transparent outline-none"
+            onClick={() => onTabChange("refer-and-earn")}
+            className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all relative ${
-              activeTab === "settings" ? "bg-gradient-to-tr from-[#1e1b4b] to-[#312e81] text-white shadow-md shadow-indigo-900/20 scale-105" : "text-gray-400 hover:text-gray-600"
+            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
+              activeTab === "refer-and-earn" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
-              <User size={20} strokeWidth={activeTab === "settings" ? 2.5 : 2} />
-              {profileCompletion < 100 && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white" />
-              )}
+              <Gift size={22} strokeWidth={activeTab === "refer-and-earn" ? 2.5 : 2} />
             </div>
-            <span className={`text-[10px] mt-0.5 font-bold transition-colors ${
-              activeTab === "settings" ? "text-indigo-950 font-extrabold" : "text-gray-400 font-medium"
+            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
+              activeTab === "refer-and-earn" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
             }`}>
-              Profile
+              Rewards
             </span>
           </button>
 
         </div>
-      </div>
-    </>
+      </nav>
+    </div>
   );
 };
 

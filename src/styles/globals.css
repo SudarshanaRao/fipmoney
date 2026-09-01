@@ -157,12 +157,23 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700; /* Inter Bold */
+  }
+
+  button {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600; /* Inter SemiBold */
   }
 }
 

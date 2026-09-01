@@ -52,7 +52,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id', 'Accept', 'Origin', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-session-id', 'x-user-mobile', 'X-User-Mobile', 'Accept', 'Origin', 'X-Requested-With']
 }));
 app.options('*', cors());
 app.use(express.json());
