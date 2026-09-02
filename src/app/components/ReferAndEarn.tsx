@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Copy, Gift, Clock, Users, Trophy, ArrowRight, Share2, MessageCircle, Send, Facebook, Twitter, MoreHorizontal, UserPlus, Wallet, FileText, Maximize2, ThumbsUp, ThumbsDown, ChevronDown } from "lucide-react";
+import { Copy, Gift, Clock, Users, Trophy, ArrowRight, Share2, MessageCircle, Send, Facebook, Twitter, MoreHorizontal, UserPlus, Wallet, FileText, Maximize2, ThumbsUp, ThumbsDown, ChevronDown, TrendingUp, Coins, CircleDollarSign } from "lucide-react";
 import { getLoggedInUser, getUserAvatar } from "../utils/userStorage";
 import { API_BASE_URL } from "../utils/apiConfig";
 
@@ -24,6 +24,13 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
     availableBalance: 0
   });
   const [expandedReferralId, setExpandedReferralId] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`https://fipmoney.com/ref/${userReferralCode}`);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   const [myAvatar, setMyAvatar] = useState<string | null>(() => getUserAvatar(loggedInUser?.mobileNumber));
 
@@ -126,13 +133,13 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
       <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-4 relative z-10">
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-4">
+        <div className="flex flex-col xl:grid xl:grid-cols-[1.5fr_1fr] gap-4">
 
           {/* Left Column (Main Content) */}
-          <div className="flex flex-col space-y-4 h-full">
+          <div className="contents xl:flex xl:flex-col xl:space-y-4 xl:h-full">
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+            <div className="order-1 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
               <div className="flex items-center gap-2.5">
                 <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
                   <Gift size={20} />
@@ -145,12 +152,12 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
             </div>
 
             {/* Hero Banner Image */}
-            <div className="w-full rounded-2xl overflow-hidden shadow-sm border border-slate-100">
+            <div className="order-2 w-full rounded-2xl overflow-hidden shadow-sm border border-slate-100">
               <img src="/refer_and_earn.png" alt="Refer and Earn" className="w-full h-[160px] sm:h-[200px] md:h-[235px] object-cover object-center" />
             </div>
 
             {/* Referral Link Card */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <div className="order-3 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
               <div className="flex items-center gap-2 mb-4">
                 <Share2 size={18} className="text-indigo-600" />
                 <h3 className="font-bold text-slate-800 text-base">Your Referral Link</h3>
@@ -158,9 +165,9 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
 
               <div className="flex flex-col sm:flex-row items-center gap-3 bg-slate-50/50 p-1.5 pl-3 rounded-xl border border-slate-200 mb-4">
                 <span className="flex-1 text-slate-500 font-medium text-sm truncate w-full sm:w-auto">https://fipmoney.com/ref/{userReferralCode}</span>
-                <button className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5 text-sm whitespace-nowrap cursor-pointer border-none outline-none">
+                <button onClick={handleCopyLink} className="w-full sm:w-auto bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5 text-sm whitespace-nowrap cursor-pointer border-none outline-none">
                   <Copy size={16} />
-                  Copy Link
+                  {copiedLink ? "Copied!" : "Copy Link"}
                 </button>
               </div>
 
@@ -188,39 +195,179 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
               </div>
             </div>
 
-            {/* How It Works Horizontal Stepper */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-              <div className="flex items-center gap-2 mb-6">
-                <Clock size={18} className="text-indigo-600" />
-                <h3 className="font-bold text-slate-800 text-base">How It Works</h3>
+            {/* How It Works Section */}
+            <div className="order-6 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+              {/* DESKTOP VIEW */}
+              <div className="hidden md:block">
+                <div className="flex items-center gap-2 mb-6">
+                  <Clock size={18} className="text-indigo-600" />
+                  <h3 className="font-bold text-slate-800 text-base">How It Works</h3>
+                </div>
+
+                <div className="flex flex-row items-center justify-between gap-0 relative">
+                  <div className="absolute top-5 left-12 right-12 h-[1px] bg-slate-100 -z-10" />
+
+                  {[
+                    { step: 1, title: "Share your link", desc: "Invite your friends using your unique referral link", icon: Share2, color: "text-emerald-500", bg: "bg-emerald-50" },
+                    { step: 2, title: "They join & verify", desc: "Your friend signs up and completes KYC", icon: UserPlus, color: "text-amber-500", bg: "bg-amber-50" },
+                    { step: 3, title: "Purchase Digital Gold", desc: "Friend purchases ₹500 worth of digital gold within 30 days", icon: Wallet, color: "text-blue-500", bg: "bg-blue-50" },
+                    { step: 4, title: "You both earn rewards", desc: "You both get ₹50 worth of digital gold as earnings", icon: Gift, color: "text-purple-500", bg: "bg-purple-50" }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center text-center gap-3 w-1/4 relative bg-white">
+                      <div className={`w-10 h-10 rounded-full ${item.bg} ${item.color} flex items-center justify-center border-4 border-white shadow-sm shrink-0`}>
+                        <item.icon size={16} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 mt-1">Step {item.step}</div>
+                        <h4 className="font-bold text-slate-700 text-sm mb-0.5">{item.title}</h4>
+                        <p className="text-xs text-slate-500 leading-tight max-w-[150px] mx-auto">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0 relative">
-                {/* Horizontal line for desktop */}
-                <div className="hidden md:block absolute top-5 left-12 right-12 h-[1px] bg-slate-100 -z-10" />
+              {/* MOBILE VIEW (MATCHING SCREENSHOT 1) */}
+              <div className="block md:hidden space-y-4">
+                {/* Mobile Header */}
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100/80 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200/50">
+                    <Trophy size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base leading-snug">How It Works</h3>
+                    <p className="text-xs text-slate-400 font-medium">Simple 4-step process</p>
+                  </div>
+                </div>
 
-                {[
-                  { step: 1, title: "Share your link", desc: "Invite your friends using your unique referral link", icon: Share2, color: "text-emerald-500", bg: "bg-emerald-50" },
-                  { step: 2, title: "They join & verify", desc: "Your friend signs up and completes KYC", icon: UserPlus, color: "text-amber-500", bg: "bg-amber-50" },
-                  { step: 3, title: "Purchase Digital Gold", desc: "Friend purchases ₹500 worth of digital gold within 30 days", icon: Wallet, color: "text-blue-500", bg: "bg-blue-50" },
-                  { step: 4, title: "You both earn rewards", desc: "You both get ₹50 worth of digital gold as earnings", icon: Gift, color: "text-purple-500", bg: "bg-purple-50" }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex flex-row md:flex-col items-center md:text-center gap-3 w-full md:w-1/4 relative bg-white">
-                    <div className={`w-10 h-10 rounded-full ${item.bg} ${item.color} flex items-center justify-center border-4 border-white shadow-sm shrink-0`}>
-                      <item.icon size={16} />
+                {/* Step 1 Card (Blue) */}
+                <div className="bg-[#eff6ff] border border-blue-200/90 rounded-2xl p-4 relative shadow-2xs">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[#2563eb] text-white font-extrabold text-base flex items-center justify-center shadow-xs">
+                        1
+                      </div>
+                      <div className="w-[2px] h-6 bg-blue-200/90 mt-2" />
                     </div>
-                    <div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 md:mt-1">Step {item.step}</div>
-                      <h4 className="font-bold text-slate-700 text-sm mb-0.5">{item.title}</h4>
-                      <p className="text-xs text-slate-500 leading-tight max-w-[150px] md:mx-auto">{item.desc}</p>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Share2 size={16} className="text-[#2563eb]" />
+                          <h4 className="font-bold text-slate-800 text-sm">Share Your Link</h4>
+                        </div>
+                        <ArrowRight size={16} className="text-blue-300" />
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                        Share your unique referral link with friends and family
+                      </p>
+                      <button
+                        onClick={handleCopyLink}
+                        className="mt-3 bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border-none outline-none flex items-center gap-1.5 shadow-xs"
+                      >
+                        <Copy size={13} />
+                        {copiedLink ? "Copied Link!" : "Copy Link"}
+                      </button>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Step 2 Card (Green) */}
+                <div className="bg-[#f0fdf4] border border-emerald-200/90 rounded-2xl p-4 relative shadow-2xs">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[#10b981] text-white font-extrabold text-base flex items-center justify-center shadow-xs">
+                        2
+                      </div>
+                      <div className="w-[2px] h-6 bg-emerald-200/90 mt-2" />
+                    </div>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <UserPlus size={16} className="text-[#10b981]" />
+                          <h4 className="font-bold text-slate-800 text-sm">Friend Joins & Invests</h4>
+                        </div>
+                        <ArrowRight size={16} className="text-emerald-300" />
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                        Your friend signs up and makes their first investment of ₹500+
+                      </p>
+                      <button
+                        onClick={() => {
+                          const el = document.getElementById("my-referrals-section");
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="mt-3 bg-[#10b981] hover:bg-emerald-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border-none outline-none flex items-center gap-1.5 shadow-xs"
+                      >
+                        Track Progress
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 3 Card (Purple) */}
+                <div className="bg-[#faf5ff] border border-purple-200/90 rounded-2xl p-4 relative shadow-2xs">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[#a855f7] text-white font-extrabold text-base flex items-center justify-center shadow-xs">
+                        3
+                      </div>
+                      <div className="w-[2px] h-6 bg-purple-200/90 mt-2" />
+                    </div>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Wallet size={16} className="text-[#a855f7]" />
+                          <h4 className="font-bold text-slate-800 text-sm">Purchase Digital Gold</h4>
+                        </div>
+                        <ArrowRight size={16} className="text-purple-300" />
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                        Friend purchases ₹500 worth of digital gold within 30 days
+                      </p>
+                      <button
+                        onClick={() => onNavigate("vault")}
+                        className="mt-3 bg-[#a855f7] hover:bg-purple-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border-none outline-none flex items-center gap-1.5 shadow-xs"
+                      >
+                        View Rewards
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 4 Card (Amber/Purple Rewards) */}
+                <div className="bg-[#fffbeb] border border-amber-200/90 rounded-2xl p-4 relative shadow-2xs">
+                  <div className="flex items-start gap-3.5">
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[#f59e0b] text-white font-extrabold text-base flex items-center justify-center shadow-xs">
+                        4
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Gift size={16} className="text-[#f59e0b]" />
+                          <h4 className="font-bold text-slate-800 text-sm">Both Earn Rewards</h4>
+                        </div>
+                        <ArrowRight size={16} className="text-amber-300" />
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                        You get ₹50, your friend gets ₹50 instantly credited
+                      </p>
+                      <button
+                        onClick={() => onNavigate("vault")}
+                        className="mt-3 bg-[#f59e0b] hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition cursor-pointer border-none outline-none flex items-center gap-1.5 shadow-xs"
+                      >
+                        View Rewards
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
 
             {/* Mini Terms and Conditions Section */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 relative group flex flex-col flex-1">
+            <div className="order-7 bg-white rounded-2xl p-5 shadow-sm border border-slate-100 relative group flex flex-col flex-1">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <FileText size={18} className="text-indigo-600" />
@@ -249,57 +396,131 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
           </div>
 
           {/* Right Column (Sidebar metrics) */}
-          <div className="space-y-4">
+          <div className="contents xl:flex xl:flex-col xl:space-y-4">
 
-            {/* Earnings Summary */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-              <h3 className="font-bold text-slate-800 text-base mb-4">Your Earnings Summary</h3>
+            {/* Earnings Summary / Referral Stats */}
+            <div className="order-4 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+              {/* DESKTOP VIEW */}
+              <div className="hidden md:block">
+                <h3 className="font-bold text-slate-800 text-base mb-4">Your Earnings Summary</h3>
 
-              <div className="grid grid-cols-3 gap-2.5 mb-3">
-                <div className="bg-[#faf5ff] rounded-xl p-3 border border-purple-50">
-                  <div className="text-[11px] font-semibold text-purple-600 mb-1 leading-tight">Total Earnings</div>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-lg font-black text-purple-900">₹{summaryData.totalEarnings.toLocaleString()}</span>
-                    <Wallet size={14} className="text-purple-400 ml-auto" />
+                <div className="grid grid-cols-3 gap-2.5 mb-3">
+                  <div className="bg-[#faf5ff] rounded-xl p-3 border border-purple-50">
+                    <div className="text-[11px] font-semibold text-purple-600 mb-1 leading-tight">Total Earnings</div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="text-lg font-black text-purple-900">₹{summaryData.totalEarnings.toLocaleString()}</span>
+                      <Wallet size={14} className="text-purple-400 ml-auto" />
+                    </div>
+                  </div>
+                  <div className="bg-[#fffbeb] rounded-xl p-3 border border-amber-50">
+                    <div className="text-[11px] font-semibold text-amber-600 mb-1 leading-tight">Pending Earnings</div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="text-lg font-black text-amber-900">₹{summaryData.pendingEarnings.toLocaleString()}</span>
+                      <Clock size={14} className="text-amber-400 ml-auto" />
+                    </div>
+                  </div>
+                  <div className="bg-[#f0fdf4] rounded-xl p-3 border border-emerald-50">
+                    <div className="text-[11px] font-semibold text-emerald-600 mb-1 leading-tight">Successful Referrals</div>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="text-lg font-black text-emerald-900">{summaryData.successfulReferrals}</span>
+                      <Users size={14} className="text-emerald-400 ml-auto" />
+                    </div>
                   </div>
                 </div>
-                <div className="bg-[#fffbeb] rounded-xl p-3 border border-amber-50">
-                  <div className="text-[11px] font-semibold text-amber-600 mb-1 leading-tight">Pending Earnings</div>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-lg font-black text-amber-900">₹{summaryData.pendingEarnings.toLocaleString()}</span>
-                    <Clock size={14} className="text-amber-400 ml-auto" />
+
+                <div className="bg-[#fffbeb] rounded-xl p-4 border border-amber-100/60 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center border border-amber-50 shrink-0">
+                      <Trophy size={16} className="text-amber-500" />
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-slate-500">Available Balance</div>
+                      <div className="text-base font-black text-slate-800">₹{summaryData.availableBalance.toLocaleString()}</div>
+                    </div>
                   </div>
+                  <button className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold py-2 px-3.5 rounded-md text-xs transition-colors flex items-center gap-1 border-none outline-none cursor-pointer shadow-sm">
+                    Withdraw Earnings <ArrowRight size={14} />
+                  </button>
                 </div>
-                <div className="bg-[#f0fdf4] rounded-xl p-3 border border-emerald-50">
-                  <div className="text-[11px] font-semibold text-emerald-600 mb-1 leading-tight">Successful Referrals</div>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <span className="text-lg font-black text-emerald-900">{summaryData.successfulReferrals}</span>
-                    <Users size={14} className="text-emerald-400 ml-auto" />
-                  </div>
+                <div className="text-left text-[10px] text-slate-400 mt-2 px-1">
+                  Minimum withdrawal amount is ₹100
                 </div>
               </div>
 
-              <div className="bg-[#fffbeb] rounded-xl p-4 border border-amber-100/60 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center border border-amber-50 shrink-0">
-                    <Trophy size={16} className="text-amber-500" />
+              {/* MOBILE VIEW (MATCHING SCREENSHOT 2) */}
+              <div className="block md:hidden">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-9 h-9 rounded-full bg-amber-100/80 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200/50">
+                    <Trophy size={18} />
                   </div>
-                  <div>
-                    <div className="text-[11px] font-bold text-slate-500">Available Balance</div>
-                    <div className="text-base font-black text-slate-800">₹{summaryData.availableBalance.toLocaleString()}</div>
+                  <h3 className="font-bold text-slate-900 text-base">Your Referral Stats</h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3.5">
+                  {/* Total Friends (Blue) */}
+                  <div className="bg-[#eff6ff] rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-blue-100/90 shadow-2xs">
+                    <div className="w-12 h-12 rounded-full bg-[#2563eb] text-white flex items-center justify-center mb-2.5 shadow-xs">
+                      <Users size={22} />
+                    </div>
+                    <div className="text-2xl font-black text-[#2563eb] leading-none mb-1">
+                      {referralsTracked.length || summaryData.successfulReferrals || 0}
+                    </div>
+                    <div className="text-xs font-bold text-[#3b82f6]">Total Friends</div>
+                  </div>
+
+                  {/* Successful (Green) */}
+                  <div className="bg-[#f0fdf4] rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-emerald-100/90 shadow-2xs">
+                    <div className="w-12 h-12 rounded-full bg-[#10b981] text-white flex items-center justify-center mb-2.5 shadow-xs">
+                      <TrendingUp size={22} />
+                    </div>
+                    <div className="text-2xl font-black text-[#10b981] leading-none mb-1">
+                      {summaryData.successfulReferrals}
+                    </div>
+                    <div className="text-xs font-bold text-[#10b981]">Successful</div>
+                  </div>
+
+                  {/* Total Earned (Amber/Orange) */}
+                  <div className="bg-[#fffbeb] rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-amber-100/90 shadow-2xs">
+                    <div className="w-12 h-12 rounded-full bg-[#f59e0b] text-white flex items-center justify-center mb-2.5 shadow-xs">
+                      <Coins size={22} />
+                    </div>
+                    <div className="text-2xl font-black text-[#d97706] leading-none mb-1">
+                      ₹{summaryData.totalEarnings}
+                    </div>
+                    <div className="text-xs font-bold text-[#d97706]">Total Earned</div>
+                  </div>
+
+                  {/* Cashback (Purple) */}
+                  <div className="bg-[#faf5ff] rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-purple-100/90 shadow-2xs">
+                    <div className="w-12 h-12 rounded-full bg-[#a855f7] text-white flex items-center justify-center mb-2.5 shadow-xs">
+                      <CircleDollarSign size={22} />
+                    </div>
+                    <div className="text-2xl font-black text-[#a855f7] leading-none mb-1">
+                      ₹{summaryData.availableBalance || summaryData.pendingEarnings}
+                    </div>
+                    <div className="text-xs font-bold text-[#a855f7]">Cashback</div>
                   </div>
                 </div>
-                <button className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold py-2 px-3.5 rounded-md text-xs transition-colors flex items-center gap-1 border-none outline-none cursor-pointer shadow-sm">
-                  Withdraw Earnings <ArrowRight size={14} />
-                </button>
-              </div>
-              <div className="text-left text-[10px] text-slate-400 mt-2 px-1">
-                Minimum withdrawal amount is ₹100
+
+                <div className="mt-3.5 bg-amber-50/80 rounded-2xl p-3.5 border border-amber-100/80 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-white shadow-xs flex items-center justify-center text-amber-500 shrink-0">
+                      <Trophy size={16} />
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Available Balance</div>
+                      <div className="text-sm font-black text-slate-800">₹{summaryData.availableBalance.toLocaleString()}</div>
+                    </div>
+                  </div>
+                  <button className="bg-[#f97316] hover:bg-[#ea580c] text-white font-bold py-2 px-3 rounded-xl text-xs transition flex items-center gap-1 border-none outline-none cursor-pointer shadow-xs">
+                    Withdraw <ArrowRight size={14} />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* My Referrals Tracking */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <div id="my-referrals-section" className="order-5 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-slate-800 text-base">My Referrals</h3>
                 <button className="text-indigo-600 text-xs font-bold bg-transparent border-none outline-none cursor-pointer hover:underline">
@@ -416,7 +637,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
             </div>
 
             {/* Referral Rewards Banner */}
-            <div className="bg-[#f5f3ff] rounded-2xl p-5 border border-indigo-50 relative overflow-hidden">
+            <div className="order-8 bg-[#f5f3ff] rounded-2xl p-5 border border-indigo-50 relative overflow-hidden">
               <div className="flex items-center gap-2 mb-3 relative z-10">
                 <Gift size={16} className="text-indigo-600" />
                 <h3 className="font-bold text-indigo-900 text-sm">Referral Rewards</h3>
@@ -449,7 +670,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
             </div>
 
             {/* Referral FAQs Section */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <div className="order-9 bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
               <div className="flex items-center gap-2 mb-4">
                 <MessageCircle size={18} className="text-indigo-600" />
                 <h3 className="font-bold text-slate-800 text-base">Referral FAQs</h3>

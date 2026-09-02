@@ -125,11 +125,11 @@ export default function PersonalizedSuggestionCard({
           First SIP. Big Step. <br /><span className="text-[#be123c]">Bright Future.</span>
         </h3>
       ),
-      description: "Begin your Gold SIP journey with just ₹100. It's quick, easy and rewarding.",
+      description: "Begin your Gold SIP journey with just ₹10. It's quick, easy and rewarding.",
       image: "/suggestion_first_sip.png",
       imgStyle: "w-32 sm:w-36 max-h-[130px]",
       hasTrustBadge: false,
-      btnText: "Start with ₹100",
+      btnText: "Start with ₹10",
       btnClass: "bg-[#f43f5e] hover:bg-[#e11d48] text-white shadow-md shadow-rose-500/20",
       route: "buy-gold"
     },

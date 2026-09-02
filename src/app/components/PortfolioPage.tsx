@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { addTransaction, getTransactions, Transaction } from "../utils/transactionStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
+import BuyMetalModal from "./BuyMetalModal";
+import SellMetalModal from "./SellMetalModal";
 
 interface PortfolioPageProps {
   onNavigate?: (page: string) => void;
@@ -25,23 +27,23 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
   const [goldHoldings, setGoldHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
-      if (saved && parseFloat(saved) > 0) return parseFloat(saved);
+      if (saved !== null && !isNaN(parseFloat(saved))) return parseFloat(saved);
     }
-    return 1.2450;
+    return 0;
   });
 
   const [silverHoldings, setSilverHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
-      if (saved && parseFloat(saved) > 0) return parseFloat(saved);
+      if (saved !== null && !isNaN(parseFloat(saved))) return parseFloat(saved);
     }
-    return 35.5000;
+    return 0;
   });
 
   const [cashBalance, setCashBalance] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(`fip_cash_balance_${loggedInMobile}`);
-      return saved ? parseFloat(saved) : 0;
+      if (saved !== null && !isNaN(parseFloat(saved))) return parseFloat(saved);
     }
     return 0;
   });
@@ -52,25 +54,90 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
     if (loggedInMobile) {
       fetchVaultSummaryApi(loggedInMobile).then((data) => {
         if (data) {
-          setGoldHoldings(data.goldHoldingsGrams > 0 ? data.goldHoldingsGrams : 1.2450);
-          setSilverHoldings(data.silverHoldingsGrams > 0 ? data.silverHoldingsGrams : 35.5000);
-          setCashBalance(data.cashBalance || 0);
+          setGoldHoldings(typeof data.goldHoldingsGrams === 'number' ? data.goldHoldingsGrams : 0);
+          setSilverHoldings(typeof data.silverHoldingsGrams === 'number' ? data.silverHoldingsGrams : 0);
+          setCashBalance(typeof data.cashBalance === 'number' ? data.cashBalance : 0);
         }
       });
       setRecentTxs(getTransactions());
     }
   }, [loggedInMobile]);
 
-  // Sell modal states
+  // Buy & Sell modal states
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
+  const [buyMetal, setBuyMetal] = useState<"gold" | "silver">("gold");
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
   const [sellMetal, setSellMetal] = useState<"gold" | "silver">("gold");
-  const [sellGrams, setSellGrams] = useState("");
-  const [sellAmount, setSellAmount] = useState("");
-  const [sellSuccess, setSellSuccess] = useState(false);
-  const [sellSuccessMsg, setSellSuccessMsg] = useState("");
 
-  const activePrice = sellMetal === "gold" ? goldPrice : silverPrice;
-  const activeHoldings = sellMetal === "gold" ? goldHoldings : silverHoldings;
+  const handleBuyInitiate = (metal: "gold" | "silver") => {
+    setBuyMetal(metal);
+    setIsBuyModalOpen(true);
+  };
+
+  const handleSellInitiate = (metal: "gold" | "silver") => {
+    setSellMetal(metal);
+    setIsSellModalOpen(true);
+  };
+
+  const handleBuySuccess = (amount: number, grams: number) => {
+    const currentGrams = buyMetal === "gold" ? goldHoldings : silverHoldings;
+    const newGrams = currentGrams + grams;
+    const newCash = Math.max(0, cashBalance - amount);
+
+    if (buyMetal === "gold") {
+      setGoldHoldings(newGrams);
+      localStorage.setItem(`fip_gold_holdings_${loggedInMobile}`, newGrams.toString());
+    } else {
+      setSilverHoldings(newGrams);
+      localStorage.setItem(`fip_silver_holdings_${loggedInMobile}`, newGrams.toString());
+    }
+
+    setCashBalance(newCash);
+    localStorage.setItem(`fip_cash_balance_${loggedInMobile}`, newCash.toString());
+
+    addTransaction({
+      type: "Buy",
+      category: buyMetal === "gold" ? "Gold" : "Silver",
+      amount: amount,
+      grams: `${grams.toFixed(4)} g`,
+      status: "Completed",
+      paymentMethod: "UPI / Bank",
+      source: buyMetal === "gold" ? "Gold Vault" : "Silver Vault"
+    });
+
+    setRecentTxs(getTransactions());
+    setIsBuyModalOpen(false);
+  };
+
+  const handleSellSuccess = (amount: number, grams: number) => {
+    const currentGrams = sellMetal === "gold" ? goldHoldings : silverHoldings;
+    const newGrams = Math.max(0, currentGrams - grams);
+    const newCash = cashBalance + amount;
+
+    if (sellMetal === "gold") {
+      setGoldHoldings(newGrams);
+      localStorage.setItem(`fip_gold_holdings_${loggedInMobile}`, newGrams.toString());
+    } else {
+      setSilverHoldings(newGrams);
+      localStorage.setItem(`fip_silver_holdings_${loggedInMobile}`, newGrams.toString());
+    }
+
+    setCashBalance(newCash);
+    localStorage.setItem(`fip_cash_balance_${loggedInMobile}`, newCash.toString());
+
+    addTransaction({
+      type: "Sell",
+      category: sellMetal === "gold" ? "Gold" : "Silver",
+      amount: amount,
+      grams: `${grams.toFixed(4)} g`,
+      status: "Completed",
+      paymentMethod: "Bank Account",
+      source: sellMetal === "gold" ? "Gold Vault" : "Silver Vault"
+    });
+
+    setRecentTxs(getTransactions());
+    setIsSellModalOpen(false);
+  };
 
   // Calculate portfolio values
   const goldValue = goldHoldings * goldPrice;
@@ -92,11 +159,11 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
   useEffect(() => {
     const handleStorageChange = () => {
       const savedGold = localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`);
-      if (savedGold) setGoldHoldings(parseFloat(savedGold));
+      if (savedGold !== null && !isNaN(parseFloat(savedGold))) setGoldHoldings(parseFloat(savedGold));
       const savedSilver = localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`);
-      if (savedSilver) setSilverHoldings(parseFloat(savedSilver));
+      if (savedSilver !== null && !isNaN(parseFloat(savedSilver))) setSilverHoldings(parseFloat(savedSilver));
       const savedCash = localStorage.getItem(`fip_cash_balance_${loggedInMobile}`);
-      if (savedCash) setCashBalance(parseFloat(savedCash));
+      if (savedCash !== null && !isNaN(parseFloat(savedCash))) setCashBalance(parseFloat(savedCash));
       setRecentTxs(getTransactions());
     };
 
@@ -113,71 +180,6 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
   const goldAlloc = totalValue > 0 ? (goldValue / totalValue) * 100 : 0;
   const silverAlloc = totalValue > 0 ? (silverValue / totalValue) * 100 : 0;
   const cashAlloc = totalValue > 0 ? (cashBalance / totalValue) * 100 : 0;
-
-  const handleSellInitiate = (metal: "gold" | "silver") => {
-    setSellMetal(metal);
-    setSellGrams("");
-    setSellAmount("");
-    setSellSuccess(false);
-    setIsSellModalOpen(true);
-  };
-
-  const handleGramsChange = (val: string) => {
-    setSellGrams(val);
-    if (!val || isNaN(Number(val))) {
-      setSellAmount("");
-      return;
-    }
-    const calculatedAmount = Number(val) * activePrice;
-    setSellAmount(Math.round(calculatedAmount).toString());
-  };
-
-  const handleAmountChange = (val: string) => {
-    setSellAmount(val);
-    if (!val || isNaN(Number(val))) {
-      setSellGrams("");
-      return;
-    }
-    const calculatedGrams = Number(val) / activePrice;
-    setSellGrams(calculatedGrams.toFixed(4));
-  };
-
-  const handleConfirmSell = () => {
-    const gramsNum = Number(sellGrams);
-    const amtNum = Number(sellAmount);
-
-    if (gramsNum <= 0 || isNaN(gramsNum)) return;
-    if (gramsNum > activeHoldings) return;
-
-    const newGrams = activeHoldings - gramsNum;
-    const newCash = cashBalance + amtNum;
-
-    if (sellMetal === "gold") {
-      setGoldHoldings(newGrams);
-      localStorage.setItem(`fip_gold_holdings_${loggedInMobile}`, newGrams.toString());
-    } else {
-      setSilverHoldings(newGrams);
-      localStorage.setItem(`fip_silver_holdings_${loggedInMobile}`, newGrams.toString());
-    }
-
-    setCashBalance(newCash);
-    localStorage.setItem(`fip_cash_balance_${loggedInMobile}`, newCash.toString());
-
-    // Add to transaction log
-    addTransaction({
-      type: "Sell",
-      category: sellMetal === "gold" ? "Gold" : "Silver",
-      amount: amtNum,
-      grams: `${gramsNum.toFixed(4)} g`,
-      status: "Completed",
-      paymentMethod: "Bank Account",
-      source: sellMetal === "gold" ? "Gold Vault" : "Silver Vault"
-    });
-
-    setRecentTxs(getTransactions());
-    setSellSuccessMsg(`Successfully sold ${gramsNum.toFixed(4)}g of Digital ${sellMetal === "gold" ? "Gold" : "Silver"} for ₹${amtNum.toLocaleString()}! Funds added to your Cash Balance.`);
-    setSellSuccess(true);
-  };
 
   return (
     <div className="flex-1 h-screen overflow-y-auto bg-[#fcfdfd] pb-24 relative font-sans text-gray-800">
@@ -520,10 +522,10 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
           <div className="mt-8 pb-10">
              <h3 className="text-[14px] font-bold text-gray-900 mb-4">Quick Actions</h3>
              <div className="flex flex-wrap gap-3">
-                <button onClick={() => onNavigate?.("sip")} className="flex items-center justify-center gap-2 bg-amber-50/50 text-amber-600 font-bold text-[12px] py-3.5 px-6 rounded-xl border border-amber-50 cursor-pointer hover:bg-amber-100 transition-colors flex-1 min-w-[140px] outline-none">
+                <button onClick={() => handleBuyInitiate("gold")} className="flex items-center justify-center gap-2 bg-amber-50/50 text-amber-600 font-bold text-[12px] py-3.5 px-6 rounded-xl border border-amber-50 cursor-pointer hover:bg-amber-100 transition-colors flex-1 min-w-[140px] outline-none">
                    <Coins size={14} /> Buy Gold
                 </button>
-                <button onClick={() => onNavigate?.("sip")} className="flex items-center justify-center gap-2 bg-slate-50 text-slate-600 font-bold text-[12px] py-3.5 px-6 rounded-xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors flex-1 min-w-[140px] outline-none">
+                <button onClick={() => handleBuyInitiate("silver")} className="flex items-center justify-center gap-2 bg-slate-50 text-slate-600 font-bold text-[12px] py-3.5 px-6 rounded-xl border border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors flex-1 min-w-[140px] outline-none">
                    <Coins size={14} /> Buy Silver
                 </button>
                 <button onClick={() => handleSellInitiate("gold")} className="flex items-center justify-center gap-2 bg-orange-50/30 text-orange-600 font-bold text-[12px] py-3.5 px-6 rounded-xl border border-orange-50 cursor-pointer hover:bg-orange-50 transition-colors flex-1 min-w-[140px] outline-none">
@@ -725,6 +727,22 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                          </div>
                       </div>
                    </div>
+
+                   {/* Action Buttons for Digital Gold */}
+                   <div className="grid grid-cols-2 gap-3 pt-2">
+                      <button
+                         onClick={() => handleBuyInitiate("gold")}
+                         className="w-full py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none border-none"
+                      >
+                         Buy Gold
+                      </button>
+                      <button
+                         onClick={() => handleSellInitiate("gold")}
+                         className="w-full py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-xs border border-amber-200/80 transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none"
+                      >
+                         <Lock size={14} /> Sell Gold
+                      </button>
+                   </div>
                 </div>
 
                 <div className="w-full h-px bg-gray-100" />
@@ -762,23 +780,22 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                          </div>
                       </div>
                    </div>
-                </div>
 
-                {/* Two Action Buttons Below Holdings (Buy Gold & Buy Silver) */}
-                <div className="pt-4 grid grid-cols-2 gap-3 border-t border-gray-100">
-                   <button
-                      onClick={() => onNavigate && onNavigate("buy-gold")}
-                      className="w-full py-3 px-4 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-sm hover:shadow transition-all flex items-center justify-center cursor-pointer outline-none"
-                   >
-                      Buy Gold
-                   </button>
-
-                   <button
-                      onClick={() => onNavigate && onNavigate("buy-silver")}
-                      className="w-full py-3 px-4 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-sm hover:shadow transition-all flex items-center justify-center cursor-pointer outline-none"
-                   >
-                      Buy Silver
-                   </button>
+                   {/* Action Buttons for Digital Silver */}
+                   <div className="grid grid-cols-2 gap-3 pt-2">
+                      <button
+                         onClick={() => handleBuyInitiate("silver")}
+                         className="w-full py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none border-none"
+                      >
+                         Buy Silver
+                      </button>
+                      <button
+                         onClick={() => handleSellInitiate("silver")}
+                         className="w-full py-2.5 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 font-extrabold text-xs border border-purple-200/80 transition-all flex items-center justify-center gap-1.5 cursor-pointer outline-none"
+                      >
+                         <Lock size={14} /> Sell Silver
+                      </button>
+                   </div>
                 </div>
 
              </div>
@@ -877,129 +894,23 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
 
       </div>
 
-      {/* QUICK SELL MODAL DIALOG */}
-      <AnimatePresence>
-        {isSellModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop Blur */}
-            <motion.div 
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSellModalOpen(false)}
-            />
+      {/* BUY METAL MODAL */}
+      <BuyMetalModal
+        isOpen={isBuyModalOpen}
+        onClose={() => setIsBuyModalOpen(false)}
+        onSuccess={handleBuySuccess}
+        metal={buyMetal}
+        basePrice={buyMetal === "gold" ? goldPrice : silverPrice}
+      />
 
-            {/* Modal Box */}
-            <motion.div 
-              className="bg-white rounded-[2rem] p-6 max-w-md w-full relative z-10 shadow-2xl border border-slate-100 overflow-hidden flex flex-col gap-6"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            >
-              
-              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                  <Coins size={18} className={sellMetal === "gold" ? "text-amber-500" : "text-slate-400"} />
-                  Sell {sellMetal === "gold" ? "Gold" : "Silver"} Instantly
-                </h3>
-                <button 
-                  onClick={() => setIsSellModalOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center border-none text-slate-400 hover:text-slate-600 cursor-pointer outline-none transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              {!sellSuccess ? (
-                <div className="space-y-4">
-                  <div className="bg-[#fdf8f0] p-4 rounded-2xl border border-amber-100/50 flex justify-between items-center text-xs">
-                    <div>
-                      <span className="text-slate-400 font-bold block">Available Balance</span>
-                      <span className="font-extrabold text-slate-800 text-sm">{activeHoldings.toFixed(4)} g</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-slate-400 font-bold block">Live Sell Rate</span>
-                      <span className="font-extrabold text-[#b87312] text-sm">₹{activePrice.toLocaleString()}/g</span>
-                    </div>
-                  </div>
-
-                  {/* Dual Input Form */}
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-1 text-left">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Grams to Sell</label>
-                      <div className="relative">
-                        <input 
-                          type="number"
-                          step="any"
-                          value={sellGrams}
-                          onChange={(e) => handleGramsChange(e.target.value)}
-                          placeholder="0.0000"
-                          max={activeHoldings}
-                          className="w-full bg-[#f8fafc] border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 outline-none focus:border-[#b87312] transition-colors"
-                        />
-                        <button 
-                          onClick={() => handleGramsChange(activeHoldings.toString())}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 border-none outline-none bg-amber-50 hover:bg-amber-100 text-[#b87312] px-2.5 py-1 rounded text-[9px] font-black uppercase cursor-pointer transition-colors"
-                        >
-                          Sell Max
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-1 text-left">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Estimated Amount (INR)</label>
-                      <div className="relative">
-                        <input 
-                          type="number"
-                          value={sellAmount}
-                          onChange={(e) => handleAmountChange(e.target.value)}
-                          placeholder="₹0"
-                          className="w-full bg-[#f8fafc] border border-slate-200/80 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 outline-none focus:border-[#b87312] transition-colors"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="text-[10px] font-semibold text-slate-400 bg-slate-50 border border-slate-100 p-3 rounded-xl leading-normal text-left">
-                    ⚡ Instant Withdrawal Enabled: Upon confirmation, the specified grams will be deducted and proceeds will be credited instantly to your Cash wallet.
-                  </div>
-
-                  <button
-                    disabled={!sellGrams || Number(sellGrams) <= 0 || Number(sellGrams) > activeHoldings}
-                    onClick={handleConfirmSell}
-                    className="w-full bg-gradient-to-r from-amber-600 to-yellow-500 text-white font-extrabold text-xs py-3 rounded-xl border-none outline-none shadow-md cursor-pointer transition-all active:scale-98 disabled:opacity-50 disabled:pointer-events-none mt-2"
-                  >
-                    Confirm Sell Order
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 text-center gap-4">
-                  <div className="w-14 h-14 bg-emerald-50 text-emerald-500 border border-emerald-100 rounded-full flex items-center justify-center shadow-sm">
-                    <ShieldCheck size={28} />
-                  </div>
-                  <div className="space-y-1 px-4">
-                    <h4 className="text-sm font-black text-slate-900">Withdrawal Successful</h4>
-                    <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                      {sellSuccessMsg}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setIsSellModalOpen(false);
-                      setSellSuccess(false);
-                    }}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3 rounded-xl border-none outline-none cursor-pointer mt-4"
-                  >
-                    Back to Portfolio
-                  </button>
-                </div>
-              )}
-
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* SELL METAL MODAL */}
+      <SellMetalModal
+        isOpen={isSellModalOpen}
+        onClose={() => setIsSellModalOpen(false)}
+        onSuccess={handleSellSuccess}
+        metal={sellMetal}
+        basePrice={sellMetal === "gold" ? goldPrice : silverPrice}
+      />
 
     </div>
   );

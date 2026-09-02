@@ -10,7 +10,7 @@ import {
   Smartphone, MonitorPlay, GraduationCap, Gift, Play, Flame, Tv, Wifi, Droplets, Car, FileText, Home, AlertCircle,
   Search, Bell, ChevronDown, Check, Building, RefreshCw, Grid, Award, Download, Clock, X, CheckCheck, Coins, Menu,
   Sun, AlertTriangle, Calculator, PiggyBank, Target, MoreHorizontal, UserPlus, Users, Share2, Handshake,
-  Calendar, Sparkles
+  Calendar, Sparkles, Mail
 } from "lucide-react";
 import { Sidebar, MobileNav, MobileDrawerNav, Tab } from "./Navigation";
 import cardBgGold from "../../assets/card_bg_gold.jpg";
@@ -622,8 +622,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               {/* Card 1 (Default First Card): Daily, Weekly or Monthly Savings Card */}
               <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
                 {/* Top Row: Title Text & Right 3D Asset */}
-                <div className="flex items-start justify-between relative z-10">
-                  <div className="space-y-0.5 max-w-[65%]">
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="space-y-0.5 max-w-[65%] mt-3 sm:mt-4">
                     <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
                       Start your{" "}
                       <span className="text-purple-600 font-black">Daily, Weekly</span>{" "}
@@ -702,8 +702,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               {/* Card 2 (Swiped Right): Become DGA Agent / Agent Dashboard Card */}
               <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
                 {/* Top Section: Left Info & Right 3D Asset */}
-                <div className="flex items-start justify-between relative z-10">
-                  <div className="space-y-1.5 max-w-[64%]">
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="space-y-1.5 max-w-[64%] mt-2.5 sm:mt-3">
                     {/* Verified Partner / Earn Commission Badge */}
                     <div>
                       <span className="bg-amber-100/90 text-amber-800 border border-amber-300/80 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase inline-flex items-center gap-1 shadow-2xs">
@@ -795,8 +795,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               {/* Card 3 (Swiped Right): Refer & Earn Card */}
               <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
                 {/* Top Section: Left Info & Right 3D Asset */}
-                <div className="flex items-start justify-between relative z-10">
-                  <div className="space-y-1.5 max-w-[62%]">
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="space-y-1.5 max-w-[62%] mt-2 sm:mt-2.5">
                     {/* User Plus Top Icon Badge */}
                     <div className="w-8 h-8 rounded-xl bg-purple-100/90 border border-purple-200/80 text-purple-600 flex items-center justify-center shadow-2xs">
                       <UserPlus size={16} strokeWidth={2.5} />
@@ -1063,6 +1063,50 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             </div>
           </div>
 
+          {/* First SIP Banner Card (Placed Below Live Price on Mobile Screens) */}
+          <div className="bg-[#fff1f2] border border-rose-100/90 rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
+            {/* Top Header Row */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-[#e11d48] tracking-tight">
+                A message for you
+              </span>
+              <div className="w-8 h-8 rounded-full bg-[#f43f5e] text-white flex items-center justify-center shadow-xs">
+                <Mail size={16} />
+              </div>
+            </div>
+
+            {/* Middle Grid Row: Text Left, Piggy Bank Asset Right */}
+            <div className="grid grid-cols-12 gap-2 items-center">
+              <div className="col-span-7 space-y-1.5 z-10 pr-1">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">
+                  First SIP. Big Step. <br />
+                  <span className="text-[#be123c]">Bright Future.</span>
+                </h3>
+                <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                  Begin your Gold SIP journey with just ₹10. It's quick, easy and rewarding.
+                </p>
+              </div>
+              <div className="col-span-5 flex items-center justify-end z-0">
+                <img
+                  src="/suggestion_first_sip.png"
+                  alt="First SIP Piggy Bank"
+                  className="w-28 sm:w-32 max-h-[125px] object-contain drop-shadow-md pointer-events-none transform hover:scale-105 transition-transform"
+                />
+              </div>
+            </div>
+
+            {/* Bottom Primary Button */}
+            <div className="pt-1">
+              <button
+                onClick={() => setTab("sip")}
+                className="w-full py-3 px-5 rounded-2xl font-black text-xs sm:text-sm bg-[#f43f5e] hover:bg-[#e11d48] text-white shadow-md shadow-rose-500/20 flex items-center justify-center gap-1 transition-all cursor-pointer border-none outline-none active:scale-[0.98]"
+              >
+                <span>Start with ₹10</span>
+                <ChevronRight size={16} strokeWidth={3} />
+              </button>
+            </div>
+          </div>
+
           {/* Gold Saving Plans Section (Mobile Light Theme) */}
           <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-gray-200/90 shadow-md shadow-gray-900/5 space-y-3.5">
             {/* Header Title */}
@@ -1277,6 +1321,38 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               <span>Start Referring Now</span>
               <ChevronRight size={16} strokeWidth={3} />
             </button>
+          </div>
+
+          {/* Trust & Security Row (100% Secure, Easy to Use, 24/7 Support) */}
+          <div className="pt-4 pb-6 px-1">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {/* Item 1: 100% Secure */}
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100/70 text-purple-600 flex items-center justify-center mb-1.5 shadow-2xs border border-purple-200/50">
+                  <Shield size={20} strokeWidth={2.2} />
+                </div>
+                <span className="text-[11px] font-black text-slate-900 leading-tight">100% Secure</span>
+                <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">Bank-level Security</span>
+              </div>
+
+              {/* Item 2: Easy to Use */}
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100/70 text-purple-600 flex items-center justify-center mb-1.5 shadow-2xs border border-purple-200/50">
+                  <CheckCircle2 size={20} strokeWidth={2.2} />
+                </div>
+                <span className="text-[11px] font-black text-slate-900 leading-tight">Easy to Use</span>
+                <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">Simple & Intuitive</span>
+              </div>
+
+              {/* Item 3: 24/7 Support */}
+              <div className="flex flex-col items-center">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100/70 text-purple-600 flex items-center justify-center mb-1.5 shadow-2xs border border-purple-200/50">
+                  <Clock size={20} strokeWidth={2.2} />
+                </div>
+                <span className="text-[11px] font-black text-slate-900 leading-tight">24/7 Support</span>
+                <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">We're here for you</span>
+              </div>
+            </div>
           </div>
 
         </div>

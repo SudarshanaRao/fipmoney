@@ -26,7 +26,10 @@ import {
   BadgePercent,
   Building2,
   AlertTriangle,
-  XCircle
+  XCircle,
+  ArrowLeft,
+  HelpCircle,
+  Scale
 } from "lucide-react";
 import {
   AreaChart,
@@ -94,6 +97,7 @@ export default function BuyMetalModal({
   const [buyMode, setBuyMode] = useState<"amount" | "grams">("amount");
   const [amountInput, setAmountInput] = useState<string>("");
   const [gramsInput, setGramsInput] = useState<string>("");
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState<boolean>(true);
 
   // Timeframe
   const [timeframe, setTimeframe] = useState<Timeframe>("24H");
@@ -140,9 +144,11 @@ export default function BuyMetalModal({
     setBuyMode(mode);
   };
 
-  // Strictly initialize mode & amount based on initialMode and initial props
+  const prevIsOpenRef = React.useRef(false);
+
+  // Strictly initialize mode & amount only on modal open transition
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !prevIsOpenRef.current) {
       setLockedRate(basePrice);
       setLiveMarketRate(basePrice);
       setTimeLeft(300);
@@ -168,6 +174,7 @@ export default function BuyMetalModal({
         if (initialAmount) setAmountInput(initialAmount);
       }
     }
+    prevIsOpenRef.current = isOpen;
   }, [isOpen, basePrice, initialAmount, initialGrams, initialMode]);
 
   // Live market price ticks
@@ -226,20 +233,20 @@ export default function BuyMetalModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto lg:overflow-hidden"
+        className="fixed inset-0 z-[100] bg-white lg:bg-slate-950/60 lg:backdrop-blur-sm flex flex-col lg:items-center lg:justify-center p-0 lg:p-5 overflow-y-auto lg:overflow-hidden w-full h-full min-h-screen"
       >
         <motion.div
-          initial={{ scale: 0.96, y: 8 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.96, y: 8 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="bg-white rounded-[24px] md:rounded-[32px] w-full max-w-[1160px] max-h-[96vh] lg:max-h-[90vh] overflow-y-auto lg:overflow-hidden shadow-2xl relative border border-slate-100 p-5 sm:p-6 lg:p-7 text-slate-800 font-sans hide-scrollbar flex flex-col justify-between"
+          className="bg-white w-full min-h-screen lg:min-h-0 lg:rounded-[32px] lg:max-w-[1160px] lg:max-h-[90vh] overflow-y-auto lg:overflow-hidden lg:shadow-2xl relative border-none lg:border lg:border-slate-100 p-4 sm:p-5 lg:p-7 text-slate-800 font-sans hide-scrollbar flex flex-col justify-between"
         >
 
-          {/* Close Button Top-Right */}
+          {/* Close Button Top-Right for Desktop */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 z-30 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full p-2 transition-colors cursor-pointer border-none outline-none"
+            className="hidden lg:block absolute top-5 right-5 z-30 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full p-2 transition-colors cursor-pointer border-none outline-none"
           >
             <X size={18} />
           </button>
@@ -265,6 +272,264 @@ export default function BuyMetalModal({
               </button>
             </div>
           )}
+
+          {/* ======================================================== */}
+          {/* MOBILE VIEW ONLY (< lg screens) Matching Image Layout    */}
+          {/* ======================================================== */}
+          <div className="lg:hidden flex flex-col space-y-4 w-full max-w-md mx-auto text-slate-800 font-sans p-1">
+            
+            {/* Top Bar Header */}
+            <div className="relative flex items-center justify-between pb-3 border-b border-slate-100">
+              <button
+                onClick={onClose}
+                className="w-9 h-9 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-700 flex items-center justify-center border-none outline-none cursor-pointer z-10"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <h2 className="text-lg font-bold text-[#0f172a] tracking-tight absolute inset-x-0 text-center pointer-events-none">
+                Buy {metalName}
+              </h2>
+              <button className="w-8 h-8 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center bg-white outline-none cursor-pointer z-10">
+                <HelpCircle size={16} />
+              </button>
+            </div>
+
+            {/* 1. Live Gold Price Card */}
+            <div className="bg-gradient-to-br from-[#fffdf5] via-[#fffef7] to-[#fffbeb] rounded-3xl p-4 border border-amber-200/80 shadow-2xs flex items-center justify-between relative overflow-hidden">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-[#fef3c7] text-[#d97706] flex items-center justify-center shrink-0">
+                    <TrendingUp size={18} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-slate-900 text-sm leading-tight">Live {metalName} Price</h3>
+                    <p className="text-[11px] font-semibold text-slate-400">{metalPurity}</p>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-1 pt-1.5">
+                  <span className="text-2xl font-black text-slate-900 tracking-tight">
+                    ₹{lockedRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-400">/gm</span>
+                  <span className="bg-[#dcfce7] text-[#15803d] text-xs font-extrabold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 ml-2.5">
+                    ▲ 1.25%
+                  </span>
+                </div>
+              </div>
+              <img src="/gold.png" alt="Gold Bars" className="w-20 h-auto object-contain shrink-0" />
+            </div>
+
+            {/* 2. Price Locked Card */}
+            <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#eff6ff] text-[#1d4ed8] flex items-center justify-center shrink-0">
+                  <Lock size={18} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm leading-tight">Price Locked</h4>
+                  <p className="text-xs text-slate-400 mt-0.5">Buy now and lock this price</p>
+                </div>
+              </div>
+
+              {/* Dark Blue Dashed Ring Gauge */}
+              <div className="w-12 h-12 rounded-full border-2 border-dashed border-[#2563eb] flex flex-col items-center justify-center text-center shrink-0">
+                <span className="text-xs font-black text-[#1d4ed8] leading-none">{formatTimer(timeLeft)}</span>
+                <span className="text-[8px] font-bold text-slate-400 leading-tight mt-0.5">mins left</span>
+              </div>
+            </div>
+
+            {/* 3. Buy in Rupees / Buy in Grams Switcher */}
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                onClick={() => handleSwitchMode("amount")}
+                className={`rounded-2xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${
+                  buyMode === "amount"
+                    ? "bg-[#eff6ff] border border-[#bfdbfe]"
+                    : "bg-[#fafafa] border border-slate-100"
+                }`}
+              >
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
+                  buyMode === "amount" ? "bg-[#1d4ed8] text-white" : "bg-slate-200 text-slate-600"
+                }`}>
+                  ₹
+                </div>
+                <div>
+                  <span className={`text-xs font-bold block ${buyMode === "amount" ? "text-[#1d4ed8]" : "text-slate-800"}`}>
+                    Buy in Rupees
+                  </span>
+                  <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">Invest any amount</span>
+                </div>
+              </div>
+
+              <div
+                onClick={() => handleSwitchMode("grams")}
+                className={`rounded-2xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${
+                  buyMode === "grams"
+                    ? "bg-[#eff6ff] border border-[#bfdbfe]"
+                    : "bg-[#fafafa] border border-slate-100"
+                }`}
+              >
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
+                  buyMode === "grams" ? "bg-[#1d4ed8] text-white" : "bg-slate-200 text-slate-600"
+                }`}>
+                  <Scale size={16} />
+                </div>
+                <div>
+                  <span className={`text-xs font-bold block ${buyMode === "grams" ? "text-[#1d4ed8]" : "text-slate-800"}`}>
+                    Buy in Grams
+                  </span>
+                  <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">Buy specific quantity</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Enter Amount Input Section */}
+            <div>
+              <label className="text-xs font-bold text-slate-800 block mb-2">Enter Amount</label>
+              <div className="bg-white border-2 border-blue-200 focus-within:border-[#1d4ed8] rounded-2xl p-3 flex items-center justify-between shadow-2xs">
+                <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-800 font-bold text-lg flex items-center justify-center mr-3 shrink-0">
+                  {buyMode === "amount" ? "₹" : "g"}
+                </div>
+                <input
+                  type="number"
+                  placeholder={buyMode === "amount" ? "1000" : "0.15"}
+                  value={buyMode === "amount" ? amountInput : gramsInput}
+                  onChange={(e) => {
+                    if (buyMode === "amount") setAmountInput(e.target.value);
+                    else setGramsInput(e.target.value);
+                  }}
+                  className="w-full text-2xl font-black text-slate-900 border-none outline-none bg-transparent placeholder:text-slate-300"
+                />
+                {(buyMode === "amount" ? amountInput : gramsInput) && (
+                  <button
+                    onClick={() => { setAmountInput(""); setGramsInput(""); }}
+                    className="w-6 h-6 rounded-full bg-slate-200/80 text-slate-400 hover:text-slate-600 flex items-center justify-center text-xs font-bold border-none outline-none cursor-pointer shrink-0 ml-2"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {/* 4 Quick Preset Amount Pills */}
+              <div className="grid grid-cols-4 gap-2.5 mt-3">
+                {[500, 1000, 2000, 5000].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => handleAddPreset(val)}
+                    className="py-2.5 px-1 rounded-2xl bg-white border border-slate-200/90 text-[#1d4ed8] text-xs font-extrabold text-center hover:bg-blue-50 transition cursor-pointer border-none outline-none shadow-2xs"
+                  >
+                    + ₹{val.toLocaleString()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 5. You Will Get & GST Summary Card */}
+            <div className="bg-[#fafafa] rounded-2xl p-4 border border-slate-100/90 flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                  <span className="text-amber-500">🪙</span> You will get (approx.)
+                </div>
+                <div className="text-xl font-black text-slate-900 mt-1">
+                  {calculatedGrams.toFixed(4)} gm
+                </div>
+              </div>
+              <div className="w-px h-8 bg-slate-200/80 mx-2"></div>
+              <div className="flex-1">
+                <div className="flex items-center gap-1 text-[11px] text-slate-400 font-medium">
+                  Including 3% GST <Info size={12} className="text-slate-400" />
+                </div>
+                <div className="text-xl font-black text-slate-900 mt-1">
+                  ₹{gstAmount.toFixed(2)}
+                </div>
+              </div>
+            </div>
+
+            {/* 6. Price Breakdown Accordion */}
+            <div
+              onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
+              className="bg-[#fafafa] rounded-2xl p-4 border border-slate-100/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#eff6ff] text-[#1d4ed8] flex items-center justify-center shrink-0">
+                  <Layers size={18} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-xs">Price Breakdown</h4>
+                  <p className="text-[10px] text-slate-400 mt-0.5">See calculation details</p>
+                </div>
+              </div>
+              <ChevronDown size={16} className={`text-slate-400 transition-transform ${isBreakdownOpen ? 'rotate-180' : ''}`} />
+            </div>
+
+            {/* Expanded Price Breakdown Details if open */}
+            {isBreakdownOpen && (
+              <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-100">
+                <div className="flex justify-between text-slate-600">
+                  <span>Base Amount</span>
+                  <span className="font-bold">₹{calculatedAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>GST (3%)</span>
+                  <span className="font-bold">₹{gstAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1.5">
+                  <span>Total Amount</span>
+                  <span>₹{totalPayable.toFixed(2)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* 7. Total Payable & Buy Gold CTA Button */}
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <div>
+                <span className="text-[11px] font-bold text-slate-400 block">Total Payable</span>
+                <span className="text-2xl font-black text-[#1d4ed8] block">
+                  ₹{totalPayable.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className="text-[9px] text-slate-400 block mt-0.5">
+                  (Incl. 3% GST ₹{gstAmount.toFixed(2)})
+                </span>
+              </div>
+              <button
+                disabled={calculatedAmount <= 0}
+                onClick={handleProcessPayment}
+                className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 cursor-pointer border-none outline-none transition-all flex-1 max-w-[190px] ${
+                  calculatedAmount <= 0
+                    ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
+                    : "bg-[#1d4ed8] hover:bg-[#1e40af] text-white shadow-lg shadow-blue-600/30"
+                }`}
+              >
+                <span>Buy {metalName}</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+
+            {/* 8. Trust Badges Footer */}
+            <div className="bg-[#fafafa] rounded-2xl p-4 border border-slate-100/90 grid grid-cols-3 gap-1 text-center">
+              <div className="flex flex-col items-center">
+                <Shield size={16} className="text-[#1d4ed8] mb-0.5" />
+                <span className="text-[10px] font-bold text-[#1d4ed8] leading-tight mt-1">100%</span>
+                <span className="text-[9px] text-slate-400 leading-tight">Insured Gold</span>
+              </div>
+              <div className="flex flex-col items-center border-x border-slate-200/80">
+                <Lock size={16} className="text-[#1d4ed8] mb-0.5" />
+                <span className="text-[10px] font-bold text-[#1d4ed8] leading-tight mt-1">Secure</span>
+                <span className="text-[9px] text-slate-400 leading-tight">Vault Storage</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <Award size={16} className="text-[#1d4ed8] mb-0.5" />
+                <span className="text-[10px] font-bold text-[#1d4ed8] leading-tight mt-1">99.99%</span>
+                <span className="text-[9px] text-slate-400 leading-tight">Pure Gold</span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ======================================================== */}
+          {/* DESKTOP VIEW ONLY (lg:flex)                               */}
+          {/* ======================================================== */}
+          <div className="hidden lg:flex flex-col justify-between h-full space-y-4">
 
           {/* Top Modal Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 shrink-0 pr-12 sm:pr-10">
@@ -631,6 +896,7 @@ export default function BuyMetalModal({
 
             </div>
 
+          </div>
           </div>
 
         </motion.div>
