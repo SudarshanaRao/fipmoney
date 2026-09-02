@@ -67,7 +67,7 @@ const savingsPlans = [
     suggestedBoxBg: "bg-[#F0F3FF] border-[#E0E7FF]",
     amountColor: "text-[#1e1b4b]",
     projected: "₹52,000/yr",
-    image: "/dga_gold_asset.png",
+    image: "/weekly_saving.png",
     subIcon: TrendingUp,
     subIconBg: "bg-indigo-100/70 text-[#1e1b4b]",
     subTextTitle: "Stay Consistent",

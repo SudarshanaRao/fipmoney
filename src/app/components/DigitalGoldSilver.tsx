@@ -49,11 +49,67 @@ const DELIVERY_PRODUCTS = [
   { id: "s50", metal: "silver", name: "99.9 Silver Bar", weight: 50, reqHoldings: 50.0, image: "🥈", purity: "999 Purity" },
 ];
 
+const SECURITY_SLIDES = [
+  {
+    id: 1,
+    title1: "100% Insured &",
+    title2: "Protected",
+    title2Color: "text-[#7c3aed]",
+    subtitle: "Your gold is securely stored in Brink’s vaults and 100% insured, giving you complete peace of mind.",
+    logo: "/brinks-logo.svg",
+    badgeIcon: ShieldCheck,
+    badgeBg: "bg-[#ece4ff] text-[#7c3aed]",
+    bgColor: "from-[#faf8ff] via-[#f3eeff] to-[#e9e2ff]",
+    borderColor: "border-[#e2d5ff]",
+    dotActive: "bg-[#7c3aed]",
+    graphic: "/vault.png",
+    logoStyle: "h-6 sm:h-7.5 w-auto object-contain",
+  },
+  {
+    id: 2,
+    title1: "24/7",
+    title1Color: "text-[#e11d48]",
+    title2: "Monitored & Protected",
+    subtitle: "Your gold is independently monitored by Vistra 24/7 for an additional layer of protection.",
+    logo: "/vistra-logo.svg",
+    badgeIcon: ShieldCheck,
+    badgeBg: "bg-[#ffe4eb] text-[#e11d48]",
+    bgColor: "from-[#fff5f7] via-[#ffeef2] to-[#ffdbe3]",
+    borderColor: "border-[#fecdd3]",
+    dotActive: "bg-[#e11d48]",
+    graphic: "/security.png",
+    logoStyle: "h-5 sm:h-6 w-auto object-contain",
+  },
+  {
+    id: 3,
+    title1: "Trusted Gold",
+    title2: "Partner",
+    title2Color: "text-[#d97706]",
+    subtitle: "Your digital gold is securely managed with SafeGold, our trusted gold partner.",
+    logo: "https://iide-media.blr1.cdn.digitaloceanspaces.com/production/safe-gold-logo-1-301d467fcce35fb9ac026f7b6f8ccdc6.png",
+    badgeIcon: Coins,
+    badgeBg: "bg-[#fef3c7] text-[#d97706]",
+    bgColor: "from-[#fffdf5] via-[#fef9e7] to-[#fef0c7]",
+    borderColor: "border-[#fde68a]",
+    dotActive: "bg-[#d97706]",
+    graphic: "/gold.png",
+    logoStyle: "h-7.5 sm:h-9 w-auto object-contain",
+  },
+];
+
 export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGoldSilverProps) {
   const { showAlert, ModalComponent } = useFipModal();
   const [metal, setMetal] = useState<"gold" | "silver">("gold");
   const [txType, setTxType] = useState<"buy" | "sell">("buy");
   const [timeframe, setTimeframe] = useState<TimeFrame>("1D");
+  const [activeBannerIndex, setActiveBannerIndex] = useState<number>(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveBannerIndex((prev) => (prev + 1) % SECURITY_SLIDES.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
 
   // Dynamic inputs
   const [amount, setAmount] = useState<string>("");
@@ -341,44 +397,305 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
     <div className="flex-1 h-screen overflow-y-auto bg-[#f8f9fa] text-gray-900 font-sans">
       <div className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6 pb-28">
 
-        {/* Dynamic KYC Warning Banner - Kept from original */}
-        {isKycPending ? (
-          <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                <AlertCircle size={24} className="animate-pulse" />
-              </div>
-              <div>
-                <p className="text-base font-extrabold text-amber-900">KYC Verification Recommended</p>
-                <p className="text-xs text-amber-700/80 mt-1 leading-relaxed">
-                  You can start investing up to ₹10,000 without KYC. Link your Aadhaar and PAN under profile configurations to unlock full limits and physical deliveries.
-                </p>
-              </div>
-            </div>
-            <button onClick={() => onNavigate("settings")} className="shrink-0 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all outline-none border-none cursor-pointer">
-              Complete KYC
-            </button>
-          </div>
-        ) : isMinKyc ? (
-          <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                <AlertCircle size={24} />
-              </div>
-              <div>
-                <p className="text-base font-extrabold text-amber-900">Minimum KYC Active</p>
-                <p className="text-xs text-amber-700/80 mt-1 leading-relaxed">
-                  You are restricted to ₹10,000 daily purchase limit. Complete Video KYC to unlock full limits and physical delivery.
-                </p>
-              </div>
-            </div>
-            <button onClick={() => onNavigate("settings")} className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-md transition-all outline-none border-none cursor-pointer">
-              Upgrade Limits
-            </button>
-          </div>
-        ) : null}
+        {/* ========================================================================= */}
+        {/* MOBILE VIEW (DEDICATED RESPONSIVE INVEST PAGE - MATCHES USER DESIGN) */}
+        {/* ========================================================================= */}
+        <div className="block md:hidden space-y-5 pb-24">
 
-        {/* Header Section */}
+          {/* 1. Top Security Banner Carousel Card */}
+          <div className="relative overflow-hidden rounded-[28px] min-h-[220px] shadow-sm">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeBannerIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className={`bg-gradient-to-br ${SECURITY_SLIDES[activeBannerIndex].bgColor} border ${SECURITY_SLIDES[activeBannerIndex].borderColor} rounded-[28px] p-6 shadow-sm relative overflow-hidden flex items-stretch justify-between min-h-[220px] w-full`}
+              >
+                {/* Background Decorative Sparkle */}
+                <Sparkles size={18} className="absolute top-4 right-4 text-purple-400/50 pointer-events-none" />
+
+                {/* Left Content Area */}
+                <div className="z-10 flex-1 pr-2 flex flex-col justify-between max-w-[210px] sm:max-w-[250px]">
+                  <div className="space-y-2.5">
+                    {/* Badge Icon & Title */}
+                    <div className="flex items-center gap-3">
+                      <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-xs ${SECURITY_SLIDES[activeBannerIndex].badgeBg}`}>
+                        {(() => {
+                          const IconComponent = SECURITY_SLIDES[activeBannerIndex].badgeIcon;
+                          return <IconComponent size={21} strokeWidth={2.5} />;
+                        })()}
+                      </div>
+                      <div className="leading-tight">
+                        <span className={`text-[17px] sm:text-lg font-black block text-gray-900 ${SECURITY_SLIDES[activeBannerIndex].title1Color || ""}`}>
+                          {SECURITY_SLIDES[activeBannerIndex].title1}
+                        </span>
+                        <span className={`text-[17px] sm:text-lg font-black block text-gray-900 ${SECURITY_SLIDES[activeBannerIndex].title2Color || ""}`}>
+                          {SECURITY_SLIDES[activeBannerIndex].title2}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Subtitle */}
+                    <p className="text-[12.5px] font-medium text-slate-600 leading-relaxed pt-0.5 max-w-[200px] sm:max-w-[230px]">
+                      {SECURITY_SLIDES[activeBannerIndex].subtitle}
+                    </p>
+                  </div>
+
+                  {/* Carousel Indicators */}
+                  <div className="flex items-center gap-2 pt-4">
+                    {SECURITY_SLIDES.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveBannerIndex(idx);
+                        }}
+                        className={`transition-all border-none outline-none cursor-pointer p-0 ${
+                          activeBannerIndex === idx
+                            ? `w-2.5 h-2.5 rounded-full ${SECURITY_SLIDES[activeBannerIndex].dotActive}`
+                            : "w-2.5 h-2.5 rounded-full bg-gray-300/80 hover:bg-gray-400"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {/* Right Graphic & Floating White Logo Pill */}
+                <div className="relative w-40 sm:w-48 flex items-center justify-end shrink-0 pointer-events-none">
+                  {/* 3D Asset Illustration */}
+                  <img 
+                    src={SECURITY_SLIDES[activeBannerIndex].graphic} 
+                    alt="Security Asset"
+                    className="w-36 sm:w-44 h-auto object-contain drop-shadow-md shrink-0 -mt-2 -mr-1 scale-105"
+                  />
+
+                  {/* Floating White Partner Logo Pill */}
+                  <div className="absolute bottom-1 right-0 bg-white/95 backdrop-blur-md rounded-xl px-2.5 py-1 shadow-xs border border-white/90 flex items-center justify-center z-20 max-w-[115px]">
+                    <img 
+                      src={SECURITY_SLIDES[activeBannerIndex].logo} 
+                      alt="Partner Logo"
+                      className={SECURITY_SLIDES[activeBannerIndex].logoStyle || "h-5 sm:h-6 w-auto object-contain"}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* 3. Section Title */}
+          <div className="pt-1">
+            <h2 className="text-base font-black text-gray-900 tracking-tight">Choose your investment</h2>
+          </div>
+
+          {/* 4. Investment Cards List */}
+          <div className="space-y-4">
+
+            {/* Card 1: Digital Gold */}
+            <div 
+              onClick={() => { setMetal("gold"); setTxType("buy"); setShowBuyModal(true); }}
+              className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-md shadow-gray-900/5 hover:shadow-lg flex flex-col justify-between h-[210px] relative overflow-hidden cursor-pointer transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-18 h-18 rounded-full bg-amber-100/70 flex items-center justify-center shrink-0 border border-amber-200/50 shadow-xs">
+                    <img src="/gold-bars.png" alt="Digital Gold" className="w-13.5 h-auto object-contain drop-shadow-xs" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900 tracking-tight">Digital Gold</h3>
+                    <p className="text-[12.5px] font-medium text-gray-600 mt-0.5 leading-snug max-w-[210px]">
+                      Invest in 24K pure digital gold starting as low as ₹10
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={20} className="text-amber-500 shrink-0 mt-1" />
+              </div>
+
+              {/* Feature Badges */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">24K Pure Gold</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
+                    <Coins size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Low Entry Amount</span>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMetal("gold"); setTxType("buy"); setShowBuyModal(true);
+                }}
+                className="w-full py-2.5 rounded-xl bg-[#fff7d6] hover:bg-[#ffefb8] border border-amber-200/80 text-amber-900 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
+              >
+                <span>Invest in Gold</span>
+                <ArrowRight size={14} strokeWidth={3} className="text-amber-700" />
+              </button>
+            </div>
+
+            {/* Card 2: Digital Silver */}
+            <div 
+              onClick={() => { setMetal("silver"); setTxType("buy"); setShowBuyModal(true); }}
+              className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-md shadow-gray-900/5 hover:shadow-lg flex flex-col justify-between h-[210px] relative overflow-hidden cursor-pointer transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-18 h-18 rounded-full bg-indigo-100/70 flex items-center justify-center shrink-0 border border-indigo-200/50 shadow-xs">
+                    <img src="/silver.png" alt="Digital Silver" className="w-13.5 h-auto object-contain drop-shadow-xs" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900 tracking-tight">Digital Silver</h3>
+                    <p className="text-[12.5px] font-medium text-gray-600 mt-0.5 leading-snug max-w-[210px]">
+                      Invest in 99.9% pure digital silver starting as low as ₹10
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={20} className="text-purple-600 shrink-0 mt-1" />
+              </div>
+
+              {/* Feature Badges */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                    <ShieldCheck size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">99.9% Pure Silver</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                    <Coins size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Low Entry Amount</span>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMetal("silver"); setTxType("buy"); setShowBuyModal(true);
+                }}
+                className="w-full py-2.5 rounded-xl bg-[#f0effe] hover:bg-[#e4e2fe] border border-purple-200/80 text-purple-900 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
+              >
+                <span>Invest in Silver</span>
+                <ArrowRight size={14} strokeWidth={3} className="text-purple-700" />
+              </button>
+            </div>
+
+            {/* Card 3: Digital Gold SIP */}
+            <div 
+              onClick={() => onNavigate("savings")}
+              className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-md shadow-gray-900/5 hover:shadow-lg flex flex-col justify-between h-[210px] relative overflow-hidden cursor-pointer transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-18 h-18 rounded-full bg-amber-100/70 flex items-center justify-center shrink-0 border border-amber-200/50 shadow-xs">
+                    <img src="/daily_savings.png" alt="Digital Gold SIP" className="w-13.5 h-auto object-contain drop-shadow-xs" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900 tracking-tight">Digital Gold SIP</h3>
+                    <p className="text-[12.5px] font-medium text-gray-600 mt-0.5 leading-snug max-w-[210px]">
+                      Invest regularly in gold and build wealth over time
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={20} className="text-amber-500 shrink-0 mt-1" />
+              </div>
+
+              {/* Feature Badges */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
+                    <Clock size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Flexible Plans</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
+                    <Coins size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Small, Regular Investments</span>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigate("savings");
+                }}
+                className="w-full py-2.5 rounded-xl bg-[#fff7d6] hover:bg-[#ffefb8] border border-amber-200/80 text-amber-900 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
+              >
+                <span>Start Gold SIP</span>
+                <ArrowRight size={14} strokeWidth={3} className="text-amber-700" />
+              </button>
+            </div>
+
+            {/* Card 4: Digital Silver SIP */}
+            <div 
+              onClick={() => onNavigate("savings")}
+              className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-md shadow-gray-900/5 hover:shadow-lg flex flex-col justify-between h-[210px] relative overflow-hidden cursor-pointer transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-18 h-18 rounded-full bg-indigo-100/70 flex items-center justify-center shrink-0 border border-indigo-200/50 shadow-xs">
+                    <img src="/silver_sip_calendar_3d.png" alt="Digital Silver SIP" className="w-13.5 h-auto object-contain drop-shadow-xs" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900 tracking-tight">Digital Silver SIP</h3>
+                    <p className="text-[12.5px] font-medium text-gray-600 mt-0.5 leading-snug max-w-[210px]">
+                      Invest regularly in silver and build wealth over time
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight size={20} className="text-purple-600 shrink-0 mt-1" />
+              </div>
+
+              {/* Feature Badges */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                    <Clock size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Flexible Plans</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                    <Coins size={12} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Small, Regular Investments</span>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigate("savings");
+                }}
+                className="w-full py-2.5 rounded-xl bg-[#f0effe] hover:bg-[#e4e2fe] border border-purple-200/80 text-purple-900 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
+              >
+                <span>Start Silver SIP</span>
+                <ArrowRight size={14} strokeWidth={3} className="text-purple-700" />
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* ========================================================================= */}
+        {/* DESKTOP / LAPTOP VIEW (UNTOUCHED AND INTACT) */}
+        {/* ========================================================================= */}
+        <div className="hidden md:block space-y-6">
+          {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-[28px] font-black tracking-tight text-[#111827]">Digital Gold & Silver Assets</h1>
@@ -905,6 +1222,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                <div className="text-[9px] font-medium text-gray-500 leading-tight">We're here for you</div>
              </div>
           </div>
+         </div>
         </div>
 
       </div>

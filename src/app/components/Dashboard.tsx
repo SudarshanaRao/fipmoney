@@ -1,7 +1,7 @@
 "use client";
 // Notification drawer updated
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../utils/apiConfig";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,7 +9,8 @@ import {
   Shield, ShieldCheck, CheckCircle2, TrendingUp, ArrowUpRight, ArrowDownRight, User,
   Smartphone, MonitorPlay, GraduationCap, Gift, Play, Flame, Tv, Wifi, Droplets, Car, FileText, Home, AlertCircle,
   Search, Bell, ChevronDown, Check, Building, RefreshCw, Grid, Award, Download, Clock, X, CheckCheck, Coins, Menu,
-  Sun, AlertTriangle, Calculator, PiggyBank, Target, MoreHorizontal, UserPlus, Users, Share2, Handshake
+  Sun, AlertTriangle, Calculator, PiggyBank, Target, MoreHorizontal, UserPlus, Users, Share2, Handshake,
+  Calendar, Sparkles
 } from "lucide-react";
 import { Sidebar, MobileNav, MobileDrawerNav, Tab } from "./Navigation";
 import cardBgGold from "../../assets/card_bg_gold.jpg";
@@ -161,6 +162,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const [showBalance, setShowBalance] = useState(true);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showCardDetails, setShowCardDetails] = useState(false);
+  const [activeTopBannerIndex, setActiveTopBannerIndex] = useState(0);
 
   // Agent Modal state & Approved DGA state
   const [isApprovedDga, setIsApprovedDga] = useState(false);
@@ -599,156 +601,289 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           
 
 
-          {/* Manual Horizontal Swipe Carousel (NO Auto Carousel, NO Arrows, Default = Portfolio Value) */}
-          <div className="w-full overflow-x-auto snap-x snap-mandatory flex gap-4 no-scrollbar py-1 scroll-smooth">
-            
-            {/* Card 1 (Default First Card): Portfolio Value Card */}
-            <div className="snap-center shrink-0 w-full min-w-full bg-gradient-to-br from-[#f0f4ff] via-[#f5f8ff] to-[#eef4ff] border border-blue-100/90 rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-                    <Wallet size={22} strokeWidth={2.5} />
+          {/* Framer Motion Touch/Drag Carousel */}
+          <div className="w-full overflow-hidden rounded-3xl relative">
+            <motion.div
+              className="flex cursor-grab active:cursor-grabbing"
+              animate={{ x: `-${activeTopBannerIndex * 100}%` }}
+              transition={{ type: "spring", stiffness: 260, damping: 28 }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.15}
+              onDragEnd={(_, info) => {
+                const swipeThreshold = 50;
+                if (info.offset.x < -swipeThreshold && activeTopBannerIndex < 2) {
+                  setActiveTopBannerIndex((prev) => prev + 1);
+                } else if (info.offset.x > swipeThreshold && activeTopBannerIndex > 0) {
+                  setActiveTopBannerIndex((prev) => prev - 1);
+                }
+              }}
+            >
+              {/* Card 1 (Default First Card): Daily, Weekly or Monthly Savings Card */}
+              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+                {/* Top Row: Title Text & Right 3D Asset */}
+                <div className="flex items-start justify-between relative z-10">
+                  <div className="space-y-0.5 max-w-[65%]">
+                    <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
+                      Start your{" "}
+                      <span className="text-purple-600 font-black">Daily, Weekly</span>{" "}
+                      or{" "}
+                      <span className="text-purple-700 font-black">Monthly</span>{" "}
+                      savings with Fipmoney
+                    </h3>
                   </div>
+
+                  {/* Right Side 3D Asset Image */}
+                  <div className="w-36 h-36 sm:w-44 sm:h-44 shrink-0 relative -mt-4 -mr-2 scale-105">
+                    <img 
+                      src="/daily_savings.png" 
+                      alt="Start Savings" 
+                      className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none" 
+                    />
+                  </div>
+                </div>
+
+                {/* 3 Savings Frequency Pills */}
+                <div className="grid grid-cols-3 gap-1.5 relative z-10">
+                  {/* Daily */}
+                  <div 
+                    onClick={() => setTab("savings")}
+                    className="bg-white/80 hover:bg-white backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
+                      <Calendar size={14} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-900 leading-none">Daily</span>
+                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Save every day</span>
+                  </div>
+
+                  {/* Weekly */}
+                  <div 
+                    onClick={() => setTab("savings")}
+                    className="bg-white/80 hover:bg-white backdrop-blur-xs border border-blue-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-blue-100/80 text-blue-600 flex items-center justify-center mb-0.5">
+                      <Calendar size={14} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-900 leading-none">Weekly</span>
+                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Save every week</span>
+                  </div>
+
+                  {/* Monthly */}
+                  <div 
+                    onClick={() => setTab("savings")}
+                    className="bg-white/80 hover:bg-white backdrop-blur-xs border border-emerald-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-emerald-100/80 text-emerald-600 flex items-center justify-center mb-0.5">
+                      <Calendar size={14} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-900 leading-none">Monthly</span>
+                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Grow every month</span>
+                  </div>
+                </div>
+
+                {/* Bottom Action Pill Banner */}
+                <div 
+                  onClick={() => setTab("savings")}
+                  className="bg-purple-100/90 hover:bg-purple-200 border border-purple-200/90 rounded-xl px-2.5 py-1.5 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
+                >
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-extrabold text-slate-900">Portfolio Value</h3>
-                    <span className="bg-emerald-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
+                    <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <Sparkles size={11} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[10px] font-black text-purple-950">
+                      Small steps today, greater wealth tomorrow
                     </span>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => {
-                      setIsRefreshingPortfolio(true);
-                      setTimeout(() => setIsRefreshingPortfolio(false), 800);
-                    }}
-                    className="text-blue-600 p-1 border-none bg-transparent outline-none cursor-pointer hover:text-blue-700 active:scale-90 transition-all"
-                    title="Refresh Portfolio Value"
-                  >
-                    <RefreshCw size={18} className={isRefreshingPortfolio ? "animate-spin text-blue-700" : ""} />
-                  </button>
-
-                  <button
-                    onClick={() => setShowBalance(!showBalance)}
-                    className="text-blue-600 p-1 border-none bg-transparent outline-none cursor-pointer hover:text-blue-700 active:scale-90 transition-all"
-                    title={showBalance ? "Hide Balance" : "Show Balance"}
-                  >
-                    <Eye size={20} />
-                  </button>
+                  <ChevronRight size={14} strokeWidth={3} className="text-purple-700 shrink-0" />
                 </div>
               </div>
 
-              <div>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-                  {showBalance ? `₹${(portfolioVal || 82500).toLocaleString('en-IN')}` : "₹ ••••••"}
-                </h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-100/80 px-2.5 py-0.5 rounded-md border border-emerald-200/50">
-                    +₹7,500
-                  </span>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-100/80 px-2.5 py-0.5 rounded-md border border-emerald-200/50">
-                    +10.0%
-                  </span>
-                </div>
-              </div>
+              {/* Card 2 (Swiped Right): Become DGA Agent / Agent Dashboard Card */}
+              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+                {/* Top Section: Left Info & Right 3D Asset */}
+                <div className="flex items-start justify-between relative z-10">
+                  <div className="space-y-1.5 max-w-[64%]">
+                    {/* Verified Partner / Earn Commission Badge */}
+                    <div>
+                      <span className="bg-amber-100/90 text-amber-800 border border-amber-300/80 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase inline-flex items-center gap-1 shadow-2xs">
+                        <ShieldCheck size={11} strokeWidth={2.5} className="text-amber-700" />
+                        {isApprovedDga ? "Verified Partner" : "Earn Commission"}
+                      </span>
+                    </div>
 
-              {/* Gold Holdings Row */}
-              <div className="pt-3 border-t border-blue-200/60 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0">
-                    <Coins size={20} strokeWidth={2.2} />
-                  </div>
-                  <span className="text-sm font-extrabold text-slate-800">Gold Holdings</span>
-                </div>
-                <span className="text-base font-black text-slate-900">{totalGrams ? totalGrams.toFixed(2) : "12.5"}g</span>
-              </div>
-            </div>
-
-            {/* Card 2 (Swiped Right): Become DGA Agent / Agent Dashboard Card */}
-            <div className="snap-center shrink-0 w-full min-w-full bg-gradient-to-br from-[#1e1b4b] via-[#2e1065] to-[#312e81] text-white rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center border border-amber-400/30">
-                    <Coins size={22} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
-                      {isApprovedDga ? "Verified Partner" : "Earn Commission"}
-                    </span>
-                    <h3 className="text-base font-black text-white mt-1 leading-tight">
-                      {isApprovedDga ? "Verified Digital Gold Agent (DGA)" : "Become a Digital Gold Agent Today!"}
+                    {/* Title */}
+                    <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
+                      {isApprovedDga ? (
+                        <>Verified Digital Gold Agent <span className="text-purple-600 font-black">(DGA)</span></>
+                      ) : (
+                        <>Become a Digital Gold Agent <span className="text-purple-600 font-black">(DGA)</span></>
+                      )}
                     </h3>
+
+                    {/* Subtitle */}
+                    <p className="text-[11px] font-medium text-slate-600 leading-tight">
+                      {isApprovedDga
+                        ? "Manage client portfolios & track instant payouts."
+                        : "Earn high commissions & exclusive rewards."}
+                    </p>
+
+                    {/* Action Button */}
+                    <div className="pt-0.5">
+                      <button
+                        onClick={() => {
+                          if (isApprovedDga) {
+                            setShowAgentOtpModal(true);
+                          } else {
+                            setTab("become-agent");
+                          }
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-black text-[11px] px-3 py-1.5 rounded-full shadow-md shadow-purple-600/20 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all outline-none"
+                      >
+                        <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
+                        <div className="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center shrink-0">
+                          <ChevronRight size={12} strokeWidth={3} />
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Side 3D Asset Image */}
+                  <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0 relative -mt-5 -mr-2 scale-105">
+                    <img 
+                      src="/dga_asset.png" 
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/dga_gold_asset.png";
+                      }}
+                      alt="DGA Agent" 
+                      className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none" 
+                    />
+                  </div>
+                </div>
+
+                {/* Bottom 3 Feature Badges Row */}
+                <div className="grid grid-cols-3 gap-1.5 relative z-10">
+                  {/* Pill 1: Manage Clients */}
+                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
+                      <CreditCard size={14} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-900 leading-none">Manage Clients</span>
+                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Client portfolios</span>
+                  </div>
+
+                  {/* Pill 2: Track Earnings */}
+                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
+                      <TrendingUp size={14} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-900 leading-none">Track Earnings</span>
+                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Real-time payouts</span>
+                  </div>
+
+                  {/* Pill 3: Instant Payouts */}
+                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
+                      <Wallet size={14} strokeWidth={2.5} />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-900 leading-none">Instant Payouts</span>
+                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Direct to wallet</span>
                   </div>
                 </div>
               </div>
 
-              <p className="text-xs text-indigo-200 font-medium relative z-10">
-                {isApprovedDga
-                  ? "Access partner console, manage client portfolios & track instant commission payouts."
-                  : "Earn high commissions, exclusive rewards & unlock a world of benefits."}
-              </p>
+              {/* Card 3 (Swiped Right): Refer & Earn Card */}
+              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+                {/* Top Section: Left Info & Right 3D Asset */}
+                <div className="flex items-start justify-between relative z-10">
+                  <div className="space-y-1.5 max-w-[62%]">
+                    {/* User Plus Top Icon Badge */}
+                    <div className="w-8 h-8 rounded-xl bg-purple-100/90 border border-purple-200/80 text-purple-600 flex items-center justify-center shadow-2xs">
+                      <UserPlus size={16} strokeWidth={2.5} />
+                    </div>
 
-              <div className="flex items-center gap-2.5 relative z-10 pt-2">
-                <button
-                  onClick={() => {
-                    if (isApprovedDga) {
-                      setShowAgentOtpModal(true);
-                    } else {
-                      setTab("become-agent");
-                    }
-                  }}
-                  className="px-4 py-2.5 rounded-xl font-extrabold text-xs text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 transition-all shadow-md flex items-center gap-1.5 cursor-pointer border-none outline-none"
-                >
-                  <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
-                  <ChevronRight size={15} strokeWidth={3} />
-                </button>
-                {!isApprovedDga && (
-                  <button
-                    onClick={() => setTab("become-agent")}
-                    className="px-3.5 py-2.5 rounded-xl font-bold text-xs text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all cursor-pointer outline-none"
-                  >
-                    Know More
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Card 3 (Swiped Right): Refer Friends & Earn 24K Gold Card */}
-            <div className="snap-center shrink-0 w-full min-w-full bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#4338ca] text-white rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
-              <div className="absolute right-0 top-0 w-36 h-36 bg-pink-500/10 rounded-full blur-2xl pointer-events-none" />
-
-              <div className="flex items-start justify-between relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-pink-400/20 text-pink-300 flex items-center justify-center border border-pink-400/30">
-                    <Gift size={22} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-pink-300 bg-pink-400/10 px-2 py-0.5 rounded-full border border-pink-400/20">
-                      Free 24K Gold
-                    </span>
-                    <h3 className="text-base font-black text-white mt-1 leading-tight">
-                      Refer Friends & Earn 24K Gold!
+                    {/* Title */}
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-none">
+                      Refer <span className="text-purple-600 font-black">& Earn</span>
                     </h3>
+
+                    {/* Subtitle */}
+                    <p className="text-[11px] font-medium text-slate-600 leading-tight">
+                      Invite your friends to Fipmoney and earn exciting rewards.
+                    </p>
+                  </div>
+
+                  {/* Right Side 3D Asset Image (refer_card.png) */}
+                  <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0 relative -mt-5 -mr-2 scale-105">
+                    <img 
+                      src="/refer_card.png" 
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = "/refer_asset.png";
+                      }}
+                      alt="Refer and Earn" 
+                      className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none" 
+                    />
                   </div>
                 </div>
-              </div>
 
-              <p className="text-xs text-indigo-200 font-medium relative z-10">
-                Invite your friends to Fipmoney & earn up to ₹500 digital gold on every successful referral.
-              </p>
+                {/* Middle 2 Feature Pills Row */}
+                <div className="grid grid-cols-2 gap-2 py-0.5 relative z-10 max-w-[65%]">
+                  {/* Badge 1: Exciting Rewards */}
+                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center shrink-0">
+                      <Gift size={13} strokeWidth={2.5} />
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[10px] font-black text-slate-900">Exciting</span>
+                      <span className="text-[8.5px] font-bold text-slate-500 mt-0.5">Rewards</span>
+                    </div>
+                  </div>
 
-              <div className="flex items-center gap-2.5 relative z-10 pt-2">
-                <button
+                  {/* Badge 2: Earn on every */}
+                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center shrink-0">
+                      <Wallet size={13} strokeWidth={2.5} />
+                    </div>
+                    <div className="flex flex-col text-left leading-none">
+                      <span className="text-[10px] font-black text-slate-900">Earn on every</span>
+                      <span className="text-[8.5px] font-bold text-slate-500 mt-0.5">successful referral</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Action Pill Banner */}
+                <div 
                   onClick={() => setTab("refer-and-earn")}
-                  className="px-4 py-2.5 rounded-xl font-extrabold text-xs text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 transition-all shadow-md flex items-center gap-1.5 cursor-pointer border-none outline-none active:scale-95"
+                  className="bg-purple-100/90 hover:bg-purple-200 border border-purple-200/90 rounded-xl px-3 py-2 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
                 >
-                  <span>Refer Now & Earn</span>
-                  <ChevronRight size={15} strokeWidth={3} />
-                </button>
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <ChevronRight size={13} strokeWidth={3} />
+                    </div>
+                    <span className="text-xs font-black text-purple-950">
+                      Refer Now
+                    </span>
+                  </div>
+                  <ChevronRight size={15} strokeWidth={3} className="text-purple-700 shrink-0" />
+                </div>
               </div>
-            </div>
+            </motion.div>
+          </div>
 
+          {/* Carousel Dots Indicator */}
+          <div className="flex items-center justify-center gap-1.5 pt-2 pb-1">
+            {[0, 1, 2].map((idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveTopBannerIndex(idx)}
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer border-none outline-none ${
+                  activeTopBannerIndex === idx
+                    ? "w-6 bg-purple-600 shadow-2xs"
+                    : "w-2 bg-purple-200 hover:bg-purple-300"
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
           </div>
 
 
@@ -756,7 +891,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           {/* Quick Actions Card (Light Theme, Placed ABOVE Live Price) */}
           <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-slate-900">Quick Actions</h3>
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Quick Actions</h3>
             </div>
 
             {/* Top Grid: 5 Quick Actions Items */}
@@ -841,14 +976,18 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </div>
 
           {/* Live Price Card with Gold & Silver Tab Switcher at Right Corner */}
-          <div className="bg-[#fffdf5] rounded-3xl p-5 border border-amber-200/80 shadow-xs space-y-4">
+          <div className={`rounded-3xl p-5 border shadow-xs space-y-4 transition-all duration-300 ${
+            activeMetalTab === 'gold'
+              ? 'bg-[#fffdf5] border-amber-200/80'
+              : 'bg-[#f8fafc] border-slate-300'
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-2xl ${activeMetalTab === 'gold' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-slate-700 shadow-slate-700/20'} text-white flex items-center justify-center shadow-md transition-all`}>
                   <TrendingUp size={22} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">Live Price</h3>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Live Price</h3>
                   <p className="text-xs text-slate-500 font-medium">
                     {activeMetalTab === 'gold' ? '24K Gold - 7 Day Trend' : '999 Pure Silver - 7 Day Trend'}
                   </p>
@@ -856,13 +995,17 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               </div>
 
               {/* Gold & Silver Tab Switcher */}
-              <div className="bg-amber-100/70 p-1 rounded-2xl flex items-center border border-amber-200/80 shrink-0">
+              <div className={`p-1 rounded-2xl flex items-center border shrink-0 transition-all ${
+                activeMetalTab === 'gold'
+                  ? 'bg-amber-100/70 border-amber-200/80'
+                  : 'bg-slate-200/80 border-slate-300/80'
+              }`}>
                 <button
                   onClick={() => setActiveMetalTab('gold')}
                   className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
                     activeMetalTab === 'gold'
                       ? 'bg-amber-500 text-white shadow-xs'
-                      : 'text-amber-900 hover:text-amber-950 bg-transparent'
+                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
                   }`}
                 >
                   Gold
@@ -872,7 +1015,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
                     activeMetalTab === 'silver'
                       ? 'bg-slate-800 text-white shadow-xs'
-                      : 'text-amber-900 hover:text-amber-950 bg-transparent'
+                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
                   }`}
                 >
                   Silver
@@ -896,7 +1039,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2.5 pt-2 border-t border-amber-100">
+            <div className={`grid grid-cols-3 gap-2.5 pt-2 border-t transition-all ${
+              activeMetalTab === 'gold' ? 'border-amber-100' : 'border-slate-200'
+            }`}>
               <div className="text-center">
                 <span className="text-[10px] text-slate-400 font-semibold block">Today's Change</span>
                 <span className="text-xs font-extrabold text-emerald-600">
@@ -914,6 +1059,95 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 <span className="text-xs font-extrabold text-slate-900">
                   {activeMetalTab === 'gold' ? '₹10,180' : '₹112'}
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Gold Saving Plans Section (Mobile Light Theme) */}
+          <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-gray-200/90 shadow-md shadow-gray-900/5 space-y-3.5">
+            {/* Header Title */}
+            <div className="flex items-center justify-between px-0.5">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                Gold Saving plans
+              </h3>
+              <button
+                onClick={() => setTab("savings")}
+                className="text-[11px] font-black text-amber-700 hover:text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full flex items-center gap-0.5 cursor-pointer outline-none"
+              >
+                <span>View All</span>
+                <ChevronRight size={13} strokeWidth={3} />
+              </button>
+            </div>
+
+            {/* 3 Saving Plan Cards */}
+            <div className="space-y-3">
+              {/* Card 1: Save Daily */}
+              <div 
+                onClick={() => setTab("savings")}
+                className="bg-[#f5f3ff] hover:bg-[#ede9fe] border border-purple-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-2xl bg-purple-100/80 border border-purple-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                    <img 
+                      src="/daily_saving.png" 
+                      alt="Save Daily" 
+                      className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" 
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black tracking-tight text-purple-950 leading-tight">Save Daily</h4>
+                    <p className="text-xs font-bold text-purple-700 mt-0.5">Starts from just ₹10/day</p>
+                  </div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-purple-200/80 text-purple-800 flex items-center justify-center shrink-0 group-hover:bg-purple-300/80 transition-all">
+                  <ChevronRight size={18} strokeWidth={3} />
+                </div>
+              </div>
+
+              {/* Card 2: Save Weekly */}
+              <div 
+                onClick={() => setTab("savings")}
+                className="bg-[#f0fdf4] hover:bg-[#dcfce7] border border-emerald-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                    <img 
+                      src="/weekly_saving.png" 
+                      alt="Save Weekly" 
+                      className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" 
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black tracking-tight text-emerald-950 leading-tight">Save Weekly</h4>
+                    <p className="text-xs font-bold text-emerald-700 mt-0.5">Starts from just ₹50/week</p>
+                  </div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-emerald-200/80 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-300/80 transition-all">
+                  <ChevronRight size={18} strokeWidth={3} />
+                </div>
+              </div>
+
+              {/* Card 3: Save Monthly */}
+              <div 
+                onClick={() => setTab("savings")}
+                className="bg-[#fffbeb] hover:bg-[#fef3c7] border border-amber-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-100/80 border border-amber-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                    <img 
+                      src="/monthly_saving.png" 
+                      alt="Save Monthly" 
+                      className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" 
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black tracking-tight text-amber-950 leading-tight">Save Monthly</h4>
+                    <p className="text-xs font-bold text-amber-700 mt-0.5">Starts from just ₹100/month</p>
+                  </div>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-amber-200/80 text-amber-800 flex items-center justify-center shrink-0 group-hover:bg-amber-300/80 transition-all">
+                  <ChevronRight size={18} strokeWidth={3} />
+                </div>
               </div>
             </div>
           </div>
@@ -976,7 +1210,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   <UserPlus size={22} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 leading-tight">Refer & Earn</h3>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Refer & Earn</h3>
                   <p className="text-xs text-blue-800 font-medium">Invite friends and earn unlimited rewards</p>
                 </div>
               </div>

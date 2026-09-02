@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, Calendar, ChevronDown, Download, AlertCircle, 
   Filter, Clock, CheckCircle2, XCircle, FileText, IndianRupee,
-  Activity, Wifi, Smartphone, Zap, Home, ShieldCheck, AlertTriangle, ChevronRight, CreditCard, Banknote, Landmark
+  Activity, Wifi, Smartphone, Zap, Home, ShieldCheck, AlertTriangle, ChevronRight, CreditCard, Banknote, Landmark,
+  Coins, TrendingUp, Wallet, Eye, ArrowUpRight, PiggyBank, Gift
 } from "lucide-react";
 import { getTransactions, Transaction } from "../utils/transactionStorage";
 import { useFipModal } from "./FipModal";
@@ -699,6 +700,182 @@ export default function HistoryPage() {
   const totalVolume = filteredTransactions.reduce((acc, curr) => acc + curr.amount, 0);
   const totalTxCount = filteredTransactions.length;
 
+  const [mobileTab, setMobileTab] = useState<"all" | "gold" | "sip" | "bills" | "rewards">("all");
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
+  // Sample transactions matching user screenshots for mobile display
+  const sampleMobileTxs = [
+    {
+      id: "SIP20241216001",
+      title: "SIP Investment",
+      subtitle: "ICICI Prudential Bluechip Fund",
+      category: "sip",
+      amount: -3000,
+      status: "pending",
+      dateStr: "16 Dec 2024",
+      timeStr: "10:00",
+      refId: "SIP20241216001",
+      charges: 7.50,
+      gst: 1.35,
+      netAmount: 3008.85,
+      iconType: "sip"
+    },
+    {
+      id: "GLD20241215001",
+      title: "Gold Purchase",
+      subtitle: "Bought 2.5g digital gold",
+      category: "gold",
+      amount: -12500,
+      status: "completed",
+      dateStr: "15 Dec 2024",
+      timeStr: "14:30",
+      refId: "GLD20241215001",
+      charges: 62.50,
+      gst: 11.25,
+      netAmount: 12573.75,
+      iconType: "gold"
+    },
+    {
+      id: "SIP20241214001",
+      title: "SIP Investment",
+      subtitle: "HDFC Top 100 Fund",
+      category: "sip",
+      amount: -5000,
+      status: "completed",
+      dateStr: "14 Dec 2024",
+      timeStr: "09:15",
+      refId: "SIP20241214001",
+      charges: 12.50,
+      gst: 2.25,
+      netAmount: 5014.75,
+      iconType: "sip"
+    },
+    {
+      id: "BIL20241213002",
+      title: "Electricity Bill",
+      subtitle: "BESCOM Electricity Payment",
+      category: "bills",
+      amount: -1450,
+      status: "completed",
+      dateStr: "13 Dec 2024",
+      timeStr: "18:20",
+      refId: "BIL20241213002",
+      charges: 0.00,
+      gst: 0.00,
+      netAmount: 1450.00,
+      iconType: "bills"
+    },
+    {
+      id: "GLD20241212002",
+      title: "Gold Sale",
+      subtitle: "Sold 1.2g digital gold",
+      category: "gold",
+      amount: 6000,
+      status: "completed",
+      dateStr: "12 Dec 2024",
+      timeStr: "11:20",
+      refId: "GLD20241212002",
+      charges: 30.00,
+      gst: 5.40,
+      netAmount: 5964.60,
+      iconType: "gold"
+    },
+    {
+      id: "REW20241211001",
+      title: "Referral Bonus",
+      subtitle: "Friend signup reward",
+      category: "rewards",
+      amount: 500,
+      status: "completed",
+      dateStr: "11 Dec 2024",
+      timeStr: "13:10",
+      refId: "REW20241211001",
+      charges: 0.00,
+      gst: 0.00,
+      netAmount: 500.00,
+      iconType: "rewards"
+    },
+    {
+      id: "BNK20241210001",
+      title: "Bank Transfer",
+      subtitle: "Money transferred to bank",
+      category: "bank",
+      amount: -2500,
+      status: "failed",
+      dateStr: "10 Dec 2024",
+      timeStr: "15:30",
+      refId: "BNK20241210001",
+      charges: 5.00,
+      gst: 0.90,
+      netAmount: 2505.90,
+      iconType: "bank"
+    }
+  ];
+
+  // Mobile filtered list computation
+  const getMobileDisplayTxs = () => {
+    let sourceList = sampleMobileTxs;
+
+    if (allTransactions.length > 0) {
+      sourceList = allTransactions.map((tx) => {
+        const isPositive = tx.type === "Buy" || tx.type === "Receive" || tx.type === "Sell";
+        const amt = (tx.type === "Sell" || tx.type === "Receive") ? tx.amount : -tx.amount;
+        const chg = Math.round(tx.amount * 0.0025 * 100) / 100;
+        const gstVal = Math.round(chg * 0.18 * 100) / 100;
+        const net = Math.abs(amt) + chg + gstVal;
+
+        let iconType = "gold";
+        const cat = tx.category.toLowerCase();
+        const src = tx.source.toLowerCase();
+        if (cat.includes("gold") || cat.includes("silver")) iconType = "gold";
+        else if (cat.includes("sip") || src.includes("fund")) iconType = "sip";
+        else if (tx.type === "Bill Pay" || cat.includes("bill") || src.includes("electricity") || src.includes("recharge") || src.includes("wifi") || src.includes("fiber")) iconType = "bills";
+        else if (cat.includes("reward") || src.includes("referral")) iconType = "rewards";
+        else iconType = "bank";
+
+        const dateObj = new Date(tx.date);
+        const dateStr = dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+        const timeStr = dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+        return {
+          id: tx.id,
+          title: tx.source || `${tx.type} ${tx.category}`,
+          subtitle: `${tx.type} ${tx.grams ? `(${tx.grams})` : ""}`,
+          category: iconType,
+          amount: amt,
+          status: tx.status.toLowerCase(),
+          dateStr: dateStr,
+          timeStr: timeStr,
+          refId: tx.id,
+          charges: chg,
+          gst: gstVal,
+          netAmount: net,
+          iconType: iconType,
+          rawTx: tx
+        };
+      });
+    }
+
+    // Filter by Mobile Tab
+    if (mobileTab !== "all") {
+      sourceList = sourceList.filter(item => item.category === mobileTab);
+    }
+
+    // Filter by Search
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      sourceList = sourceList.filter(item => 
+        item.title.toLowerCase().includes(q) || 
+        item.subtitle.toLowerCase().includes(q) || 
+        item.refId.toLowerCase().includes(q)
+      );
+    }
+
+    return sourceList;
+  };
+
+  const mobileDisplayList = getMobileDisplayTxs();
+
   if (isLoading) {
     return (
       <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#f8f9fa]">
@@ -710,7 +887,9 @@ export default function HistoryPage() {
   
   return (
     <div className="flex-1 h-screen overflow-y-auto bg-[#f8f9fa]">
-      <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-6 pb-24 lg:pb-10">
+      
+      {/* LAPTOP / DESKTOP SCREENS VIEW (>= md) - UNTOUCHED ORIGINAL DESIGN */}
+      <div className="hidden md:block p-8 lg:p-10 max-w-7xl mx-auto space-y-6 pb-10">
         
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1074,6 +1253,277 @@ export default function HistoryPage() {
         </div>
 
       </div>
+
+
+      {/* MOBILE SCREENS VIEW (< md) - EXACT SPECIFICATION MATCHING USER SCREENSHOTS */}
+      <div className="block md:hidden p-4 space-y-5 pb-24">
+        
+        {/* Header Row */}
+        <div>
+          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Transaction History</h1>
+          <p className="text-[12px] text-gray-500 font-medium mt-0.5">
+            {mobileDisplayList.length} transactions found
+          </p>
+        </div>
+
+        {/* Combined Row: Search Input + Filters Icon + Export PDF Icon */}
+        <div className="flex items-center gap-2.5 w-full">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search transactions, ref..."
+              className="w-full pl-10 pr-4 py-2.5 bg-[#f3f4f6]/80 border border-gray-200/90 rounded-2xl text-[13px] text-gray-800 placeholder-gray-400 outline-none font-medium focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all shadow-2xs"
+            />
+          </div>
+
+          {/* Filter Modal Toggle Button */}
+          <button
+            onClick={() => setShowFilterModal(!showFilterModal)}
+            className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs cursor-pointer border transition-all active:scale-95 outline-none ${
+              showFilterModal 
+                ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20" 
+                : "bg-white border-gray-200/80 text-gray-700 hover:bg-gray-50"
+            }`}
+            title="Filter Options"
+          >
+            <Filter size={17} className={showFilterModal ? "text-white" : "text-gray-600"} />
+          </button>
+
+          {/* Export PDF Button */}
+          <button 
+            onClick={handleExport}
+            className="w-10 h-10 rounded-2xl bg-white border border-gray-200/80 text-gray-700 flex items-center justify-center shrink-0 shadow-2xs cursor-pointer hover:bg-gray-50 active:scale-95 transition-all outline-none"
+            title="Export PDF / CSV"
+          >
+            <Download size={17} className="text-gray-600" />
+          </button>
+        </div>
+
+        {/* Filter Options Modal / Drawer */}
+        {showFilterModal && (
+          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-md space-y-3">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+              <span className="text-xs font-bold text-gray-800">Filter Transactions</span>
+              <button onClick={() => setShowFilterModal(false)} className="text-xs font-bold text-blue-600 bg-transparent border-none outline-none cursor-pointer">Close</button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 block mb-1">Status</label>
+                <select 
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  className="w-full p-2 text-xs font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg outline-none cursor-pointer"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Failed">Failed</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 block mb-1">Start Date</label>
+                <input 
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full p-2 text-xs font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Horizontal Scroll Pill Filters with Smooth Tab Shifting */}
+        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar py-1 px-0.5">
+          {[
+            { id: "all", label: "All" },
+            { id: "gold", label: "Gold" },
+            { id: "sip", label: "SIP" },
+            { id: "bills", label: "Bill Payments" },
+            { id: "rewards", label: "Rewards" }
+          ].map((pill) => {
+            const isSelected = mobileTab === pill.id;
+            return (
+              <button
+                key={pill.id}
+                onClick={() => setMobileTab(pill.id as any)}
+                className={`relative px-5 py-2 rounded-full text-[13px] font-bold transition-all duration-200 cursor-pointer border-none outline-none whitespace-nowrap ${
+                  isSelected 
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]" 
+                    : "bg-white text-gray-600 hover:text-gray-900 border border-gray-200/70 hover:border-blue-200 shadow-sm"
+                }`}
+              >
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeMobileTabHighlight"
+                    className="absolute inset-0 bg-blue-600 rounded-full -z-0"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{pill.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Transaction Cards List with Smooth Animated Shifting */}
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={mobileTab + searchQuery}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-4"
+          >
+            {mobileDisplayList.length === 0 ? (
+              <div className="p-8 text-center bg-white rounded-2xl border border-gray-100">
+                <p className="text-xs font-bold text-gray-500">No transactions match your criteria</p>
+              </div>
+            ) : (
+              mobileDisplayList.map((tx) => {
+                const renderQuickActionIcon = () => {
+                  if (tx.iconType === "gold") {
+                    return (
+                      <div className="w-12 h-12 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
+                        <img 
+                          src="/gold-bars.png" 
+                          alt="Digital Gold" 
+                          className="w-8 h-8 object-contain drop-shadow-2xs" 
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      </div>
+                    );
+                  } else if (tx.iconType === "silver") {
+                    return (
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center p-1.5 shadow-2xs shrink-0">
+                        <img 
+                          src="/silver.png" 
+                          alt="Digital Silver" 
+                          className="w-8 h-8 object-contain drop-shadow-2xs" 
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      </div>
+                    );
+                  } else if (tx.iconType === "sip") {
+                    return (
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center shadow-2xs shrink-0">
+                        <PiggyBank size={22} strokeWidth={2.2} />
+                      </div>
+                    );
+                  } else if (tx.iconType === "bills") {
+                    return (
+                      <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center shadow-2xs shrink-0">
+                        <FileText size={22} strokeWidth={2.2} />
+                      </div>
+                    );
+                  } else if (tx.iconType === "rewards") {
+                    return (
+                      <div className="w-12 h-12 rounded-2xl bg-pink-50 border border-pink-200/80 text-pink-600 flex items-center justify-center shadow-2xs shrink-0">
+                        <Gift size={22} strokeWidth={2.2} />
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center shadow-2xs shrink-0">
+                        <ArrowUpRight size={22} strokeWidth={2.2} />
+                      </div>
+                    );
+                  }
+                };
+
+                const isPositive = tx.amount > 0;
+                let amountColor = isPositive ? "text-emerald-600" : "text-purple-600";
+                if (!isPositive && tx.title.includes("Gold")) amountColor = "text-blue-600";
+                if (!isPositive && tx.title.includes("Bank")) amountColor = "text-red-600";
+
+                const statusStyle = 
+                  tx.status === "completed" 
+                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100/50" 
+                    : tx.status === "pending"
+                    ? "bg-amber-50 text-amber-600 border border-amber-100/50"
+                    : "bg-rose-50 text-rose-600 border border-rose-100/50";
+
+                return (
+                  <div 
+                    key={tx.id} 
+                    className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm space-y-4"
+                  >
+                  {/* Top Row: Icon + Title/Subtitle + Amount/Status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {renderQuickActionIcon()}
+                      <div>
+                        <h3 className="text-[15px] font-bold text-gray-900 leading-snug">{tx.title}</h3>
+                        <p className="text-[12px] text-gray-500 font-medium mt-0.5">{tx.subtitle}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end shrink-0">
+                      <span className={`text-[17px] font-extrabold ${amountColor}`}>
+                        {isPositive ? "+" : "-"}₹{Math.abs(tx.amount).toLocaleString()}
+                      </span>
+                      <span className={`mt-1 text-[10px] font-bold px-2 py-0.5 rounded-md ${statusStyle}`}>
+                        {tx.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Middle Row: Date + Time + Ref ID + Eye Icon */}
+                  <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 pt-1">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1">
+                        <Calendar size={13} className="text-gray-400" /> {tx.dateStr}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={13} className="text-gray-400" /> {tx.timeStr}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <FileText size={13} className="text-gray-400" /> {tx.refId}
+                      </span>
+                    </div>
+
+                    <button 
+                      onClick={() => tx.rawTx ? downloadInvoicePDF(tx.rawTx) : null}
+                      className="text-gray-400 hover:text-gray-700 transition-colors p-1 cursor-pointer outline-none bg-transparent border-none"
+                    >
+                      <Eye size={16} />
+                    </button>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-full h-px bg-gray-100" />
+
+                  {/* Bottom 3-Column Metrics */}
+                  <div className="grid grid-cols-3 gap-2 pt-0.5">
+                    <div>
+                      <div className="text-[11px] text-gray-400 font-medium">Charges</div>
+                      <div className="text-[13px] text-gray-900 font-bold mt-0.5">₹{tx.charges.toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-gray-400 font-medium">GST</div>
+                      <div className="text-[13px] text-gray-900 font-bold mt-0.5">₹{tx.gst.toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-gray-400 font-medium">Net Amount</div>
+                      <div className="text-[13px] text-gray-900 font-bold mt-0.5">₹{tx.netAmount.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+
     </div>
   );
 }
