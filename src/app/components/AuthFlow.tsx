@@ -3,10 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, CheckCircle, RefreshCw,
+  ArrowLeft, CheckCircle, RefreshCw, Users, Award, Star,
   ShieldCheck, Smartphone, Eye, EyeOff, Loader2, XCircle,
-  Shield, Coins, BarChart3, Globe, ChevronDown, User, CheckCircle2, ArrowRight
+  Shield, Coins, BarChart3, Globe, ChevronDown, User, CheckCircle2, ArrowRight,
+  HelpCircle, Mail, Lock
 } from "lucide-react";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import { saveLoggedInUser, MongoUser } from "../utils/userStorage";
 import { toast } from "react-hot-toast";
@@ -55,30 +60,79 @@ function FormSlide({ children, dir }: { children: React.ReactNode; dir: number }
 
 function OtpBoxes({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
-    <div className="relative h-14">
+    <div className="relative h-14 sm:h-16 w-full max-w-[380px] mx-auto">
       <input
         type="tel" inputMode="numeric" maxLength={6} value={value} autoFocus
         onChange={e => onChange(e.target.value.replace(/\D/g, "").slice(0, 6))}
         className="absolute inset-0 opacity-0 w-full h-full cursor-text z-10"
       />
-      <div className="flex gap-3 pointer-events-none h-full">
-        {[0,1,2,3,4,5].map(i => {
+      <div className="flex gap-2 sm:gap-3 justify-center items-center h-full">
+        {[0, 1, 2, 3, 4, 5].map(i => {
           const char = value[i] || "";
           const isActive = value.length === i;
           return (
             <motion.div key={i} animate={{ scale: char ? 1.05 : 1 }}
-              className={`flex items-center justify-center text-2xl font-black flex-1 rounded-xl transition-all border-2
-                ${isActive ? 'border-indigo-600 shadow-[0_0_0_4px_rgba(79,70,229,0.1)] bg-white' : char ? 'border-indigo-600/40 bg-indigo-50/50 text-[#1e1b4b]' : 'border-gray-200 bg-gray-50 text-gray-300'}
+              className={`w-11 h-11 sm:w-13 sm:h-13 aspect-square shrink-0 flex items-center justify-center text-xl sm:text-2xl font-black rounded-2xl transition-all border-2
+                ${isActive ? 'border-amber-500 shadow-[0_0_0_4px_rgba(245,158,11,0.2)] bg-white text-slate-900' : char ? 'border-amber-500/60 bg-amber-50/60 text-slate-900' : 'border-slate-200 bg-white text-slate-300'}
               `}
             >
               {char || (isActive
-                ? <motion.div className="w-0.5 h-6 rounded-full bg-indigo-600"
+                ? <motion.div className="w-0.5 h-6 rounded-full bg-amber-500"
                     animate={{ opacity: [0,1,0] }} transition={{ duration: 1, repeat: Infinity }} />
                 : "·")}
             </motion.div>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function TpinBoxes({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="relative h-16 w-full max-w-[300px] mx-auto">
+      <input
+        type="tel"
+        inputMode="numeric"
+        maxLength={4}
+        value={value}
+        autoFocus
+        onChange={e => onChange(e.target.value.replace(/\D/g, "").slice(0, 4))}
+        className="absolute inset-0 opacity-0 w-full h-full cursor-text z-10"
+      />
+      <div className="flex gap-3.5 justify-center items-center h-full">
+        {[0, 1, 2, 3].map(i => {
+          const char = value[i] ? "●" : "";
+          const isActive = value.length === i;
+          return (
+            <motion.div key={i} animate={{ scale: value[i] ? 1.05 : 1 }}
+              className={`w-14 h-14 sm:w-16 sm:h-16 aspect-square shrink-0 flex items-center justify-center text-2xl font-black rounded-2xl transition-all border-2
+                ${isActive ? 'border-amber-500 shadow-[0_0_0_4px_rgba(245,158,11,0.2)] bg-white text-slate-900' : value[i] ? 'border-amber-500/60 bg-amber-50/60 text-slate-900' : 'border-slate-200 bg-white text-slate-300'}
+              `}
+            >
+              {char || (isActive
+                ? <motion.div className="w-0.5 h-6 rounded-full bg-amber-500"
+                    animate={{ opacity: [0,1,0] }} transition={{ duration: 1, repeat: Infinity }} />
+                : "·")}
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+function Dream60MobileBackground() {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Soft warm cream/yellow background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#fffdf7] via-[#fffbeb] to-[#fffdf5]" />
+      
+      {/* Ambient background yellow/gold glow orbs */}
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-200/35 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 -right-20 w-80 h-80 bg-yellow-200/30 rounded-full blur-3xl" />
+      <div className="absolute bottom-10 -left-20 w-80 h-80 bg-amber-100/45 rounded-full blur-3xl" />
     </div>
   );
 }
@@ -473,7 +527,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       </div>
 
       {/* ── RIGHT PANEL ── */}
-      <div className="flex-1 flex flex-col relative bg-white h-screen">
+      <div className="hidden lg:flex flex-1 flex-col relative bg-white h-screen">
          {/* Top Header: Left Back button, Middle FipMoney Logo, Right Language dropdown */}
          <div className="w-full px-4 sm:px-6 py-4 flex items-center justify-between z-20 shrink-0 border-b border-gray-100/60">
             {/* Left: Back Button */}
@@ -881,22 +935,412 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
             </AnimatePresence>
          </div>
       </div>
+            {/* ── MOBILE VIEW (flex lg:hidden) - Increased Asset Size & Font Sizes ── */}
+      <div className="flex lg:hidden min-h-screen bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fff7ed] flex-col items-center justify-between relative selection:bg-amber-500 selection:text-white w-full px-6 py-8 font-sans overflow-y-auto">
+        {/* Ambient Warm Gold Background Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[450px] bg-gradient-to-b from-amber-300/40 via-yellow-300/30 to-transparent blur-3xl pointer-events-none -z-10" />
+
+        <motion.div
+          className="w-full max-w-[420px] min-h-[calc(100vh-4rem)] relative z-10 flex flex-col items-center justify-between mx-auto"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          {/* Upper Section: Image + Headers + Form */}
+          <div className="w-full flex flex-col items-center my-auto">
+            
+            {/* Top Asset Container with login-bro.png, otp-bro.png, account-profile.png & dashboard-bro.png */}
+            <div className="relative mb-6">
+              <div className="w-88 h-88 sm:w-96 sm:h-96 flex items-center justify-center mx-auto">
+                <img 
+                  src={
+                    step === "otp"
+                      ? "/otp-bro.png"
+                      : step === "profile"
+                      ? "/account-profile.png"
+                      : step === "tpin"
+                      ? "/tpin.png"
+                      : step === "success"
+                      ? "/dashboard-bro.png"
+                      : "/login-bro.png"
+                  } 
+                  alt={
+                    step === "otp"
+                      ? "OTP Verification"
+                      : step === "profile"
+                      ? "Account Profile Setup"
+                      : step === "tpin"
+                      ? "Security TPIN Setup"
+                      : step === "success"
+                      ? "Dashboard Welcome"
+                      : "Login Illustration"
+                  } 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+
+            {/* Title & Subtitle (Increased Font Sizes) */}
+            <div className="text-center mb-8 w-full">
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                {step === "mobile" && (regStatus === "new" ? "Create Account" : "Welcome Back")}
+                {step === "otp" && "Verify OTP"}
+                {step === "profile" && "Complete Profile"}
+                {step === "tpin" && "Set Security PIN"}
+                {step === "success" && "Welcome to FipMoney"}
+              </h1>
+              <p className="text-sm sm:text-base text-slate-500 font-medium mt-1.5">
+                {step === "mobile" && "Enter your 10-digit mobile number to proceed"}
+                {step === "otp" && `Enter 6-digit code sent to +91 ${mobile}`}
+                {step === "profile" && "Almost there — just a few details."}
+                {step === "tpin" && "Create a 4-digit PIN for securing all your transactions."}
+                {step === "success" && "Your account is setup & ready to use"}
+              </p>
+            </div>
+
+            {/* Stepper Wizard Indicator for Profile & Security steps (Centered) */}
+            {(step === "profile" || step === "tpin") && (
+              <div className="w-full relative flex items-center justify-center mb-7 px-1">
+                <button
+                  type="button"
+                  onClick={() => { setDir(-1); setStep(step === "tpin" ? "profile" : "otp"); }}
+                  className="absolute left-0 w-11 h-11 rounded-full bg-white border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs hover:bg-slate-50 transition-all cursor-pointer z-10"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step === "profile" ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : "bg-emerald-500 text-white"}`}>
+                      1
+                    </div>
+                    <span className={`text-xs font-bold ${step === "profile" ? "text-amber-600 font-extrabold" : "text-slate-500"}`}>Profile</span>
+                  </div>
+                  <div className="w-16 h-0.5 bg-slate-200 mb-4" />
+                  <div className="flex flex-col items-center gap-1">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step === "tpin" ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
+                      2
+                    </div>
+                    <span className={`text-xs font-bold ${step === "tpin" ? "text-amber-600 font-extrabold" : "text-slate-400"}`}>Security</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Interactive Form Flow (Increased Font & Input Sizes) */}
+            <div className="w-full">
+              <AnimatePresence mode="wait" custom={dir}>
+                {step === "mobile" && (
+                  <FormSlide key="mobile" dir={dir}>
+                    <form onSubmit={(e) => { e.preventDefault(); handlePrimaryBtn(); }} className="space-y-6">
+                      {/* Mobile Number Field */}
+                      <div className="space-y-2.5">
+                        <Label htmlFor="identifier" className="text-base sm:text-lg font-bold text-slate-800 block">
+                          Mobile Number
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="identifier"
+                            type="tel"
+                            inputMode="numeric"
+                            maxLength={10}
+                            value={mobile}
+                            onChange={(e) => handleMobileChange(e.target.value)}
+                            placeholder="Enter your 10-digit mobile number"
+                            className="w-full h-14 px-4.5 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:!border-amber-500 focus:!ring-1 focus:!ring-amber-500 focus-visible:!border-amber-500 focus-visible:!ring-1 focus-visible:!ring-amber-500 transition-all rounded-2xl font-medium text-base sm:text-lg outline-none shadow-sm"
+                          />
+                        </div>
+
+                        {checking && (
+                          <div className="flex items-center gap-2.5 text-amber-600 text-base sm:text-lg font-bold pt-1.5 pl-1">
+                            <Loader2 className="w-5 h-5 animate-spin text-amber-500 shrink-0" />
+                            <span>Checking account...</span>
+                          </div>
+                        )}
+
+                        {regStatus === "registered" && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-2.5 text-emerald-700 bg-emerald-50 border border-emerald-300/90 px-4 py-2.5 rounded-xl text-base sm:text-lg font-extrabold mt-2.5 shadow-sm"
+                          >
+                            <CheckCircle2 className="w-5.5 h-5.5 text-emerald-600 shrink-0" />
+                            <span>Account found! Welcome back.</span>
+                          </motion.div>
+                        )}
+
+                        {regStatus === "new" && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-2.5 text-amber-800 bg-amber-50 border border-amber-300/90 px-4 py-2.5 rounded-xl text-base sm:text-lg font-extrabold mt-2.5 shadow-sm"
+                          >
+                            <User className="w-5.5 h-5.5 text-amber-600 shrink-0" />
+                            <span>New user! Account will be created upon verification.</span>
+                          </motion.div>
+                        )}
+
+                        {err && (
+                          <p className="text-red-500 text-base sm:text-lg font-bold pl-1 pt-1.5">
+                            {err}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Need Help Row */}
+                      <div className="flex items-center justify-end text-sm sm:text-base pt-1">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowGuidelinesModal(true);
+                          }}
+                          className="text-amber-600 font-extrabold hover:underline cursor-pointer border-none bg-transparent"
+                        >
+                          Need help?
+                        </button>
+                      </div>
+
+                      {/* Action Button */}
+                      <Button
+                        type="submit"
+                        disabled={checking || mobile.length < 10}
+                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-amber-500/25 transition-all duration-300 active:scale-[0.98] mt-7 flex items-center justify-center gap-2 cursor-pointer border-none"
+                      >
+                        {checking ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>{regStatus === "new" ? "Creating Account..." : "Signing In..."}</span>
+                          </>
+                        ) : (
+                          <span>{regStatus === "new" ? "Sign Up" : "Login"}</span>
+                        )}
+                      </Button>
+                    </form>
+
+                    {/* Footer Link */}
+                    <div className="mt-7 text-center">
+                      <p className="text-base sm:text-lg text-slate-500 font-semibold">
+                        {regStatus === "new" ? (
+                          <>
+                            Already have an account?{" "}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRegStatus("registered");
+                                const inputEl = document.getElementById("identifier");
+                                if (inputEl) inputEl.focus();
+                              }}
+                              className="text-amber-600 font-black hover:underline text-base sm:text-lg transition-all ml-1 cursor-pointer bg-transparent border-none p-0"
+                            >
+                              Sign In
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            Don't have account?{" "}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRegStatus("new");
+                                if (mobile.length === 10) {
+                                  handlePrimaryBtn();
+                                } else {
+                                  const inputEl = document.getElementById("identifier");
+                                  if (inputEl) inputEl.focus();
+                                  toast.success("Enter your mobile number to sign up!");
+                                }
+                              }}
+                              className="text-amber-600 font-black hover:underline text-base sm:text-lg transition-all ml-1 cursor-pointer bg-transparent border-none p-0"
+                            >
+                              Sign Up
+                            </button>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </FormSlide>
+                )}
+
+                {step === "otp" && (
+                  <FormSlide key="otp" dir={dir}>
+                    <form onSubmit={(e) => { e.preventDefault(); handleOtpVerify(); }} className="space-y-6">
+                      <OtpBoxes value={otp} onChange={setOtp} />
+
+                      {err && <p className="text-red-500 text-sm font-semibold text-center">{err}</p>}
+
+                      <div className="flex items-center justify-between text-sm sm:text-base pt-1">
+                        <span className="text-slate-400 font-medium">Didn't receive code?</span>
+                        <button
+                          type="button"
+                          disabled={!canResend}
+                          onClick={() => handlePrimaryBtn()}
+                          className="font-extrabold text-amber-600 hover:underline disabled:opacity-40 cursor-pointer border-none bg-transparent"
+                        >
+                          {canResend ? "Resend OTP" : `Resend in ${timer}s`}
+                        </button>
+                      </div>
+
+                      <Button
+                        type="submit"
+                        disabled={otp.length !== 6 || isActionLoading}
+                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-amber-500/25 transition-all duration-300 active:scale-[0.98] mt-7 flex items-center justify-center gap-2 cursor-pointer border-none disabled:opacity-50"
+                      >
+                        {isActionLoading ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <span>Verify &amp; Proceed</span>
+                        )}
+                      </Button>
+                    </form>
+                  </FormSlide>
+                )}
+
+                {step === "profile" && (
+                  <FormSlide key="profile" dir={dir}>
+                    <form onSubmit={(e) => { e.preventDefault(); handleProfileContinue(); }} className="space-y-5">
+                      {/* Username */}
+                      <div className="space-y-2">
+                        <Label className="text-base sm:text-lg font-bold text-slate-800 block">Username</Label>
+                        <Input
+                          type="text"
+                          value={username}
+                          onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                          placeholder="Enter your username"
+                          maxLength={16}
+                          className="w-full h-14 px-4.5 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:!border-amber-500 focus:!ring-1 focus:!ring-amber-500 focus-visible:!border-amber-500 focus-visible:!ring-1 focus-visible:!ring-amber-500 transition-all rounded-2xl font-medium text-base sm:text-lg outline-none shadow-sm"
+                          required
+                        />
+                        {usernameStatus === 'checking' && <p className="text-xs font-bold text-amber-600">Checking username availability...</p>}
+                        {usernameStatus === 'available' && <p className="text-xs font-bold text-emerald-600">✓ Username is available</p>}
+                        {usernameStatus === 'taken' && <p className="text-xs font-bold text-red-500">✗ Username is already taken</p>}
+                      </div>
+
+                      {/* Date of Birth */}
+                      <div className="space-y-2">
+                        <Label className="text-base sm:text-lg font-bold text-slate-800 block">Date of Birth</Label>
+                        <Input
+                          type="date"
+                          value={dateOfBirth}
+                          onChange={e => setDateOfBirth(e.target.value)}
+                          placeholder="mm/dd/yyyy"
+                          className="w-full h-14 px-4.5 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:!border-amber-500 focus:!ring-1 focus:!ring-amber-500 focus-visible:!border-amber-500 focus-visible:!ring-1 focus-visible:!ring-amber-500 transition-all rounded-2xl font-medium text-base sm:text-lg outline-none shadow-sm cursor-pointer"
+                          required
+                        />
+                      </div>
+
+                      {/* Referral Code (Optional) */}
+                      <div className="space-y-2">
+                        <Label className="text-base sm:text-lg font-bold text-slate-800 block">Referral Code (Optional)</Label>
+                        <Input
+                          type="text"
+                          value={referredBy}
+                          onChange={e => setReferredBy(e.target.value.toUpperCase())}
+                          placeholder="E.G. FIP12345"
+                          className="w-full h-14 px-4.5 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:!border-amber-500 focus:!ring-1 focus:!ring-amber-500 focus-visible:!border-amber-500 focus-visible:!ring-1 focus-visible:!ring-amber-500 transition-all rounded-2xl font-medium text-base sm:text-lg outline-none shadow-sm"
+                        />
+                        {referredByStatus === 'valid' && <p className="text-xs font-bold text-emerald-600">✓ Referred by {referrerName}</p>}
+                        {referredByStatus === 'invalid' && <p className="text-xs font-bold text-red-500">✗ Invalid referral code</p>}
+                      </div>
+
+                      {err && <p className="text-red-500 text-sm font-semibold">{err}</p>}
+
+                      <Button
+                        type="submit"
+                        disabled={!username || usernameStatus === 'taken' || !dateOfBirth}
+                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-amber-500/25 transition-all duration-300 active:scale-[0.98] mt-6 flex items-center justify-center gap-2 cursor-pointer border-none disabled:opacity-50"
+                      >
+                        Continue
+                      </Button>
+
+                      {/* Instructions Footer Link */}
+                      <div className="text-center pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowGuidelinesModal(true)}
+                          className="text-amber-600 font-extrabold text-sm sm:text-base hover:underline cursor-pointer bg-transparent border-none p-0"
+                        >
+                          Read username &amp; security instructions - Click here
+                        </button>
+                      </div>
+                    </form>
+                  </FormSlide>
+                )}
+
+                {step === "tpin" && (
+                  <FormSlide key="tpin" dir={dir}>
+                    <form onSubmit={(e) => { e.preventDefault(); handleCreateAccount(); }} className="space-y-6">
+                      <TpinBoxes value={tpin} onChange={setTpin} />
+
+                      {err && <p className="text-red-500 text-sm font-semibold text-center">{err}</p>}
+
+                      <Button
+                        type="submit"
+                        disabled={tpin.length !== 4 || isActionLoading}
+                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-amber-500/25 transition-all duration-300 active:scale-[0.98] mt-7 flex items-center justify-center gap-2 cursor-pointer border-none disabled:opacity-50"
+                      >
+                        {isActionLoading ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span>Saving PIN...</span>
+                          </>
+                        ) : (
+                          <span>Complete Setup</span>
+                        )}
+                      </Button>
+                    </form>
+                  </FormSlide>
+                )}
+
+                {step === "success" && (
+                  <FormSlide key="success" dir={dir}>
+                    <div className="text-center space-y-4 py-3">
+                      <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-100/60 shadow-sm">
+                        <CheckCircle className="w-10 h-10" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-slate-900">Setup Complete!</h3>
+                        <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">
+                          Your FipMoney account is verified and ready.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => onNavigate("dashboard")}
+                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-amber-500/25 transition-all duration-300 active:scale-[0.98] mt-7 flex items-center justify-center gap-2 cursor-pointer border-none"
+                      >
+                        Go to Dashboard
+                      </Button>
+                    </div>
+                  </FormSlide>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
       {/* ── GUIDELINES MODAL ── */}
       <AnimatePresence>
         {showGuidelinesModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-[#1e1b4b]/40 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white rounded-2xl w-full max-w-[400px] shadow-2xl overflow-hidden flex flex-col"
             >
               <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                 <h3 className="text-[20px] font-black text-[#1e1b4b]">Security Guidelines</h3>
+                 <h3 className="text-[20px] font-black text-slate-900">Security Guidelines</h3>
                  <button onClick={() => setShowGuidelinesModal(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 border-none cursor-pointer">
                    <XCircle size={18} />
                  </button>
               </div>
               <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
                  <div>
-                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><User size={16} className="text-indigo-600"/> Username Instructions</h4>
+                    <h4 className="text-[14px] font-bold text-slate-900 mb-2 flex items-center gap-2"><User size={16} className="text-amber-500"/> Username Instructions</h4>
                     <ul className="text-[13px] text-gray-600 space-y-1.5 list-disc pl-5 m-0">
                        <li>Must be unique and not already taken.</li>
                        <li>Maximum 16 characters long.</li>
@@ -905,21 +1349,14 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     </ul>
                  </div>
                  <div>
-                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><ShieldCheck size={16} className="text-indigo-600"/> Password Strength</h4>
-                    <ul className="text-[13px] text-gray-600 space-y-1.5 list-disc pl-5 m-0">
-                       <li>Must be at least 8 characters long.</li>
-                       <li>Include at least one uppercase letter and one number for a "Strong" rating.</li>
-                    </ul>
-                 </div>
-                 <div>
-                    <h4 className="text-[14px] font-bold text-[#1e1b4b] mb-2 flex items-center gap-2"><Shield size={16} className="text-indigo-600"/> T-PIN Security</h4>
+                    <h4 className="text-[14px] font-bold text-slate-900 mb-2 flex items-center gap-2"><ShieldCheck size={16} className="text-amber-500"/> T-PIN Security</h4>
                     <p className="text-[13px] text-gray-600 m-0 leading-relaxed">
-                       Your 4-digit Transactional PIN is highly sensitive. We do not store the actual numbers in our database. Instead, it is secured using <strong>SHA-256 one-way cryptographic hashing</strong>. This means even our database administrators cannot see or decrypt your PIN.
+                       Your 4-digit Transactional PIN is highly sensitive. We do not store the actual numbers in our database. Instead, it is secured using <strong>SHA-256 one-way cryptographic hashing</strong>.
                     </p>
                  </div>
               </div>
               <div className="p-4 border-t border-gray-100">
-                 <button onClick={() => setShowGuidelinesModal(false)} className="w-full py-3 rounded-xl bg-[#1e1b4b] text-white font-bold text-[14px] border-none cursor-pointer hover:bg-[#2e2b60]">
+                 <button onClick={() => setShowGuidelinesModal(false)} className="w-full py-3 rounded-xl bg-amber-500 text-white font-bold text-[14px] border-none cursor-pointer hover:bg-amber-600">
                    I Understand
                  </button>
               </div>
