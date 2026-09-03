@@ -182,6 +182,38 @@ export const checkMobile = async (req, res, next) => {
   }
 };
 
+// @desc    Check if email already exists in database
+// @route   POST /api/users/check-email
+export const checkEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required' });
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
+
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        exists: true,
+        available: false,
+        message: 'Email already registered'
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        exists: false,
+        available: true,
+        message: 'Email is available'
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Generate and send OTP
 // @route   POST /api/users/send-otp
 export const sendOtp = async (req, res, next) => {

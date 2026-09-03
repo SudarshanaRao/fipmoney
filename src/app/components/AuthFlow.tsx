@@ -6,7 +6,7 @@ import {
   ArrowLeft, CheckCircle, RefreshCw, Users, Award, Star,
   ShieldCheck, Smartphone, Eye, EyeOff, Loader2, XCircle,
   Shield, Coins, BarChart3, Globe, ChevronDown, User, CheckCircle2, ArrowRight,
-  HelpCircle, Mail, Lock
+  HelpCircle, Mail, Lock, AlertCircle
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -155,6 +155,16 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [regStatus,   setRegStatus]   = useState<"registered" | "new" | null>(null);
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [emailStatus, setEmailStatus] = useState<'checking' | 'available' | 'taken' | null>(null);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [showEmailOtpPanel, setShowEmailOtpPanel] = useState(false);
+  const [emailOtp, setEmailOtp] = useState("");
+  const [isSendingEmailOtp, setIsSendingEmailOtp] = useState(false);
+  const [isVerifyingEmailOtp, setIsVerifyingEmailOtp] = useState(false);
+  const [emailOtpTimer, setEmailOtpTimer] = useState(30);
+  const [canResendEmailOtp, setCanResendEmailOtp] = useState(false);
+
   const [usernameStatus, setUsernameStatus] = useState<'checking' | 'available' | 'taken' | null>(null);
   const [showTpin, setShowTpin] = useState(false);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
@@ -163,6 +173,44 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [referredBy, setReferredBy] = useState("");
   const [referredByStatus, setReferredByStatus] = useState<'checking' | 'valid' | 'invalid' | null>(null);
   const [referrerName, setReferrerName] = useState("");
+
+  useEffect(() => {
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      setEmailStatus(null);
+      setIsEmailVerified(false);
+      return;
+    }
+    setEmailStatus('checking');
+    const timerId = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/users/check-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.exists) {
+          setEmailStatus('taken');
+          setIsEmailVerified(false);
+        } else {
+          setEmailStatus('available');
+        }
+      } catch (err) {
+        setEmailStatus(null);
+      }
+    }, 500);
+    return () => clearTimeout(timerId);
+  }, [email]);
+
+  useEffect(() => {
+    if (!showEmailOtpPanel) return;
+    if (emailOtpTimer <= 0) {
+      setCanResendEmailOtp(true);
+      return;
+    }
+    const timer = setTimeout(() => setEmailOtpTimer(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [showEmailOtpPanel, emailOtpTimer]);
 
   useEffect(() => {
     if (!username || username.length < 3) {
@@ -376,7 +424,84 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     }
   };
 
+  const handleSendEmailOtp = async () => {
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (emailStatus === 'taken') {
+      toast.error("Email is already registered");
+      return;
+    }
+
+    setIsSendingEmailOtp(true);
+    const loadingToast = toast.loading("Sending Email OTP...");
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, userName: username || "User" })
+      });
+      const data = await res.json();
+      setIsSendingEmailOtp(false);
+      if (data.success) {
+        toast.success("Email OTP sent successfully!", { id: loadingToast });
+        setShowEmailOtpPanel(true);
+        setEmailOtp("");
+        setEmailOtpTimer(30);
+        setCanResendEmailOtp(false);
+      } else {
+        toast.error(data.message || "Failed to send Email OTP", { id: loadingToast });
+      }
+    } catch (err) {
+      setIsSendingEmailOtp(false);
+      toast.error("Network error. Could not send OTP.", { id: loadingToast });
+    }
+  };
+
+  const handleVerifyEmailOtp = async () => {
+    if (!emailOtp || emailOtp.length !== 6) {
+      toast.error("Please enter 6-digit OTP");
+      return;
+    }
+    setIsVerifyingEmailOtp(true);
+    const loadingToast = toast.loading("Verifying Email OTP...");
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/verify-email-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: emailOtp })
+      });
+      const data = await res.json();
+      setIsVerifyingEmailOtp(false);
+      if (data.success) {
+        toast.success("Email verified successfully!", { id: loadingToast });
+        setIsEmailVerified(true);
+        setShowEmailOtpPanel(false);
+      } else {
+        toast.error(data.message || "Invalid Email OTP", { id: loadingToast });
+      }
+    } catch (err) {
+      setIsVerifyingEmailOtp(false);
+      toast.error("Network error while verifying OTP.", { id: loadingToast });
+    }
+  };
+
   const handleProfileContinue = () => {
+    if (!username || username.trim().length < 3) {
+      setErr("Please enter a valid username (min 3 characters)");
+      return;
+    }
+    if (!email || !email.includes("@")) {
+      setErr("Please enter a valid email address");
+      return;
+    }
+    if (!isEmailVerified) {
+      setErr("Please verify your email address before continuing");
+      toast.error("Please verify your email address first");
+      return;
+    }
+    setErr("");
     go(() => setStep("tpin"));
   };
 
@@ -386,7 +511,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
       const res = await fetch(`${API_BASE_URL}/users/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile, username, dateOfBirth, tpin, referredBy })
+        body: JSON.stringify({ mobile, username, email, dateOfBirth, tpin, referredBy })
       });
       const data = await res.json();
       if (data.success && data.data) {
@@ -1218,18 +1343,133 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                         {usernameStatus === 'taken' && <p className="text-xs font-bold text-red-500">✗ Username is already taken</p>}
                       </div>
 
-                      {/* Date of Birth */}
+                      {/* Email Address */}
                       <div className="space-y-2">
-                        <Label className="text-base sm:text-lg font-bold text-slate-800 block">Date of Birth</Label>
-                        <Input
-                          type="date"
-                          value={dateOfBirth}
-                          onChange={e => setDateOfBirth(e.target.value)}
-                          placeholder="mm/dd/yyyy"
-                          className="w-full h-14 px-4.5 bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:!border-amber-500 focus:!ring-1 focus:!ring-amber-500 focus-visible:!border-amber-500 focus-visible:!ring-1 focus-visible:!ring-amber-500 transition-all rounded-2xl font-medium text-base sm:text-lg outline-none shadow-sm cursor-pointer"
-                          required
-                        />
+                        <Label className="text-base sm:text-lg font-bold text-slate-800 block">Email Address</Label>
+                        <div className="flex items-center gap-2.5">
+                          <div className="relative flex-1">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                              <Mail className="w-5 h-5" />
+                            </div>
+                            <Input
+                              type="email"
+                              value={email}
+                              disabled={isEmailVerified}
+                              onChange={e => {
+                                setEmail(e.target.value);
+                                setIsEmailVerified(false);
+                                setShowEmailOtpPanel(false);
+                              }}
+                              placeholder="Enter your email address"
+                              className={`w-full h-14 pl-12 pr-11 bg-white border ${
+                                emailStatus === 'taken' 
+                                  ? 'border-red-400 focus:!border-red-500 focus:!ring-red-500' 
+                                  : isEmailVerified || emailStatus === 'available'
+                                  ? 'border-amber-400 focus:!border-amber-500 focus:!ring-amber-500'
+                                  : 'border-slate-200 focus:!border-amber-500 focus:!ring-amber-500'
+                              } text-slate-900 placeholder:text-slate-400 transition-all rounded-2xl font-medium text-base sm:text-lg outline-none shadow-sm disabled:bg-slate-50 disabled:text-slate-600`}
+                              required
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                              {emailStatus === 'checking' && (
+                                <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                              )}
+                              {emailStatus === 'taken' && (
+                                <AlertCircle className="w-5 h-5 text-red-500" />
+                              )}
+                              {(isEmailVerified || (emailStatus === 'available' && !isEmailVerified)) && (
+                                <CheckCircle2 className={`w-5 h-5 ${isEmailVerified ? 'text-emerald-500 fill-emerald-500/10' : 'text-emerald-500'}`} />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Verify / Resend / Verified Button */}
+                          {isEmailVerified ? (
+                            <div className="h-14 px-5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-extrabold text-sm sm:text-base flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                              <span>Verified</span>
+                            </div>
+                          ) : (
+                            <Button
+                              type="button"
+                              disabled={!email || !email.includes('@') || emailStatus === 'taken' || emailStatus === 'checking' || isSendingEmailOtp}
+                              onClick={handleSendEmailOtp}
+                              className="h-14 px-5 sm:px-6 rounded-2xl bg-amber-50 hover:bg-amber-100/80 border border-amber-300 text-amber-800 font-extrabold text-base transition-all duration-200 active:scale-95 shrink-0 shadow-sm disabled:opacity-40"
+                            >
+                              {isSendingEmailOtp ? (
+                                <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                              ) : showEmailOtpPanel ? (
+                                "Resend"
+                              ) : (
+                                "Verify"
+                              )}
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Error message if email already registered */}
+                        {emailStatus === 'taken' && (
+                          <p className="text-xs sm:text-sm font-semibold text-red-500 flex items-center gap-1.5 pt-0.5">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            <span>Email already registered</span>
+                          </p>
+                        )}
                       </div>
+
+                      {/* Collapsible Inline Email OTP Panel */}
+                      <AnimatePresence>
+                        {showEmailOtpPanel && !isEmailVerified && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                            animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="bg-amber-50/60 border border-amber-200/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm">
+                              <div className="flex items-center justify-between">
+                                <span className="font-extrabold text-slate-800 text-sm sm:text-base">Enter 6-Digit Email OTP</span>
+                                <span className="bg-amber-200/80 text-amber-900 font-extrabold text-[11px] sm:text-xs px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                  MAIL SENT
+                                </span>
+                              </div>
+
+                              {/* 6 Square Input boxes for Email OTP */}
+                              <OtpBoxes
+                                value={emailOtp}
+                                onChange={setEmailOtp}
+                              />
+
+                              <div className="flex items-center justify-between text-xs sm:text-sm font-medium text-slate-600">
+                                <span>Didn't receive email OTP?</span>
+                                <button
+                                  type="button"
+                                  disabled={!canResendEmailOtp || isSendingEmailOtp}
+                                  onClick={handleSendEmailOtp}
+                                  className="font-extrabold text-amber-700 hover:underline disabled:opacity-40 cursor-pointer border-none bg-transparent p-0"
+                                >
+                                  {canResendEmailOtp ? "Resend OTP" : `Resend in ${emailOtpTimer}s`}
+                                </button>
+                              </div>
+
+                              <Button
+                                type="button"
+                                disabled={emailOtp.length !== 6 || isVerifyingEmailOtp}
+                                onClick={handleVerifyEmailOtp}
+                                className="w-full h-13 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-base shadow-md shadow-amber-500/20 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer border-none disabled:opacity-50"
+                              >
+                                {isVerifyingEmailOtp ? (
+                                  <>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span>Verifying OTP...</span>
+                                  </>
+                                ) : (
+                                  <span>Confirm Email OTP</span>
+                                )}
+                              </Button>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
                       {/* Referral Code (Optional) */}
                       <div className="space-y-2">
@@ -1249,7 +1489,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
                       <Button
                         type="submit"
-                        disabled={!username || usernameStatus === 'taken' || !dateOfBirth}
+                        disabled={!username || usernameStatus === 'taken' || !email || !isEmailVerified || isActionLoading}
                         className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-amber-500/25 transition-all duration-300 active:scale-[0.98] mt-6 flex items-center justify-center gap-2 cursor-pointer border-none disabled:opacity-50"
                       >
                         Continue

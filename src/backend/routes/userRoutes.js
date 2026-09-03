@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkMobile, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPresignedUploadUrl, confirmProfileImageUpload, getProfileImageUrl, deleteProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus, getUserSessions, revokeUserSession, checkSessionStatus } from '../controllers/userController.js';
+import { checkMobile, checkEmail, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPresignedUploadUrl, confirmProfileImageUpload, getProfileImageUrl, deleteProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus, getUserSessions, revokeUserSession, checkSessionStatus } from '../controllers/userController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -153,6 +153,7 @@ router.post('/check-referral', checkReferral);
  *         description: Checked existence status.
  */
 router.post('/check-mobile', checkMobile);
+router.post('/check-email', checkEmail);
 
 /**
  * @swagger
