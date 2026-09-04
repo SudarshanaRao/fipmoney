@@ -87,9 +87,27 @@ export default function SellMetalModal({
   const [step, setStep] = useState<Step>("input");
   const [isBreakdownOpen, setIsBreakdownOpen] = useState<boolean>(true);
 
+  const isGold = metal === "gold";
+
   // Dynamic metal strings
-  const metalName = metal === "gold" ? "Gold" : "Silver";
-  const metalPurity = metal === "gold" ? "24K 99.99% Pure Digital Gold" : "99.9% Fine Pure Digital Silver";
+  const metalName = isGold ? "Gold" : "Silver";
+  const metalPurity = isGold ? "24K 99.99% Pure Digital Gold" : "99.9% Fine Pure Digital Silver";
+
+  // Dynamic theme colors (Gold vs Silver)
+  const metalImage = isGold ? "/gold.png" : "/silver.png";
+  const themeCardGradient = isGold 
+    ? "bg-gradient-to-r from-amber-50/90 via-amber-100/80 to-amber-50/90 border-amber-200/90" 
+    : "bg-gradient-to-r from-blue-50/90 via-sky-100/80 to-blue-50/90 border-blue-200/90";
+  const themeBadgeBg = isGold ? "bg-amber-500 text-white" : "bg-[#1d4ed8] text-white";
+  const themeText = isGold ? "text-amber-600" : "text-[#1d4ed8]";
+  const themeFocusBorder = isGold ? "border-amber-300 focus-within:border-amber-500" : "border-blue-200 focus-within:border-[#1d4ed8]";
+  const themePresetBtn = isGold 
+    ? "text-amber-700 bg-amber-50/70 border-amber-200/80 hover:bg-amber-100" 
+    : "text-[#1d4ed8] bg-blue-50/70 border-blue-200/80 hover:bg-blue-100";
+  const themeCtaBtn = isGold 
+    ? "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-amber-600/25" 
+    : "bg-[#1d4ed8] hover:bg-[#1e40af] text-white shadow-blue-600/30";
+  const themeSubCardBg = isGold ? "bg-amber-500/10 text-amber-600" : "bg-[#eff6ff] text-[#1d4ed8]";
 
   // Day-wise Stable Fixed Locked Rate
   const [lockedRate, setLockedRate] = useState<number>(basePrice);
@@ -231,12 +249,12 @@ export default function SellMetalModal({
           </button>
 
           {/* ======================================================== */}
-          {/* MOBILE VIEW ONLY (< lg screens) Matching Buy Gold Layout */}
+          {/* MOBILE VIEW ONLY (< lg screens) Dynamic Gold/Silver Theme */}
           {/* ======================================================== */}
-          <div className="lg:hidden flex flex-col space-y-4 w-full max-w-md mx-auto text-slate-800 font-sans p-1">
+          <div className="lg:hidden flex flex-col space-y-3.5 w-full max-w-md mx-auto text-slate-800 font-sans p-1">
             
             {/* Top Bar Header */}
-            <div className="relative flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="relative flex items-center justify-between pb-2 border-b border-slate-100">
               <button
                 onClick={onClose}
                 className="w-9 h-9 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-700 flex items-center justify-center border-none outline-none cursor-pointer z-10"
@@ -251,112 +269,106 @@ export default function SellMetalModal({
               </button>
             </div>
 
-            {/* 1. Live Gold Sell Rate Card */}
-            <div className="bg-gradient-to-br from-[#fffdf5] via-[#fffef7] to-[#fffbeb] rounded-3xl p-4 border border-amber-200/80 shadow-2xs flex items-center justify-between relative overflow-hidden">
+            {/* 1. Live Gold/Silver Sell Rate Card */}
+            <div className={`rounded-2xl p-3.5 border shadow-2xs flex items-center justify-between relative overflow-hidden ${
+              isGold ? "bg-gradient-to-br from-[#fffdf5] via-[#fffef7] to-[#fffbeb] border-amber-200/80" : "bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] border-slate-200/80"
+            }`}>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full bg-[#fef3c7] text-[#d97706] flex items-center justify-center shrink-0">
-                    <TrendingUp size={18} strokeWidth={2.5} />
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                    isGold ? "bg-[#fef3c7] text-[#d97706]" : "bg-blue-100 text-[#1d4ed8]"
+                  }`}>
+                    <TrendingUp size={16} strokeWidth={2.5} />
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-sm leading-tight">Live {metalName} Sell Rate</h3>
-                    <p className="text-[11px] font-semibold text-slate-400">{metalPurity}</p>
-                  </div>
+                  <h3 className="font-extrabold text-slate-900 text-sm leading-tight">Live {metalName} Sell Rate</h3>
                 </div>
-                <div className="flex items-baseline gap-1 pt-1.5">
+                <div className="flex items-baseline gap-1 pt-1">
                   <span className="text-2xl font-black text-slate-900 tracking-tight">
                     ₹{lockedRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                   <span className="text-xs font-semibold text-slate-400">/gm</span>
-                  <span className="bg-[#dcfce7] text-[#15803d] text-xs font-extrabold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 ml-2.5">
+                  <span className="bg-[#dcfce7] text-[#15803d] text-xs font-extrabold px-2 py-0.5 rounded-full inline-flex items-center gap-0.5 ml-2">
                     ▲ +₹{marketDiff}
                   </span>
                 </div>
               </div>
-              <img src="/gold.png" alt="Gold Bars" className="w-20 h-auto object-contain shrink-0" />
+              <img src={metalImage} alt={metalName} className="w-16 h-auto object-contain shrink-0" />
             </div>
 
-            {/* 2. Same-Day Price Locked Card */}
-            <div className="bg-white rounded-3xl p-4 border border-slate-100 shadow-2xs flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#eff6ff] text-[#1d4ed8] flex items-center justify-center shrink-0">
+            {/* 2. Same-Day Price Locked Card (Lighter Background) */}
+            <div className={`rounded-2xl p-3.5 shadow-2xs flex items-center justify-between relative overflow-hidden border ${themeCardGradient}`}>
+              <div className="flex items-center gap-3 relative z-10">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
+                  isGold ? "bg-amber-500 text-white" : "bg-[#1d4ed8] text-white"
+                }`}>
                   <Lock size={18} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm leading-tight">Same-Day Rate Lock</h4>
-                  <p className="text-xs text-slate-400 mt-0.5">Rate valid till 11:59 PM today</p>
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-extrabold text-slate-900 text-xs tracking-tight uppercase">Same-Day Rate Lock</h4>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  </div>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Rate valid till 11:59 PM today</p>
                 </div>
               </div>
 
-              {/* Dark Blue Circular Lock Pill */}
-              <div className="px-3 py-2 rounded-2xl border-2 border-dashed border-[#2563eb] bg-[#eff6ff] flex flex-col items-center justify-center text-center shrink-0">
-                <span className="text-xs font-black text-[#1d4ed8] leading-none">TODAY</span>
-                <span className="text-[8px] font-bold text-slate-400 leading-tight mt-0.5">valid</span>
+              {/* Lock Badge on light bg */}
+              <div className={`rounded-xl px-3 py-1.5 flex flex-col items-center justify-center text-center shrink-0 relative z-10 shadow-2xs min-w-[65px] ${
+                isGold ? "bg-amber-500 text-white" : "bg-[#1d4ed8] text-white"
+              }`}>
+                <span className="text-xs font-black leading-none tracking-wider">TODAY</span>
+                <span className="text-[8px] font-bold text-white/90 uppercase tracking-widest leading-none mt-0.5">Locked</span>
               </div>
             </div>
 
-            {/* 3. Sell in Rupees / Sell in Grams Switcher */}
-            <div className="grid grid-cols-2 gap-3">
-              <div
+            {/* 3. Sleek Segmented Control Switcher */}
+            <div className="bg-slate-100/90 p-1 rounded-2xl flex items-center border border-slate-200/60 shadow-2xs">
+              <button
+                type="button"
                 onClick={() => handleSwitchMode("amount")}
-                className={`rounded-2xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${
+                className={`flex-1 py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none outline-none ${
                   sellMode === "amount"
-                    ? "bg-[#eff6ff] border border-[#bfdbfe]"
-                    : "bg-[#fafafa] border border-slate-100"
+                    ? `${themeBadgeBg} shadow-sm`
+                    : "text-slate-600 hover:text-slate-900 bg-transparent"
                 }`}
               >
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
-                  sellMode === "amount" ? "bg-[#1d4ed8] text-white" : "bg-slate-200 text-slate-600"
-                }`}>
-                  ₹
-                </div>
-                <div>
-                  <span className={`text-xs font-bold block ${sellMode === "amount" ? "text-[#1d4ed8]" : "text-slate-800"}`}>
-                    Sell in Rupees
-                  </span>
-                  <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">Specify ₹ amount</span>
-                </div>
-              </div>
+                <span className="font-black text-sm">₹</span>
+                <span>Sell in Rupees</span>
+              </button>
 
-              <div
+              <button
+                type="button"
                 onClick={() => handleSwitchMode("grams")}
-                className={`rounded-2xl p-3.5 flex items-center gap-3 cursor-pointer transition-all ${
+                className={`flex-1 py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border-none outline-none ${
                   sellMode === "grams"
-                    ? "bg-[#eff6ff] border border-[#bfdbfe]"
-                    : "bg-[#fafafa] border border-slate-100"
+                    ? `${themeBadgeBg} shadow-sm`
+                    : "text-slate-600 hover:text-slate-900 bg-transparent"
                 }`}
               >
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
-                  sellMode === "grams" ? "bg-[#1d4ed8] text-white" : "bg-slate-200 text-slate-600"
-                }`}>
-                  <Scale size={16} />
-                </div>
-                <div>
-                  <span className={`text-xs font-bold block ${sellMode === "grams" ? "text-[#1d4ed8]" : "text-slate-800"}`}>
-                    Sell in Grams
-                  </span>
-                  <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">Specify quantity</span>
-                </div>
-              </div>
+                <Scale size={14} strokeWidth={2.5} />
+                <span>Sell in Grams</span>
+              </button>
             </div>
 
             {/* 4. Enter Amount Input Section */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold text-slate-800 block">Enter Amount to Sell</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-extrabold text-slate-700 block uppercase tracking-wider">
+                  {sellMode === "amount" ? "Enter Amount" : "Enter Grams"}
+                </label>
                 <button
                   onClick={() => {
                     if (sellMode === "amount") setAmountInput("5000");
                     else setGramsInput("1.0");
                   }}
-                  className="text-[11px] font-extrabold text-[#1d4ed8] hover:underline cursor-pointer border-none bg-transparent"
+                  className={`text-[11px] font-extrabold hover:underline cursor-pointer border-none bg-transparent ${themeText}`}
                 >
                   SELL ALL
                 </button>
               </div>
               
-              <div className="bg-white border-2 border-blue-200 focus-within:border-[#1d4ed8] rounded-2xl p-3 flex items-center justify-between shadow-2xs">
-                <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-800 font-bold text-lg flex items-center justify-center mr-3 shrink-0">
+              <div className={`bg-white border-2 rounded-2xl p-2.5 flex items-center justify-between shadow-2xs ${themeFocusBorder}`}>
+                <div className="w-8 h-8 rounded-xl bg-slate-50 text-slate-800 font-bold text-base flex items-center justify-center mr-2 shrink-0">
                   {sellMode === "amount" ? "₹" : "g"}
                 </div>
                 <input
@@ -367,7 +379,7 @@ export default function SellMetalModal({
                     if (sellMode === "amount") setAmountInput(e.target.value);
                     else setGramsInput(e.target.value);
                   }}
-                  className="w-full text-2xl font-black text-slate-900 border-none outline-none bg-transparent placeholder:text-slate-300"
+                  className="w-full text-xl font-black text-slate-900 border-none outline-none bg-transparent placeholder:text-slate-300"
                 />
                 {(sellMode === "amount" ? amountInput : gramsInput) && (
                   <button
@@ -380,12 +392,12 @@ export default function SellMetalModal({
               </div>
 
               {/* 4 Quick Preset Amount Pills */}
-              <div className="grid grid-cols-4 gap-2.5 mt-3">
+              <div className="grid grid-cols-4 gap-2 mt-2">
                 {[500, 1000, 2000, 5000].map((val) => (
                   <button
                     key={val}
                     onClick={() => handleAddPreset(val)}
-                    className="py-2.5 px-1 rounded-2xl bg-white border border-slate-200/90 text-[#1d4ed8] text-xs font-extrabold text-center hover:bg-blue-50 transition cursor-pointer border-none outline-none shadow-2xs"
+                    className={`py-2 px-1 rounded-xl text-xs font-extrabold text-center transition cursor-pointer border outline-none shadow-2xs ${themePresetBtn}`}
                   >
                     + ₹{val.toLocaleString()}
                   </button>
@@ -394,39 +406,36 @@ export default function SellMetalModal({
             </div>
 
             {/* 5. You Will Sell & Net Payout Summary Card */}
-            <div className="bg-[#fafafa] rounded-2xl p-4 border border-slate-100/90 flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-                  <span className="text-amber-500">🪙</span> You will sell (approx.)
+            <div className="bg-[#fafafa] rounded-2xl p-3 border border-slate-100/90 flex items-center justify-between">
+              <div className="flex-1 text-center">
+                <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                  You Will Sell
                 </div>
-                <div className="text-xl font-black text-slate-900 mt-1">
+                <div className="text-lg font-black text-slate-900 mt-0.5">
                   {calculatedGrams.toFixed(4)} gm
                 </div>
               </div>
-              <div className="w-px h-8 bg-slate-200/80 mx-2"></div>
-              <div className="flex-1">
-                <div className="flex items-center gap-1 text-[11px] text-slate-400 font-medium">
-                  Instant Payout <Info size={12} className="text-slate-400" />
+              <div className="w-px h-7 bg-slate-200/80 mx-2"></div>
+              <div className="flex-1 text-center">
+                <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                  Instant Payout
                 </div>
-                <div className="text-xl font-black text-slate-900 mt-1">
+                <div className="text-lg font-black text-slate-900 mt-0.5">
                   ₹{netPayout.toFixed(2)}
                 </div>
               </div>
             </div>
 
-            {/* 6. Price & Payout Breakdown Accordion (Open by Default) */}
+            {/* 6. Price Breakdown Accordion */}
             <div
               onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
-              className="bg-[#fafafa] rounded-2xl p-4 border border-slate-100/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
+              className="bg-[#fafafa] rounded-2xl p-3 border border-slate-100/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#eff6ff] text-[#1d4ed8] flex items-center justify-center shrink-0">
-                  <Layers size={18} />
+              <div className="flex items-center gap-2.5">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${themeSubCardBg}`}>
+                  <Layers size={16} />
                 </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-xs">Payout Breakdown</h4>
-                  <p className="text-[10px] text-slate-400 mt-0.5">0% vault fee • Free IMPS transfer</p>
-                </div>
+                <h4 className="font-extrabold text-slate-900 text-xs">Payout Breakdown</h4>
               </div>
               <ChevronDown size={16} className={`text-slate-400 transition-transform ${isBreakdownOpen ? 'rotate-180' : ''}`} />
             </div>
@@ -442,35 +451,28 @@ export default function SellMetalModal({
                   <span>Vault Transfer Fee</span>
                   <span className="font-bold text-emerald-600">₹0.00 (Free)</span>
                 </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>TDS / Tax Deductions</span>
-                  <span className="font-bold">₹0.00</span>
-                </div>
                 <div className="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1.5">
                   <span>Net Payout to Bank</span>
-                  <span className="text-[#1d4ed8]">₹{netPayout.toFixed(2)}</span>
+                  <span className={themeText}>₹{netPayout.toFixed(2)}</span>
                 </div>
               </div>
             )}
 
-            {/* 7. Net Bank Payout & Sell Gold CTA Button */}
-            <div className="flex items-center justify-between gap-3 pt-2">
+            {/* 7. Net Bank Payout & Sell CTA Button */}
+            <div className="flex items-center justify-between gap-3 pt-1">
               <div>
-                <span className="text-[11px] font-bold text-slate-400 block">Net Bank Payout</span>
-                <span className="text-2xl font-black text-[#1d4ed8] block">
+                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Net Bank Payout</span>
+                <span className={`text-xl font-black block ${themeText}`}>
                   ₹{netPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-                <span className="text-[9px] text-slate-400 block mt-0.5">
-                  (Instant IMPS Settlement)
                 </span>
               </div>
               <button
                 disabled={calculatedAmount <= 0}
                 onClick={handleProcessSell}
-                className={`py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 cursor-pointer border-none outline-none transition-all flex-1 max-w-[190px] ${
+                className={`py-3 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer border-none outline-none transition-all flex-1 max-w-[190px] ${
                   calculatedAmount <= 0
                     ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
-                    : "bg-[#1d4ed8] hover:bg-[#1e40af] text-white shadow-lg shadow-blue-600/30"
+                    : themeCtaBtn
                 }`}
               >
                 <span>Sell {metalName}</span>
@@ -479,21 +481,18 @@ export default function SellMetalModal({
             </div>
 
             {/* 8. Trust Badges Footer */}
-            <div className="bg-[#fafafa] rounded-2xl p-4 border border-slate-100/90 grid grid-cols-3 gap-1 text-center">
+            <div className="mt-5 bg-[#fafafa] rounded-2xl p-3.5 border border-slate-100/90 grid grid-cols-3 gap-1 text-center">
               <div className="flex flex-col items-center">
-                <Shield size={16} className="text-[#1d4ed8] mb-0.5" />
-                <span className="text-[10px] font-bold text-[#1d4ed8] leading-tight mt-1">100%</span>
-                <span className="text-[9px] text-slate-400 leading-tight">Instant IMPS</span>
+                <Shield size={14} className={themeText} />
+                <span className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">100% Instant</span>
               </div>
               <div className="flex flex-col items-center border-x border-slate-200/80">
-                <Lock size={16} className="text-[#1d4ed8] mb-0.5" />
-                <span className="text-[10px] font-bold text-[#1d4ed8] leading-tight mt-1">Secure</span>
-                <span className="text-[9px] text-slate-400 leading-tight">Vault Transfer</span>
+                <Lock size={14} className={themeText} />
+                <span className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">Vault Transfer</span>
               </div>
               <div className="flex flex-col items-center">
-                <Award size={16} className="text-[#1d4ed8] mb-0.5" />
-                <span className="text-[10px] font-bold text-[#1d4ed8] leading-tight mt-1">0%</span>
-                <span className="text-[9px] text-slate-400 leading-tight">Vault Fee</span>
+                <Award size={14} className={themeText} />
+                <span className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">0% Vault Fee</span>
               </div>
             </div>
           </div>

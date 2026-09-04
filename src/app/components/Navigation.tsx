@@ -8,15 +8,16 @@ import { API_BASE_URL } from "../utils/apiConfig";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "become-agent";
+export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "become-agent";
 
 export const navItems = [
-  { id: "home",      Icon: Home,       label: "Dashboard" },
-  { id: "portfolio", Icon: Wallet,     label: "Portfolio"  },
-  { id: "sip",       Icon: TrendingUp, label: "Digital Gold & Silver"  },
-  { id: "savings",   Icon: PiggyBank,  label: "Savings (SIP)"          },
-  { id: "bills",     Icon: Zap,        label: "Bills & Recharges"      },
-  { id: "history",   Icon: Clock,      label: "History"    },
+  { id: "home",           Icon: Home,       label: "Dashboard" },
+  { id: "portfolio",      Icon: Wallet,     label: "Portfolio"  },
+  { id: "sip",            Icon: TrendingUp, label: "Digital Gold & Silver"  },
+  { id: "savings",        Icon: PiggyBank,  label: "Gold SIP Savings"       },
+  { id: "silver-savings", Icon: Sparkles,   label: "Silver SIP Savings"     },
+  { id: "bills",          Icon: Zap,        label: "Bills & Recharges"      },
+  { id: "history",        Icon: Clock,      label: "History"    },
 ];
 
 interface NavProps {

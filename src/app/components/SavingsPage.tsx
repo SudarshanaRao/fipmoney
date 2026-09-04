@@ -21,7 +21,9 @@ import {
   Wallet,
   Zap,
   Smartphone,
-  ArrowRight
+  ArrowRight,
+  Check,
+  X
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -133,27 +135,83 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
   const [sipAmount, setSipAmount] = useState<number>(10);
   const [sipDuration, setSipDuration] = useState<number>(5);
 
-  const handleOpenSetup = (planId: PlanType) => {
-    setActiveSetup(planId);
-    const plan = savingsPlans.find(p => p.id === planId);
-    if (plan) {
-      setSipAmount(plan.defaults.amount);
-      setSipDuration(5);
+  // Mobile SIP setup flow states (only triggered on mobile screens)
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [mobileSipStep, setMobileSipStep] = useState<'none' | 'day_select' | 'date_select' | 'daily_tenure' | 'success'>('none');
+  const [mobileSelectedPlan, setMobileSelectedPlan] = useState<PlanType>(null);
+  const [selectedWeeklyDay, setSelectedWeeklyDay] = useState<string>('Monday');
+  const [selectedMonthlyDate, setSelectedMonthlyDate] = useState<number>(5);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const handleSetupPlanClick = (planId: PlanType, customAmt?: number) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('fm_setup_metal', 'gold');
+      sessionStorage.setItem('fm_setup_plan', planId);
     }
+    if (onNavigate) {
+      onNavigate('setup-sip');
+    } else {
+      setActiveSetup(planId);
+    }
+  };
+
+  const handleOpenSetup = (planId: PlanType) => {
+    handleSetupPlanClick(planId);
   };
 
   const handleCloseSetup = () => {
     setActiveSetup(null);
   };
 
-  const activePlanData = useMemo(() => savingsPlans.find(p => p.id === activeSetup), [activeSetup]);
+  const getNextAutoPayDate = () => {
+    const now = new Date();
+    const plan = mobileSelectedPlan || activeSetup || 'daily';
+
+    if (plan === 'daily') {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      return tomorrow.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ' at 09:00 AM';
+    }
+
+    if (plan === 'weekly') {
+      const daysMap: Record<string, number> = {
+        'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6
+      };
+      const targetDay = daysMap[selectedWeeklyDay] ?? 1;
+      const currentDay = now.getDay();
+      let distance = targetDay - currentDay;
+      if (distance <= 0) distance += 7;
+      const nextDate = new Date(now);
+      nextDate.setDate(now.getDate() + distance);
+      return nextDate.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    if (plan === 'monthly') {
+      let nextDate = new Date(now.getFullYear(), now.getMonth(), selectedMonthlyDate);
+      if (nextDate <= now) {
+        nextDate = new Date(now.getFullYear(), now.getMonth() + 1, selectedMonthlyDate);
+      }
+      return nextDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    return 'Tomorrow at 09:00 AM';
+  };
+
+  const activePlanData = useMemo(() => savingsPlans.find(p => p.id === (activeSetup || mobileSelectedPlan)), [activeSetup, mobileSelectedPlan]);
 
   const calculationData = useMemo(() => {
-    if (!activePlanData) return { chartData: [], totalInvested: 0, estimatedReturn: 0, totalValue: 0 };
-
+    const currentPlanId = activeSetup || mobileSelectedPlan || 'daily';
     let periodsPerYear = 12;
-    if (activePlanData.id === 'daily') periodsPerYear = 365;
-    if (activePlanData.id === 'weekly') periodsPerYear = 52;
+    if (currentPlanId === 'daily') periodsPerYear = 365;
+    if (currentPlanId === 'weekly') periodsPerYear = 52;
 
     const ratePerPeriod = ANNUAL_RETURN_RATE / periodsPerYear;
     const chartData = [];
@@ -183,13 +241,17 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
       }
     }
 
+    const estimatedReturn = Math.round(currentValue - currentInvested);
+    const percentageGain = currentInvested > 0 ? Number(((estimatedReturn / currentInvested) * 100).toFixed(1)) : 0;
+
     return {
       chartData,
       totalInvested: Math.round(currentInvested),
-      estimatedReturn: Math.round(currentValue - currentInvested),
-      totalValue: Math.round(currentValue)
+      estimatedReturn,
+      totalValue: Math.round(currentValue),
+      percentageGain
     };
-  }, [activePlanData, sipAmount, sipDuration]);
+  }, [activeSetup, mobileSelectedPlan, sipAmount, sipDuration]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -338,99 +400,6 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                 </div>
               </div>
 
-              {/* Your Savings Goals Section */}
-              <div className="pt-2">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-[#6D28D9]">
-                      <Target size={14} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight">
-                        Your Savings Goals
-                      </h2>
-                      <p className="text-xs text-slate-500 font-medium">
-                        Track and manage all your gold savings goals in one place.
-                      </p>
-                    </div>
-                  </div>
-
-                  <button className="text-xs font-black text-[#6D28D9] hover:text-purple-900 flex items-center gap-1 transition-colors cursor-pointer bg-transparent border-none outline-none">
-                    <span>View All Goals</span>
-                    <ChevronRight size={14} strokeWidth={2.5} />
-                  </button>
-                </div>
-
-                {/* 4 Summary Metric Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Card 1: Total Invested */}
-                  <div className="bg-[#F8F9FE] border border-purple-100/80 rounded-2xl p-5 flex items-center justify-between shadow-xs">
-                    <div>
-                      <span className="text-xs font-bold text-[#6D28D9]">Total Invested</span>
-                      <div className="text-xl font-black text-slate-900 tracking-tight mt-1">
-                        ₹12,450.00
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-400">
-                        Across all plans
-                      </span>
-                    </div>
-                    <div className="w-11 h-11 rounded-full bg-purple-100/70 text-[#6D28D9] flex items-center justify-center shrink-0">
-                      <Wallet size={20} strokeWidth={2.5} />
-                    </div>
-                  </div>
-
-                  {/* Card 2: Current Gold Value */}
-                  <div className="bg-[#FFFDF5] border border-amber-100/80 rounded-2xl p-5 flex items-center justify-between shadow-xs">
-                    <div>
-                      <span className="text-xs font-bold text-[#D97706]">Current Gold Value</span>
-                      <div className="text-xl font-black text-slate-900 tracking-tight mt-1">
-                        ₹13,230.50
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-400">
-                        Live market value
-                      </span>
-                    </div>
-                    <div className="w-11 h-11 rounded-full bg-amber-100/70 text-[#D97706] flex items-center justify-center shrink-0">
-                      <Sparkles size={20} strokeWidth={2.5} />
-                    </div>
-                  </div>
-
-                  {/* Card 3: Total Gold Owned */}
-                  <div className="bg-[#F8FAFC] border border-indigo-100/80 rounded-2xl p-5 flex items-center justify-between shadow-xs">
-                    <div>
-                      <span className="text-xs font-bold text-indigo-600">Total Gold Owned</span>
-                      <div className="text-xl font-black text-slate-900 tracking-tight mt-1">
-                        0.1523 g
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-400">
-                        24K pure gold
-                      </span>
-                    </div>
-                    <div className="w-11 h-11 rounded-full bg-indigo-100/70 text-indigo-600 flex items-center justify-center shrink-0">
-                      <Scale size={20} strokeWidth={2.5} />
-                    </div>
-                  </div>
-
-                  {/* Card 4: Total Returns */}
-                  <div className="bg-[#F0FDF4]/60 border border-emerald-100/80 rounded-2xl p-5 flex items-center justify-between shadow-xs">
-                    <div>
-                      <span className="text-xs font-bold text-[#059669]">Total Returns</span>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xl font-black text-slate-900 tracking-tight">₹780.50</span>
-                        <span className="text-[10px] font-extrabold text-[#059669] bg-emerald-100/80 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
-                          ▲ 6.27%
-                        </span>
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-400">
-                        Overall gain
-                      </span>
-                    </div>
-                    <div className="w-11 h-11 rounded-full bg-emerald-100/70 text-[#059669] flex items-center justify-center shrink-0">
-                      <ArrowUpRight size={22} strokeWidth={2.5} />
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Bottom Safety & Regulation Banner */}
               <div className="bg-gradient-to-r from-[#0F0C20] via-[#1A153B] to-[#0F0C20] rounded-2xl p-5 md:p-6 text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg border border-indigo-900/40 relative overflow-hidden">
@@ -842,29 +811,74 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                     </div>
                   </div>
 
-                  {/* Projected Value Box */}
-                  <div className="bg-[#F8F9FE] border border-purple-100/80 rounded-2xl p-4 relative">
+                  {/* Tenure Selection */}
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs font-extrabold text-slate-500 flex items-center gap-1.5">
+                        <Clock size={14} className="text-[#6D28D9]" />
+                        <span>Investment Tenure (Years)</span>
+                      </label>
+                      <span className="text-xs font-black text-[#6D28D9] bg-purple-100 px-2.5 py-0.5 rounded-full">
+                        {sipDuration} {sipDuration === 1 ? 'Year' : 'Years'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2">
+                      {[1, 3, 5, 10].map((years) => (
+                        <button
+                          key={years}
+                          type="button"
+                          onClick={() => setSipDuration(years)}
+                          className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
+                            sipDuration === years
+                              ? 'bg-[#6D28D9] text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {years} {years === 1 ? 'Yr' : 'Yrs'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dynamic Projected Value & Returns Box */}
+                  <div className="bg-[#F8F9FE] border border-purple-100/80 rounded-2xl p-4 relative space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="text-xs font-bold text-slate-500">Projected Value</div>
+                        <div className="text-xs font-bold text-slate-500">Projected Portfolio Value</div>
                         <div className="text-3xl font-black text-slate-900 tracking-tight mt-1">
-                          ₹{(sipAmount * (activePlanData?.id === 'weekly' ? 52 : activePlanData?.id === 'monthly' ? 12 : 365)).toLocaleString()}
+                          ₹{calculationData.totalValue.toLocaleString()}
                         </div>
-                        <div className="text-xs font-semibold text-slate-400 mt-0.5">
-                          In 1 Year ({activePlanData?.id === 'weekly' ? '52 weeks' : activePlanData?.id === 'monthly' ? '12 months' : '365 days'})
+                        <div className="text-xs font-semibold text-slate-500 mt-0.5">
+                          In {sipDuration} {sipDuration === 1 ? 'Year' : 'Years'} ({sipDuration * (activePlanData?.id === 'weekly' ? 52 : activePlanData?.id === 'monthly' ? 12 : 365)} installments)
                         </div>
                       </div>
 
                       <div className="text-right">
                         <span className="inline-block bg-emerald-50 border border-emerald-200/80 text-[#059669] font-black text-[11px] px-2.5 py-1 rounded-md">
-                          +8.27%
+                          +{calculationData.percentageGain}%
                         </span>
                         <div className="text-[10px] font-bold text-slate-400 mt-1">Est. Returns</div>
                       </div>
                     </div>
 
-                    <p className="text-[10px] font-semibold text-slate-400 mt-3 leading-tight border-t border-slate-200/50 pt-2.5">
-                      Returns are based on historical gold price performance. Actual returns may vary.
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-purple-100/80">
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Total Invested</div>
+                        <div className="text-xs font-black text-slate-800 mt-0.5">
+                          ₹{calculationData.totalInvested.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Est. Capital Gain</div>
+                        <div className="text-xs font-black text-[#059669] mt-0.5">
+                          +₹{calculationData.estimatedReturn.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] font-semibold text-slate-400 mt-2 leading-tight pt-2 border-t border-slate-200/50">
+                      Returns are calculated @ ~11% p.a. expected growth. Actual performance may vary.
                     </p>
                   </div>
                 </div>
@@ -959,7 +973,9 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     <div className="flex justify-between items-center text-xs pt-2">
                       <span className="font-semibold text-slate-500">Invested In</span>
-                      <span className="font-black text-slate-900">24K Pure Digital Gold</span>
+                      <span className="font-black text-slate-900">
+                        {selectedMetal === 'silver' ? '999 Pure Digital Silver' : '24K Pure Digital Gold'}
+                      </span>
                     </div>
 
                     <div className="flex justify-between items-center text-xs pt-2">
@@ -969,7 +985,9 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     <div className="flex justify-between items-center text-xs pt-2">
                       <span className="font-semibold text-slate-500">Payout</span>
-                      <span className="font-black text-slate-900">Gold in grams</span>
+                      <span className="font-black text-slate-900">
+                        {selectedMetal === 'silver' ? 'Silver in grams' : 'Gold in grams'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -986,21 +1004,548 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                       Start your {activePlanData?.type} journey today!
                     </h3>
                     <p className="text-xs font-semibold text-purple-200 mt-0.5">
-                      Invest ₹{sipAmount} per {activePlanData?.id === 'weekly' ? 'week' : activePlanData?.id === 'monthly' ? 'month' : 'day'} and build your golden future.
+                      Invest ₹{sipAmount} per {activePlanData?.id === 'weekly' ? 'week' : activePlanData?.id === 'monthly' ? 'month' : 'day'} and build your {selectedMetal === 'silver' ? 'silver' : 'golden'} future.
                     </p>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => alert(`Initiating ${activePlanData?.type} Mandate @ ₹${sipAmount}...`)}
+                  onClick={() => {
+                    if (isMobile && activePlanData) {
+                      handleSetupPlanClick(activePlanData.id as PlanType, sipAmount);
+                    } else {
+                      alert(`Initiating ${activePlanData?.type} Mandate @ ₹${sipAmount}...`);
+                    }
+                  }}
                   className="bg-white hover:bg-purple-50 text-[#6D28D9] font-black text-xs sm:text-sm px-6 py-3 rounded-full flex items-center gap-2 shadow-md transition-all cursor-pointer border-none outline-none shrink-0 self-stretch sm:self-auto justify-center"
                 >
-                  <span>Start {activePlanData?.type}</span>
+                  <span>Set Up SIP Mandate</span>
                   <ArrowRight size={16} strokeWidth={2.5} />
                 </button>
               </div>
 
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile SIP Setup Overlays & Sheets */}
+        <AnimatePresence>
+          {mobileSipStep !== 'none' && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+              
+              {/* 1. DAILY SIP TENURE & RETURNS MODAL */}
+              {mobileSipStep === 'daily_tenure' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full max-w-md bg-white rounded-[32px] p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 border border-purple-100 max-h-[85vh] overflow-y-auto my-auto"
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-purple-100 text-[#6D28D9] flex items-center justify-center font-black">
+                        <Clock size={20} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black tracking-wider uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/60">
+                          DAILY SIP SETUP
+                        </span>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
+                          Tenure & Expected Returns
+                        </h3>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setMobileSipStep('none')}
+                      className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors border-none outline-none cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                    Set up your recurring daily investment of ₹{sipAmount}/day and preview expected returns.
+                  </p>
+
+                  {/* Tenure Selector */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock size={14} className="text-[#6D28D9]" />
+                        <span>Investment Tenure</span>
+                      </label>
+                      <span className="text-xs font-extrabold text-[#6D28D9] bg-purple-100 px-2.5 py-0.5 rounded-full">
+                        {sipDuration} {sipDuration === 1 ? 'Year' : 'Years'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2">
+                      {[1, 3, 5, 10].map((years) => (
+                        <button
+                          key={years}
+                          type="button"
+                          onClick={() => setSipDuration(years)}
+                          className={`py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
+                            sipDuration === years
+                              ? 'bg-[#6D28D9] text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {years} {years === 1 ? 'Yr' : 'Yrs'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Expected Returns Box */}
+                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50/60 border border-purple-200/80 rounded-2xl p-4 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs pb-1 border-b border-purple-200/50">
+                      <span className="font-extrabold text-slate-600 flex items-center gap-1">
+                        <TrendingUp size={14} className="text-emerald-600" />
+                        Expected Returns ({sipDuration} {sipDuration === 1 ? 'Year' : 'Years'})
+                      </span>
+                      <span className="font-black text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md text-[11px]">
+                        +{calculationData.percentageGain}%
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-left pt-0.5">
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Invested</div>
+                        <div className="text-xs font-black text-slate-900 mt-0.5">
+                          ₹{calculationData.totalInvested.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Est. Gain</div>
+                        <div className="text-xs font-black text-emerald-600 mt-0.5">
+                          +₹{calculationData.estimatedReturn.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Total Value</div>
+                        <div className="text-xs font-black text-purple-900 mt-0.5">
+                          ₹{calculationData.totalValue.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => setMobileSipStep('success')}
+                    className="w-full py-3.5 rounded-2xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 border-none outline-none cursor-pointer transition-all mt-2"
+                  >
+                    <span>Confirm & Set Daily SIP</span>
+                    <ArrowRight size={16} strokeWidth={2.5} />
+                  </button>
+                </motion.div>
+              )}
+
+              {/* 2. WEEKLY DAY SELECTION & TENURE MODAL */}
+              {mobileSipStep === 'day_select' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full max-w-md bg-white rounded-[32px] p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 border border-amber-100 max-h-[85vh] overflow-y-auto my-auto"
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-100/80 text-[#059669] flex items-center justify-center font-black">
+                        <CalendarIcon size={20} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black tracking-wider uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                          {selectedMetal === 'silver' ? 'SILVER WEEKLY SIP SCHEDULE' : 'WEEKLY SIP SCHEDULE'}
+                        </span>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
+                          Which day of every week?
+                        </h3>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setMobileSipStep('none')}
+                      className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors border-none outline-none cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                    Select day of the week for your ₹{sipAmount} weekly {selectedMetal === 'silver' ? 'silver' : 'gold'} SIP.
+                  </p>
+
+                  {/* Days Grid */}
+                  <div className="space-y-2">
+                    {[
+                      { day: 'Monday', label: 'Salary Saver • Most Popular' },
+                      { day: 'Tuesday', label: 'Mid-Week Habit' },
+                      { day: 'Wednesday', label: 'Consistent Growth' },
+                      { day: 'Thursday', label: 'Pre-Weekend SIP' },
+                      { day: 'Friday', label: 'Payday Favourite' },
+                      { day: 'Saturday', label: 'Weekend Auto-Save' },
+                      { day: 'Sunday', label: 'Sunday Wealth Plan' }
+                    ].map(({ day, label }) => {
+                      const isSelected = selectedWeeklyDay === day;
+                      return (
+                        <div
+                          key={day}
+                          onClick={() => setSelectedWeeklyDay(day)}
+                          className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                            isSelected
+                              ? 'border-emerald-500 bg-emerald-50/70 text-slate-900 shadow-xs'
+                              : 'border-slate-200/80 bg-white hover:border-emerald-200 text-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${
+                              isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {day.slice(0, 3)}
+                            </div>
+                            <div>
+                              <div className="text-sm font-extrabold text-slate-900">{day}</div>
+                              <div className="text-[11px] font-semibold text-slate-400">{label}</div>
+                            </div>
+                          </div>
+
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            isSelected ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300'
+                          }`}>
+                            {isSelected && <Check size={12} strokeWidth={3} />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Tenure Selector */}
+                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock size={14} className="text-[#059669]" />
+                        <span>Investment Tenure</span>
+                      </label>
+                      <span className="text-xs font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                        {sipDuration} {sipDuration === 1 ? 'Year' : 'Years'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2">
+                      {[1, 3, 5, 10].map((years) => (
+                        <button
+                          key={years}
+                          type="button"
+                          onClick={() => setSipDuration(years)}
+                          className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
+                            sipDuration === years
+                              ? 'bg-[#059669] text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {years} {years === 1 ? 'Yr' : 'Yrs'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Expected Returns Box */}
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50/60 border border-emerald-200/80 rounded-2xl p-4 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs pb-1 border-b border-emerald-200/50">
+                      <span className="font-extrabold text-slate-600 flex items-center gap-1">
+                        <TrendingUp size={14} className="text-emerald-600" />
+                        Expected Returns ({sipDuration} {sipDuration === 1 ? 'Year' : 'Years'})
+                      </span>
+                      <span className="font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md text-[11px]">
+                        +{calculationData.percentageGain}%
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-left pt-0.5">
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Invested</div>
+                        <div className="text-xs font-black text-slate-900 mt-0.5">
+                          ₹{calculationData.totalInvested.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Est. Gain</div>
+                        <div className="text-xs font-black text-emerald-600 mt-0.5">
+                          +₹{calculationData.estimatedReturn.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Total Value</div>
+                        <div className="text-xs font-black text-emerald-900 mt-0.5">
+                          ₹{calculationData.totalValue.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => setMobileSipStep('success')}
+                    className="w-full py-3.5 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 border-none outline-none cursor-pointer transition-all mt-2"
+                  >
+                    <span>Confirm & Set Weekly SIP</span>
+                    <ArrowRight size={16} strokeWidth={2.5} />
+                  </button>
+                </motion.div>
+              )}
+
+              {/* 3. MONTHLY CALENDAR DATE SELECTION & TENURE MODAL */}
+              {mobileSipStep === 'date_select' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full max-w-md bg-white rounded-[32px] p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 border border-amber-100 max-h-[85vh] overflow-y-auto my-auto"
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-2xl bg-amber-100/80 text-[#D97706] flex items-center justify-center font-black">
+                        <CalendarIcon size={20} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black tracking-wider uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
+                          MONTHLY SIP CALENDAR
+                        </span>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
+                          Which date of every month?
+                        </h3>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setMobileSipStep('none')}
+                      className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors border-none outline-none cursor-pointer"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <p className="text-xs font-semibold text-slate-500 leading-relaxed">
+                    Choose day of month for your recurring ₹{sipAmount} monthly SIP auto-debit.
+                  </p>
+
+                  {/* Calendar Grid (1-28) */}
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                    <div className="flex justify-between items-center text-xs font-black text-slate-700 pb-1 border-b border-slate-200/60">
+                      <span>Select Date</span>
+                      <span className="text-amber-700 font-extrabold bg-amber-100/70 px-2 py-0.5 rounded-md">
+                        Every {selectedMonthlyDate}th of month
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-2 pt-1 text-center">
+                      {Array.from({ length: 28 }, (_, i) => i + 1).map((dateNum) => {
+                        const isSelected = selectedMonthlyDate === dateNum;
+                        return (
+                          <button
+                            key={dateNum}
+                            type="button"
+                            onClick={() => setSelectedMonthlyDate(dateNum)}
+                            className={`h-10 rounded-xl font-extrabold text-sm flex items-center justify-center transition-all cursor-pointer border-none outline-none ${
+                              isSelected
+                                ? 'bg-[#D97706] text-white shadow-md shadow-amber-600/30 scale-105 font-black'
+                                : 'bg-white text-slate-800 hover:bg-amber-50 border border-slate-200/60'
+                            }`}
+                          >
+                            {dateNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Tenure Selector */}
+                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <Clock size={14} className="text-[#D97706]" />
+                        <span>Investment Tenure</span>
+                      </label>
+                      <span className="text-xs font-extrabold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                        {sipDuration} {sipDuration === 1 ? 'Year' : 'Years'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2">
+                      {[1, 3, 5, 10].map((years) => (
+                        <button
+                          key={years}
+                          type="button"
+                          onClick={() => setSipDuration(years)}
+                          className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
+                            sipDuration === years
+                              ? 'bg-[#D97706] text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {years} {years === 1 ? 'Yr' : 'Yrs'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Expected Returns Box */}
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50/60 border border-amber-200/80 rounded-2xl p-4 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs pb-1 border-b border-amber-200/50">
+                      <span className="font-extrabold text-slate-600 flex items-center gap-1">
+                        <TrendingUp size={14} className="text-amber-600" />
+                        Expected Returns ({sipDuration} {sipDuration === 1 ? 'Year' : 'Years'})
+                      </span>
+                      <span className="font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md text-[11px]">
+                        +{calculationData.percentageGain}%
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2 text-left pt-0.5">
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Invested</div>
+                        <div className="text-xs font-black text-slate-900 mt-0.5">
+                          ₹{calculationData.totalInvested.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Est. Gain</div>
+                        <div className="text-xs font-black text-emerald-600 mt-0.5">
+                          +₹{calculationData.estimatedReturn.toLocaleString()}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Total Value</div>
+                        <div className="text-xs font-black text-amber-900 mt-0.5">
+                          ₹{calculationData.totalValue.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => setMobileSipStep('success')}
+                    className="w-full py-3.5 rounded-2xl bg-[#D97706] hover:bg-[#B45309] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-600/20 border-none outline-none cursor-pointer transition-all mt-2"
+                  >
+                    <span>Confirm & Set Monthly SIP</span>
+                    <ArrowRight size={16} strokeWidth={2.5} />
+                  </button>
+                </motion.div>
+              )}
+
+              {/* 4. AUTOPAY SUCCESS / SIP SET SUCCESSFULLY SCREEN */}
+              {mobileSipStep === 'success' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full max-w-md bg-white rounded-[32px] p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 border border-amber-200/80 text-center relative overflow-hidden my-auto max-h-[85vh] overflow-y-auto"
+                >
+                  {/* Confetti Background Accent */}
+                  <div className="absolute -top-12 -left-12 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none" />
+
+                  {/* Animated Success Check Badge */}
+                  <div className="flex justify-center pt-2">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: [0, 1.15, 1] }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                      className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-emerald-500 p-1 shadow-xl shadow-amber-500/20"
+                    >
+                      <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-emerald-600">
+                        <CheckCircle2 size={44} strokeWidth={2.5} className="text-emerald-500" />
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  <div>
+                    <span className="inline-block bg-emerald-100 text-emerald-800 font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider mb-1.5 border border-emerald-200">
+                      AUTOPAY VERIFIED & ACTIVE
+                    </span>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                      SIP Set Successfully!
+                    </h3>
+                    <p className="text-xs font-semibold text-slate-500 mt-1">
+                      Your {selectedMetal === 'silver' ? '999 Pure Digital Silver' : '24K Pure Digital Gold'} SIP is configured & ready.
+                    </p>
+                  </div>
+
+                  {/* Receipt / Details Box */}
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-left space-y-3">
+                    <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-200/60">
+                      <span className="font-semibold text-slate-500">Plan Type</span>
+                      <span className="font-black text-slate-900 uppercase">
+                        {mobileSelectedPlan === 'weekly' ? 'Weekly Savings' : mobileSelectedPlan === 'monthly' ? 'Monthly Savings' : 'Daily Savings'}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-200/60">
+                      <span className="font-semibold text-slate-500">SIP Schedule</span>
+                      <span className="font-black text-amber-700">
+                        {mobileSelectedPlan === 'weekly'
+                          ? `Every ${selectedWeeklyDay}`
+                          : mobileSelectedPlan === 'monthly'
+                          ? `Every ${selectedMonthlyDate}th of month`
+                          : 'Daily Auto-Debit'}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-200/60">
+                      <span className="font-semibold text-slate-500">Amount & Tenure</span>
+                      <span className="font-black text-slate-900 text-xs">
+                        ₹{sipAmount} / {mobileSelectedPlan === 'weekly' ? 'week' : mobileSelectedPlan === 'monthly' ? 'month' : 'day'} ({sipDuration} Yrs)
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-200/60">
+                      <span className="font-semibold text-slate-500">Expected Value ({sipDuration} Yrs)</span>
+                      <span className="font-black text-emerald-600">
+                        ₹{calculationData.totalValue.toLocaleString()} (+{calculationData.percentageGain}%)
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-200/60">
+                      <span className="font-semibold text-slate-500">First Auto-Debit Date</span>
+                      <span className="font-extrabold text-slate-800">
+                        {getNextAutoPayDate()}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-semibold text-slate-500">Asset</span>
+                      <span className="font-black text-slate-900 flex items-center gap-1">
+                      <span>{selectedMetal === 'silver' ? '999 Digital Silver' : '24K Digital Gold'}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-slate-500">
+                    <ShieldCheck size={14} className="text-emerald-600" />
+                    <span>100% Insured Storage by Brink's & Regulated Vault</span>
+                  </div>
+
+                  {/* Done Button */}
+                  <button
+                    onClick={() => {
+                      setMobileSipStep('none');
+                      setActiveSetup(null);
+                    }}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-lg shadow-amber-500/25 border-none outline-none cursor-pointer transition-all"
+                  >
+                    Done
+                  </button>
+                </motion.div>
+              )}
+
+            </div>
           )}
         </AnimatePresence>
 

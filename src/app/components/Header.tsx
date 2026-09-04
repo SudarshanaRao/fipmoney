@@ -235,6 +235,12 @@ export default function Header({ onNavigate }: HeaderProps) {
                         >
                           Sell Digital Silver
                         </button>
+                        <button
+                          onClick={() => handleDropdownItemClick(() => onNavigate?.('silver-savings'))}
+                          className="w-full text-left text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100/70 p-2 rounded-lg transition-all duration-200"
+                        >
+                          Silver Savings (SIP)
+                        </button>
                       </div>
                     </div>
 
@@ -409,6 +415,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                     <div className="pl-4 flex flex-col space-y-2">
                       <button onClick={() => handleDropdownItemClick(() => onNavigate?.('digital-silver'))} className="text-left text-xs text-gray-600 hover:text-slate-700 py-1 font-semibold bg-transparent border-none">Buy Digital Silver</button>
                       <button onClick={() => handleDropdownItemClick(() => onNavigate?.('digital-silver'))} className="text-left text-xs text-gray-600 hover:text-slate-700 py-1 font-semibold bg-transparent border-none">Sell Digital Silver</button>
+                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('silver-savings'))} className="text-left text-xs text-slate-800 hover:text-slate-900 py-1 font-bold bg-transparent border-none">Silver Savings (SIP)</button>
                     </div>
                   </div>
 

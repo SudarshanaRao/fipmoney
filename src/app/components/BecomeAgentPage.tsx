@@ -961,7 +961,7 @@ export default function BecomeAgentPage() {
                       </span>
                     </div>
                     <h3 className="text-lg sm:text-xl font-black text-slate-900 mt-1 tracking-tight">
-                      You are an Approved Digital Gold Agent (DGA)! 🎉
+                      You are an Approved Digital Gold Agent (DGA)!
                     </h3>
                   </div>
                 </div>

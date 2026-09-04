@@ -43,10 +43,10 @@ const SILVER_DATASETS: Record<TimeFrame, number[]> = {
 
 // Physical Delivery Products Catalog
 const DELIVERY_PRODUCTS = [
-  { id: "g1", metal: "gold", name: "24K Gold Coin", weight: 1, reqHoldings: 1.0, image: "🪙", purity: "999.9 Purity" },
-  { id: "g5", metal: "gold", name: "24K Gold Bar", weight: 5, reqHoldings: 5.0, image: "💳", purity: "999.9 Purity" },
-  { id: "s10", metal: "silver", name: "99.9 Fine Silver Coin", weight: 10, reqHoldings: 10.0, image: "🪙", purity: "999 Purity" },
-  { id: "s50", metal: "silver", name: "99.9 Silver Bar", weight: 50, reqHoldings: 50.0, image: "🥈", purity: "999 Purity" },
+  { id: "g1", metal: "gold", name: "24K Gold Coin", weight: 1, reqHoldings: 1.0, image: "gold", purity: "999.9 Purity" },
+  { id: "g5", metal: "gold", name: "24K Gold Bar", weight: 5, reqHoldings: 5.0, image: "gold", purity: "999.9 Purity" },
+  { id: "s10", metal: "silver", name: "99.9 Fine Silver Coin", weight: 10, reqHoldings: 10.0, image: "silver", purity: "999 Purity" },
+  { id: "s50", metal: "silver", name: "99.9 Silver Bar", weight: 50, reqHoldings: 50.0, image: "silver", purity: "999 Purity" },
 ];
 
 const SECURITY_SLIDES = [
@@ -640,7 +640,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
 
             {/* Card 4: Digital Silver SIP */}
             <div 
-              onClick={() => onNavigate("savings")}
+              onClick={() => onNavigate("silver-savings")}
               className="bg-white border border-gray-200/90 rounded-2xl p-4 shadow-md shadow-gray-900/5 hover:shadow-lg flex flex-col justify-between h-[210px] relative overflow-hidden cursor-pointer transition-all"
             >
               <div className="flex items-start justify-between">
@@ -678,7 +678,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  onNavigate("savings");
+                  onNavigate("silver-savings");
                 }}
                 className="w-full py-2.5 rounded-xl bg-[#f0effe] hover:bg-[#e4e2fe] border border-purple-200/80 text-purple-900 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
               >
@@ -718,8 +718,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
           <div className="bg-[#fffbeb] border border-amber-100 rounded-[24px] p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-300 to-amber-500 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white text-xl">
-                  🪙
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-300 to-amber-500 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white">
+                  <Coins size={22} />
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1">Digital Gold Balance</h3>
@@ -742,8 +742,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
           <div className="bg-[#f8fafc] border border-slate-200 rounded-[24px] p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-slate-300 to-slate-400 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white text-xl">
-                  🥈
+                <div className="w-12 h-12 bg-gradient-to-br from-slate-300 to-slate-400 rounded-full flex items-center justify-center text-white shadow-md border-2 border-white">
+                  <Coins size={22} />
                 </div>
                 <div>
                   <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Digital Silver Balance</h3>
@@ -1121,7 +1121,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     <div key={i} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-[12px] shadow-sm ${t.type === 'Buy' && t.metal === 'Gold' ? 'bg-emerald-500' : t.type === 'Buy' && t.metal === 'Silver' ? 'bg-blue-500' : 'bg-amber-500'}`}>
-                            {t.metal === 'Gold' ? '🪙' : '🥈'}
+                            <Coins size={16} />
                          </div>
                          <div>
                            <div className="text-[11px] font-bold text-gray-900">{t.type} {t.metal}</div>

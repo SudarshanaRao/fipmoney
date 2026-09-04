@@ -27,6 +27,9 @@ import TermsAndConditions from "./TermsAndConditions";
 import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
 import AgentOtpModal from "./AgentOtpModal";
 import SavingsPage from "./SavingsPage";
+import SilverSavingsPage from "./SilverSavingsPage";
+import GoldSipSetupPage from "./GoldSipSetupPage";
+import SilverSipSetupPage from "./SilverSipSetupPage";
 import BecomeAgentPage from "./BecomeAgentPage";
 import PersonalizedSuggestionCard from "./PersonalizedSuggestionCard";
 import ProfileCompletionWidget from "./ProfileCompletionWidget";
@@ -45,7 +48,7 @@ const POS = "#10b981";
 const INITIAL_NOTIFICATIONS = [
   {
     id: "n1",
-    title: "Gold Rate Alert 📈",
+    title: "Gold Rate Alert",
     desc: "Live 24K Gold rate updated to ₹6,420.50/g (+1.4% change today).",
     time: "10 mins ago",
     read: false,
@@ -54,7 +57,7 @@ const INITIAL_NOTIFICATIONS = [
   },
   {
     id: "n2",
-    title: "Full KYC Verification Complete 🛡️",
+    title: "Full KYC Verification Complete",
     desc: "Your account is fully verified. Annual digital gold holding limit updated to 1000g.",
     time: "2 hours ago",
     read: false,
@@ -63,7 +66,7 @@ const INITIAL_NOTIFICATIONS = [
   },
   {
     id: "n3",
-    title: "Automatic SIP Executed 🪙",
+    title: "Automatic SIP Executed",
     desc: "₹500 Digital Gold SIP executed for July 2026. Added 0.078g to your vault.",
     time: "1 day ago",
     read: false,
@@ -72,7 +75,7 @@ const INITIAL_NOTIFICATIONS = [
   },
   {
     id: "n4",
-    title: "Special Cashback Offer 🎁",
+    title: "Special Cashback Offer",
     desc: "Get ₹100 extra gold bonus on purchases above ₹1,000 using code GOLD100.",
     time: "2 days ago",
     read: true,
@@ -84,6 +87,9 @@ const INITIAL_NOTIFICATIONS = [
 const tabSlugMap: Record<string, string> = {
   home: "dashboard",
   savings: "dashboard/savings",
+  "silver-savings": "dashboard/silver-savings",
+  "setup-sip": "dashboard/setup-sip",
+  "setup-silver-sip": "dashboard/setup-silver-sip",
   history: "dashboard/transactions",
   bills: "dashboard/bills",
   refer: "dashboard/referrals",
@@ -101,6 +107,10 @@ const getInitialUserTab = (): Tab => {
       const slugMap: Record<string, Tab> = {
         overview: "home",
         savings: "savings",
+        "silver-savings": "silver-savings",
+        "silver-sip": "silver-savings",
+        "setup-sip": "setup-sip" as Tab,
+        "setup-silver-sip": "setup-silver-sip" as Tab,
         transactions: "history",
         bills: "bills",
         referrals: "refer",
@@ -111,6 +121,9 @@ const getInitialUserTab = (): Tab => {
       };
       if (slugMap[subPath]) return slugMap[subPath];
     } else if (path === "savings") return "savings";
+    else if (path === "silver-savings" || path === "silver-sip") return "silver-savings";
+    else if (path === "setup-sip" || path === "setup-gold-sip") return "setup-sip" as Tab;
+    else if (path === "setup-silver-sip") return "setup-silver-sip" as Tab;
     else if (path === "history" || path === "transactions") return "history";
     else if (path === "bills") return "bills";
     else if (path === "refer") return "refer";
@@ -1828,6 +1841,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <DigitalGoldSilver onNavigate={(target) => setTab(target as Tab)} kycStatus={kycStatus} />
         ) : tab === "savings" ? (
           <SavingsPage onNavigate={(target) => setTab(target as Tab)} />
+        ) : (tab as string) === "silver-savings" ? (
+          <SilverSavingsPage onNavigate={(target) => setTab(target as Tab)} />
+        ) : (tab as string) === "setup-sip" || (tab as string) === "setup-gold-sip" ? (
+          <GoldSipSetupPage onNavigate={(target) => setTab(target as Tab)} />
+        ) : (tab as string) === "setup-silver-sip" ? (
+          <SilverSipSetupPage onNavigate={(target) => setTab(target as Tab)} />
         ) : tab === "history" ? (
           <HistoryPage />
         ) : tab === "help" ? (
@@ -1880,7 +1899,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               </div>
 
               <div className="space-y-1.5">
-                <h3 className="text-xl font-black text-slate-900">Add Official Email Address ✉️</h3>
+                <h3 className="text-xl font-black text-slate-900">Add Official Email Address</h3>
                 <p className="text-xs font-semibold text-slate-500 max-w-xs mx-auto leading-relaxed">
                   To protect your 24K digital gold locker, receive transaction invoices, purchase receipts, and security OTPs, please add & verify your email address.
                 </p>
@@ -1976,19 +1995,19 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     {/* Benefits Grid */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-amber-50/70 border border-amber-200/60 p-3.5 rounded-2xl">
-                        <div className="text-amber-700 font-extrabold text-xs mb-1">💰 High Commissions</div>
+                        <div className="text-amber-700 font-extrabold text-xs mb-1">High Commissions</div>
                         <div className="text-[11px] text-gray-600 font-medium">Earn up to 2.5% on every purchase & SIP in your network.</div>
                       </div>
                       <div className="bg-purple-50/70 border border-purple-200/60 p-3.5 rounded-2xl">
-                        <div className="text-purple-700 font-extrabold text-xs mb-1">🏆 Gold Rewards</div>
+                        <div className="text-purple-700 font-extrabold text-xs mb-1">Gold Rewards</div>
                         <div className="text-[11px] text-gray-600 font-medium">Unlock 24K Gold coins & milestone tech gifts monthly.</div>
                       </div>
                       <div className="bg-blue-50/70 border border-blue-200/60 p-3.5 rounded-2xl">
-                        <div className="text-blue-700 font-extrabold text-xs mb-1">📊 Agent Dashboard</div>
+                        <div className="text-blue-700 font-extrabold text-xs mb-1">Agent Dashboard</div>
                         <div className="text-[11px] text-gray-600 font-medium">Track clients, live volume & instant bank payouts.</div>
                       </div>
                       <div className="bg-emerald-50/70 border border-emerald-200/60 p-3.5 rounded-2xl">
-                        <div className="text-emerald-700 font-extrabold text-xs mb-1">🛡️ Free Training</div>
+                        <div className="text-emerald-700 font-extrabold text-xs mb-1">Free Training</div>
                         <div className="text-[11px] text-gray-600 font-medium">Dedicated relationship manager & free DGA certification.</div>
                       </div>
                     </div>
@@ -2056,7 +2075,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                       <CheckCircle2 size={36} />
                     </div>
                     <div>
-                      <h4 className="text-xl font-extrabold text-gray-900">Application Submitted! 🎉</h4>
+                      <h4 className="text-xl font-extrabold text-gray-900">Application Submitted!</h4>
                       <p className="text-xs text-gray-600 font-medium max-w-md mx-auto mt-1">
                         Thank you for applying to become a FipMoney Digital Gold Agent (DGA). Our onboard team will review your profile and contact you within 24 hours.
                       </p>

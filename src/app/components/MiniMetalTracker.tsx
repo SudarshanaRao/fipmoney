@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Sparkles, Activity, ShieldCheck, Award, RefreshCw, ArrowRight, PlayCircle, Star, TrendingUp, BarChart2 } from "lucide-react";
+import { Sparkles, Activity, ShieldCheck, Award, RefreshCw, ArrowRight, PlayCircle, Star, TrendingUp, BarChart2, Coins } from "lucide-react";
 import { fetchLatestMetalPrices, ParsedMetalPrices } from "../utils/metalPriceApi";
 import { AreaChart, Area, ResponsiveContainer, YAxis } from "recharts";
 
@@ -124,8 +124,8 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                {/* Top Section */}
                <div className="flex justify-between items-start mb-10">
                  <div className="flex items-center gap-3">
-                   <div className="w-12 h-12 bg-amber-100/80 rounded-full flex items-center justify-center shadow-inner">
-                      <span className="text-2xl drop-shadow-sm">🪙</span>
+                   <div className="w-12 h-12 bg-amber-100/80 rounded-full flex items-center justify-center shadow-inner text-amber-600">
+                      <Coins size={22} />
                    </div>
                    <div>
                      <h3 className="font-bold text-slate-900 text-lg">24K Pure Gold</h3>
@@ -223,8 +223,8 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                {/* Top Section */}
                <div className="flex justify-between items-start mb-10">
                  <div className="flex items-center gap-3">
-                   <div className="w-12 h-12 bg-slate-200/50 rounded-full flex items-center justify-center shadow-inner">
-                      <span className="text-2xl drop-shadow-sm filter grayscale">🪙</span>
+                   <div className="w-12 h-12 bg-slate-200/50 rounded-full flex items-center justify-center shadow-inner text-slate-500">
+                      <Coins size={22} />
                    </div>
                    <div>
                      <h3 className="font-bold text-slate-900 text-lg">Pure Silver</h3>

@@ -1094,10 +1094,10 @@ export default function HistoryPage() {
                         let TxIcon = <Banknote size={16} className="text-gray-500" />;
                         let iconBg = "bg-gray-100";
                         if (tx.category.toLowerCase() === "gold") {
-                           TxIcon = <span className="text-lg">🪙</span>;
+                           TxIcon = <Coins size={18} className="text-amber-500" />;
                            iconBg = "bg-amber-50";
                         } else if (tx.category.toLowerCase() === "silver") {
-                           TxIcon = <span className="text-lg">🪙</span>; // Silver coin emoji variant not widely supported, using standard
+                           TxIcon = <Coins size={18} className="text-slate-400" />;
                            iconBg = "bg-slate-100";
                         } else if (tx.source.toLowerCase().includes("electricity")) {
                            TxIcon = <Zap size={16} className="text-purple-600" />;

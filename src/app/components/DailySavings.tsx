@@ -22,19 +22,19 @@ const DailySavings = ({ onBack }: DailySavingsProps) => {
   const [timeframe, setTimeframe] = useState<string>('6');
 
   const savingsGoals = [
-    { id: 'wedding', name: 'Wedding', icon: '💍', color: 'bg-pink-100 text-pink-800' },
-    { id: 'vacation', name: 'Vacation', icon: '✈️', color: 'bg-blue-100 text-blue-800' },
-    { id: 'house', name: 'House', icon: '🏠', color: 'bg-green-100 text-green-800' },
-    { id: 'car', name: 'Car', icon: '🚗', color: 'bg-orange-100 text-orange-800' },
-    { id: 'education', name: 'Education', icon: '🎓', color: 'bg-purple-100 text-purple-800' },
-    { id: 'emergency', name: 'Emergency Fund', icon: '🛡️', color: 'bg-red-100 text-red-800' },
+    { id: 'wedding', name: 'Wedding', icon: '', color: 'bg-pink-100 text-pink-800' },
+    { id: 'vacation', name: 'Vacation', icon: '', color: 'bg-blue-100 text-blue-800' },
+    { id: 'house', name: 'House', icon: '', color: 'bg-green-100 text-green-800' },
+    { id: 'car', name: 'Car', icon: '', color: 'bg-orange-100 text-orange-800' },
+    { id: 'education', name: 'Education', icon: '', color: 'bg-purple-100 text-purple-800' },
+    { id: 'emergency', name: 'Emergency Fund', icon: '', color: 'bg-red-100 text-red-800' },
   ];
 
   const activeSavings = [
     {
       id: 1,
       goal: 'Wedding',
-      icon: '💍',
+      icon: '',
       target: 200000,
       saved: 45000,
       dailyAmount: 100,
@@ -44,7 +44,7 @@ const DailySavings = ({ onBack }: DailySavingsProps) => {
     {
       id: 2,
       goal: 'Vacation',
-      icon: '✈️',
+      icon: '',
       target: 50000,
       saved: 32000,
       dailyAmount: 75,
@@ -54,7 +54,7 @@ const DailySavings = ({ onBack }: DailySavingsProps) => {
     {
       id: 3,
       goal: 'Emergency Fund',
-      icon: '🛡️',
+      icon: '',
       target: 100000,
       saved: 78000,
       dailyAmount: 50,

@@ -1778,7 +1778,7 @@ export default function SettingsPage() {
                 {percentage === 100 && (
                   <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
                     <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    <span>100% Profile Complete & Verified 🎉</span>
+                    <span>100% Profile Complete & Verified</span>
                   </div>
                 )}
               </div>

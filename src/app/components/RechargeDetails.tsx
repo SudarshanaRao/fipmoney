@@ -424,7 +424,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                   </div>
 
                   <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Recharge Successful! 🎉</h2>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Recharge Successful!</h2>
                     <p className="text-xs font-medium text-gray-500 mt-1">Your payment of <span className="font-extrabold text-gray-900">₹{amount}</span> has been processed successfully.</p>
                   </div>
 
@@ -883,7 +883,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                                 onChange={(e) => setOperator(e.target.value)}
                                 className="w-full pl-10 pr-10 py-4 rounded-2xl text-sm font-bold text-gray-800 bg-gradient-to-r from-white to-amber-50/30 border-2 border-amber-100/80 outline-none focus:border-amber-400 focus:bg-white focus:ring-4 focus:ring-amber-50 transition-all cursor-pointer appearance-none shadow-sm hover:shadow-md hover:border-amber-200"
                               >
-                                <option value="" disabled>⚡ Select your provider</option>
+                                <option value="" disabled>Select your provider</option>
                                 {operators.map((op) => (
                                   <option key={op.operatorCode} value={op.operatorCode}>
                                     {op.operatorName}
@@ -1065,7 +1065,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                                       <div className="flex gap-1.5 flex-wrap mt-2 pt-1">
                                         {plan.benefits.map((b: string, idx: number) => (
                                           <span key={idx} className="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-100 flex items-center gap-1">
-                                            ✨ {b}
+                                            {b}
                                           </span>
                                         ))}
                                       </div>
@@ -1146,17 +1146,17 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                         </thead>
                         <tbody>
                           <tr className="border-b border-slate-50">
-                            <td className="p-2.5 text-amber-700 font-bold">⚡ Instant</td>
+                            <td className="p-2.5 text-amber-700 font-bold">Instant</td>
                             <td className="text-center p-2.5 text-gray-700">2.2%</td>
                             <td className="text-right p-2.5 text-gray-500">+ 18% GST</td>
                           </tr>
                           <tr className="border-b border-slate-50">
-                            <td className="p-2.5 text-blue-700 font-bold">🕐 Next Day</td>
+                            <td className="p-2.5 text-blue-700 font-bold">Next Day</td>
                             <td className="text-center p-2.5 text-gray-700">1.8%</td>
                             <td className="text-right p-2.5 text-gray-500">+ 18% GST</td>
                           </tr>
                           <tr>
-                            <td className="p-2.5 text-emerald-700 font-bold">📅 2-Day</td>
+                            <td className="p-2.5 text-emerald-700 font-bold">2-Day</td>
                             <td className="text-center p-2.5 text-gray-700">1.2%</td>
                             <td className="text-right p-2.5 text-gray-500">+ 18% GST</td>
                           </tr>
