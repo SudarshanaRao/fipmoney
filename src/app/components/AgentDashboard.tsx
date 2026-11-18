@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
   Users,
-  Wallet,
+  Landmark,
   Coins,
   Award,
   QrCode,
@@ -406,7 +406,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
               onClick={() => setActiveTab("commissions")}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "commissions" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
             >
-              <Wallet size={16} /> Commissions & Payouts
+              <Landmark size={16} /> Commissions & Payouts
             </button>
 
             <button
@@ -544,7 +544,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                       onClick={() => { setActiveTab("commissions"); setIsMenuOpen(false); }}
                       className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${activeTab === "commissions" ? "bg-[#1e1b4b] text-white font-black shadow-md shadow-[#1e1b4b]/20" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"}`}
                     >
-                      <Wallet size={16} /> Commissions & Payouts
+                      <Landmark size={16} /> Commissions & Payouts
                     </button>
 
                     <button
@@ -1258,7 +1258,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   <div className="flex items-center justify-between text-slate-500 text-xs font-extrabold mb-3">
                     <span>Total Commissions Earned</span>
                     <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                      <Wallet size={18} />
+                      <Landmark size={18} />
                     </div>
                   </div>
                   <div className="text-2xl sm:text-3xl font-black text-amber-600">₹{agent.totalEarned.toLocaleString('en-IN')}</div>

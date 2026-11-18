@@ -226,14 +226,18 @@ export const sendOtp = async (req, res, next) => {
 
     const cleanMobile = String(mobile).trim();
     
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Google Play Reviewer / Test Account Static OTP bypass
+    const isTestAccount = cleanMobile === '9999999999';
+    const generatedOtp = isTestAccount ? '123456' : Math.floor(100000 + Math.random() * 900000).toString();
     await Otp.findOneAndUpdate(
       { mobileNumber: cleanMobile },
       { otp: generatedOtp, createdAt: new Date() },
       { upsert: true, new: true }
     );
     
-    sendSmsOtp(cleanMobile, generatedOtp).catch(err => console.error('[SMS error]', err));
+    if (!isTestAccount) {
+      sendSmsOtp(cleanMobile, generatedOtp).catch(err => console.error('[SMS error]', err));
+    }
     
     return res.status(200).json({ success: true, message: 'OTP sent successfully' });
   } catch (error) {
@@ -252,6 +256,12 @@ export const verifyOtp = async (req, res, next) => {
     }
 
     const cleanMobile = String(mobile).trim();
+    const cleanOtp = String(otp).trim();
+
+    // Google Play Reviewer / Test Account Static OTP bypass
+    if (cleanMobile === '9999999999' && cleanOtp === '123456') {
+      return res.status(200).json({ success: true, message: 'OTP verified successfully' });
+    }
 
     const otpRecord = await Otp.findOne({ mobileNumber: cleanMobile });
     if (!otpRecord) {
@@ -259,7 +269,7 @@ export const verifyOtp = async (req, res, next) => {
       throw new Error('OTP expired or not found. Please request a new one.');
     }
 
-    if (otpRecord.otp !== String(otp).trim()) {
+    if (otpRecord.otp !== cleanOtp) {
       res.status(400);
       throw new Error('Invalid OTP code.');
     }
@@ -661,7 +671,7 @@ export const authUser = async (req, res, next) => {
         isAadhaarVerified: false,
         isBankVerified: false,
         isAddressVerified: false,
-        walletId: null,
+        vaultId: null,
         primaryBankAccountId: null,
         defaultUPIId: '',
         defaultPaymentMethod: '',
@@ -1933,7 +1943,7 @@ export const getAllAdminUsers = async (req, res, next) => {
         name,
         email,
         phone: user.mobileNumber,
-        walletBal: `₹${(user.cashBalance || 0).toLocaleString()}`,
+        silverBal: `${(user.silverHoldingsGrams || 0).toFixed(3)} g`,
         goldBal: `${(user.goldHoldingsGrams || 0).toFixed(3)} g`,
         kycStatus: user.isKycCompleted ? 'Verified' : 'Pending',
         status: user.status === 'SUSPENDED' ? 'Suspended' : 'Active',

@@ -17,7 +17,7 @@ interface HomeSavingsSectionProps {
 }
 
 // --- Banner Ribbon Tag Component ---
-function BannerTag({ text, color = "#6D28D9" }: { text: string; color?: string }) {
+function BannerTag({ text, color = "#064e3b" }: { text: string; color?: string }) {
   return (
     <div
       className="absolute top-0 right-0 z-20 text-white font-black text-[10px] tracking-wider uppercase px-4 py-1.5 flex items-center justify-center pointer-events-none shadow-xs"
@@ -40,19 +40,19 @@ const savingsPlans = [
     amount: "₹10 / day",
     desc: "Micro-savings that build huge wealth over time.",
     tag: "MOST POPULAR",
-    tagColorHex: "#6D28D9",
-    pillBorder: "border-purple-200",
-    pillBg: "bg-purple-50/50",
-    pillText: "text-[#6D28D9]",
-    suggestedBoxBg: "bg-[#F7F5FF] border-[#EDE9FE]",
-    amountColor: "text-[#6D28D9]",
+    tagColorHex: "#485E47",
+    pillBorder: "border-emerald-300",
+    pillBg: "bg-white",
+    pillText: "text-emerald-800",
+    suggestedBoxBg: "bg-[#f8fafc] border-slate-200",
+    amountColor: "text-slate-900",
     projected: "₹3,650/yr",
     image: "/daily_savings.png",
     subIcon: Layers,
-    subIconBg: "bg-purple-100/70 text-[#6D28D9]",
+    subIconBg: "bg-[#DDE3C4] text-emerald-800",
     subTextTitle: "Small Steps",
     subTextSubtitle: "Big Future",
-    btnBg: "bg-[#1e1b4b] hover:bg-[#312e81]"
+    btnBg: "bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:to-[#059669] shadow-sm"
   },
   {
     id: "weekly",
@@ -60,19 +60,19 @@ const savingsPlans = [
     amount: "₹1,000 / week",
     desc: "Perfect for matching your steady weekly expenses.",
     tag: "STEADY GROWTH",
-    tagColorHex: "#1e1b4b",
-    pillBorder: "border-indigo-200",
-    pillBg: "bg-indigo-50/50",
-    pillText: "text-[#1e1b4b]",
-    suggestedBoxBg: "bg-[#F0F3FF] border-[#E0E7FF]",
-    amountColor: "text-[#1e1b4b]",
+    tagColorHex: "#d97706",
+    pillBorder: "border-amber-200",
+    pillBg: "bg-amber-50/60",
+    pillText: "text-[#b45309]",
+    suggestedBoxBg: "bg-[#FFFBEB] border-[#FEF3C7]",
+    amountColor: "text-[#b45309]",
     projected: "₹52,000/yr",
     image: "/weekly_saving.png",
     subIcon: TrendingUp,
-    subIconBg: "bg-indigo-100/70 text-[#1e1b4b]",
+    subIconBg: "bg-amber-100/70 text-[#b45309]",
     subTextTitle: "Stay Consistent",
     subTextSubtitle: "Stay Ahead",
-    btnBg: "bg-[#1e1b4b] hover:bg-[#312e81]"
+    btnBg: "bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:to-[#059669] shadow-sm"
   },
   {
     id: "monthly",
@@ -80,19 +80,19 @@ const savingsPlans = [
     amount: "₹5,000 / month",
     desc: "Serious wealth building directly from your salary.",
     tag: "WEALTH BUILDER",
-    tagColorHex: "#312e81",
-    pillBorder: "border-purple-200",
-    pillBg: "bg-purple-50/50",
-    pillText: "text-[#312e81]",
-    suggestedBoxBg: "bg-[#F5F3FF] border-[#EDE9FE]",
-    amountColor: "text-[#312e81]",
+    tagColorHex: "#064e3b",
+    pillBorder: "border-emerald-300",
+    pillBg: "bg-white",
+    pillText: "text-emerald-800",
+    suggestedBoxBg: "bg-[#f8fafc] border-slate-200",
+    amountColor: "text-slate-900",
     projected: "₹60,000/yr",
     image: "/monthly_savings.png",
     subIcon: Scale,
-    subIconBg: "bg-purple-100/70 text-[#312e81]",
+    subIconBg: "bg-[#DDE3C4] text-emerald-800",
     subTextTitle: "Build Wealth",
     subTextSubtitle: "Secure Future",
-    btnBg: "bg-[#1e1b4b] hover:bg-[#312e81]"
+    btnBg: "bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:to-[#059669] shadow-sm"
   }
 ];
 
@@ -107,15 +107,15 @@ export default function HomeSavingsSection({ onNavigate }: HomeSavingsSectionPro
         
         {/* Section Header */}
         <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-purple-100/70 text-[#6D28D9] text-[11px] font-black uppercase tracking-wider">
-            <Sparkles size={13} />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white text-emerald-800 text-[11px] font-black uppercase tracking-wider border border-emerald-300">
+            <Sparkles size={13} className="text-amber-500" />
             <span>GOLD SIP SAVINGS</span>
           </div>
           
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
             Automate Your Gold Savings
           </h2>
-          <p className="text-xs sm:text-sm md:text-base font-semibold text-slate-500">
+          <p className="text-xs sm:text-sm md:text-base font-semibold text-emerald-800">
             Start small. Stay consistent. Build long-term wealth in 24K Pure Digital Gold.
           </p>
         </div>
@@ -131,7 +131,7 @@ export default function HomeSavingsSection({ onNavigate }: HomeSavingsSectionPro
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.2 }}
                 onClick={() => handleOpenPlan(plan.id)}
-                className="bg-white rounded-[26px] border border-slate-200/80 p-6 shadow-xs hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer group"
+                className="bg-white rounded-[26px] border border-slate-200 p-6 shadow-xs hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer group"
               >
                 {/* Top-Right Banner Tag */}
                 <BannerTag text={plan.tag} color={plan.tagColorHex} />
@@ -211,10 +211,10 @@ export default function HomeSavingsSection({ onNavigate }: HomeSavingsSectionPro
         <div className="flex items-center justify-center pt-2">
           <button
             onClick={() => onNavigate?.('savings')}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-[#6D28D9] hover:text-[#5B21B6] bg-purple-50/80 hover:bg-purple-100/80 border border-purple-200/80 px-6 py-3 rounded-full transition-all cursor-pointer outline-none shadow-2xs"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-slate-900 hover:text-[#1F291E] bg-white hover:bg-[#DDE3C4] border border-emerald-300 px-6 py-3 rounded-full transition-all cursor-pointer outline-none shadow-2xs"
           >
             <span>View All Gold Savings Plans & Growth Calculators</span>
-            <ChevronRight size={16} strokeWidth={2.5} />
+            <ChevronRight size={16} strokeWidth={2.5} className="text-amber-500" />
           </button>
         </div>
 

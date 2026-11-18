@@ -6,7 +6,7 @@ import {
   Search, Calendar, ChevronDown, Download, AlertCircle, 
   Filter, Clock, CheckCircle2, XCircle, FileText, IndianRupee,
   Activity, Wifi, Smartphone, Zap, Home, ShieldCheck, AlertTriangle, ChevronRight, CreditCard, Banknote, Landmark,
-  Coins, TrendingUp, Wallet, Eye, ArrowUpRight, PiggyBank, Gift
+  Coins, TrendingUp, Eye, ArrowUpRight, PiggyBank, Gift
 } from "lucide-react";
 import { getTransactions, Transaction } from "../utils/transactionStorage";
 import { useFipModal } from "./FipModal";
@@ -878,7 +878,7 @@ export default function HistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 h-screen flex flex-col items-center justify-center bg-[#f8f9fa]">
+      <div className="flex-1 h-screen flex flex-col items-center justify-center bg-white">
         <LoadingSpinner size={100} />
         <p className="text-xs font-bold text-[#6d28d9] mt-3 tracking-wide animate-pulse">Loading transaction history...</p>
       </div>
@@ -886,7 +886,7 @@ export default function HistoryPage() {
   }
   
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-[#f8f9fa]">
+    <div className="flex-1 h-screen overflow-y-auto bg-white">
       
       {/* LAPTOP / DESKTOP SCREENS VIEW (>= md) - UNTOUCHED ORIGINAL DESIGN */}
       <div className="hidden md:block p-8 lg:p-10 max-w-7xl mx-auto space-y-6 pb-10">
@@ -900,7 +900,7 @@ export default function HistoryPage() {
           
           <button 
             onClick={handleExport}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-purple-200 text-purple-700 font-bold text-xs bg-white hover:bg-purple-50 transition-all outline-none cursor-pointer shadow-sm"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-purple-200 text-purple-700 font-bold text-xs bg-white hover:bg-[#f8fafc] transition-all outline-none cursor-pointer shadow-sm"
           >
             <Download size={14} strokeWidth={2.5} />
             Export Report
@@ -910,9 +910,9 @@ export default function HistoryPage() {
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Card 1 */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
-              <Calendar size={20} className="text-purple-600" />
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 border border-slate-200 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#f8fafc] flex items-center justify-center shrink-0">
+              <Calendar size={20} className="text-[#047857]" />
             </div>
             <div className="flex flex-col justify-center">
               <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Total Transactions</span>
@@ -922,7 +922,7 @@ export default function HistoryPage() {
           </div>
           
           {/* Card 2 */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-4">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 border border-slate-200 shadow-sm flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
               <div className="w-6 h-6 rounded-full border-2 border-emerald-500 flex items-center justify-center">
                 <IndianRupee size={12} className="text-emerald-600" strokeWidth={3} />
@@ -937,7 +937,7 @@ export default function HistoryPage() {
         </div>
 
         {/* Filters Controls Row */}
-        <div className="bg-white p-4 md:p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+        <div className="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
             
             {/* Date Range Picker */}
@@ -948,7 +948,7 @@ export default function HistoryPage() {
                   type="date" 
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all" 
+                  className="w-full pl-9 pr-3 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8fafc] border border-slate-200 rounded-xl outline-none focus:border-[#047857] focus:ring-2 focus:ring-emerald-500/20 transition-all" 
                   placeholder="Start Date"
                 />
               </div>
@@ -959,7 +959,7 @@ export default function HistoryPage() {
                   type="date" 
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all" 
+                  className="w-full pl-9 pr-3 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8fafc] border border-slate-200 rounded-xl outline-none focus:border-[#047857] focus:ring-2 focus:ring-emerald-500/20 transition-all" 
                   placeholder="End Date"
                 />
               </div>
@@ -971,7 +971,7 @@ export default function HistoryPage() {
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full pl-9 pr-8 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl appearance-none outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all cursor-pointer"
+                className="w-full pl-9 pr-8 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8fafc] border border-slate-200 rounded-xl appearance-none outline-none focus:border-[#047857] focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer"
               >
                 <option value="all">All Statuses</option>
                 <option value="Completed">Completed</option>
@@ -989,7 +989,7 @@ export default function HistoryPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by Transaction ID, Merchant..."
-                className="w-full pl-9 pr-4 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8f9fc] border border-gray-100 rounded-xl outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-50 transition-all"
+                className="w-full pl-9 pr-4 py-2.5 text-xs font-semibold text-gray-600 bg-[#f8fafc] border border-slate-200 rounded-xl outline-none focus:border-[#047857] focus:ring-2 focus:ring-emerald-500/20 transition-all"
               />
             </div>
 
@@ -1010,7 +1010,7 @@ export default function HistoryPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`pb-3 font-bold text-xs relative cursor-pointer bg-transparent border-none transition-colors duration-200 outline-none
-                  ${active ? "text-purple-600" : "text-gray-400 hover:text-gray-700"}`}
+                  ${active ? "text-[#047857]" : "text-gray-400 hover:text-gray-700"}`}
               >
                 {tab.label}
                 {active && (
@@ -1033,7 +1033,7 @@ export default function HistoryPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-gray-100 text-center"
+                className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-slate-200 border border-slate-200 text-center"
               >
                 <div className="w-12 h-12 bg-gray-50 text-gray-400 rounded-full flex items-center justify-center mb-3">
                   <AlertCircle size={24} />
@@ -1057,7 +1057,7 @@ export default function HistoryPage() {
                       className={`flex justify-between items-center select-none px-1 ${group.list.length > 1 ? 'cursor-pointer' : ''}`}
                     >
                       <div className="flex items-center gap-2">
-                        <Calendar size={14} className="text-purple-600" />
+                        <Calendar size={14} className="text-[#047857]" />
                         <span className="text-xs font-black text-gray-800">{dateKey}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1076,7 +1076,7 @@ export default function HistoryPage() {
 
                     {/* Transactions list for the day */}
                     {expandedGroups[dateKey] !== false && (
-                      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
+                      <div className="bg-white rounded-2xl border border-slate-200 border border-slate-200 shadow-sm divide-y divide-gray-50">
                       {group.list.map(tx => {
                         const statusColors = 
                           tx.status === "Completed" 
@@ -1100,17 +1100,17 @@ export default function HistoryPage() {
                            TxIcon = <Coins size={18} className="text-slate-400" />;
                            iconBg = "bg-slate-100";
                         } else if (tx.source.toLowerCase().includes("electricity")) {
-                           TxIcon = <Zap size={16} className="text-purple-600" />;
-                           iconBg = "bg-purple-50";
+                           TxIcon = <Zap size={16} className="text-[#047857]" />;
+                           iconBg = "bg-[#f8fafc]";
                         } else if (tx.source.toLowerCase().includes("recharge")) {
-                           TxIcon = <Smartphone size={16} className="text-purple-600" />;
-                           iconBg = "bg-purple-50";
+                           TxIcon = <Smartphone size={16} className="text-[#047857]" />;
+                           iconBg = "bg-[#f8fafc]";
                         } else if (tx.source.toLowerCase().includes("fiber") || tx.source.toLowerCase().includes("wifi")) {
                            TxIcon = <Wifi size={16} className="text-blue-600" />;
                            iconBg = "bg-blue-50";
                         } else if (tx.source.toLowerCase().includes("rent") || tx.source.toLowerCase().includes("home")) {
-                           TxIcon = <Home size={16} className="text-purple-600" />;
-                           iconBg = "bg-purple-50";
+                           TxIcon = <Home size={16} className="text-[#047857]" />;
+                           iconBg = "bg-[#f8fafc]";
                         }
 
                         // Determine Amount Sign & Color
@@ -1194,7 +1194,7 @@ export default function HistoryPage() {
         </div>
 
         {/* Footer Stats Bar */}
-        <div className="bg-[#f8f9fc] border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+        <div className="bg-[#f8fafc] border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
            <div className="flex items-center gap-3 w-full sm:w-auto">
              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <ShieldCheck size={18} className="text-emerald-500" />
@@ -1225,7 +1225,7 @@ export default function HistoryPage() {
 
            <div className="flex items-center gap-3 w-full sm:w-auto">
              <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                <Clock size={18} className="text-purple-600" />
+                <Clock size={18} className="text-[#047857]" />
              </div>
              <div className="flex flex-col">
                <span className="text-[10px] font-bold text-gray-500">This Month</span>
@@ -1240,7 +1240,7 @@ export default function HistoryPage() {
 
            <div className="flex items-center gap-3 w-full sm:w-auto">
              <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                <Home size={18} className="text-purple-600" />
+                <Home size={18} className="text-[#047857]" />
              </div>
              <div className="flex flex-col">
                <span className="text-[10px] font-bold text-gray-500">Avg. Transaction</span>
@@ -1304,8 +1304,8 @@ export default function HistoryPage() {
 
         {/* Filter Options Modal / Drawer */}
         {showFilterModal && (
-          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-md space-y-3">
-            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-md space-y-3">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
               <span className="text-xs font-bold text-gray-800">Filter Transactions</span>
               <button onClick={() => setShowFilterModal(false)} className="text-xs font-bold text-blue-600 bg-transparent border-none outline-none cursor-pointer">Close</button>
             </div>
@@ -1352,14 +1352,14 @@ export default function HistoryPage() {
                 onClick={() => setMobileTab(pill.id as any)}
                 className={`relative px-5 py-2 rounded-full text-[13px] font-bold transition-all duration-200 cursor-pointer border-none outline-none whitespace-nowrap ${
                   isSelected 
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-[1.02]" 
-                    : "bg-white text-gray-600 hover:text-gray-900 border border-gray-200/70 hover:border-blue-200 shadow-sm"
+                    ? "bg-[#047857] text-white shadow-md shadow-emerald-900/20 scale-[1.02]" 
+                    : "bg-white text-gray-600 hover:text-gray-900 border border-gray-200/70 hover:border-emerald-200 shadow-sm"
                 }`}
               >
                 {isSelected && (
                   <motion.div
                     layoutId="activeMobileTabHighlight"
-                    className="absolute inset-0 bg-blue-600 rounded-full -z-0"
+                    className="absolute inset-0 bg-[#047857] rounded-full -z-0"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -1380,7 +1380,7 @@ export default function HistoryPage() {
             className="space-y-4"
           >
             {mobileDisplayList.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-gray-100">
+              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 border border-slate-200">
                 <p className="text-xs font-bold text-gray-500">No transactions match your criteria</p>
               </div>
             ) : (
@@ -1420,7 +1420,7 @@ export default function HistoryPage() {
                     );
                   } else if (tx.iconType === "bills") {
                     return (
-                      <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center shadow-2xs shrink-0">
+                      <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] border border-purple-200/80 text-[#047857] flex items-center justify-center shadow-2xs shrink-0">
                         <FileText size={22} strokeWidth={2.2} />
                       </div>
                     );
@@ -1440,7 +1440,7 @@ export default function HistoryPage() {
                 };
 
                 const isPositive = tx.amount > 0;
-                let amountColor = isPositive ? "text-emerald-600" : "text-purple-600";
+                let amountColor = isPositive ? "text-emerald-600" : "text-[#047857]";
                 if (!isPositive && tx.title.includes("Gold")) amountColor = "text-blue-600";
                 if (!isPositive && tx.title.includes("Bank")) amountColor = "text-red-600";
 
@@ -1454,7 +1454,7 @@ export default function HistoryPage() {
                 return (
                   <div 
                     key={tx.id} 
-                    className="bg-white rounded-[24px] p-5 border border-gray-100 shadow-sm space-y-4"
+                    className="bg-white rounded-[24px] p-5 border border-slate-200 shadow-sm space-y-4"
                   >
                   {/* Top Row: Icon + Title/Subtitle + Amount/Status */}
                   <div className="flex items-start justify-between gap-3">

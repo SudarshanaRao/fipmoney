@@ -1,0 +1,23 @@
+Release Name / Title:
+Fipmoney v1.0.1 - Direct Bank Settlement Update
+
+Release Notes (<en-GB>):
+<en-GB>
+Welcome to Fipmoney v1.0.1!
+• Pure 24K Digital Gold & 99.9% Digital Silver savings
+• Direct-to-bank settlements for all sell orders (Zero wallet lock-in)
+• Automated Gold & Silver SIP starting from ₹10
+• 100% Insured Brink's vault storage & live price tracking
+• Fast UPI payments & biometric authentication
+</en-GB>
+
+Package Details:
+- App ID: com.fipmoney.app
+- Version Name: 1.0.1
+- Version Code: 2
+- Target SDK: 36
+- Min SDK: 24
+- Keystore: release/fipmoney-release.keystore
+- Key Alias: fipmoney
+- Key/Store Password: fipmoney2026
+

@@ -401,7 +401,7 @@ export default function BecomeAgentPage() {
     const agentReferralLink = typeof window !== "undefined" ? `${window.location.origin}/?ref=${referralCode}` : `https://fipmoney.com/?ref=${referralCode}`;
 
     return (
-      <div className="flex-1 h-screen overflow-y-auto bg-[#fafbfc] pb-24 text-slate-800 font-sans hide-scrollbar">
+      <div className="flex-1 h-screen overflow-y-auto bg-white pb-24 text-slate-800 font-sans hide-scrollbar">
         <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
 
           {/* Executive Header Banner */}
@@ -489,7 +489,7 @@ export default function BecomeAgentPage() {
           </div>
 
           {/* Agent Referral Sharing Card */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-150 shadow-sm space-y-4">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 border border-gray-150 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-extrabold text-gray-900">Share Your Official DGA Agent Referral Link</h3>
@@ -578,7 +578,7 @@ export default function BecomeAgentPage() {
   }
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-[#fafafd] pb-20 text-slate-800 hide-scrollbar font-sans">
+    <div className="flex-1 h-screen overflow-y-auto bg-white pb-20 text-slate-800 hide-scrollbar font-sans">
 
       {/* 1. TOP HERO BANNER */}
       <div className="px-6 lg:px-12 pt-6 max-w-[1600px] mx-auto w-full">
@@ -731,7 +731,7 @@ export default function BecomeAgentPage() {
             How You Earn?
           </h2>
 
-          <div className="bg-white rounded-3xl p-6 lg:p-8 border border-slate-100 shadow-xs">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 lg:p-8 border border-slate-200 shadow-xs">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
 
               {/* Step 1 */}
@@ -787,7 +787,7 @@ export default function BecomeAgentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
 
           {/* Left Card: Target Based Commission Table */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs flex flex-col justify-between">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 border border-slate-200 shadow-xs flex flex-col justify-between">
             <div>
               <h3 className="text-lg font-black text-slate-900 mb-1">Target Based Commission</h3>
               <p className="text-xs text-slate-500 font-medium mb-6">
@@ -826,7 +826,7 @@ export default function BecomeAgentPage() {
           </div>
 
           {/* Right Card: Tools & Support You Get (with marketing_kit.png) */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 border border-slate-200 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="space-y-4 flex-1">
               <h3 className="text-lg font-black text-slate-900 mb-1">Tools & Support You Get</h3>
 
@@ -882,7 +882,7 @@ export default function BecomeAgentPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-center">
 
           {/* 3 Pills */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 border border-slate-200 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                 <AlertCircle size={20} />
@@ -929,7 +929,7 @@ export default function BecomeAgentPage() {
 
 
         {/* 6. JOIN THE DGA WAITLIST SECTION (FORM + TICKET GRAPHIC OVERLAY) */}
-        <div id="join-waitlist-section" className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-sm space-y-6">
+        <div id="join-waitlist-section" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6">
 
           <div>
             <div className="flex items-center gap-2">
@@ -971,7 +971,7 @@ export default function BecomeAgentPage() {
                     Your account is fully verified and active as an official Digital Gold Agent Partner. You do not need to register or submit the waitlist application form again.
                   </p>
 
-                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="space-y-2 pt-2 border-t border-slate-200">
                     <label className="text-[11px] font-extrabold text-amber-900 uppercase tracking-wider block">
                       Refer Now with Your Official Agent Referral Link:
                     </label>
@@ -1243,7 +1243,7 @@ export default function BecomeAgentPage() {
 
 
         {/* 7. BOTTOM HELP BAR (USING fipmoney_support.png) */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
           <div className="flex items-center gap-5 relative z-10">
             <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 shrink-0 flex items-center justify-center">
               <img

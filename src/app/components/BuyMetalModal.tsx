@@ -260,14 +260,14 @@ export default function BuyMetalModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-white lg:bg-slate-950/60 lg:backdrop-blur-sm flex flex-col lg:items-center lg:justify-center p-0 lg:p-5 overflow-y-auto lg:overflow-hidden w-full h-full min-h-screen"
+        className="fixed inset-0 z-[100] bg-white lg:bg-black/60 lg:backdrop-blur-sm flex flex-col lg:items-center lg:justify-center p-0 lg:p-5 overflow-y-auto lg:overflow-hidden w-full h-full min-h-screen"
       >
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="bg-white w-full min-h-screen lg:min-h-0 lg:rounded-[32px] lg:max-w-[1160px] lg:max-h-[90vh] overflow-y-auto lg:overflow-hidden lg:shadow-2xl relative border-none lg:border lg:border-slate-100 p-4 sm:p-5 lg:p-7 text-slate-800 font-sans hide-scrollbar flex flex-col justify-between"
+          className="bg-white w-full min-h-screen lg:min-h-0 lg:rounded-[32px] lg:max-w-[1160px] lg:max-h-[90vh] overflow-y-auto lg:overflow-hidden lg:shadow-2xl relative border-none lg:border lg:border-slate-200 p-4 sm:p-5 lg:p-7 text-slate-800 font-sans hide-scrollbar flex flex-col justify-between"
         >
 
           {/* Close Button Top-Right for Desktop */}
@@ -298,7 +298,7 @@ export default function BuyMetalModal({
           <div className="lg:hidden flex flex-col space-y-3.5 w-full max-w-md mx-auto text-slate-800 font-sans p-1 mt-12">
             
             {/* Top Bar Header */}
-            <div className="relative flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="relative flex items-center justify-between pb-2 border-b border-slate-200">
               <button
                 onClick={onClose}
                 className="w-9 h-9 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-700 flex items-center justify-center border-none outline-none cursor-pointer z-10"
@@ -308,7 +308,7 @@ export default function BuyMetalModal({
               <h2 className="text-lg font-bold text-[#0f172a] tracking-tight absolute inset-x-0 text-center pointer-events-none">
                 Buy {metalName}
               </h2>
-              <button className="w-8 h-8 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center bg-white outline-none cursor-pointer z-10">
+              <button className="w-8 h-8 rounded-full border border-slate-200 text-slate-400 flex items-center justify-center bg-white outline-none cursor-pointer z-10">
                 <HelpCircle size={16} />
               </button>
             </div>
@@ -399,7 +399,7 @@ export default function BuyMetalModal({
               <label className="text-xs font-extrabold text-slate-700 block mb-1.5 uppercase tracking-wider">
                 {buyMode === "amount" ? "Enter Amount" : "Enter Grams"}
               </label>
-              <div className={`bg-white border-2 rounded-2xl p-2.5 flex items-center justify-between shadow-2xs ${themeFocusBorder}`}>
+              <div className={`bg-[#f8fafc] border-2 rounded-2xl p-2.5 flex items-center justify-between shadow-2xs ${themeFocusBorder}`}>
                 <div className="w-8 h-8 rounded-xl bg-slate-50 text-slate-800 font-bold text-base flex items-center justify-center mr-2 shrink-0">
                   {buyMode === "amount" ? "₹" : "g"}
                 </div>
@@ -438,7 +438,7 @@ export default function BuyMetalModal({
             </div>
 
             {/* 5. You Will Get & GST Summary Card */}
-            <div className="bg-[#fafafa] rounded-2xl p-3 border border-slate-100/90 flex items-center justify-between">
+            <div className="bg-[#fafafa] rounded-2xl p-3 border border-slate-200/90 flex items-center justify-between">
               <div className="flex-1 text-center">
                 <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
                   You Will Get
@@ -461,7 +461,7 @@ export default function BuyMetalModal({
             {/* 6. Price Breakdown Accordion */}
             <div
               onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
-              className="bg-[#fafafa] rounded-2xl p-3 border border-slate-100/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
+              className="bg-[#fafafa] rounded-2xl p-3 border border-slate-200/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${themeSubCardBg}`}>
@@ -474,7 +474,7 @@ export default function BuyMetalModal({
 
             {/* Expanded Price Breakdown Details if open */}
             {isBreakdownOpen && (
-              <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-100">
+              <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-200">
                 <div className="flex justify-between text-slate-600">
                   <span>Base Amount</span>
                   <span className="font-bold">₹{calculatedAmount.toFixed(2)}</span>
@@ -513,7 +513,7 @@ export default function BuyMetalModal({
             </div>
 
             {/* 8. Trust Badges Footer */}
-            <div className="mt-5 bg-[#fafafa] rounded-2xl p-3.5 border border-slate-100/90 grid grid-cols-3 gap-1 text-center">
+            <div className="mt-5 bg-[#fafafa] rounded-2xl p-3.5 border border-slate-200/90 grid grid-cols-3 gap-1 text-center">
               <div className="flex flex-col items-center">
                 <Shield size={14} className={themeText} />
                 <span className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">100% Insured</span>
@@ -536,7 +536,7 @@ export default function BuyMetalModal({
           <div className="hidden lg:flex flex-col justify-between h-full space-y-4">
 
           {/* Top Modal Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 shrink-0 pr-12 sm:pr-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200 shrink-0 pr-12 sm:pr-10">
             {/* Left: Dynamic Title & Subtitle */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-amber-100/80 text-amber-600 flex items-center justify-center shrink-0">
@@ -553,7 +553,7 @@ export default function BuyMetalModal({
             </div>
 
             {/* Middle: Live Market Rate */}
-            <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+            <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                 LIVE MARKET RATE
               </span>
@@ -664,7 +664,7 @@ export default function BuyMetalModal({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200/70">
+                  <div className="flex items-center gap-1 bg-[#f8fafc] p-1 rounded-xl border border-slate-200/70">
                     {(["1H", "24H", "7D", "1M", "1Y"] as Timeframe[]).map((tf) => (
                       <button
                         key={tf}
@@ -734,14 +734,14 @@ export default function BuyMetalModal({
               </div>
 
               {/* 3. Security Banner */}
-              <div className="bg-gradient-to-r from-[#0F0C20] via-[#1A153B] to-[#0F0C20] rounded-2xl p-3.5 sm:p-4 text-white flex items-center justify-between shadow-xs border border-indigo-900/40 mt-auto">
+              <div className="bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] rounded-2xl p-3.5 sm:p-4 text-white flex items-center justify-between shadow-xs border border-emerald-300/30 mt-auto">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-amber-500/20 border border-amber-400/30 rounded-xl flex items-center justify-center text-amber-400 shrink-0">
                     <Shield size={18} strokeWidth={2.5} />
                   </div>
                   <div>
                     <h4 className="text-xs sm:text-sm font-black text-white leading-tight">100% Secure & Insured by SafeGold</h4>
-                    <p className="text-[10px] sm:text-xs text-indigo-200/80 font-medium mt-0.5">
+                    <p className="text-[10px] sm:text-xs text-white/80 font-medium mt-0.5">
                       Your order will be sent to SafeGold. SafeGold stores and handles your {metalName.toLowerCase()} in 100% secure, insured bank-grade vaults.
                     </p>
                   </div>
@@ -840,7 +840,7 @@ export default function BuyMetalModal({
               </div>
 
               {/* Order Summary */}
-              <div className="border-t border-slate-100 pt-3 space-y-2 text-xs sm:text-sm">
+              <div className="border-t border-slate-200 pt-3 space-y-2 text-xs sm:text-sm">
                 <h3 className="text-xs sm:text-sm font-black text-slate-800 mb-1.5">Order Summary</h3>
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-slate-500">Live {metalName} Rate (per gram)</span>

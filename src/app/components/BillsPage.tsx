@@ -6,7 +6,7 @@ import {
   Smartphone, Car, Tv, MonitorPlay, Flame, Droplets, Zap,
   FileText, Wifi, GraduationCap, Home, Gift, Play, Search,
   Shield, CheckCircle2, CreditCard, ArrowRight, Clock, AlertCircle, ChevronRight,
-  LayoutGrid, Landmark, Plane, MoreHorizontal, Star, Wallet, Bell, Receipt,
+  LayoutGrid, Landmark, Plane, MoreHorizontal, Star, Bell, Receipt,
   Users, Banknote
 } from "lucide-react";
 import { API_BASE_URL } from "../utils/apiConfig";
@@ -78,7 +78,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
   }, []);
 
   const promoCards = [
-    { title: "Refer & Earn", desc: "Invite friends and earn ₹500 cashback directly in your wallet.", icon: Users, gradient: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", action: "Refer Now" },
+    { title: "Refer & Earn", desc: "Invite friends and earn digital gold rewards directly in your vault.", icon: Users, gradient: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", action: "Refer Now" },
     { title: "Instant Cashbacks", desc: "Pay your utility bills and get assured cashbacks every month.", icon: Banknote, gradient: "linear-gradient(135deg, #064e3b 0%, #10b981 100%)", action: "Explore Offers" },
     { title: "Bank-Grade Security", desc: "Your payments are protected with 256-bit encryption.", icon: Shield, gradient: "linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)", action: "Learn More" }
   ];
@@ -90,12 +90,12 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
   });
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-[#FAFAFA] pb-24 text-slate-800 font-sans relative">
+    <div className="flex-1 h-screen overflow-y-auto bg-white pb-24 text-slate-900 font-sans relative">
       
       {/* Decorative Floating Mesh Gradients */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-yellow-200/20 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute top-80 right-10 w-80 h-80 bg-purple-200/10 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-emerald-200/15 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute top-20 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute top-80 right-10 w-80 h-80 bg-[#047857]/10 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none z-0" />
 
       <div className="p-4 md:p-6 lg:p-10 max-w-[1400px] mx-auto space-y-10 relative z-10">
         
@@ -107,7 +107,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
           </div>
           
           {/* Right Aligned Floating Search Bar */}
-          <div className="relative w-full md:w-80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-2xl border border-slate-100 bg-white overflow-hidden focus-within:border-indigo-500 transition-colors">
+          <div className="relative w-full md:w-80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-2xl border border-slate-100 bg-white overflow-hidden focus-within:border-emerald-500 transition-colors">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Search size={16} /></span>
             <input 
               type="text" 
@@ -128,9 +128,9 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <Clock size={16} className="text-indigo-600" /> Pending Due Alerts
+              <Clock size={16} className="text-[#047857]" /> Pending Due Alerts
             </h2>
-            <span className="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+            <span className="text-[10px] font-black uppercase text-[#047857] bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full">
               3 Payments Due
             </span>
           </div>
@@ -138,7 +138,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {isLoadingDues ? (
               <div className="col-span-1 md:col-span-3 flex justify-center py-10">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent" />
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#047857] border-t-transparent" />
               </div>
             ) : dueBills.length > 0 ? (
               dueBills.map((bill, i) => {
@@ -268,7 +268,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
           <div className="flex-1 bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] min-h-[300px]">
             <div className="flex justify-between items-center mb-8">
                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Popular Services</h2>
-               <button className="flex items-center gap-1.5 text-sm font-bold text-indigo-600 bg-transparent border-none outline-none cursor-pointer hover:text-indigo-700 transition-colors">
+               <button className="flex items-center gap-1.5 text-sm font-bold text-[#047857] bg-transparent border-none outline-none cursor-pointer hover:text-[#064e3b] transition-colors">
                   <Star size={16} /> Manage Favourites
                </button>
             </div>
@@ -344,7 +344,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
 
            <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0">
-                 <Wallet size={22} strokeWidth={2} />
+                 <CreditCard size={22} strokeWidth={2} />
               </div>
               <div>
                  <h4 className="text-sm font-extrabold text-slate-900">Multiple Options</h4>
@@ -378,7 +378,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
             </div>
 
             <div className="space-y-1 max-w-lg">
-              <h4 className="text-sm font-extrabold text-indigo-700">
+              <h4 className="text-sm font-extrabold text-[#047857]">
                 Secure Payments Assured
               </h4>
               <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">

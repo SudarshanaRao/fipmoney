@@ -18,7 +18,6 @@ import {
   Layers,
   Scale,
   Sparkles,
-  Wallet,
   Zap,
   Smartphone,
   ArrowRight,
@@ -32,7 +31,7 @@ type PlanType = 'daily' | 'weekly' | 'monthly' | null;
 // --- Banner Ribbon Tag Component ---
 export function BannerTag({
   text,
-  color = "#6D28D9",
+  color = "#047857",
 }: { text: string; color?: string }) {
   return (
     <div
@@ -57,24 +56,24 @@ const savingsPlans = [
     amount: "₹10 / day",
     desc: "Micro-savings that build huge wealth over time.",
     tag: "MOST POPULAR",
-    tagColorHex: "#6D28D9",
+    tagColorHex: "#047857",
     tagWidth: 145,
-    tagBg: "bg-[#6D28D9]",
-    btnBg: "bg-[#6D28D9] hover:bg-[#5B21B6]",
-    pillBorder: "border-purple-200",
-    pillBg: "bg-purple-50/50",
-    pillText: "text-[#6D28D9]",
-    suggestedBoxBg: "bg-[#F7F5FF] border-[#EDE9FE]",
-    amountColor: "text-[#6D28D9]",
+    tagBg: "bg-[#047857]",
+    btnBg: "bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857]",
+    pillBorder: "border-emerald-300",
+    pillBg: "bg-[#f8fafc]",
+    pillText: "text-[#047857]",
+    suggestedBoxBg: "bg-[#f8fafc] border-slate-200",
+    amountColor: "text-emerald-800",
     projected: "₹3,650/yr",
     image: "/daily_savings.png",
     subIcon: Layers,
-    subIconBg: "bg-purple-100/70 text-[#6D28D9]",
+    subIconBg: "bg-white text-[#047857]",
     subTextTitle: "Small Steps",
     subTextSubtitle: "Big Future",
     defaults: { amount: 10, minAmount: 10, maxAmount: 1000, step: 10 },
-    theme: { bg: "bg-purple-600", text: "text-[#6D28D9]", light: "bg-purple-50", dark: "#4c1d95", accent: "#6D28D9" },
-    gradient: "linear-gradient(135deg, #4c1d95 0%, #6D28D9 100%)"
+    theme: { bg: "bg-[#047857]", text: "text-[#047857]", light: "bg-[#f8fafc]", dark: "#022c22", accent: "#047857" },
+    gradient: "linear-gradient(135deg, #022c22 0%, #064e3b 50%, #047857 100%)"
   },
   {
     id: "weekly",
@@ -85,21 +84,21 @@ const savingsPlans = [
     tagColorHex: "#059669",
     tagWidth: 150,
     tagBg: "bg-[#059669]",
-    btnBg: "bg-[#059669] hover:bg-[#047857]",
-    pillBorder: "border-emerald-200",
-    pillBg: "bg-emerald-50/50",
-    pillText: "text-[#059669]",
-    suggestedBoxBg: "bg-[#F0FDF4] border-[#DCFCE7]",
-    amountColor: "text-[#059669]",
+    btnBg: "bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857]",
+    pillBorder: "border-emerald-300",
+    pillBg: "bg-[#f8fafc]",
+    pillText: "text-[#047857]",
+    suggestedBoxBg: "bg-[#f8fafc] border-slate-200",
+    amountColor: "text-emerald-800",
     projected: "₹52,000/yr",
     image: "/weekly_savings.png",
     subIcon: TrendingUp,
-    subIconBg: "bg-emerald-100/70 text-[#059669]",
+    subIconBg: "bg-white text-[#047857]",
     subTextTitle: "Stay Consistent",
     subTextSubtitle: "Stay Ahead",
     defaults: { amount: 1000, minAmount: 100, maxAmount: 10000, step: 100 },
-    theme: { bg: "bg-emerald-600", text: "text-[#059669]", light: "bg-emerald-50", dark: "#064e3b", accent: "#059669" },
-    gradient: "linear-gradient(135deg, #064e3b 0%, #059669 100%)"
+    theme: { bg: "bg-[#059669]", text: "text-[#047857]", light: "bg-[#f8fafc]", dark: "#022c22", accent: "#059669" },
+    gradient: "linear-gradient(135deg, #022c22 0%, #064e3b 50%, #059669 100%)"
   },
   {
     id: "monthly",
@@ -275,7 +274,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
   };
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-[#FAFAFC] pb-24 text-slate-800 font-sans relative hide-scrollbar">
+    <div className="flex-1 h-screen overflow-y-auto bg-white pb-24 text-slate-900 font-sans relative hide-scrollbar">
       <div className="p-4 md:p-6 lg:p-8 max-w-[1360px] mx-auto space-y-8 relative z-10">
 
         <AnimatePresence mode="popLayout">
@@ -294,14 +293,14 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
                     Gold SIP Savings
                   </h1>
-                  <p className="text-xs md:text-sm font-medium text-slate-500 mt-1">
+                  <p className="text-xs md:text-sm font-medium text-slate-600 mt-1">
                     Discipline today, prosperity tomorrow. Automate your savings in 24K pure Digital Gold.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 bg-[#F3F4FF] px-4 py-2 rounded-full border border-indigo-100/80 shadow-xs self-start md:self-auto">
-                  <ShieldCheck size={16} className="text-[#6D28D9]" />
-                  <span className="text-xs font-black text-[#6D28D9] uppercase tracking-wider">
+                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-emerald-300 shadow-xs self-start md:self-auto">
+                  <ShieldCheck size={16} className="text-[#047857]" />
+                  <span className="text-xs font-black text-[#047857] uppercase tracking-wider">
                     100% SECURE & REGULATED
                   </span>
                 </div>
@@ -309,8 +308,8 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
               {/* Choose Your Plan Title */}
               <div>
-                <div className="flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider text-[#6D28D9] mb-4">
-                  <TrendingUp size={16} className="text-[#6D28D9]" />
+                <div className="flex items-center gap-2 text-xs md:text-sm font-extrabold uppercase tracking-wider text-[#047857] mb-4">
+                  <TrendingUp size={16} className="text-[#047857]" />
                   <span>CHOOSE YOUR PLAN</span>
                 </div>
 
@@ -323,7 +322,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                       <div
                         key={plan.id}
                         onClick={() => handleOpenSetup(plan.id as PlanType)}
-                        className="bg-white rounded-[24px] border border-slate-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer group"
+                        className="bg-white rounded-[24px] border border-slate-200 p-6 shadow-xs hover:shadow-md transition-all duration-300 relative overflow-hidden flex flex-col justify-between cursor-pointer group"
                       >
                         {/* Top-Right Banner Tag */}
                         <BannerTag text={plan.tag} color={plan.tagColorHex} />
@@ -402,7 +401,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
 
               {/* Bottom Safety & Regulation Banner */}
-              <div className="bg-gradient-to-r from-[#0F0C20] via-[#1A153B] to-[#0F0C20] rounded-2xl p-5 md:p-6 text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg border border-indigo-900/40 relative overflow-hidden">
+              <div className="bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] rounded-2xl p-5 md:p-6 text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg border border-emerald-500/30 relative overflow-hidden">
                 <div className="flex items-center gap-4 relative z-10">
                   <div className="w-11 h-11 bg-amber-500/20 border border-amber-400/30 rounded-xl flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
                     <Shield size={22} strokeWidth={2.5} />
@@ -411,7 +410,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                     <h3 className="text-base md:text-lg font-black text-white tracking-tight">
                       Safe. Secure. 24K Pure.
                     </h3>
-                    <p className="text-xs text-indigo-200/80 font-medium mt-0.5">
+                    <p className="text-xs text-emerald-100/80 font-medium mt-0.5">
                       Your gold savings are 100% secure, insured and regulated.
                     </p>
                   </div>
@@ -438,13 +437,13 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
               <div className="flex items-center justify-between">
                 <button
                   onClick={handleCloseSetup}
-                  className="inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-600 hover:text-[#6D28D9] transition-colors cursor-pointer bg-transparent border-none outline-none"
+                  className="inline-flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-600 hover:text-emerald-800 transition-colors cursor-pointer bg-transparent border-none outline-none"
                 >
                   <ArrowLeft size={16} strokeWidth={2.5} />
                   <span>Back to Savings Plans</span>
                 </button>
 
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-50 border border-purple-200/70 text-[#6D28D9] text-xs font-black uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#f8fafc] border border-emerald-300 text-emerald-800 text-xs font-black uppercase tracking-wider">
                   <ShieldCheck size={15} strokeWidth={2.5} />
                   <span>100% SECURE & REGULATED</span>
                 </div>
@@ -463,10 +462,10 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
               {/* Row 1: Hero Banner & Plan Highlights */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Hero Card (Left 2 cols) */}
-                <div className="lg:col-span-2 bg-gradient-to-br from-[#F6F3FF] via-[#FAF8FF] to-white border border-purple-100/90 rounded-[28px] p-6 md:p-8 shadow-xs relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 min-h-[250px]">
+                <div className="lg:col-span-2 bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-[28px] p-6 md:p-8 shadow-xs relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 min-h-[250px]">
                   <div className="flex-1 space-y-4 z-10 text-left w-full">
                     {/* Tag */}
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100/80 text-[#6D28D9] text-[10px] font-black uppercase tracking-wider border border-purple-200/60">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 text-[10px] font-black uppercase tracking-wider border border-emerald-300">
                       <Zap size={13} strokeWidth={2.5} />
                       <span>AUTO-INVEST PLAN</span>
                     </div>
@@ -482,7 +481,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     <div className="space-y-2.5 pt-1">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-6 h-6 rounded-full bg-purple-100/80 text-[#6D28D9] flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 flex items-center justify-center shrink-0">
                           <Clock size={13} strokeWidth={2.5} />
                         </div>
                         <span className="text-xs sm:text-sm font-bold text-slate-800">
@@ -495,7 +494,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                       </div>
 
                       <div className="flex items-center gap-2.5">
-                        <div className="w-6 h-6 rounded-full bg-purple-100/80 text-[#6D28D9] flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 flex items-center justify-center shrink-0">
                           <Layers size={13} strokeWidth={2.5} />
                         </div>
                         <span className="text-xs sm:text-sm font-bold text-slate-800">
@@ -504,7 +503,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                       </div>
 
                       <div className="flex items-center gap-2.5">
-                        <div className="w-6 h-6 rounded-full bg-purple-100/80 text-[#6D28D9] flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 flex items-center justify-center shrink-0">
                           <Shield size={13} strokeWidth={2.5} />
                         </div>
                         <span className="text-xs sm:text-sm font-bold text-slate-800">
@@ -531,7 +530,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   <div className="space-y-4">
                     {/* Item 1 */}
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-purple-100/80 text-[#6D28D9] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-9 h-9 rounded-xl bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
                         <CalendarIcon size={18} strokeWidth={2.5} />
                       </div>
                       <div>
@@ -561,7 +560,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     {/* Item 3 */}
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-purple-100/80 text-[#6D28D9] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-9 h-9 rounded-xl bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
                         <Layers size={18} strokeWidth={2.5} />
                       </div>
                       <div>
@@ -578,7 +577,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     {/* Item 4 */}
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-purple-100/80 text-[#6D28D9] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-9 h-9 rounded-xl bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
                         <ShieldCheck size={18} strokeWidth={2.5} />
                       </div>
                       <div>
@@ -602,9 +601,9 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-6 md:gap-1 relative px-1">
                     {/* Step 1 */}
                     <div className="flex flex-col items-center text-center z-10 flex-1">
-                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#F4F0FF] border border-purple-200/60 flex items-center justify-center shadow-2xs relative">
+                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shadow-2xs relative">
                         <div className="relative">
-                          <CalendarIcon size={32} className="text-[#6D28D9]" strokeWidth={2.2} />
+                          <CalendarIcon size={32} className="text-emerald-800" strokeWidth={2.2} />
                           <div className="absolute -bottom-1 -right-1.5 bg-amber-400 text-amber-950 font-black text-[9px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-2xs">
                             ₹
                           </div>
@@ -630,9 +629,9 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     {/* Step 2 */}
                     <div className="flex flex-col items-center text-center z-10 flex-1">
-                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#F4F0FF] border border-purple-200/60 flex items-center justify-center shadow-2xs relative">
+                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shadow-2xs relative">
                         <div className="relative">
-                          <Smartphone size={32} className="text-[#6D28D9]" strokeWidth={2.2} />
+                          <Smartphone size={32} className="text-emerald-800" strokeWidth={2.2} />
                           <div className="absolute bottom-0 right-0 bg-amber-400 text-amber-950 font-black text-[9px] w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white shadow-2xs">
                             ₹
                           </div>
@@ -658,7 +657,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     {/* Step 3 */}
                     <div className="flex flex-col items-center text-center z-10 flex-1">
-                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#F4F0FF] border border-purple-200/60 flex items-center justify-center shadow-2xs relative">
+                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shadow-2xs relative">
                         <div className="flex flex-col items-center gap-0.5">
                           <div className="w-7 h-3 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-xs shadow-2xs border border-amber-300/80" />
                           <div className="flex gap-1">
@@ -687,8 +686,8 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                     {/* Step 4 */}
                     <div className="flex flex-col items-center text-center z-10 flex-1">
-                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#F4F0FF] border border-purple-200/60 flex items-center justify-center shadow-2xs relative">
-                        <div className="w-9 h-9 rounded-xl bg-[#6D28D9] text-white flex items-center justify-center shadow-xs">
+                      <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shadow-2xs relative">
+                        <div className="w-9 h-9 rounded-xl bg-[#064e3b] text-white flex items-center justify-center shadow-xs">
                           <ShieldCheck size={24} strokeWidth={2.5} />
                         </div>
                       </div>
@@ -721,7 +720,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           type="number"
                           value={sipAmount}
                           onChange={(e) => setSipAmount(Math.max(1, Number(e.target.value)))}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2.5 font-black text-slate-900 text-sm focus:outline-none focus:border-purple-500"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2.5 font-black text-slate-900 text-sm focus:outline-none focus:border-[#047857]"
                         />
                       </div>
 
@@ -731,7 +730,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(500)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 500 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 500 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹500
@@ -739,7 +738,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(1000)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 1000 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 1000 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹1k
@@ -747,7 +746,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(2000)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 2000 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 2000 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹2k
@@ -758,7 +757,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(2000)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 2000 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 2000 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹2k
@@ -766,7 +765,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(5000)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 5000 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 5000 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹5k
@@ -774,7 +773,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(10000)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 10000 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 10000 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹10k
@@ -785,7 +784,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(10)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 10 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 10 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹10
@@ -793,7 +792,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(20)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 20 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 20 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹20
@@ -801,7 +800,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           <button
                             onClick={() => setSipAmount(50)}
                             className={`px-2.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer border-none outline-none ${
-                              sipAmount === 50 ? 'bg-[#6D28D9] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              sipAmount === 50 ? 'bg-[#064e3b] text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹50
@@ -815,10 +814,10 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="text-xs font-extrabold text-slate-500 flex items-center gap-1.5">
-                        <Clock size={14} className="text-[#6D28D9]" />
+                        <Clock size={14} className="text-emerald-800" />
                         <span>Investment Tenure (Years)</span>
                       </label>
-                      <span className="text-xs font-black text-[#6D28D9] bg-purple-100 px-2.5 py-0.5 rounded-full">
+                      <span className="text-xs font-black text-emerald-800 bg-[#f8fafc] px-2.5 py-0.5 rounded-full">
                         {sipDuration} {sipDuration === 1 ? 'Year' : 'Years'}
                       </span>
                     </div>
@@ -831,7 +830,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           onClick={() => setSipDuration(years)}
                           className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
                             sipDuration === years
-                              ? 'bg-[#6D28D9] text-white shadow-xs'
+                              ? 'bg-[#064e3b] text-white shadow-xs'
                               : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                           }`}
                         >
@@ -842,7 +841,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   </div>
 
                   {/* Dynamic Projected Value & Returns Box */}
-                  <div className="bg-[#F8F9FE] border border-purple-100/80 rounded-2xl p-4 relative space-y-3">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-4 relative space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="text-xs font-bold text-slate-500">Projected Portfolio Value</div>
@@ -862,7 +861,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-purple-100/80">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200">
                       <div>
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Total Invested</div>
                         <div className="text-xs font-black text-slate-800 mt-0.5">
@@ -895,7 +894,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* Benefit 1 */}
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-purple-100/80 text-[#6D28D9] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-10 h-10 rounded-xl bg-[#f8fafc] text-[#047857] border border-emerald-300 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
                         <CalendarIcon size={20} strokeWidth={2.5} />
                       </div>
                       <div>
@@ -994,7 +993,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
               </div>
 
               {/* Bottom CTA Banner */}
-              <div className="bg-[#6D28D9] rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-purple-900/15 relative overflow-hidden">
+              <div className="bg-[#064e3b] rounded-[24px] sm:rounded-[28px] p-5 sm:p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-black/10 relative overflow-hidden">
                 <div className="flex items-center gap-4 relative z-10">
                   <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0 text-amber-300">
                     <Clock size={24} strokeWidth={2.5} />
@@ -1003,7 +1002,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                     <h3 className="text-base sm:text-lg font-black text-white tracking-tight">
                       Start your {activePlanData?.type} journey today!
                     </h3>
-                    <p className="text-xs font-semibold text-purple-200 mt-0.5">
+                    <p className="text-xs font-semibold text-white/80 mt-0.5">
                       Invest ₹{sipAmount} per {activePlanData?.id === 'weekly' ? 'week' : activePlanData?.id === 'monthly' ? 'month' : 'day'} and build your {selectedMetal === 'silver' ? 'silver' : 'golden'} future.
                     </p>
                   </div>
@@ -1017,7 +1016,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                       alert(`Initiating ${activePlanData?.type} Mandate @ ₹${sipAmount}...`);
                     }
                   }}
-                  className="bg-white hover:bg-purple-50 text-[#6D28D9] font-black text-xs sm:text-sm px-6 py-3 rounded-full flex items-center gap-2 shadow-md transition-all cursor-pointer border-none outline-none shrink-0 self-stretch sm:self-auto justify-center"
+                  className="bg-white hover:bg-[#f8fafc] text-emerald-800 font-black text-xs sm:text-sm px-6 py-3 rounded-full flex items-center gap-2 shadow-md transition-all cursor-pointer border-none outline-none shrink-0 self-stretch sm:self-auto justify-center"
                 >
                   <span>Set Up SIP Mandate</span>
                   <ArrowRight size={16} strokeWidth={2.5} />
@@ -1039,16 +1038,16 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="w-full max-w-md bg-white rounded-[32px] p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 border border-purple-100 max-h-[85vh] overflow-y-auto my-auto"
+                  className="w-full max-w-md bg-white rounded-[32px] p-5 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 border border-slate-200 max-h-[85vh] overflow-y-auto my-auto"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-2xl bg-purple-100 text-[#6D28D9] flex items-center justify-center font-black">
+                      <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-emerald-800 flex items-center justify-center font-black">
                         <Clock size={20} />
                       </div>
                       <div>
-                        <span className="text-[10px] font-black tracking-wider uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/60">
+                        <span className="text-[10px] font-black tracking-wider uppercase text-emerald-800 bg-[#f8fafc] px-2 py-0.5 rounded-full border border-emerald-300">
                           DAILY SIP SETUP
                         </span>
                         <h3 className="text-lg font-black text-slate-900 tracking-tight mt-0.5">
@@ -1073,10 +1072,10 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                        <Clock size={14} className="text-[#6D28D9]" />
+                        <Clock size={14} className="text-emerald-800" />
                         <span>Investment Tenure</span>
                       </label>
-                      <span className="text-xs font-extrabold text-[#6D28D9] bg-purple-100 px-2.5 py-0.5 rounded-full">
+                      <span className="text-xs font-extrabold text-emerald-800 bg-[#f8fafc] px-2.5 py-0.5 rounded-full">
                         {sipDuration} {sipDuration === 1 ? 'Year' : 'Years'}
                       </span>
                     </div>
@@ -1089,7 +1088,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                           onClick={() => setSipDuration(years)}
                           className={`py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
                             sipDuration === years
-                              ? 'bg-[#6D28D9] text-white shadow-xs'
+                              ? 'bg-[#064e3b] text-white shadow-xs'
                               : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                           }`}
                         >
@@ -1100,8 +1099,8 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   </div>
 
                   {/* Expected Returns Box */}
-                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50/60 border border-purple-200/80 rounded-2xl p-4 space-y-2.5">
-                    <div className="flex items-center justify-between text-xs pb-1 border-b border-purple-200/50">
+                  <div className="bg-gradient-to-br from-white to-[#f8fafc] border border-emerald-300 rounded-2xl p-4 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs pb-1 border-b border-emerald-300">
                       <span className="font-extrabold text-slate-600 flex items-center gap-1">
                         <TrendingUp size={14} className="text-emerald-600" />
                         Expected Returns ({sipDuration} {sipDuration === 1 ? 'Year' : 'Years'})
@@ -1126,7 +1125,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                       </div>
                       <div>
                         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Total Value</div>
-                        <div className="text-xs font-black text-purple-900 mt-0.5">
+                        <div className="text-xs font-black text-slate-900 mt-0.5">
                           ₹{calculationData.totalValue.toLocaleString()}
                         </div>
                       </div>
@@ -1136,7 +1135,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   {/* Action Button */}
                   <button
                     onClick={() => setMobileSipStep('success')}
-                    className="w-full py-3.5 rounded-2xl bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 border-none outline-none cursor-pointer transition-all mt-2"
+                    className="w-full py-3.5 rounded-2xl bg-[#064e3b] hover:bg-[#022c22] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20 border-none outline-none cursor-pointer transition-all mt-2"
                   >
                     <span>Confirm & Set Daily SIP</span>
                     <ArrowRight size={16} strokeWidth={2.5} />
@@ -1225,7 +1224,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   </div>
 
                   {/* Tenure Selector */}
-                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                  <div className="space-y-2 pt-1 border-t border-slate-200">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                         <Clock size={14} className="text-[#059669]" />
@@ -1291,7 +1290,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   {/* Action Button */}
                   <button
                     onClick={() => setMobileSipStep('success')}
-                    className="w-full py-3.5 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 border-none outline-none cursor-pointer transition-all mt-2"
+                    className="w-full py-3.5 rounded-2xl bg-[#059669] hover:bg-[#064e3b] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 border-none outline-none cursor-pointer transition-all mt-2"
                   >
                     <span>Confirm & Set Weekly SIP</span>
                     <ArrowRight size={16} strokeWidth={2.5} />
@@ -1366,7 +1365,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
                   </div>
 
                   {/* Tenure Selector */}
-                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                  <div className="space-y-2 pt-1 border-t border-slate-200">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                         <Clock size={14} className="text-[#D97706]" />

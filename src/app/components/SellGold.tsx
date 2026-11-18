@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, TrendingDown, Coins, Clock, Shield, Calculator, AlertCircle, CheckCircle, DollarSign, Wallet } from "lucide-react";
+import { ArrowLeft, TrendingDown, Coins, Clock, Shield, Calculator, AlertCircle, CheckCircle, DollarSign, Landmark } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -190,7 +190,7 @@ const SellGold = ({ onBack }: SellGoldProps) => {
                       }}
                     >
                       <div className="flex items-center space-x-3 mb-2">
-                        <Wallet className="w-5 h-5 text-[#ffbf00]" />
+                        <Coins className="w-5 h-5 text-[#ffbf00]" />
                         <h3 className="font-semibold text-gray-900">Sell All</h3>
                       </div>
                       <p className="text-sm text-gray-600">Sell all your gold holdings</p>

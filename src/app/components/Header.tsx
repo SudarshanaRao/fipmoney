@@ -14,7 +14,7 @@ const DropdownMenu = ({ title, items, isOpen, onToggle, onItemClick }) => {
   return (
     <div className="relative">
       <motion.button
-        className="flex items-center space-x-1 text-gray-600 hover:text-[#1e1b4b] font-medium transition-colors duration-200"
+        className="flex items-center space-x-1 text-gray-600 hover:text-[#047857] font-medium transition-colors duration-200"
         onClick={onToggle}
         whileHover={{ scale: 1.05 }}
       >
@@ -39,13 +39,13 @@ const DropdownMenu = ({ title, items, isOpen, onToggle, onItemClick }) => {
             {items.map((item, index) => (
               <motion.button
                 key={item.name}
-                className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-600 hover:text-[#1e1b4b] hover:bg-indigo-50/50 transition-all duration-200"
+                className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-600 hover:text-[#047857] hover:bg-emerald-50/60 transition-all duration-200"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => onItemClick(item.action)}
               >
-                {item.icon && <item.icon className="w-4 h-4 text-[#1e1b4b]" />}
+                {item.icon && <item.icon className="w-4 h-4 text-[#047857]" />}
                 <span className="text-sm">{item.name}</span>
               </motion.button>
             ))}
@@ -124,8 +124,8 @@ export default function Header({ onNavigate }: HeaderProps) {
     <motion.header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top,0px)] ${
         isScrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200' 
-          : 'bg-white/80 backdrop-blur-sm lg:bg-transparent'
+          ? 'bg-white/95 backdrop-blur-md shadow-sm' 
+          : 'bg-white/90 backdrop-blur-sm'
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -147,8 +147,8 @@ export default function Header({ onNavigate }: HeaderProps) {
               transition={{ duration: 0.3 }}
             />
             <motion.span 
-              className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900"
-              whileHover={{ color: "#1e1b4b" }}
+              className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900"
+              whileHover={{ color: "#047857" }}
               transition={{ duration: 0.3 }}
             >
               FipMoney
@@ -160,7 +160,7 @@ export default function Header({ onNavigate }: HeaderProps) {
             {/* Features Megamenu Trigger */}
             <div className="relative">
               <motion.button
-                className="flex items-center space-x-1 text-gray-600 hover:text-[#1e1b4b] font-medium transition-colors duration-200"
+                className="flex items-center space-x-1 text-emerald-800 hover:text-slate-900 font-semibold transition-colors duration-200"
                 onClick={handleDropdownToggle('features')}
                 whileHover={{ scale: 1.05 }}
               >
@@ -176,7 +176,7 @@ export default function Header({ onNavigate }: HeaderProps) {
               <AnimatePresence>
                 {activeDropdown === 'features' && (
                   <motion.div
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[92vw] sm:w-[640px] md:w-[720px] max-w-[720px] bg-white rounded-2xl shadow-2xl border border-gray-150 p-5 md:p-6 z-50 grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[92vw] sm:w-[640px] md:w-[720px] max-w-[720px] bg-[#f8fafc] rounded-2xl shadow-2xl border border-slate-200 p-5 md:p-6 z-50 grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -247,7 +247,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                     {/* Bill Payments */}
                     <div className="space-y-4">
                       <div className="flex items-center space-x-2 border-b border-gray-100 pb-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-[#047857]">
                           <CreditCard className="w-4 h-4" />
                         </div>
                         <span className="font-bold text-gray-900 text-sm">Bill Payments</span>
@@ -262,14 +262,14 @@ export default function Header({ onNavigate }: HeaderProps) {
                           <button
                             key={b.name}
                             onClick={() => handleDropdownItemClick(() => handleBillClick(b.label))}
-                            className="w-full text-left text-xs font-semibold text-gray-600 hover:text-blue-500 hover:bg-blue-50/50 p-1.5 rounded-lg transition-all duration-200"
+                            className="w-full text-left text-xs font-semibold text-gray-600 hover:text-[#047857] hover:bg-emerald-50/50 p-1.5 rounded-lg transition-all duration-200"
                           >
                             {b.name}
                           </button>
                         ))}
                         <button
                           onClick={() => handleDropdownItemClick(() => onNavigate?.('recharge-details'))}
-                          className="w-full text-left text-xs font-bold text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1.5 rounded-lg transition-all duration-200"
+                          className="w-full text-left text-xs font-bold text-[#047857] hover:text-[#064e3b] hover:bg-emerald-50 p-1.5 rounded-lg transition-all duration-200"
                         >
                           View More →
                         </button>
@@ -330,7 +330,7 @@ export default function Header({ onNavigate }: HeaderProps) {
             {navItems.map((item, index) => (
               <motion.button
                 key={item.name}
-                className="text-gray-600 hover:text-[#1e1b4b] font-medium transition-colors duration-200"
+                className="text-emerald-800 hover:text-slate-900 font-semibold transition-colors duration-200"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
@@ -344,20 +344,21 @@ export default function Header({ onNavigate }: HeaderProps) {
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center space-x-3">
             <motion.button
-              className="flex items-center space-x-1.5 px-5 py-2.5 text-sm font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all duration-200 cursor-pointer shadow-2xs"
+              className="flex items-center space-x-1.5 px-5 py-2.5 text-sm font-bold text-slate-900 bg-white hover:bg-emerald-50 hover:border-emerald-300 hover:text-[#047857] border border-slate-200 rounded-xl transition-all duration-200 cursor-pointer shadow-2xs"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onNavigate?.('login')}
             >
-              <LogIn className="w-4 h-4 text-[#1e1b4b]" />
+              <LogIn className="w-4 h-4 text-emerald-600" />
               <span>Login</span>
             </motion.button>
             <motion.button
-              className="flex items-center space-x-1.5 px-5.5 py-2.5 text-sm font-black text-white bg-gradient-to-r from-[#1e1b4b] to-[#312e81] hover:from-[#111827] hover:to-[#1e1b4b] rounded-xl shadow-md shadow-[#1e1b4b]/20 transition-all duration-200 cursor-pointer"
+              className="flex items-center space-x-1.5 px-5.5 py-2.5 text-sm font-black text-white bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] rounded-xl shadow-md shadow-emerald-900/25 border border-[#F3F6E8]/30 hover:border-amber-300 transition-all duration-200 cursor-pointer"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onNavigate?.('signup')}
             >
+              <Sparkles className="w-4 h-4 text-amber-300" />
               <span>Start Savings Now</span>
             </motion.button>
           </div>
@@ -381,7 +382,7 @@ export default function Header({ onNavigate }: HeaderProps) {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            className="md:hidden bg-white shadow-xl border-t border-gray-200 max-h-[80vh] overflow-y-auto"
+            className="md:hidden bg-white shadow-xl border-t border-slate-200 max-h-[80vh] overflow-y-auto"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -421,15 +422,15 @@ export default function Header({ onNavigate }: HeaderProps) {
 
                   {/* Bill Payments */}
                   <div className="pl-2 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-blue-600">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#047857]">
                       <CreditCard className="w-3.5 h-3.5" />
                       <span>Bill Payments</span>
                     </div>
                     <div className="pl-4 flex flex-col space-y-2">
-                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Mobile Prepaid"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">Mobile Prepaid</button>
-                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Electricity Bill"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">Electricity</button>
-                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("DTH Connection"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">DTH Connection</button>
-                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Credit Card Rent"))} className="text-left text-xs text-gray-600 hover:text-blue-500 py-1 font-semibold bg-transparent border-none">Credit Card Bill</button>
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Mobile Prepaid"))} className="text-left text-xs text-gray-600 hover:text-[#047857] py-1 font-semibold bg-transparent border-none">Mobile Prepaid</button>
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Electricity Bill"))} className="text-left text-xs text-gray-600 hover:text-[#047857] py-1 font-semibold bg-transparent border-none">Electricity</button>
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("DTH Connection"))} className="text-left text-xs text-gray-600 hover:text-[#047857] py-1 font-semibold bg-transparent border-none">DTH Connection</button>
+                      <button onClick={() => handleDropdownItemClick(() => handleBillClick("Credit Card Rent"))} className="text-left text-xs text-gray-600 hover:text-[#047857] py-1 font-semibold bg-transparent border-none">Credit Card Bill</button>
                     </div>
                   </div>
                 </div>

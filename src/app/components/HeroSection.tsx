@@ -56,39 +56,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
   const currentData = carouselData[currentSlide];
 
   return (
-    <section className="bg-white relative overflow-hidden pt-28 md:pt-32 pb-12 border-b border-indigo-100/60">
-      {/* Dynamic Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <motion.div 
-          className={`absolute top-20 left-10 w-32 h-32 rounded-full blur-3xl transition-all duration-1000 ${
-            currentData.id === "gold" 
-              ? "bg-[#3b82f6]" 
-              : currentData.id === "silver" 
-                ? "bg-[#4f46e5]" 
-                : "bg-[#0ea5e9]"
-          }`}
-          animate={{ 
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3]
-          }}
-          transition={{ duration: 4, repeat: Infinity }}
-        />
-        <motion.div 
-          className={`absolute bottom-20 right-10 w-40 h-40 rounded-full blur-3xl transition-all duration-1000 ${
-            currentData.id === "gold" 
-              ? "bg-[#2563eb]" 
-              : currentData.id === "silver" 
-                ? "bg-[#7c3aed]" 
-                : "bg-[#2563eb]"
-          }`}
-          animate={{ 
-            scale: [1.2, 1, 1.2],
-            opacity: [0.6, 0.3, 0.6]
-          }}
-          transition={{ duration: 4, repeat: Infinity, delay: 2 }}
-        />
-      </div>
-
+    <section className="bg-white relative overflow-hidden pt-28 md:pt-32 pb-12">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -102,17 +70,17 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                 transition={{ duration: 0.8 }}
               >
                 <motion.div
-                  className="inline-flex items-center px-4 py-2 rounded-full mb-6 transition-all duration-500 bg-purple-50 text-purple-900 border border-purple-200 text-xs font-black"
+                  className="inline-flex items-center px-4 py-2 rounded-full mb-6 transition-all duration-500 bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-xs font-black shadow-xs"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Sparkles className="w-4 h-4 mr-2 text-purple-700" />
+                  <Sparkles className="w-4 h-4 mr-2 text-emerald-600" />
                   {currentData.badge}
                 </motion.div>
 
                 <motion.h1
-                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-4 sm:mb-6 leading-tight"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
@@ -124,7 +92,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
                 </motion.h1>
 
                 <motion.p
-                  className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0"
+                  className="text-base sm:text-lg md:text-xl text-slate-600 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 }}
@@ -142,7 +110,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
             >
               <Button
                 size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-[#1e1b4b] to-[#312e81] hover:from-[#111827] hover:to-[#1e1b4b] text-white border-0 shadow-xl hover:shadow-2xl transition-all duration-300 px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-black rounded-2xl cursor-pointer flex items-center justify-center"
+                className="w-full sm:w-auto bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white border border-[#F3F6E8]/30 hover:border-amber-300 shadow-xl shadow-emerald-900/25 hover:shadow-2xl transition-all duration-300 px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-black rounded-2xl cursor-pointer flex items-center justify-center ring-1 ring-amber-400/20"
                 onClick={() => onNavigate?.('signup')}
               >
                 <TrendingUp className="w-5 h-5 mr-2 text-amber-400" />
@@ -174,7 +142,7 @@ export default function HeroSection({ onNavigate }: { onNavigate?: (page: string
 
                   {/* Floating Elements */}
                   <motion.div
-                    className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-white rounded-2xl shadow-xl p-2.5 sm:p-4 z-20"
+                    className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-white rounded-2xl shadow-xl border border-slate-200 p-2.5 sm:p-4 z-20"
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 }}

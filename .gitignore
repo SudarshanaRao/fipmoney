@@ -17,6 +17,8 @@ dist/
 dist-ssr/
 build/
 *.tsbuildinfo
+*.aab
+*.apk
 
 # Logs & Temp
 *.log

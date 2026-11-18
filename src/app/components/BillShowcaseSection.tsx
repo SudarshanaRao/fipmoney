@@ -44,7 +44,7 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
           <h2 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
             Recharge & Pay Bills
           </h2>
-          <p className="text-sm md:text-base font-semibold text-slate-500 leading-relaxed">
+          <p className="text-sm md:text-base font-semibold text-emerald-800 leading-relaxed">
             Maximize your utility payments! Pay bills, mobile recharges, tuition fees, and house rent securely with premium checks and fast settlement.
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
           {displayedBills.map((item, idx) => (
             <motion.div 
               key={idx}
-              className="bg-slate-50/50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between hover:bg-white hover:border-amber-200 hover:shadow-xl hover:shadow-slate-100 transition-all group cursor-pointer"
+              className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between hover:bg-[#f8fafc] hover:border-emerald-300 hover:shadow-lg transition-all group cursor-pointer"
               whileHover={{ y: -3 }}
               onClick={() => onNavigate?.('login')}
             >
@@ -67,8 +67,8 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
                   <item.Icon size={18} strokeWidth={2.5} />
                 </div>
                 
-                <h3 className="text-sm font-extrabold text-slate-800 mt-3 group-hover:text-amber-600 transition-colors leading-tight">{item.label}</h3>
-                <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold mt-1.5 leading-relaxed line-clamp-2">{item.desc}</p>
+                <h3 className="text-sm font-extrabold text-slate-900 mt-3 group-hover:text-amber-600 transition-colors leading-tight">{item.label}</h3>
+                <p className="text-[10px] sm:text-[11px] text-slate-600 font-semibold mt-1.5 leading-relaxed line-clamp-2">{item.desc}</p>
               </div>
 
               <div className="flex items-center gap-1 text-[9px] font-black text-amber-600 uppercase tracking-widest mt-4 transition-opacity opacity-0 group-hover:opacity-100">
@@ -85,21 +85,21 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
           <Button 
             variant="outline" 
             onClick={() => setShowAll(!showAll)}
-            className="rounded-full px-8 py-6 font-bold border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
+            className="rounded-full px-8 py-6 font-bold border-slate-200 bg-white text-slate-900 hover:bg-[#DDE3C4] cursor-pointer"
           >
             {showAll ? "View Less Services" : "View All Services"}
           </Button>
         </div>
 
         {/* bottom secure guarantee banner */}
-        <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-[#1e1b4b] flex items-center justify-center shrink-0 border border-indigo-150">
+            <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center shrink-0 border border-emerald-300 shadow-xs">
               <ShieldCheck size={24} strokeWidth={2} />
             </div>
             <div>
-              <p className="text-base font-black text-slate-800">Secure Payments via BBPS Guarantee</p>
-              <p className="text-xs font-semibold text-slate-500 mt-1 leading-relaxed">
+              <p className="text-base font-black text-slate-900">Secure Payments via BBPS Guarantee</p>
+              <p className="text-xs font-semibold text-slate-600 mt-1 leading-relaxed">
                 Transactions are authorized via RBI-regulated Bharat Bill Payment System (BBPS) and secure multi-layer PCI-DSS credit protection protocols.
               </p>
             </div>
@@ -107,7 +107,7 @@ export default function BillShowcaseSection({ onNavigate }: BillShowcaseSectionP
 
           <Button 
             onClick={() => onNavigate?.('login')}
-            className="bg-gradient-to-r from-[#1e1b4b] via-[#2d2968] to-[#1e1b4b] hover:from-[#0b0922] hover:to-[#1e1b4b] text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-[#1e1b4b]/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0 outline-none border-none cursor-pointer transition-all"
+            className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-emerald-900/20 border border-[#F3F6E8]/30 hover:border-amber-300 hover:-translate-y-0.5 active:translate-y-0 shrink-0 outline-none cursor-pointer transition-all"
           >
             Log In to Pay Bills
           </Button>

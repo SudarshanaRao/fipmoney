@@ -31,16 +31,16 @@ export default function PlatformTrustSection() {
       subtitle: "Bank-Grade Security",
       desc: "Housed in multi-tier, 24x7 monitored physical bank vaults with 100% Lloyds-backed insurance coverage for total peace of mind.",
       icon: Lock,
-      iconBg: "bg-blue-100/80 text-blue-600 border-blue-200",
-      accentBorder: "group-hover:border-blue-400"
+      iconBg: "bg-white text-[#047857] border-emerald-300",
+      accentBorder: "group-hover:border-[#047857]"
     },
     {
       title: "Gold Held in Your Name",
       subtitle: "Vistra Trustee Safeguard",
       desc: "Independent trustee Vistra legally holds ownership strictly in your name, protecting your gold independent of FipMoney.",
       icon: ShieldCheck,
-      iconBg: "bg-emerald-100/80 text-emerald-600 border-emerald-200",
-      accentBorder: "group-hover:border-emerald-400"
+      iconBg: "bg-white text-[#047857] border-emerald-300",
+      accentBorder: "group-hover:border-[#047857]"
     }
   ];
 
@@ -50,40 +50,35 @@ export default function PlatformTrustSection() {
       subtitle: "Doorstep Physical Delivery",
       desc: "Coins and bars shipped securely to your home anywhere in India with insured tamper-proof packaging.",
       icon: Truck,
-      iconBg: "bg-amber-100/80 text-amber-600 border-amber-200"
+      iconBg: "bg-white text-amber-600 border-amber-200"
     },
     {
       title: "Sell for Cash, Easily",
       subtitle: "Instant 24x7 Payout",
       desc: "Sell at live market prices with funds credited straight to your bank account via instant UPI or IMPS transfer.",
       icon: Banknote,
-      iconBg: "bg-emerald-100/80 text-emerald-600 border-emerald-200"
+      iconBg: "bg-white text-[#047857] border-emerald-300"
     },
     {
       title: "Make Jewellery",
       subtitle: "Partner Outlet Redemption",
       desc: "Use your gold balance seamlessly at leading partner jewellery outlets like Tanishq & CaratLane.",
       icon: Gem,
-      iconBg: "bg-purple-100/80 text-purple-600 border-purple-200"
+      iconBg: "bg-white text-[#047857] border-emerald-300"
     }
   ];
 
   return (
     <section className="py-14 md:py-16 bg-white text-slate-900 relative overflow-hidden">
-      
-      {/* LIGHT GRADIENT BLURS */}
-      <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-gradient-to-br from-blue-100/40 via-indigo-50/20 to-transparent rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-emerald-100/50 via-teal-50/40 to-transparent rounded-full blur-[100px] pointer-events-none" />
-
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* CONCEPT 1: SECURITY OF OWNERSHIP */}
         <div className="space-y-12">
           <div className="text-center">
-            <span className="text-sm font-black tracking-widest text-indigo-600 uppercase block mb-4 sm:mb-6">SECURITY OF OWNERSHIP</span>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-800 tracking-tight mb-4">
+            <span className="text-sm font-black tracking-widest text-[#047857] uppercase block mb-4 sm:mb-6">SECURITY OF OWNERSHIP</span>
+            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight mb-4">
               Real, Vaulted, and Yours
             </h3>
-            <p className="text-sm md:text-base font-semibold text-slate-500 max-w-lg mx-auto">
+            <p className="text-sm md:text-base font-semibold text-emerald-800 max-w-lg mx-auto">
               Every rupee becomes physical 24K — stored under bank-grade security and held in your name, not ours.
             </p>
           </div>
@@ -94,7 +89,7 @@ export default function PlatformTrustSection() {
               return (
                 <motion.div
                   key={idx}
-                  className={`bg-white border border-slate-200/80 ${feat.accentBorder} rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden`}
+                  className="bg-white border border-slate-200 hover:border-[#047857] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -105,7 +100,7 @@ export default function PlatformTrustSection() {
                       <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${feat.iconBg} border flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform`}>
                         <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                       </div>
-                      <span className="text-[11px] sm:text-xs font-black text-slate-500 bg-slate-100 px-2.5 sm:px-3 py-1 rounded-full border border-slate-200">
+                      <span className="text-[11px] sm:text-xs font-black text-slate-600 bg-[#f8fafc] px-2.5 sm:px-3 py-1 rounded-full border border-slate-200">
                         {feat.subtitle}
                       </span>
                     </div>
@@ -114,14 +109,14 @@ export default function PlatformTrustSection() {
                       {feat.title}
                     </h4>
 
-                    <p className="text-xs sm:text-sm font-semibold text-slate-500 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed">
                       {feat.desc}
                     </p>
                   </div>
 
-                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm font-extrabold text-indigo-600 group-hover:text-[#1e1b4b] transition-colors mt-6">
+                  <div className="pt-6 border-t border-slate-200/60 flex items-center justify-between text-xs sm:text-sm font-extrabold text-[#047857] group-hover:text-slate-900 transition-colors mt-6">
                     <span className="flex items-center gap-1.5">
-                      <CheckCircle2 size={15} className="text-indigo-600 shrink-0" /> Fully Verified & Protected
+                      <CheckCircle2 size={15} className="text-emerald-600 shrink-0" /> Fully Verified & Protected
                     </span>
                     <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>
@@ -134,11 +129,11 @@ export default function PlatformTrustSection() {
         {/* CONCEPT 2: YOUR GOLD, YOUR CHOICE (WITHDRAWAL OPTIONS) */}
         <div className="space-y-12 pt-4">
           <div className="text-center">
-            <span className="text-sm font-black tracking-widest text-emerald-600 uppercase block mb-4 sm:mb-6">YOUR GOLD, YOUR CHOICE</span>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-800 tracking-tight mb-4">
+            <span className="text-sm font-black tracking-widest text-[#047857] uppercase block mb-4 sm:mb-6">YOUR GOLD, YOUR CHOICE</span>
+            <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight mb-4">
               Withdraw It However You Like
             </h3>
-            <p className="text-sm md:text-base font-semibold text-slate-500 max-w-lg mx-auto">
+            <p className="text-sm md:text-base font-semibold text-emerald-800 max-w-lg mx-auto">
               Once you've saved enough, take it out your way with instant flexibility.
             </p>
           </div>
@@ -149,7 +144,7 @@ export default function PlatformTrustSection() {
               return (
                 <motion.div
                   key={idx}
-                  className="bg-white border border-slate-200/80 hover:border-emerald-400 rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden"
+                  className="bg-white border border-slate-200 hover:border-[#047857] rounded-3xl p-6 sm:p-7 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_15px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group relative overflow-hidden"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -160,7 +155,7 @@ export default function PlatformTrustSection() {
                       <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${choice.iconBg} border flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform`}>
                         <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
                       </div>
-                      <span className="text-[11px] sm:text-xs font-black text-slate-500 bg-slate-100 px-2.5 sm:px-3 py-1 rounded-full border border-slate-200">
+                      <span className="text-[11px] sm:text-xs font-black text-slate-600 bg-[#f8fafc] px-2.5 sm:px-3 py-1 rounded-full border border-slate-200">
                         {choice.subtitle}
                       </span>
                     </div>
@@ -169,12 +164,12 @@ export default function PlatformTrustSection() {
                       {choice.title}
                     </h4>
 
-                    <p className="text-xs sm:text-sm font-semibold text-slate-500 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed">
                       {choice.desc}
                     </p>
                   </div>
 
-                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm font-extrabold text-emerald-600 group-hover:text-emerald-700 transition-colors mt-6">
+                  <div className="pt-6 border-t border-slate-200/60 flex items-center justify-between text-xs sm:text-sm font-extrabold text-[#047857] group-hover:text-slate-900 transition-colors mt-6">
                     <span>Instant Execution</span>
                     <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>

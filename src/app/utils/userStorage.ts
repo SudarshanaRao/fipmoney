@@ -53,7 +53,7 @@ export interface MongoUser {
   isAadhaarVerified: boolean;
   isBankVerified: boolean;
   isAddressVerified: boolean;
-  walletId: string | null;
+  vaultId: string | null;
   primaryBankAccountId: string | null;
   defaultUPIId: string;
   defaultPaymentMethod: string;
@@ -190,7 +190,7 @@ export function registerOrLoginUser(mobile: string, fullName?: string, email?: s
     isAadhaarVerified: false,
     isBankVerified: false,
     isAddressVerified: false,
-    walletId: null,
+    vaultId: null,
     primaryBankAccountId: null,
     defaultUPIId: "",
     defaultPaymentMethod: "",

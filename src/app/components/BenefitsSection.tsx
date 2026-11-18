@@ -8,7 +8,7 @@ const benefits = [
     icon: Shield,
     title: "100% Safe & Secure",
     description: "Your gold is stored in secure vaults with full insurance coverage and our trusted vault partner's certification.",
-    color: "from-blue-500 to-blue-600",
+    color: "from-emerald-500 to-emerald-700",
   },
   {
     icon: Zap,

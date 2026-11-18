@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../utils/apiConfig";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Wallet, Zap, Eye, Send, Plus, CreditCard, ChevronRight,
+  Landmark, Zap, Eye, Send, Plus, CreditCard, ChevronRight,
   Shield, ShieldCheck, CheckCircle2, TrendingUp, ArrowUpRight, ArrowDownRight, User,
   Smartphone, MonitorPlay, GraduationCap, Gift, Play, Flame, Tv, Wifi, Droplets, Car, FileText, Home, AlertCircle,
   Search, Bell, ChevronDown, Check, Building, RefreshCw, Grid, Award, Download, Clock, X, CheckCheck, Coins, Menu,
@@ -71,7 +71,7 @@ const INITIAL_NOTIFICATIONS = [
     time: "1 day ago",
     read: false,
     Icon: Coins,
-    iconBg: "bg-purple-50 text-purple-600 border-purple-200/50"
+    iconBg: "bg-white text-[#047857] border-slate-200"
   },
   {
     id: "n4",
@@ -432,12 +432,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   };
 
   const MainDashboard = () => (
-    <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-[#fcfdfd] flex flex-col pb-28 sm:pb-32 lg:pb-10">
+    <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-white flex flex-col pb-28 sm:pb-32 lg:pb-10 text-slate-900">
        {/* Top Bar */}
-       <div className="hidden lg:flex h-[72px] border-b border-gray-100 items-center justify-between px-6 md:px-8 shrink-0 bg-white sticky top-0 z-20">
+       <div className="hidden lg:flex h-[72px] border-b border-slate-200 items-center justify-between px-6 md:px-8 shrink-0 bg-white sticky top-0 z-20">
          <div className="relative w-full max-w-md hidden md:block">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input type="text" placeholder="Search services, transactions..." className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-purple-200 transition-colors placeholder:text-gray-400 text-gray-700 font-medium" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <input type="text" placeholder="Search services, transactions..." className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-[#047857] transition-colors placeholder:text-slate-600 text-slate-900 font-medium" />
          </div>
          <div className="flex items-center gap-6 ml-auto">
             {/* Notification Panel Trigger */}
@@ -445,7 +445,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className={`relative border w-10 h-10 rounded-full flex items-center justify-center shadow-sm cursor-pointer outline-none transition-all ${
-                  showNotifications ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-white border-gray-100 text-gray-500 hover:bg-gray-50'
+                  showNotifications ? 'bg-white border-[#047857] text-emerald-800' : 'bg-[#f8fafc] border-slate-200 text-gray-500 hover:bg-gray-50'
                 }`}
               >
                 <Bell size={18} />
@@ -475,10 +475,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                       animate={{ x: 0 }}
                       exit={{ x: "100%" }}
                       transition={{ type: "spring", damping: 28, stiffness: 280 }}
-                      className="fixed top-0 right-0 h-full w-full md:w-[50vw] bg-white z-[51] shadow-2xl flex flex-col font-sans border-l border-gray-100"
+                      className="fixed top-0 right-0 h-full w-full md:w-[50vw] bg-white z-[51] shadow-2xl flex flex-col font-sans border-l border-slate-200"
                     >
                       {/* Panel Header */}
-                      <div className="p-6 bg-gradient-to-r from-[#1e1b4b] to-[#312e81] text-white flex items-center justify-between shrink-0 shadow-md">
+                      <div className="p-6 bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] text-white flex items-center justify-between shrink-0 shadow-md">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-2xl bg-amber-400/20 flex items-center justify-center text-amber-400 border border-amber-400/30">
                             <Bell size={22} strokeWidth={2.5} />
@@ -492,7 +492,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-indigo-200 font-medium mt-0.5">Real-time alerts, market updates & transaction logs</p>
+                            <p className="text-xs text-white/80 font-medium mt-0.5">Real-time alerts, market updates & transaction logs</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -506,7 +506,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                           )}
                           <button
                             onClick={() => setShowNotifications(false)}
-                            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-indigo-200 hover:text-white flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
+                            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
                           >
                             <X size={20} />
                           </button>
@@ -531,8 +531,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                               onClick={() => markAsRead(n.id)}
                               className={`p-5 rounded-2xl border transition-all cursor-pointer relative group flex gap-4 items-start ${
                                 n.read
-                                  ? 'bg-white border-gray-100 hover:border-gray-200 shadow-xs'
-                                  : 'bg-white border-purple-200/80 shadow-md shadow-purple-900/5 ring-1 ring-purple-500/10'
+                                  ? 'bg-[#f8fafc] border-slate-200 hover:border-emerald-300 shadow-xs'
+                                  : 'bg-[#f8fafc] border-slate-200 shadow-md shadow-black/5 ring-1 ring-emerald-500/20'
                               }`}
                             >
                               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-xs ${n.iconBg}`}>
@@ -549,8 +549,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                                   {n.desc}
                                 </p>
                                 {!n.read && (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" /> New Alert
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-300">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#047857] animate-pulse" /> New Alert
                                   </span>
                                 )}
                               </div>
@@ -567,7 +567,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                       </div>
 
                       {/* Panel Footer */}
-                      <div className="p-5 bg-white border-t border-gray-100 flex items-center justify-between shrink-0">
+                      <div className="p-5 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
                         <button
                           onClick={() => setNotifications([])}
                           disabled={notifications.length === 0}
@@ -577,7 +577,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                         </button>
                         <button
                           onClick={() => setShowNotifications(false)}
-                          className="px-5 py-2.5 bg-[#1e1b4b] hover:bg-[#111827] text-white font-bold text-xs rounded-xl shadow-md transition-colors border-none cursor-pointer outline-none"
+                          className="px-5 py-2.5 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/20 border border-amber-400/40 transition-colors cursor-pointer outline-none"
                         >
                           Close Panel
                         </button>
@@ -588,7 +588,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               </AnimatePresence>
             </div>
             <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab("settings")}>
-               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-gray-100 shadow-xs">
+               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-slate-200 shadow-xs">
                  <span>{(userName || "U").charAt(0)}</span>
                  {userAvatar && (
                    <img
@@ -603,7 +603,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                </div>
                <div className="flex flex-col hidden sm:flex">
                  <span className="text-[11px] text-gray-500 font-medium">Welcome back,</span>
-                 <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-purple-700 transition-colors">{userName}</span> <ChevronDown size={14} className="text-gray-400" /></div>
+                 <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-emerald-800 transition-colors">{userName}</span> <ChevronDown size={14} className="text-gray-400" /></div>
                </div>
             </div>
          </div>
@@ -633,15 +633,15 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               }}
             >
               {/* Card 1 (Default First Card): Daily, Weekly or Monthly Savings Card */}
-              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
                 {/* Top Row: Title Text & Right 3D Asset */}
                 <div className="flex items-center justify-between relative z-10">
                   <div className="space-y-0.5 max-w-[65%] mt-3 sm:mt-4">
                     <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
                       Start your{" "}
-                      <span className="text-purple-600 font-black">Daily, Weekly</span>{" "}
+                      <span className="text-[#047857] font-black">Daily, Weekly</span>{" "}
                       or{" "}
-                      <span className="text-purple-700 font-black">Monthly</span>{" "}
+                      <span className="text-emerald-800 font-black">Monthly</span>{" "}
                       savings with Fipmoney
                     </h3>
                   </div>
@@ -661,9 +661,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   {/* Daily */}
                   <div 
                     onClick={() => setTab("savings")}
-                    className="bg-white/80 hover:bg-white backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
+                    className="bg-[#f8fafc] hover:bg-white backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
                   >
-                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
+                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
                       <Calendar size={14} strokeWidth={2.5} />
                     </div>
                     <span className="text-[11px] font-black text-slate-900 leading-none">Daily</span>
@@ -673,9 +673,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   {/* Weekly */}
                   <div 
                     onClick={() => setTab("savings")}
-                    className="bg-white/80 hover:bg-white backdrop-blur-xs border border-blue-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
+                    className="bg-[#f8fafc] hover:bg-white backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
                   >
-                    <div className="w-6 h-6 rounded-lg bg-blue-100/80 text-blue-600 flex items-center justify-center mb-0.5">
+                    <div className="w-6 h-6 rounded-lg bg-amber-100/80 text-amber-600 flex items-center justify-center mb-0.5">
                       <Calendar size={14} strokeWidth={2.5} />
                     </div>
                     <span className="text-[11px] font-black text-slate-900 leading-none">Weekly</span>
@@ -685,7 +685,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   {/* Monthly */}
                   <div 
                     onClick={() => setTab("savings")}
-                    className="bg-white/80 hover:bg-white backdrop-blur-xs border border-emerald-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
+                    className="bg-[#f8fafc] hover:bg-white backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
                   >
                     <div className="w-6 h-6 rounded-lg bg-emerald-100/80 text-emerald-600 flex items-center justify-center mb-0.5">
                       <Calendar size={14} strokeWidth={2.5} />
@@ -698,22 +698,22 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 {/* Bottom Action Pill Banner */}
                 <div 
                   onClick={() => setTab("savings")}
-                  className="bg-purple-100/90 hover:bg-purple-200 border border-purple-200/90 rounded-xl px-2.5 py-1.5 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
+                  className="bg-[#f8fafc] hover:bg-white border border-emerald-300 border border-slate-200 rounded-xl px-2.5 py-1.5 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shrink-0 shadow-2xs">
                       <Sparkles size={11} strokeWidth={2.5} />
                     </div>
-                    <span className="text-[10px] font-black text-purple-950">
+                    <span className="text-[10px] font-black text-slate-900">
                       Small steps today, greater wealth tomorrow
                     </span>
                   </div>
-                  <ChevronRight size={14} strokeWidth={3} className="text-purple-700 shrink-0" />
+                  <ChevronRight size={14} strokeWidth={3} className="text-emerald-800 shrink-0" />
                 </div>
               </div>
 
               {/* Card 2 (Swiped Right): Become DGA Agent / Agent Dashboard Card */}
-              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
                 {/* Top Section: Left Info & Right 3D Asset */}
                 <div className="flex items-center justify-between relative z-10">
                   <div className="space-y-1.5 max-w-[64%] mt-2.5 sm:mt-3">
@@ -728,9 +728,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     {/* Title */}
                     <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
                       {isApprovedDga ? (
-                        <>Verified Digital Gold Agent <span className="text-purple-600 font-black">(DGA)</span></>
+                        <>Verified Digital Gold Agent <span className="text-[#047857] font-black">(DGA)</span></>
                       ) : (
-                        <>Become a Digital Gold Agent <span className="text-purple-600 font-black">(DGA)</span></>
+                        <>Become a Digital Gold Agent <span className="text-[#047857] font-black">(DGA)</span></>
                       )}
                     </h3>
 
@@ -751,10 +751,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                             setTab("become-agent");
                           }
                         }}
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-black text-[11px] px-3 py-1.5 rounded-full shadow-md shadow-purple-600/20 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all outline-none"
+                        className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-[11px] px-3 py-1.5 rounded-full shadow-md shadow-emerald-900/20 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all outline-none"
                       >
                         <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
-                        <div className="w-4 h-4 rounded-full bg-white text-purple-600 flex items-center justify-center shrink-0">
+                        <div className="w-4 h-4 rounded-full bg-white text-[#047857] flex items-center justify-center shrink-0">
                           <ChevronRight size={12} strokeWidth={3} />
                         </div>
                       </button>
@@ -777,8 +777,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 {/* Bottom 3 Feature Badges Row */}
                 <div className="grid grid-cols-3 gap-1.5 relative z-10">
                   {/* Pill 1: Manage Clients */}
-                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
+                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
                       <CreditCard size={14} strokeWidth={2.5} />
                     </div>
                     <span className="text-[11px] font-black text-slate-900 leading-none">Manage Clients</span>
@@ -786,8 +786,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   </div>
 
                   {/* Pill 2: Track Earnings */}
-                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
+                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
                       <TrendingUp size={14} strokeWidth={2.5} />
                     </div>
                     <span className="text-[11px] font-black text-slate-900 leading-none">Track Earnings</span>
@@ -795,29 +795,29 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   </div>
 
                   {/* Pill 3: Instant Payouts */}
-                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center mb-0.5">
-                      <Wallet size={14} strokeWidth={2.5} />
+                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
+                      <Landmark size={14} strokeWidth={2.5} />
                     </div>
                     <span className="text-[11px] font-black text-slate-900 leading-none">Instant Payouts</span>
-                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Direct to wallet</span>
+                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Direct to Bank</span>
                   </div>
                 </div>
               </div>
 
               {/* Card 3 (Swiped Right): Refer & Earn Card */}
-              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#fbf9ff] via-[#f5efff] to-[#eee4ff] border border-purple-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
                 {/* Top Section: Left Info & Right 3D Asset */}
                 <div className="flex items-center justify-between relative z-10">
                   <div className="space-y-1.5 max-w-[62%] mt-2 sm:mt-2.5">
                     {/* User Plus Top Icon Badge */}
-                    <div className="w-8 h-8 rounded-xl bg-purple-100/90 border border-purple-200/80 text-purple-600 flex items-center justify-center shadow-2xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#f8fafc] border border-slate-200 text-[#047857] flex items-center justify-center shadow-2xs">
                       <UserPlus size={16} strokeWidth={2.5} />
                     </div>
 
                     {/* Title */}
                     <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-none">
-                      Refer <span className="text-purple-600 font-black">& Earn</span>
+                      Refer <span className="text-[#047857] font-black">& Earn</span>
                     </h3>
 
                     {/* Subtitle */}
@@ -842,8 +842,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 {/* Middle 2 Feature Pills Row */}
                 <div className="grid grid-cols-2 gap-2 py-0.5 relative z-10 max-w-[65%]">
                   {/* Badge 1: Exciting Rewards */}
-                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center shrink-0">
+                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center shrink-0">
                       <Gift size={13} strokeWidth={2.5} />
                     </div>
                     <div className="flex flex-col text-left leading-none">
@@ -853,9 +853,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   </div>
 
                   {/* Badge 2: Earn on every */}
-                  <div className="bg-white/80 backdrop-blur-xs border border-purple-100/90 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-purple-100/80 text-purple-600 flex items-center justify-center shrink-0">
-                      <Wallet size={13} strokeWidth={2.5} />
+                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
+                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center shrink-0">
+                      <Coins size={13} strokeWidth={2.5} />
                     </div>
                     <div className="flex flex-col text-left leading-none">
                       <span className="text-[10px] font-black text-slate-900">Earn on every</span>
@@ -867,17 +867,17 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 {/* Bottom Action Pill Banner */}
                 <div 
                   onClick={() => setTab("refer-and-earn")}
-                  className="bg-purple-100/90 hover:bg-purple-200 border border-purple-200/90 rounded-xl px-3 py-2 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
+                  className="bg-[#f8fafc] hover:bg-white border border-emerald-300 border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shrink-0 shadow-2xs">
                       <ChevronRight size={13} strokeWidth={3} />
                     </div>
-                    <span className="text-xs font-black text-purple-950">
+                    <span className="text-xs font-black text-slate-900">
                       Refer Now
                     </span>
                   </div>
-                  <ChevronRight size={15} strokeWidth={3} className="text-purple-700 shrink-0" />
+                  <ChevronRight size={15} strokeWidth={3} className="text-emerald-800 shrink-0" />
                 </div>
               </div>
             </motion.div>
@@ -891,8 +891,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 onClick={() => setActiveTopBannerIndex(idx)}
                 className={`h-2 rounded-full transition-all duration-300 cursor-pointer border-none outline-none ${
                   activeTopBannerIndex === idx
-                    ? "w-6 bg-purple-600 shadow-2xs"
-                    : "w-2 bg-purple-200 hover:bg-purple-300"
+                    ? "w-6 bg-[#047857] shadow-2xs"
+                    : "w-2 bg-slate-200 hover:bg-[#064e3b]"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
@@ -902,7 +902,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
 
           {/* Quick Actions Card (Light Theme, Placed ABOVE Live Price) */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4">
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-black text-slate-900 tracking-tight">Quick Actions</h3>
             </div>
@@ -925,7 +925,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 onClick={() => setTab("sip")}
                 className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
               >
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center p-1.5 shadow-2xs group-active:scale-95 transition-all mb-1">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center p-1.5 shadow-2xs group-active:scale-95 transition-all mb-1">
                   <img src="/silver.png" alt="Digital Silver" className="w-8 h-8 object-contain drop-shadow-2xs" />
                 </div>
                 <span className="text-[11px] font-bold text-slate-800 leading-tight">Digital Silver</span>
@@ -947,7 +947,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 onClick={() => handleBillClick("Mobile Recharge")}
                 className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
               >
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600 shadow-2xs group-active:scale-95 transition-all mb-1">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs group-active:scale-95 transition-all mb-1">
                   <Smartphone size={22} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-bold text-slate-800 leading-tight">Recharge</span>
@@ -958,7 +958,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 onClick={() => setTab("bills")}
                 className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
               >
-                <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-600 shadow-2xs group-active:scale-95 transition-all mb-1">
+                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-[#047857] shadow-2xs group-active:scale-95 transition-all mb-1">
                   <FileText size={22} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-bold text-slate-800 leading-tight">Bills</span>
@@ -980,7 +980,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               {/* Right More Button -> Navigates to /bills */}
               <button
                 onClick={() => setTab("bills")}
-                className="w-24 bg-slate-100/90 hover:bg-slate-200/60 border border-slate-200/90 rounded-2xl px-3 py-3.5 flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all text-purple-700 outline-none shrink-0"
+                className="w-24 bg-slate-100/90 hover:bg-slate-200/60 border border-slate-200/90 rounded-2xl px-3 py-3.5 flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all text-emerald-800 outline-none shrink-0"
               >
                 <span className="text-xs font-black">More</span>
                 <ChevronRight size={15} strokeWidth={3} />
@@ -1121,7 +1121,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </div>
 
           {/* Gold Saving Plans Section (Mobile Light Theme) */}
-          <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-gray-200/90 shadow-md shadow-gray-900/5 space-y-3.5">
+          <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-slate-200 shadow-md shadow-black/5 space-y-3.5">
             {/* Header Title */}
             <div className="flex items-center justify-between px-0.5">
               <h3 className="text-lg font-black text-slate-900 tracking-tight">
@@ -1141,10 +1141,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               {/* Card 1: Save Daily */}
               <div 
                 onClick={() => setTab("savings")}
-                className="bg-[#f5f3ff] hover:bg-[#ede9fe] border border-purple-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+                className="bg-[#f5f3ff] hover:bg-[#ede9fe] border border-slate-200 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-purple-100/80 border border-purple-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                  <div className="w-14 h-14 rounded-2xl bg-[#f8fafc] border border-slate-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
                     <img 
                       src="/daily_saving.png" 
                       alt="Save Daily" 
@@ -1152,11 +1152,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     />
                   </div>
                   <div>
-                    <h4 className="text-base font-black tracking-tight text-purple-950 leading-tight">Save Daily</h4>
-                    <p className="text-xs font-bold text-purple-700 mt-0.5">Starts from just ₹10/day</p>
+                    <h4 className="text-base font-black tracking-tight text-slate-900 leading-tight">Save Daily</h4>
+                    <p className="text-xs font-bold text-emerald-800 mt-0.5">Starts from just ₹10/day</p>
                   </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-purple-200/80 text-purple-800 flex items-center justify-center shrink-0 group-hover:bg-purple-300/80 transition-all">
+                <div className="w-8 h-8 rounded-full bg-[#f8fafc] text-slate-900 flex items-center justify-center shrink-0 group-hover:bg-white transition-all">
                   <ChevronRight size={18} strokeWidth={3} />
                 </div>
               </div>
@@ -1227,7 +1227,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               </div>
             </div>
 
-            <p className="text-xs text-indigo-200 font-medium relative z-10">
+            <p className="text-xs text-white/80 font-medium relative z-10">
               {isApprovedDga
                 ? "Access partner console, manage client portfolios & track instant commission payouts."
                 : "Earn high commissions, exclusive rewards & unlock a world of benefits."}
@@ -1258,39 +1258,39 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             </div>
           </div>
 
-          {/* Refer & Earn Card (Matching Screenshot Structure with Soft Blue Aesthetic) */}
-          <div className="bg-gradient-to-br from-[#f0f4ff] via-[#f5f8ff] to-[#eef4ff] border border-blue-100/90 rounded-3xl p-5 shadow-xs space-y-4">
+          {/* Refer & Earn Card (Emerald & Gold Finishing) */}
+          <div className="bg-gradient-to-br from-[#ecfdf5] via-[#f0fdf4] to-[#fefce8] border border-emerald-200/70 rounded-3xl p-5 shadow-xs space-y-4">
             {/* Header Row */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#059669] text-[#FBC740] flex items-center justify-center shadow-md shadow-emerald-900/20 shrink-0">
                   <UserPlus size={22} strokeWidth={2.5} />
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Refer & Earn</h3>
-                  <p className="text-xs text-blue-800 font-medium">Invite friends and earn unlimited rewards</p>
+                  <p className="text-xs text-emerald-800 font-medium">Invite friends and earn unlimited rewards</p>
                 </div>
               </div>
 
               {/* Earn up to ₹500 Badge */}
-              <div className="bg-white/90 border border-blue-100/80 rounded-2xl px-3 py-1.5 text-right shadow-2xs shrink-0">
-                <span className="text-[10px] font-bold text-blue-700 block">Earn up to</span>
-                <span className="text-sm font-black text-blue-950">₹500</span>
+              <div className="bg-[#f8fafc] border border-amber-300/60 rounded-2xl px-3 py-1.5 text-right shadow-2xs shrink-0">
+                <span className="text-[10px] font-bold text-amber-700 block">Earn up to</span>
+                <span className="text-sm font-black text-[#064e3b]">₹500</span>
               </div>
             </div>
 
             {/* Middle Reward Highlight Card */}
             <div 
               onClick={() => setTab("refer-and-earn")}
-              className="bg-white/90 border border-blue-100/80 rounded-2xl p-3 flex items-center justify-between shadow-2xs cursor-pointer hover:border-blue-200 transition-all"
+              className="bg-[#f8fafc] border border-emerald-200/70 rounded-2xl p-3 flex items-center justify-between shadow-2xs cursor-pointer hover:border-emerald-300 transition-all"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-full bg-emerald-50 text-[#047857] flex items-center justify-center shrink-0">
                   <Coins size={20} strokeWidth={2.2} />
                 </div>
                 <div>
                   <h4 className="text-xs font-black text-slate-900">You earn ₹500 per referral</h4>
-                  <p className="text-[11px] font-bold text-blue-700">Friend gets ₹100 bonus</p>
+                  <p className="text-[11px] font-bold text-emerald-700">Friend gets ₹100 bonus</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">
@@ -1304,21 +1304,21 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             {/* 3-Step Process Row */}
             <div className="grid grid-cols-3 gap-2 text-center pt-1">
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-blue-100/70 border border-blue-200/60 text-blue-700 flex items-center justify-center mb-1.5 shadow-2xs">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs">
                   <Share2 size={18} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-bold text-slate-800">Share Link</span>
               </div>
 
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-blue-100/70 border border-blue-200/60 text-blue-700 flex items-center justify-center mb-1.5 shadow-2xs">
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/60 text-amber-600 flex items-center justify-center mb-1.5 shadow-2xs">
                   <Users size={18} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-bold text-slate-800">Friend Joins</span>
               </div>
 
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-blue-100/70 border border-blue-200/60 text-blue-700 flex items-center justify-center mb-1.5 shadow-2xs">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs">
                   <Gift size={18} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-bold text-slate-800">Both Earn</span>
@@ -1328,11 +1328,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             {/* Bottom Full-Width CTA Button */}
             <button
               onClick={() => setTab("refer-and-earn")}
-              className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-xs py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer border-none outline-none active:scale-[0.98] transition-all"
+              className="w-full bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-xs py-3.5 px-4 rounded-2xl shadow-md shadow-emerald-950/20 border border-amber-400/40 flex items-center justify-center gap-2 cursor-pointer outline-none active:scale-[0.98] transition-all"
             >
-              <Share2 size={16} strokeWidth={2.5} />
+              <Share2 size={16} strokeWidth={2.5} className="text-amber-300" />
               <span>Start Referring Now</span>
-              <ChevronRight size={16} strokeWidth={3} />
+              <ChevronRight size={16} strokeWidth={3} className="text-amber-300" />
             </button>
           </div>
 
@@ -1341,7 +1341,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             <div className="grid grid-cols-3 gap-2 text-center">
               {/* Item 1: 100% Secure */}
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-purple-100/70 text-purple-600 flex items-center justify-center mb-1.5 shadow-2xs border border-purple-200/50">
+                <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
                   <Shield size={20} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-black text-slate-900 leading-tight">100% Secure</span>
@@ -1350,7 +1350,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
               {/* Item 2: Easy to Use */}
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-purple-100/70 text-purple-600 flex items-center justify-center mb-1.5 shadow-2xs border border-purple-200/50">
+                <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
                   <CheckCircle2 size={20} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-black text-slate-900 leading-tight">Easy to Use</span>
@@ -1359,7 +1359,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
               {/* Item 3: 24/7 Support */}
               <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-purple-100/70 text-purple-600 flex items-center justify-center mb-1.5 shadow-2xs border border-purple-200/50">
+                <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
                   <Clock size={20} strokeWidth={2.2} />
                 </div>
                 <span className="text-[11px] font-black text-slate-900 leading-tight">24/7 Support</span>
@@ -1407,7 +1407,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 onClick={() => {
                   setTab("become-agent");
                 }}
-                className="px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm text-amber-900 bg-white/90 hover:bg-white border border-amber-300/80 hover:border-amber-400 transition-all shadow-xs cursor-pointer outline-none"
+                className="px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm text-amber-900 bg-[#f8fafc] hover:bg-white border border-amber-300/80 hover:border-amber-400 transition-all shadow-xs cursor-pointer outline-none"
               >
                 Know More
               </button>
@@ -1445,15 +1445,15 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             {/* Row 1: 3 Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                {/* Vault Balance */}
-               <div className="bg-[#f3e8ff] rounded-3xl p-6 border border-purple-100 flex flex-col justify-center relative overflow-hidden shadow-sm">
-                 <h3 className="text-xs font-bold text-purple-900 mb-3 flex items-center gap-1.5">Vault Balance</h3>
+               <div className="bg-[#f3e8ff] rounded-3xl p-6 border border-emerald-300 flex flex-col justify-center relative overflow-hidden shadow-sm">
+                 <h3 className="text-xs font-bold text-slate-900 mb-3 flex items-center gap-1.5">Vault Balance</h3>
                  <div className="flex items-center gap-3 mb-1 relative z-10">
                    <h2 className="text-[26px] font-black text-[#2e1065] tracking-tight">{showBalance ? `${totalGrams.toFixed(2)} g` : "******"}</h2>
-                   <button onClick={() => setShowBalance(!showBalance)} className="bg-transparent border-none outline-none cursor-pointer"><Eye size={18} className="text-purple-400 hover:text-purple-600" /></button>
+                   <button onClick={() => setShowBalance(!showBalance)} className="bg-transparent border-none outline-none cursor-pointer"><Eye size={18} className="text-[#047857] hover:text-[#047857]" /></button>
                  </div>
-                 <p className="text-xs font-bold text-purple-800/70 relative z-10">≈ ₹{portfolioVal.toLocaleString('en-IN')}</p>
-                 <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/40 rounded-2xl flex items-center justify-center text-purple-600 shadow-sm backdrop-blur-sm">
-                    <Wallet size={24} />
+                 <p className="text-xs font-bold text-slate-900/70 relative z-10">≈ ₹{portfolioVal.toLocaleString('en-IN')}</p>
+                 <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/40 rounded-2xl flex items-center justify-center text-[#047857] shadow-sm backdrop-blur-sm">
+                    <Coins size={24} />
                  </div>
                </div>
                
@@ -1481,9 +1481,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             {/* Row 2: Vault & Actions */}
             <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-6">
                {/* My Vault */}
-               <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.02)] relative overflow-hidden flex flex-col">
+               <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] relative overflow-hidden flex flex-col">
                  <div className="flex items-center gap-3 mb-6 relative z-10">
-                    <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center"><Wallet size={16} /></div>
+                    <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center"><Coins size={16} /></div>
                     <h3 className="text-lg font-bold text-gray-900">My Vault</h3>
                  </div>
                  
@@ -1498,8 +1498,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                    <p className="text-xs font-bold text-gray-400 mb-8">Max Capacity: <span className="text-gray-900">{kycStatus === "full kyc" ? "1000 g" : "0.00 g"}</span></p>
                    
                    <div className="flex gap-4">
-                     <button onClick={() => setTab("sip")} className="flex-1 bg-[#6d28d9] text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/20 flex items-center justify-center gap-2 border-none outline-none cursor-pointer hover:bg-[#5b21b6] transition-colors"><Plus size={18}/> Buy Gold</button>
-                     <button onClick={() => setTab("sip")} className="flex-1 bg-white text-amber-500 border border-amber-300 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 outline-none cursor-pointer hover:bg-amber-50 transition-colors"><Send size={18}/> Sell Gold</button>
+                     <button onClick={() => setTab("sip")} className="flex-1 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white py-3 rounded-xl text-sm font-bold shadow-md shadow-emerald-900/20 flex items-center justify-center gap-2 border-none outline-none cursor-pointer transition-all"><Plus size={18}/> Buy Gold</button>
+                     <button onClick={() => setTab("sip")} className="flex-1 bg-[#f8fafc] text-amber-600 border border-emerald-300 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 outline-none cursor-pointer hover:bg-white transition-colors"><Send size={18}/> Sell Gold</button>
                    </div>
                  </div>
                  
@@ -1508,14 +1508,14 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                    <div className="absolute right-12 top-14 w-28 h-20 bg-gradient-to-br from-[#ffd66b] via-[#eab308] to-[#b45309] rounded-xl transform -rotate-12 shadow-[0_10px_25px_rgba(234,179,8,0.4)] border border-yellow-300" />
                    <div className="absolute right-4 top-24 w-28 h-20 bg-gradient-to-br from-[#fde047] via-[#eab308] to-[#a16207] rounded-xl transform -rotate-12 shadow-[0_10px_25px_rgba(234,179,8,0.4)] border border-yellow-300" />
                    
-                   <div className="absolute right-16 bottom-8 w-12 h-12 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500 rounded-full shadow-lg border border-gray-100" />
-                   <div className="absolute right-32 bottom-14 w-14 h-14 bg-gradient-to-br from-gray-100 via-gray-300 to-gray-400 rounded-full shadow-lg border border-gray-100" />
-                   <div className="absolute right-6 bottom-20 w-10 h-10 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 rounded-full shadow-md border border-gray-100" />
+                   <div className="absolute right-16 bottom-8 w-12 h-12 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500 rounded-full shadow-lg border border-slate-200" />
+                   <div className="absolute right-32 bottom-14 w-14 h-14 bg-gradient-to-br from-gray-100 via-gray-300 to-gray-400 rounded-full shadow-lg border border-slate-200" />
+                   <div className="absolute right-6 bottom-20 w-10 h-10 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 rounded-full shadow-md border border-slate-200" />
                  </div>
                </div>
 
                {/* Quick Actions */}
-               <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col">
+               <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col">
                   <h3 className="text-lg font-bold text-gray-900 mb-8">Quick Actions</h3>
                   <div className="grid grid-cols-3 gap-y-8 gap-x-2 flex-1 items-center">
                      <div className="flex flex-col items-center gap-3 cursor-pointer group">
@@ -1523,11 +1523,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                        <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900">UPI Pay</span>
                      </div>
                      <div onClick={() => setTab("sip")} className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-blue-50 text-blue-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-blue-100/50 shadow-sm"><TrendingUp size={22} strokeWidth={2.5}/></div>
+                       <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><TrendingUp size={22} strokeWidth={2.5}/></div>
                        <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900">Start SIP</span>
                      </div>
                      <div className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-purple-50 text-purple-600 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-purple-100/50 shadow-sm"><Building size={22} strokeWidth={2.5}/></div>
+                       <div className="w-[52px] h-[52px] rounded-[18px] bg-white text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-300/50 shadow-sm"><Building size={22} strokeWidth={2.5}/></div>
                        <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-nowrap">Bank Transfer</span>
                      </div>
                      <div className="flex flex-col items-center gap-3 cursor-pointer group">
@@ -1535,7 +1535,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                        <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-nowrap">Vault Transfer</span>
                      </div>
                      <div onClick={() => setTab("bills")} className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-blue-50 text-blue-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-blue-100/50 shadow-sm"><FileText size={22} strokeWidth={2.5}/></div>
+                       <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><FileText size={22} strokeWidth={2.5}/></div>
                        <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-pre-line">{"Bills &\nRecharges"}</span>
                      </div>
                      <div className="flex flex-col items-center gap-3 cursor-pointer group">
@@ -1547,10 +1547,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             </div>
 
             {/* Row 3: Bill Payments & Recharges */}
-            <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+            <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
                <div className="flex justify-between items-center mb-8">
                  <h3 className="text-lg font-bold text-gray-900">Bill Payments & Recharges</h3>
-                 <span onClick={() => setTab("bills")} className="text-xs font-bold text-purple-600 hover:text-purple-800 cursor-pointer transition-colors">View All</span>
+                 <span onClick={() => setTab("bills")} className="text-xs font-bold text-[#047857] hover:text-slate-900 cursor-pointer transition-colors">View All</span>
                </div>
                <div className="grid grid-cols-4 md:grid-cols-8 gap-y-6 gap-x-2">
                   {[
@@ -1564,7 +1564,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     { label: "More", Icon: Grid, color: "#9ca3af" },
                   ].map((b, i) => (
                     <div key={i} onClick={() => { if(b.label !== "More") handleBillClick(b.label.replace('\n', ' ')); else setTab("bills"); }} className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-12 h-12 rounded-2xl bg-white border border-gray-100 shadow-sm flex items-center justify-center group-hover:-translate-y-1 transition-transform group-hover:shadow-md group-hover:border-purple-100" style={{ color: b.color }}>
+                       <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] border border-slate-200 shadow-sm flex items-center justify-center group-hover:-translate-y-1 transition-transform group-hover:shadow-md group-hover:border-emerald-300" style={{ color: b.color }}>
                          <b.Icon size={22} strokeWidth={1.5}/>
                        </div>
                        <span className="text-[11px] font-bold text-gray-600 text-center leading-tight whitespace-pre-line group-hover:text-gray-900">{b.label}</span>
@@ -1574,28 +1574,28 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             </div>
             
             {/* Row 4: Banner */}
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50/50 rounded-2xl p-6 border border-purple-100/50 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50/50 rounded-2xl p-6 border border-emerald-300/50 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
                <div className="flex-1 relative z-10">
                   <h3 className="text-lg font-bold text-[#312e81] mb-1">Secure. Simple. Smart.</h3>
                   <p className="text-xs text-gray-600 font-medium">All your financial needs in one place.</p>
                </div>
                <div className="flex flex-wrap gap-4 relative z-10 justify-center">
-                  <div className="bg-white/80 backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
-                    <Shield size={18} className="text-purple-600"/>
+                  <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
+                    <Shield size={18} className="text-[#047857]"/>
                     <div>
                       <div className="text-[10px] font-bold text-gray-900">100% Secure</div>
                       <div className="text-[8px] text-gray-500 font-medium mt-0.5">Bank-level Security</div>
                     </div>
                   </div>
-                  <div className="bg-white/80 backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
-                    <CheckCircle2 size={18} className="text-purple-600"/>
+                  <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
+                    <CheckCircle2 size={18} className="text-[#047857]"/>
                     <div>
                       <div className="text-[10px] font-bold text-gray-900">Easy to Use</div>
                       <div className="text-[8px] text-gray-500 font-medium mt-0.5">Simple & Intuitive</div>
                     </div>
                   </div>
-                  <div className="bg-white/80 backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
-                    <Clock size={18} className="text-purple-600"/>
+                  <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
+                    <Clock size={18} className="text-[#047857]"/>
                     <div>
                       <div className="text-[10px] font-bold text-gray-900">24/7 Support</div>
                       <div className="text-[8px] text-gray-500 font-medium mt-0.5">We're here for you</div>
@@ -1623,9 +1623,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             />
             
             {/* Upgrade Card */}
-            <div className="rounded-[24px] p-6 text-white relative overflow-hidden shadow-[0_10px_25px_rgba(76,29,149,0.15)]" style={{ background: 'linear-gradient(135deg, #4c1d95, #6d28d9)' }}>
+            <div className="rounded-[24px] p-6 text-white relative overflow-hidden shadow-sm bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] border border-emerald-300/30">
                <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
-               <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-purple-900/40 rounded-full blur-xl pointer-events-none" />
+               <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-emerald-950/20 rounded-full blur-xl pointer-events-none" />
                
                <h3 className="text-lg font-bold mb-2 relative z-10 tracking-tight">Upgrade to Premium</h3>
                <p className="text-[11px] text-purple-200 leading-relaxed max-w-[65%] mb-5 relative z-10 font-medium">Unlock exclusive benefits and higher limits.</p>
@@ -1641,10 +1641,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             </div>
             
             {/* Recent Transactions */}
-            <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col gap-6">
+            <div className="bg-white rounded-[24px] p-6 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col gap-6">
                <div className="flex justify-between items-center">
                  <h3 className="text-[15px] font-bold text-gray-900">Recent Transactions</h3>
-                 <span onClick={() => setTab("history")} className="text-[11px] font-bold text-purple-600 hover:text-purple-800 cursor-pointer transition-colors">View All</span>
+                 <span onClick={() => setTab("history")} className="text-[11px] font-bold text-[#047857] hover:text-slate-900 cursor-pointer transition-colors">View All</span>
                </div>
                
                <div className="flex flex-col gap-4">
@@ -1655,8 +1655,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                  ) : (
                    recentTransactions.map((t, i) => (
                      <div key={i} className="flex items-center gap-3">
-                       <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-gray-50/50 shadow-sm bg-purple-50 text-purple-600">
-                          <Wallet size={16} strokeWidth={2.5} />
+                       <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-gray-50/50 shadow-sm bg-white text-[#047857]">
+                          <Coins size={16} strokeWidth={2.5} />
                        </div>
                        <div className="flex-1 min-w-0">
                           <div className="text-[12px] font-bold text-gray-900 truncate">{t.source || t.category}</div>
@@ -1671,7 +1671,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                  )}
                 </div>
                 
-                <button onClick={() => setTab("history")} className="mt-1 text-[11px] font-bold text-[#6d28d9] border border-purple-100 rounded-xl py-3 w-full hover:bg-purple-50 transition-colors flex items-center justify-center gap-2 cursor-pointer bg-transparent outline-none">
+                <button onClick={() => setTab("history")} className="mt-1 text-[11px] font-bold text-[#047857] border border-emerald-300 rounded-xl py-3 w-full hover:bg-white transition-colors flex items-center justify-center gap-2 cursor-pointer bg-transparent outline-none">
                    <Download size={14} strokeWidth={2.5} /> Download Statement
                 </button>
              </div>
@@ -1688,7 +1688,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-100 text-[#6d28d9] flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] border border-emerald-300 flex items-center justify-center shadow-xs">
               <Bell size={22} strokeWidth={2.5} />
             </div>
             <h1 className="text-2xl font-black text-gray-900 tracking-tight">Notification Center</h1>
@@ -1699,7 +1699,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="px-4 py-2.5 rounded-xl bg-purple-50 text-purple-700 font-bold text-xs hover:bg-purple-100 transition-colors border border-purple-200/60 cursor-pointer outline-none flex items-center gap-2 shadow-xs"
+              className="px-4 py-2.5 rounded-xl bg-white text-emerald-800 font-bold text-xs hover:bg-[#f8fafc] transition-colors border border-slate-200/60 cursor-pointer outline-none flex items-center gap-2 shadow-xs"
             >
               <CheckCheck size={16} /> Mark all as read
             </button>
@@ -1714,7 +1714,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex-1">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex-1">
         {notifications.length === 0 ? (
           <div className="p-16 text-center">
             <Bell size={48} className="mx-auto text-gray-300 mb-3" />
@@ -1728,7 +1728,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 key={n.id}
                 onClick={() => markAsRead(n.id)}
                 className={`p-6 flex flex-col sm:flex-row items-start gap-4 transition-colors cursor-pointer group ${
-                  n.read ? 'bg-white hover:bg-gray-50/80' : 'bg-purple-50/30 hover:bg-purple-50/60'
+                  n.read ? 'bg-[#f8fafc] hover:bg-white' : 'bg-white hover:bg-[#f8fafc]'
                 }`}
               >
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-xs ${n.iconBg}`}>
@@ -1736,7 +1736,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <h3 className={`text-sm font-bold ${n.read ? 'text-gray-900' : 'text-purple-950 font-black'}`}>
+                    <h3 className={`text-sm font-bold ${n.read ? 'text-gray-900' : 'text-slate-900 font-black'}`}>
                       {n.title}
                     </h3>
                     <span className="text-xs font-semibold text-gray-400 shrink-0">{n.time}</span>
@@ -1788,7 +1788,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Top Header Bar for Mobile Screens (lg:hidden) */}
-        <header className="lg:hidden bg-white border-b border-gray-100 shrink-0 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+        <header className="lg:hidden bg-white border-b border-slate-200 shrink-0 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between sticky top-0 z-30 shadow-2xs">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(prev => !prev)}
@@ -1808,7 +1808,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setShowNotifications(prev => !prev)}
-              className="relative border w-9 h-9 rounded-full flex items-center justify-center shadow-2xs bg-white border-gray-200 text-gray-600 cursor-pointer outline-none"
+              className="relative border w-9 h-9 rounded-full flex items-center justify-center shadow-2xs bg-[#f8fafc] border-slate-200 text-slate-900 cursor-pointer outline-none"
             >
               <Bell size={17} />
               {unreadCount > 0 && (
@@ -1820,7 +1820,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
             <div
               onClick={() => setTab("settings")}
-              className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative cursor-pointer shadow-2xs border border-gray-100"
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative cursor-pointer shadow-2xs border border-slate-200"
             >
               <span>{(userName || "U").charAt(0)}</span>
               {userAvatar && (
@@ -1885,7 +1885,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 border border-purple-200 z-10 space-y-5 text-center"
+              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 border border-slate-200 z-10 space-y-5 text-center"
             >
               <button
                 onClick={() => setShowEmailMissingModal(false)}
@@ -1894,7 +1894,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 <X size={18} />
               </button>
 
-              <div className="w-16 h-16 rounded-3xl bg-purple-100 text-[#7C3AED] flex items-center justify-center mx-auto shadow-md shadow-purple-500/10">
+              <div className="w-16 h-16 rounded-3xl bg-[#f8fafc] text-[#047857] border border-emerald-300 flex items-center justify-center mx-auto shadow-md shadow-none">
                 <FileText size={32} />
               </div>
 
@@ -1905,13 +1905,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 </p>
               </div>
 
-              <div className="bg-purple-50/80 border border-purple-200 p-3.5 rounded-2xl text-left flex items-center gap-3">
+              <div className="bg-white/80 border border-slate-200 p-3.5 rounded-2xl text-left flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-purple-100 text-[#7C3AED] flex items-center justify-center shrink-0">
                   <ShieldCheck size={18} />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-purple-950">Email Invoice Delivery</div>
-                  <div className="text-[10px] font-semibold text-purple-700">Official GST invoices sent directly to your verified inbox</div>
+                  <div className="text-xs font-bold text-slate-900">Email Invoice Delivery</div>
+                  <div className="text-[10px] font-semibold text-emerald-800">Official GST invoices sent directly to your verified inbox</div>
                 </div>
               </div>
 
@@ -1924,7 +1924,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     }
                     setTab("settings");
                   }}
-                  className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-[#FFF] font-black text-xs py-3.5 rounded-xl shadow-lg shadow-purple-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer border-none outline-none"
+                  className="w-full bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-xs py-3.5 rounded-xl shadow-md shadow-emerald-900/20 transition-all flex items-center justify-center gap-2 cursor-pointer border-none outline-none"
                 >
                   <User size={16} />
                   <span>Go to Profile & Add Email</span>
@@ -1968,7 +1968,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                     setShowAgentModal(false);
                     if (tab === "become-agent") setTab("home");
                   }}
-                  className="absolute right-5 top-5 text-indigo-200 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors border-none cursor-pointer outline-none"
+                  className="absolute right-5 top-5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors border-none cursor-pointer outline-none"
                 >
                   <X size={18} />
                 </button>
@@ -1981,7 +1981,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                       <h3 className="text-xl font-extrabold tracking-tight text-white">Become a Digital Gold Agent</h3>
                       <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase">DGA</span>
                     </div>
-                    <p className="text-xs text-indigo-200 font-medium mt-0.5">
+                    <p className="text-xs text-white/80 font-medium mt-0.5">
                       Earn lifetime commissions & exclusive rewards with FipMoney
                     </p>
                   </div>
@@ -1998,8 +1998,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                         <div className="text-amber-700 font-extrabold text-xs mb-1">High Commissions</div>
                         <div className="text-[11px] text-gray-600 font-medium">Earn up to 2.5% on every purchase & SIP in your network.</div>
                       </div>
-                      <div className="bg-purple-50/70 border border-purple-200/60 p-3.5 rounded-2xl">
-                        <div className="text-purple-700 font-extrabold text-xs mb-1">Gold Rewards</div>
+                      <div className="bg-white/70 border border-slate-200/60 p-3.5 rounded-2xl">
+                        <div className="text-emerald-800 font-extrabold text-xs mb-1">Gold Rewards</div>
                         <div className="text-[11px] text-gray-600 font-medium">Unlock 24K Gold coins & milestone tech gifts monthly.</div>
                       </div>
                       <div className="bg-blue-50/70 border border-blue-200/60 p-3.5 rounded-2xl">
@@ -2086,7 +2086,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                         setAgentFormSubmitted(false);
                         if (tab === "become-agent") setTab("home");
                       }}
-                      className="px-6 py-2.5 bg-[#1e1b4b] text-white font-bold text-xs rounded-xl shadow-md cursor-pointer border-none outline-none"
+                      className="px-6 py-2.5 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/20 border border-amber-400/40 cursor-pointer outline-none"
                     >
                       Back to Dashboard
                     </button>

@@ -70,17 +70,17 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
           {/* Left Side: Typography & Features */}
           <div className="w-full lg:w-[30%] xl:w-[28%] space-y-8 shrink-0">
              <div className="space-y-6">
-               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-indigo-50 text-indigo-600 border border-indigo-100">
-                 <Sparkles size={12} className="text-indigo-500" /> LIVE MARKET PRICES
+               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase bg-white text-emerald-800 border border-emerald-300">
+                 <Sparkles size={12} className="text-amber-500" /> LIVE MARKET PRICES
                </div>
                
-               <h2 className="text-4xl md:text-5xl font-black text-[#1a1c29] leading-[1.1] tracking-tight">
+               <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] tracking-tight">
                  Track Live <br />
-                 <span className="text-[#ffb900]">Gold</span> <span className="text-[#64748b]">& Silver</span> <br />
+                 <span className="text-[#ffb900]">Gold</span> <span className="text-slate-600">& Silver</span> <br />
                  Prices
                </h2>
                
-               <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xs pr-4">
+               <p className="text-emerald-800 text-sm font-medium leading-relaxed max-w-xs pr-4">
                  Real-time 24K gold and silver prices. Invest anytime with confidence.
                </p>
              </div>
@@ -93,10 +93,10 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                  { title: "Easy buy, sell & withdraw", icon: <RefreshCw size={16} /> }
                ].map((feature, idx) => (
                  <div key={idx} className="flex items-center gap-4 group">
-                   <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 shadow-sm border border-indigo-100/50">
+                   <div className="w-8 h-8 rounded-full bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm border border-emerald-300">
                      {feature.icon}
                    </div>
-                   <div className="text-xs font-semibold text-slate-700">{feature.title}</div>
+                   <div className="text-xs font-semibold text-slate-900">{feature.title}</div>
                  </div>
                ))}
              </div>
@@ -104,14 +104,14 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
              <div className="flex items-center gap-3 pt-6">
                 <button 
                   onClick={() => onNavigate?.('login')}
-                  className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-5 py-3.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/30"
+                  className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white px-5 py-3.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/20 border border-amber-400/30 cursor-pointer"
                 >
-                  Invest Now <ArrowRight size={14} />
+                  Invest Now <ArrowRight size={14} className="text-amber-300" />
                 </button>
                 <button 
-                  className="bg-white border border-indigo-100 hover:border-indigo-200 text-indigo-800 px-5 py-3.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm"
+                  className="bg-white border border-emerald-300 hover:border-[#047857] text-slate-900 px-5 py-3.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer"
                 >
-                  <PlayCircle size={16} className="text-indigo-600" /> How It Works
+                  <PlayCircle size={16} className="text-amber-500" /> How It Works
                 </button>
              </div>
           </div>
@@ -120,7 +120,7 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
           <div className="w-full lg:w-[65%] xl:w-[68%] flex flex-col md:flex-row gap-6 ml-auto">
             
             {/* Gold Card */}
-            <div className="flex-1 bg-gradient-to-b from-[#fffaf0] to-white border border-amber-100 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-shadow relative overflow-hidden group">
+            <div className="flex-1 bg-gradient-to-b from-white to-[#f8fafc] border border-amber-200/60 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-shadow relative overflow-hidden group">
                {/* Top Section */}
                <div className="flex justify-between items-start mb-10">
                  <div className="flex items-center gap-3">
@@ -133,10 +133,10 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                    </div>
                  </div>
                  <div className="flex items-center gap-2">
-                   <div className="bg-white border border-amber-100 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-amber-600 tracking-wider shadow-sm">
+                   <div className="bg-[#f8fafc] border border-amber-200/80 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-amber-600 tracking-wider shadow-sm">
                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div> LIVE
                    </div>
-                   <button className="w-9 h-9 bg-white border border-amber-100 rounded-full flex items-center justify-center text-slate-400 hover:text-amber-500 transition-colors shadow-sm">
+                   <button className="w-9 h-9 bg-[#f8fafc] border border-emerald-300 rounded-full flex items-center justify-center text-slate-600 hover:text-amber-500 transition-colors shadow-sm cursor-pointer">
                      <Star size={14} />
                    </button>
                  </div>
@@ -145,10 +145,10 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                {/* Price Section */}
                <div className="mb-6 relative z-10">
                  <div className="flex justify-between items-start mb-2 relative z-20">
-                   <div className="text-[10px] font-bold text-emerald-600 tracking-widest uppercase flex items-center gap-1.5">
-                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> LIVE BUY PRICE
+                   <div className="text-[10px] font-bold text-[#047857] tracking-widest uppercase flex items-center gap-1.5">
+                     <div className="w-1.5 h-1.5 rounded-full bg-[#059669]"></div> LIVE BUY PRICE
                    </div>
-                   <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200/70 shadow-sm">
+                   <div className="flex items-center gap-1 bg-[#f8fafc] p-1 rounded-xl border border-slate-200 shadow-sm">
                      {["1D", "1W", "1M", "1Y"].map((tf) => (
                        <button
                          key={tf}
@@ -168,7 +168,7 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                    <span className="text-3xl xl:text-4xl font-black text-slate-900 tracking-tighter">₹{goldPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                    <span className="text-lg text-slate-500 font-bold mb-1">/g</span>
                  </div>
-                 <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                 <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#047857] bg-white px-2 py-1 rounded-md">
                    <TrendingUp size={12} /> {goldChange} (24h)
                  </div>
                </div>
@@ -206,7 +206,7 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
 
                {/* Actions */}
                <div className="flex gap-3">
-                 <button className="flex-[0.4] bg-white border border-amber-200 text-amber-700 py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-amber-50 transition-colors shadow-sm">
+                 <button className="flex-[0.4] bg-[#f8fafc] border border-amber-200 text-amber-700 py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#f8fafc] transition-colors shadow-sm cursor-pointer">
                    View Details <BarChart2 size={14} />
                  </button>
                  <button 
@@ -219,7 +219,7 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
             </div>
 
             {/* Silver Card */}
-            <div className="flex-1 bg-gradient-to-b from-[#f8fafc] to-white border border-slate-200/80 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-shadow relative overflow-hidden group">
+            <div className="flex-1 bg-gradient-to-b from-white to-[#f8fafc] border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-shadow relative overflow-hidden group">
                {/* Top Section */}
                <div className="flex justify-between items-start mb-10">
                  <div className="flex items-center gap-3">
@@ -232,10 +232,10 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                    </div>
                  </div>
                  <div className="flex items-center gap-2">
-                   <div className="bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-slate-600 tracking-wider shadow-sm">
+                   <div className="bg-[#f8fafc] border border-slate-200 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] font-bold text-[#047857] tracking-wider shadow-sm">
                      <div className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse"></div> LIVE
                    </div>
-                   <button className="w-9 h-9 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-indigo-500 transition-colors shadow-sm">
+                   <button className="w-9 h-9 bg-[#f8fafc] border border-emerald-300 rounded-full flex items-center justify-center text-slate-600 hover:text-[#047857] transition-colors shadow-sm cursor-pointer">
                      <Star size={14} />
                    </button>
                  </div>
@@ -244,10 +244,10 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                {/* Price Section */}
                <div className="mb-6 relative z-10">
                  <div className="flex justify-between items-start mb-2 relative z-20">
-                   <div className="text-[10px] font-bold text-emerald-600 tracking-widest uppercase flex items-center gap-1.5">
-                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> LIVE BUY PRICE
+                   <div className="text-[10px] font-bold text-[#047857] tracking-widest uppercase flex items-center gap-1.5">
+                     <div className="w-1.5 h-1.5 rounded-full bg-[#059669]"></div> LIVE BUY PRICE
                    </div>
-                   <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200/70 shadow-sm">
+                   <div className="flex items-center gap-1 bg-[#f8fafc] p-1 rounded-xl border border-slate-200 shadow-sm">
                      {["1D", "1W", "1M", "1Y"].map((tf) => (
                        <button
                          key={tf}
@@ -267,7 +267,7 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
                    <span className="text-3xl xl:text-4xl font-black text-slate-900 tracking-tighter">₹{silverPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                    <span className="text-lg text-slate-500 font-bold mb-1">/g</span>
                  </div>
-                 <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+                 <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#047857] bg-white px-2 py-1 rounded-md">
                    <TrendingUp size={12} /> {silverChange} (24h)
                  </div>
                </div>
@@ -305,7 +305,7 @@ export default function MiniMetalTracker({ onNavigate }: MiniMetalTrackerProps) 
 
                {/* Actions */}
                <div className="flex gap-3">
-                 <button className="flex-[0.4] bg-white border border-slate-200 text-slate-700 py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-sm">
+                 <button className="flex-[0.4] bg-[#f8fafc] border border-slate-200 text-emerald-800 py-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-[#f8fafc] transition-colors shadow-sm cursor-pointer">
                    View Details <BarChart2 size={14} />
                  </button>
                  <button 

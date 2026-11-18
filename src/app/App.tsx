@@ -505,7 +505,7 @@ export default function App() {
             <Header onNavigate={navigateToPage} />
 
             {/* Main Content */}
-            <main className="bg-white">
+            <main className="bg-white text-slate-900">
               {/* Hero Section */}
               <HeroSection onNavigate={navigateToPage} />
 
@@ -571,7 +571,7 @@ export default function App() {
 
   return (
     <motion.div
-      className="min-h-screen bg-[#f0f4f9] smooth-scroll"
+      className="min-h-screen bg-[#f8fafc] smooth-scroll"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}

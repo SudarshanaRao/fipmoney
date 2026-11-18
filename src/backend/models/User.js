@@ -174,7 +174,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    walletId: {
+    vaultId: {
       type: mongoose.Schema.Types.ObjectId,
       default: null,
     },

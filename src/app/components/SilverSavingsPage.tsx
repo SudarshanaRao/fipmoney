@@ -266,7 +266,7 @@ export default function SilverSavingsPage({ onNavigate }: { onNavigate: (page: s
   };
 
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-[#FAFAFC] pb-24 text-slate-800 font-sans relative hide-scrollbar">
+    <div className="flex-1 h-screen overflow-y-auto bg-white pb-24 text-slate-800 font-sans relative hide-scrollbar">
       <div className="p-4 md:p-6 lg:p-8 max-w-[1360px] mx-auto space-y-8 relative z-10">
 
         <AnimatePresence mode="popLayout">
@@ -357,7 +357,7 @@ export default function SilverSavingsPage({ onNavigate }: { onNavigate: (page: s
                           </div>
 
                           {/* Key Numbers / Dynamic Pill */}
-                          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                          <div className="mt-5 pt-4 border-t border-slate-200 flex items-center justify-between">
                             <div>
                               <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                                 Starting From
@@ -958,7 +958,7 @@ export default function SilverSavingsPage({ onNavigate }: { onNavigate: (page: s
                   </div>
 
                   {/* Tenure Selector */}
-                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                  <div className="space-y-2 pt-1 border-t border-slate-200">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                         <Clock size={14} className="text-sky-700" />
@@ -1099,7 +1099,7 @@ export default function SilverSavingsPage({ onNavigate }: { onNavigate: (page: s
                   </div>
 
                   {/* Tenure Selector */}
-                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                  <div className="space-y-2 pt-1 border-t border-slate-200">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                         <Clock size={14} className="text-slate-700" />

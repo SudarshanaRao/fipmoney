@@ -25,7 +25,7 @@ import {
   Truck,
   Gem,
   Calendar,
-  Wallet,
+  Landmark,
   ArrowLeft,
   HelpCircle,
   Scale,
@@ -230,14 +230,14 @@ export default function SellMetalModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-white lg:bg-slate-950/60 lg:backdrop-blur-sm flex flex-col lg:items-center lg:justify-center p-0 lg:p-5 overflow-y-auto lg:overflow-hidden w-full h-full min-h-screen"
+        className="fixed inset-0 z-[100] bg-white lg:bg-black/60 lg:backdrop-blur-sm flex flex-col lg:items-center lg:justify-center p-0 lg:p-5 overflow-y-auto lg:overflow-hidden w-full h-full min-h-screen"
       >
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.2 }}
-          className="bg-white w-full min-h-screen lg:min-h-0 lg:rounded-[32px] lg:max-w-[1160px] lg:max-h-[90vh] overflow-y-auto lg:overflow-hidden lg:shadow-2xl relative border-none lg:border lg:border-slate-100 p-4 sm:p-5 lg:p-7 text-slate-800 font-sans hide-scrollbar flex flex-col justify-between"
+          className="bg-white w-full min-h-screen lg:min-h-0 lg:rounded-[32px] lg:max-w-[1160px] lg:max-h-[90vh] overflow-y-auto lg:overflow-hidden lg:shadow-2xl relative border-none lg:border lg:border-slate-200 p-4 sm:p-5 lg:p-7 text-slate-800 font-sans hide-scrollbar flex flex-col justify-between"
         >
 
           {/* Close Button Top-Right for Desktop */}
@@ -254,7 +254,7 @@ export default function SellMetalModal({
           <div className="lg:hidden flex flex-col space-y-3.5 w-full max-w-md mx-auto text-slate-800 font-sans p-1">
             
             {/* Top Bar Header */}
-            <div className="relative flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="relative flex items-center justify-between pb-2 border-b border-slate-200">
               <button
                 onClick={onClose}
                 className="w-9 h-9 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-700 flex items-center justify-center border-none outline-none cursor-pointer z-10"
@@ -264,7 +264,7 @@ export default function SellMetalModal({
               <h2 className="text-lg font-bold text-[#0f172a] tracking-tight absolute inset-x-0 text-center pointer-events-none">
                 Sell {metalName}
               </h2>
-              <button className="w-8 h-8 rounded-full border border-slate-300 text-slate-400 flex items-center justify-center bg-white outline-none cursor-pointer z-10">
+              <button className="w-8 h-8 rounded-full border border-slate-200 text-slate-400 flex items-center justify-center bg-white outline-none cursor-pointer z-10">
                 <HelpCircle size={16} />
               </button>
             </div>
@@ -367,7 +367,7 @@ export default function SellMetalModal({
                 </button>
               </div>
               
-              <div className={`bg-white border-2 rounded-2xl p-2.5 flex items-center justify-between shadow-2xs ${themeFocusBorder}`}>
+              <div className={`bg-[#f8fafc] border-2 rounded-2xl p-2.5 flex items-center justify-between shadow-2xs ${themeFocusBorder}`}>
                 <div className="w-8 h-8 rounded-xl bg-slate-50 text-slate-800 font-bold text-base flex items-center justify-center mr-2 shrink-0">
                   {sellMode === "amount" ? "₹" : "g"}
                 </div>
@@ -406,7 +406,7 @@ export default function SellMetalModal({
             </div>
 
             {/* 5. You Will Sell & Net Payout Summary Card */}
-            <div className="bg-[#fafafa] rounded-2xl p-3 border border-slate-100/90 flex items-center justify-between">
+            <div className="bg-[#fafafa] rounded-2xl p-3 border border-slate-200/90 flex items-center justify-between">
               <div className="flex-1 text-center">
                 <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">
                   You Will Sell
@@ -429,7 +429,7 @@ export default function SellMetalModal({
             {/* 6. Price Breakdown Accordion */}
             <div
               onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
-              className="bg-[#fafafa] rounded-2xl p-3 border border-slate-100/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
+              className="bg-[#fafafa] rounded-2xl p-3 border border-slate-200/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${themeSubCardBg}`}>
@@ -442,7 +442,7 @@ export default function SellMetalModal({
 
             {/* Expanded Price Breakdown Details if open */}
             {isBreakdownOpen && (
-              <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-100">
+              <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-200">
                 <div className="flex justify-between text-slate-600">
                   <span>Gross Sell Value</span>
                   <span className="font-bold">₹{calculatedAmount.toFixed(2)}</span>
@@ -481,7 +481,7 @@ export default function SellMetalModal({
             </div>
 
             {/* 8. Trust Badges Footer */}
-            <div className="mt-5 bg-[#fafafa] rounded-2xl p-3.5 border border-slate-100/90 grid grid-cols-3 gap-1 text-center">
+            <div className="mt-5 bg-[#fafafa] rounded-2xl p-3.5 border border-slate-200/90 grid grid-cols-3 gap-1 text-center">
               <div className="flex flex-col items-center">
                 <Shield size={14} className={themeText} />
                 <span className="text-[10px] font-bold text-slate-700 leading-tight mt-0.5">100% Instant</span>
@@ -503,11 +503,11 @@ export default function SellMetalModal({
           <div className="hidden lg:flex flex-col justify-between h-full">
 
             {/* Top Modal Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 shrink-0 pr-12 sm:pr-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200 shrink-0 pr-12 sm:pr-10">
             {/* Left: Dynamic Title & Subtitle */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-emerald-100/80 text-emerald-600 flex items-center justify-center shrink-0">
-                <Wallet size={20} strokeWidth={2.5} />
+                <Landmark size={20} strokeWidth={2.5} />
               </div>
               <div>
                 <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
@@ -520,7 +520,7 @@ export default function SellMetalModal({
             </div>
 
             {/* Middle: Live Market Rate */}
-            <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+            <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                 LIVE SELL RATE
               </span>
@@ -581,7 +581,7 @@ export default function SellMetalModal({
                   </div>
 
                   {/* Oval Pill Gauge for Day-wise Price Lock */}
-                  <div className="px-5 py-2.5 rounded-2xl border-2 border-emerald-500 bg-white flex flex-col items-center justify-center shadow-xs shrink-0 min-w-[108px]">
+                  <div className="px-5 py-2.5 rounded-2xl border-2 border-[#047857] bg-[#f8fafc] flex flex-col items-center justify-center shadow-xs shrink-0 min-w-[108px]">
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <Calendar size={12} className="text-emerald-600" />
                       <span className="text-sm font-black text-slate-900 leading-none">
@@ -617,7 +617,7 @@ export default function SellMetalModal({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200/70">
+                  <div className="flex items-center gap-1 bg-[#f8fafc] p-1 rounded-xl border border-slate-200/70">
                     {(["1H", "24H", "7D", "1M", "1Y"] as Timeframe[]).map((tf) => (
                       <button
                         key={tf}
@@ -744,7 +744,7 @@ export default function SellMetalModal({
 
               {/* Amount / Grams Input Box */}
               <div className="space-y-2">
-                <div className="bg-white border border-slate-200 focus-within:border-emerald-600 rounded-2xl p-3.5 sm:p-4 shadow-2xs transition-all">
+                <div className="bg-white border border-slate-200 focus-within:border-[#047857] rounded-2xl p-3.5 sm:p-4 shadow-2xs transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center flex-1">
                       {sellMode === "amount" && (
@@ -809,11 +809,11 @@ export default function SellMetalModal({
                         className={`p-3 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
                           isSelected
                             ? "border-2 border-emerald-600 bg-emerald-50/60"
-                            : "border-slate-200 bg-white hover:border-slate-300"
+                            : "border-slate-200 bg-white hover:border-slate-200"
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center ${isSelected ? "border-emerald-600" : "border-slate-300"}`}>
+                          <div className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center ${isSelected ? "border-emerald-600" : "border-slate-200"}`}>
                             {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-emerald-600" />}
                           </div>
                           <div>
@@ -832,7 +832,7 @@ export default function SellMetalModal({
               </div>
 
               {/* Order Summary */}
-              <div className="border-t border-slate-100 pt-3 space-y-2 text-xs sm:text-sm">
+              <div className="border-t border-slate-200 pt-3 space-y-2 text-xs sm:text-sm">
                 <h3 className="text-xs sm:text-sm font-black text-slate-800 mb-1.5">Order Summary</h3>
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-slate-500">Live {metalName} Sell Rate (per gram)</span>
@@ -878,7 +878,7 @@ export default function SellMetalModal({
                       : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 hover:-translate-y-0.5"
                   }`}
                 >
-                  <Wallet size={16} />
+                  <Landmark size={16} />
                   <span>Sell {metalName} & Settle Instantly</span>
                   <ArrowRight size={18} />
                 </button>

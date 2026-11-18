@@ -6,7 +6,7 @@ export interface Transaction {
   grams?: string;
   date: string; // ISO string
   status: "Completed" | "Pending" | "Failed";
-  paymentMethod: string; // e.g. "UPI", "Credit Card", "Bank Transfer", "Wallet"
+  paymentMethod: string; // e.g. "UPI", "Credit Card", "Net Banking", "Direct Bank IMPS"
   source: string; // e.g. "Gold Vault", "BESCOM Electricity", "Jio Recharge"
 }
 

@@ -866,11 +866,11 @@ export default function SettingsPage() {
 
   return (
     <>
-    <div className="flex-1 h-screen overflow-y-auto bg-[#fafbfc]">
+    <div className="flex-1 h-screen overflow-y-auto bg-white">
       <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8 pb-24 lg:pb-10">
 
         {/* Title */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Settings</h1>
             <p className="text-sm text-gray-500 font-semibold mt-1 flex flex-wrap items-center gap-2">
@@ -945,9 +945,9 @@ export default function SettingsPage() {
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-6"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
                     <div className="flex items-center gap-4">
-                      <div className="p-2 bg-gray-50 rounded-full border border-gray-100 text-gray-700">
+                      <div className="p-2 bg-[#f8fafc] rounded-full border border-slate-200 text-gray-700">
                          <User size={24} />
                       </div>
                       <div>
@@ -958,7 +958,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* User Code Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">User Code</label>
                       <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Permanent Account Identifier</span>
@@ -971,7 +971,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Referral Code Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Referral Code</label>
                       <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Share this to earn rewards</span>
@@ -984,14 +984,14 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Username Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Username</label>
                       <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Letters, numbers & _ only</span>
                     </div>
                     <div className="md:col-span-8">
                       <div className="flex max-w-lg rounded-lg shadow-sm border border-gray-200 overflow-hidden focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-50/55 transition-all">
-                        <span className="bg-gray-50 px-3.5 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
+                        <span className="bg-[#f8fafc] px-3.5 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
                           fipmoney.com/
                         </span>
                         <input
@@ -1020,7 +1020,7 @@ export default function SettingsPage() {
 
 
                   {/* Photo Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Your photo</label>
                       <span className="block text-xs text-gray-400 mt-1 font-semibold">This will be displayed on your profile.</span>
@@ -1057,7 +1057,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Full Name Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Full Name as per PAN</label>
                     </div>
@@ -1074,7 +1074,7 @@ export default function SettingsPage() {
                   {/* Email Row */}
                   <div
                     id="email-input-section"
-                    className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100 transition-all rounded-2xl px-2 ${
+                    className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200 transition-all rounded-2xl px-2 ${
                       isEmailHighlighted || !email ? 'bg-purple-50/70 border-purple-200 ring-2 ring-purple-500/50 p-4' : ''
                     }`}
                   >
@@ -1100,7 +1100,7 @@ export default function SettingsPage() {
                         placeholder="e.g. yourname@domain.com"
                         readOnly
                         className={`flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium border outline-none select-none ${
-                          !email ? 'bg-amber-50/60 border-amber-200 text-slate-800 placeholder:text-slate-400' : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                          !email ? 'bg-amber-50/60 border-amber-200 text-slate-800 placeholder:text-slate-400' : 'bg-[#f8fafc] border-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                       />
                       <button
@@ -1114,7 +1114,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Mobile Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Mobile Number</label>
                     </div>
@@ -1123,7 +1123,7 @@ export default function SettingsPage() {
                         type="tel"
                         value={mobileNumber}
                         readOnly
-                        className="flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 outline-none select-none cursor-not-allowed"
+                        className="flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-400 bg-[#f8fafc] border border-gray-200 outline-none select-none cursor-not-allowed"
                       />
                       <button
                         type="button"
@@ -1136,14 +1136,14 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Masked PAN Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Permanent Account Number (PAN)</label>
                     </div>
                     <div className="md:col-span-8">
                       {panVerified ? (
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-[#f8fafc] px-3 py-2 rounded-lg border border-slate-200">
                             XXXXX{panNumber.slice(-5, -1)}{panNumber.slice(-1)}
                           </span>
                           <span className="text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-600">
@@ -1166,14 +1166,14 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Masked Aadhaar Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Aadhaar Number</label>
                     </div>
                     <div className="md:col-span-8">
                       {aadhaarVerified ? (
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-[#f8fafc] px-3 py-2 rounded-lg border border-slate-200">
                             XXXX XXXX {aadhaarNumber.slice(-4)}
                           </span>
                           <span className="text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-600">
@@ -1236,7 +1236,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Bank Name Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Bank Name</label>
                     </div>
@@ -1251,7 +1251,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Account Number Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Account Number</label>
                     </div>
@@ -1296,7 +1296,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Nominee Name */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Nominee Name</label>
                     </div>
@@ -1312,7 +1312,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Relationship */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-gray-100">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
                     <div className="md:col-span-4">
                       <label className="text-sm font-semibold text-gray-700">Relationship</label>
                     </div>
@@ -1367,7 +1367,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Two-Factor Authentication Toggle */}
-                  <div className="flex items-center justify-between py-5 border-b border-gray-100">
+                  <div className="flex items-center justify-between py-5 border-b border-slate-200">
                     <div>
                       <h4 className="text-sm font-semibold text-gray-800">Two-Factor Authentication</h4>
                       <p className="text-xs text-gray-400 mt-1 font-medium">Require secure OTP verification for major cashouts.</p>
@@ -1382,7 +1382,7 @@ export default function SettingsPage() {
                   {/* KYC Verification status */}
                   {/* KYC Verification status */}
                   {kycStatus.toLowerCase() === "pending" ? (
-                    <div className="py-5 border-b border-gray-100 space-y-4">
+                    <div className="py-5 border-b border-slate-200 space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
@@ -1400,7 +1400,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Aadhaar Linking Field */}
-                        <div className="space-y-2 border-b border-gray-100 pb-4">
+                        <div className="space-y-2 border-b border-slate-200 pb-4">
                           <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">1. 12-Digit Aadhaar Number</label>
                           {aadhaarVerified ? (
                             <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold py-1">
@@ -1428,7 +1428,7 @@ export default function SettingsPage() {
                               </div>
 
                               {showAadhaarOtp && (
-                                <div className="bg-white p-3 rounded-xl border border-gray-100 space-y-2.5 shadow-sm max-w-sm">
+                                <div className="bg-white p-3 rounded-xl border border-slate-200 space-y-2.5 shadow-sm max-w-sm">
                                   <p className="text-[10px] font-bold text-amber-600 animate-pulse">✓ OTP sent to your registered UIDAI mobile number</p>
                                   <div className="flex gap-2">
                                     <Input
@@ -1485,7 +1485,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   ) : kycStatus.toLowerCase().includes("full") ? (
-                    <div className="flex items-center justify-between py-5 border-b border-gray-100">
+                    <div className="flex items-center justify-between py-5 border-b border-slate-200">
                       <div>
                         <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
                         <p className="text-xs text-gray-400 mt-1 font-medium">Verify Aadhaar and PAN database linkage.</p>
@@ -1495,7 +1495,7 @@ export default function SettingsPage() {
                       </span>
                     </div>
                   ) : (
-                    <div className="py-5 border-b border-gray-100 space-y-4">
+                    <div className="py-5 border-b border-slate-200 space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
@@ -1538,7 +1538,7 @@ export default function SettingsPage() {
                   )}
 
                   {/* KYC Limits & Tiers Table */}
-                  <div className="bg-white rounded-2xl p-5 border border-gray-150 shadow-sm space-y-4">
+                  <div className="bg-white rounded-2xl border border-slate-200 p-5 border border-gray-150 shadow-sm space-y-4">
                     <div>
                       <h4 className="text-xs font-black text-gray-800 uppercase tracking-wider">KYC Tiers & Storage Limits</h4>
                       <p className="text-[10px] text-gray-400 font-semibold mt-0.5">Compare asset buying, daily transfers, and secure storage capacity.</p>
@@ -1546,7 +1546,7 @@ export default function SettingsPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs font-semibold">
                         <thead>
-                          <tr className="border-b border-gray-100 text-[10px] text-gray-450 font-bold uppercase tracking-wider">
+                          <tr className="border-b border-slate-200 text-[10px] text-gray-450 font-bold uppercase tracking-wider">
                             <th className="py-2.5 pr-2">Tier</th>
                             <th className="py-2.5 pr-2">Buy Limit</th>
                             <th className="py-2.5 pr-2">Transfer/Sell Limit</th>
@@ -1623,12 +1623,12 @@ export default function SettingsPage() {
                   </div>
 
                   {isSessionsLoading ? (
-                    <div className="flex items-center justify-center py-16 space-x-3 text-amber-600 font-bold text-sm bg-gray-50/50 rounded-2xl border border-gray-100">
+                    <div className="flex items-center justify-center py-16 space-x-3 text-amber-600 font-bold text-sm bg-[#f8fafc]/50 rounded-2xl border border-slate-200">
                       <Loader2 className="animate-spin" size={22} />
                       <span>Fetching active sessions from database...</span>
                     </div>
                   ) : sessionsList.length === 0 ? (
-                    <div className="p-8 text-center bg-gray-50 rounded-2xl border border-gray-150 space-y-2">
+                    <div className="p-8 text-center bg-[#f8fafc] rounded-2xl border border-gray-150 space-y-2">
                       <ShieldCheck size={32} className="mx-auto text-gray-400" />
                       <p className="text-sm font-bold text-gray-700">No active device sessions found</p>
                       <p className="text-xs text-gray-400 font-medium">Log out and log back in to register your current session.</p>
@@ -1723,7 +1723,7 @@ export default function SettingsPage() {
           <div className="lg:col-span-4 space-y-6">
 
             {/* Completion Percentage card */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col items-center text-center">
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col items-center text-center">
               <div className="flex items-center gap-2 mb-6 w-full justify-center">
                 <Trophy size={18} className="text-[#d97706]" />
                 <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Profile Completion</h3>
@@ -1840,7 +1840,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Security Compliance Card */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col relative overflow-hidden mt-6">
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col relative overflow-hidden mt-6">
               <div className="flex items-center gap-2 mb-4 relative z-10">
                 <ShieldCheck size={18} className="text-[#d97706]" />
                 <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Security Compliance</h3>
@@ -1862,7 +1862,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Footer info blocks */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm mt-8">
            <div className="flex items-start gap-4">
               <div className="p-3 bg-purple-50 rounded-full text-purple-600 shrink-0">
                  <Lock size={20} />
@@ -2056,7 +2056,7 @@ export default function SettingsPage() {
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-white text-slate-800 rounded-3xl p-6 max-w-md w-full relative border border-slate-100 shadow-2xl space-y-5"
+            className="bg-white text-slate-800 rounded-3xl p-6 max-w-md w-full relative border border-slate-200 shadow-2xl space-y-5"
             initial={{ scale: 0.95, y: 10 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 10 }}
@@ -2090,7 +2090,7 @@ export default function SettingsPage() {
                     value={currentVerifyOtp}
                     onChange={(e) => setCurrentVerifyOtp(e.target.value.replace(/\D/g, ""))}
                     placeholder="Enter 6-digit OTP"
-                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
+                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
                   />
                 </div>
 
@@ -2101,7 +2101,7 @@ export default function SettingsPage() {
                       setChangeFieldType(null);
                       setCurrentVerifyOtp("");
                     }}
-                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
+                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
                   >
                     Cancel
                   </button>
@@ -2128,7 +2128,7 @@ export default function SettingsPage() {
                     value={newValueInput}
                     onChange={(e) => setNewValueInput(e.target.value)}
                     placeholder={changeFieldType === "email" ? "name@example.com" : "Enter 10-digit number"}
-                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm"
+                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm"
                   />
                 </div>
 
@@ -2140,7 +2140,7 @@ export default function SettingsPage() {
                       setChangeStep(1);
                       setCurrentVerifyOtp("");
                     }}
-                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
+                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
                   >
                     Cancel
                   </button>
@@ -2172,7 +2172,7 @@ export default function SettingsPage() {
                     value={newVerifyOtp}
                     onChange={(e) => setNewVerifyOtp(e.target.value.replace(/\D/g, ""))}
                     placeholder="Enter 6-digit OTP"
-                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-gray-50 border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
+                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
                   />
                 </div>
 
@@ -2180,7 +2180,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setChangeStep(2)}
-                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
+                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
                   >
                     Back
                   </button>

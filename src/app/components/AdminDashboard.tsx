@@ -37,8 +37,6 @@ const getDynamicVariableDefaults = (): Record<string, string> => {
     SECURE_LOGIN_ANIMATION_URL: `${baseDomain}/secure_login.gif`,
     MOBILE_ENCRYPTION_ANIMATION_URL: `${baseDomain}/mobile_encryption.gif`,
     KYC_SUBMITTED_ANIMATION_URL: `${baseDomain}/documents.gif`,
-    WALLET_BRO_ANIMATION_URL: `${baseDomain}/fipmoney-wallet-bro.gif`,
-    EWALLET_PANA_ANIMATION_URL: `${baseDomain}/fipmoney-ewallet-pana.gif`,
     DIGITAL_GOLD_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_gold.png`,
     DIGITAL_SILVER_ILLUSTRATION_URL: `${baseDomain}/hero_banner_digital_silver.png`,
     MANAGE_MONEY_AMICO_ANIMATION_URL: `${baseDomain}/fipmoney-manage-money-amico.gif`,
@@ -2615,7 +2613,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           </td>
                           <td className="p-3.5">
                             <button
-                              onClick={() => handleOpenAmtEditModal({ id: inv.userId, name: inv.userName, email: "", phone: inv.userPhone, walletBal: "", goldBal: inv.totalGold, kycStatus: "", status: "Active", joined: "", amtScore: inv.amtScore })}
+                              onClick={() => handleOpenAmtEditModal({ id: inv.userId, name: inv.userName, email: "", phone: inv.userPhone, walletBal: "", goldBal: inv.totalGold, kycStatus: "", status: "Active", joined: "", amtScore: inv.amtScore, silverBal: "" })}
                               className="bg-purple-50 hover:bg-purple-100 text-[#7C3AED] px-3 py-1 rounded-lg font-bold text-[11px] transition-colors border-none cursor-pointer"
                             >
                               Edit AMT
@@ -3057,7 +3055,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                       <th className="p-3.5">User ID & Name</th>
                       <th className="p-3.5">Contact Details</th>
                       <th className="p-3.5">AML Audit Score</th>
-                      <th className="p-3.5">Wallet Bal</th>
+                      <th className="p-3.5">Silver Bal</th>
                       <th className="p-3.5">Gold Bal</th>
                       <th className="p-3.5">KYC Status</th>
                       <th className="p-3.5">Account Status</th>
@@ -3118,7 +3116,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                                 </button>
                               </div>
                             </td>
-                            <td className="p-3.5 font-bold text-slate-900">{usr.walletBal}</td>
+                            <td className="p-3.5 font-bold text-slate-900">{usr.silverBal || usr.walletBal || "0 g"}</td>
                             <td className="p-3.5 font-bold text-amber-600">{usr.goldBal}</td>
                             <td className="p-3.5">
                               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
@@ -5529,8 +5527,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <div className="bg-amber-50/50 p-3.5 rounded-2xl border border-amber-200/80 space-y-2">
                   <div className="text-[10px] font-black uppercase text-amber-700 tracking-wider">Digital Vault Holdings</div>
                   <div>
-                    <div className="text-[10px] text-amber-700/80 font-medium">Wallet Cash Balance:</div>
-                    <div className="font-black text-sm text-slate-900">{selectedViewUser.walletBal}</div>
+                    <div className="text-[10px] text-amber-700/80 font-medium">99.9% Pure Silver Balance:</div>
+                    <div className="font-black text-sm text-slate-900">{selectedViewUser.silverBal || selectedViewUser.walletBal || "0 g"}</div>
                   </div>
                   <div>
                     <div className="text-[10px] text-amber-700/80 font-medium">24K 99.9% Gold Balance:</div>
@@ -6087,7 +6085,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     >
                       <option>Setu BBPS NPCI</option>
                       <option>Razorpay BBPS</option>
-                      <option>FipMoney Wallet</option>
+                      <option>Instant Direct UPI</option>
                       <option>Axis UPI BBPS</option>
                     </select>
                   </div>

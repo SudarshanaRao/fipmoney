@@ -588,7 +588,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                             type="button"
                             onClick={handleFetchPlans}
                             disabled={loadingPlans || !operator}
-                            className="px-5 rounded-xl text-white text-xs font-black bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed shadow-[0_4px_14px_rgba(37,99,235,0.2)] transition-all outline-none border-none cursor-pointer flex items-center gap-1.5 shrink-0"
+                            className="px-5 rounded-xl text-white text-xs font-black bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] border border-amber-400/40 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_14px_rgba(4,120,87,0.2)] transition-all outline-none cursor-pointer flex items-center gap-1.5 shrink-0"
                           >
                             {loadingPlans ? (
                               <>

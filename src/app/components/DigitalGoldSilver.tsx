@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Lock, Unlock, TrendingUp, Coins, ArrowUpRight, ArrowDownRight,
-  Sparkles, Clock, Wallet, AlertCircle, CheckCircle2, Calculator,
+  Sparkles, Clock, AlertCircle, CheckCircle2, Calculator,
   Loader2, Truck, Gift, Info, BarChart3, HelpCircle, ChevronRight, X, ArrowRight, ShieldCheck, Bell, RefreshCw, FileText } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -414,7 +414,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 className={`bg-gradient-to-br ${SECURITY_SLIDES[activeBannerIndex].bgColor} border ${SECURITY_SLIDES[activeBannerIndex].borderColor} rounded-[28px] p-6 shadow-sm relative overflow-hidden flex items-stretch justify-between min-h-[220px] w-full`}
               >
                 {/* Background Decorative Sparkle */}
-                <Sparkles size={18} className="absolute top-4 right-4 text-purple-400/50 pointer-events-none" />
+                <Sparkles size={18} className="absolute top-4 right-4 text-[#047857]/50 pointer-events-none" />
 
                 {/* Left Content Area */}
                 <div className="z-10 flex-1 pr-2 flex flex-col justify-between max-w-[210px] sm:max-w-[250px]">
@@ -557,19 +557,19 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     </p>
                   </div>
                 </div>
-                <ChevronRight size={20} className="text-purple-600 shrink-0 mt-1" />
+                <ChevronRight size={20} className="text-[#047857] shrink-0 mt-1" />
               </div>
 
               {/* Feature Badges */}
               <div className="grid grid-cols-2 gap-2 pt-0.5">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-emerald-800 flex items-center justify-center shrink-0">
                     <ShieldCheck size={12} strokeWidth={2.5} />
                   </div>
                   <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">99.9% Pure Silver</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-emerald-800 flex items-center justify-center shrink-0">
                     <Coins size={12} strokeWidth={2.5} />
                   </div>
                   <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Low Entry Amount</span>
@@ -582,10 +582,10 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   e.stopPropagation();
                   setMetal("silver"); setTxType("buy"); setShowBuyModal(true);
                 }}
-                className="w-full py-2.5 rounded-xl bg-[#f0effe] hover:bg-[#e4e2fe] border border-purple-200/80 text-purple-900 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
+                className="w-full py-2.5 rounded-xl bg-[#f8fafc] hover:bg-white border border-emerald-300 text-emerald-800 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
               >
                 <span>Invest in Silver</span>
-                <ArrowRight size={14} strokeWidth={3} className="text-purple-700" />
+                <ArrowRight size={14} strokeWidth={3} className="text-emerald-800" />
               </button>
             </div>
 
@@ -655,19 +655,19 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                     </p>
                   </div>
                 </div>
-                <ChevronRight size={20} className="text-purple-600 shrink-0 mt-1" />
+                <ChevronRight size={20} className="text-[#047857] shrink-0 mt-1" />
               </div>
 
               {/* Feature Badges */}
               <div className="grid grid-cols-2 gap-2 pt-0.5">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-emerald-800 flex items-center justify-center shrink-0">
                     <Clock size={12} strokeWidth={2.5} />
                   </div>
                   <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Flexible Plans</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-purple-700 flex items-center justify-center shrink-0">
+                  <div className="w-5.5 h-5.5 rounded-full bg-indigo-100/80 text-emerald-800 flex items-center justify-center shrink-0">
                     <Coins size={12} strokeWidth={2.5} />
                   </div>
                   <span className="text-[11.5px] font-extrabold text-gray-700 leading-tight">Small, Regular Investments</span>
@@ -680,10 +680,10 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   e.stopPropagation();
                   onNavigate("silver-savings");
                 }}
-                className="w-full py-2.5 rounded-xl bg-[#f0effe] hover:bg-[#e4e2fe] border border-purple-200/80 text-purple-900 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
+                className="w-full py-2.5 rounded-xl bg-[#f8fafc] hover:bg-white border border-emerald-300 text-emerald-800 font-black text-[13.5px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer border-none outline-none"
               >
                 <span>Start Silver SIP</span>
-                <ArrowRight size={14} strokeWidth={3} className="text-purple-700" />
+                <ArrowRight size={14} strokeWidth={3} className="text-emerald-800" />
               </button>
             </div>
 
@@ -763,23 +763,23 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
           </div>
 
           {/* Vault Value Card */}
-          <div className="bg-[#f5f3ff] border border-purple-100 rounded-[24px] p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 border border-purple-200 shadow-sm">
+                <div className="w-12 h-12 bg-[#f8fafc] rounded-full flex items-center justify-center text-[#047857] border border-emerald-300 shadow-sm">
                   <Shield size={22} />
                 </div>
                 <div>
-                  <h3 className="text-[10px] font-bold text-purple-600 uppercase tracking-widest mb-1">Total Vault Value</h3>
+                  <h3 className="text-[10px] font-bold text-[#047857] uppercase tracking-widest mb-1">Total Vault Value</h3>
                   <div className="text-[28px] font-black text-[#2e1065]">₹{((goldHoldings * goldPrice) + (silverHoldings * silverPrice)).toLocaleString()}</div>
                 </div>
               </div>
             </div>
             <div className="mt-6 flex items-end justify-between">
-              <div className="text-[11px] font-bold text-purple-800/60 leading-tight">
+              <div className="text-[11px] font-bold text-slate-900/60 leading-tight">
                 Locker Insured by<br/>Our Certified Partner
               </div>
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-purple-600 shadow-sm">
+              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-[#047857] shadow-sm">
                 <ShieldCheck size={16} />
               </div>
             </div>
@@ -797,7 +797,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-purple-500 bg-purple-50 w-10 h-10 rounded-full flex items-center justify-center"><ShieldCheck size={20} /></div>
+              <div className="text-emerald-600 bg-[#f8fafc] w-10 h-10 rounded-full flex items-center justify-center"><ShieldCheck size={20} /></div>
               <div>
                 <div className="text-[12px] font-bold text-gray-900">100% Secure</div>
                 <div className="text-[10px] font-medium text-gray-500">Insurance Cover</div>
@@ -811,7 +811,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-emerald-500 bg-emerald-50 w-10 h-10 rounded-full flex items-center justify-center"><Wallet size={20} /></div>
+              <div className="text-emerald-500 bg-emerald-50 w-10 h-10 rounded-full flex items-center justify-center"><Coins size={20} /></div>
               <div>
                 <div className="text-[12px] font-bold text-gray-900">Low Entry</div>
                 <div className="text-[10px] font-medium text-gray-500">Start from ₹1</div>
@@ -1068,14 +1068,14 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
              </div>
 
              {/* Security Banner */}
-             <div className="bg-gradient-to-r from-indigo-50 via-purple-50 to-purple-100 rounded-[24px] p-6 flex items-center justify-between relative overflow-hidden border border-purple-100 shadow-sm">
+             <div className="bg-gradient-to-r from-[#f8fafc] via-white to-[#f8fafc] rounded-[24px] p-6 flex items-center justify-between relative overflow-hidden border border-slate-200 shadow-sm">
                 <div className="relative z-10 max-w-[200px] sm:max-w-[250px]">
                   <div className="w-8 h-8 rounded-full bg-[#5b21b6] text-white flex items-center justify-center mb-3 shadow-md">
                      <ShieldCheck size={14} />
                   </div>
                   <h3 className="text-[15px] font-black text-gray-900 mb-1 leading-tight">Your Wealth, 100% Secure</h3>
                   <p className="text-[11px] font-medium text-gray-600 mb-4 leading-relaxed">All your gold & silver is stored in insured vaults with top-tier security.</p>
-                  <button className="bg-white text-purple-600 text-[11px] font-bold px-4 py-2 rounded-xl flex items-center gap-1 hover:bg-purple-50 transition-colors shadow-sm outline-none border border-transparent cursor-pointer">
+                  <button className="bg-white text-[#047857] text-[11px] font-bold px-4 py-2 rounded-xl flex items-center gap-1 hover:bg-[#f8fafc] transition-colors shadow-sm outline-none border border-transparent cursor-pointer">
                     Learn More <ArrowRight size={12} />
                   </button>
                 </div>
@@ -1091,7 +1091,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                         <div className="w-3 h-1 bg-gray-800 rounded-full" />
                       </div>
                    </div>
-                   <div className="absolute -bottom-2 -right-2 bg-purple-600 text-white p-2 rounded-2xl shadow-lg border-2 border-white">
+                   <div className="absolute -bottom-2 -right-2 bg-[#047857] text-white p-2 rounded-2xl shadow-lg border-2 border-white">
                       <ShieldCheck size={24} />
                    </div>
                 </div>
@@ -1102,7 +1102,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
           <div className="space-y-6 flex flex-col h-full">
              <div className="bg-white rounded-[24px] border border-gray-100 p-6 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                   <div className="w-10 h-10 rounded-xl bg-[#f8fafc] text-[#047857] flex items-center justify-center">
                       {vaultLocked ? <Lock size={20} /> : <Unlock size={20} />}
                    </div>
                    <div>
@@ -1110,11 +1110,11 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                      <p className="text-[10px] font-medium text-gray-500 mt-0.5 max-w-[140px] leading-tight">Protects assets and transactions if active</p>
                    </div>
                 </div>
-                <Switch checked={vaultLocked} onCheckedChange={setVaultLocked} className="data-[state=checked]:bg-purple-600" />
+                <Switch checked={vaultLocked} onCheckedChange={setVaultLocked} className="data-[state=checked]:bg-[#047857]" />
              </div>
 
              <div className="bg-white rounded-[24px] border border-gray-100 p-6 shadow-sm flex-1 flex flex-col">
-                <h3 className="text-[13px] font-bold text-gray-900 mb-6 flex items-center gap-2"><FileText size={16} className="text-purple-600" /> Vault Statement Log</h3>
+                <h3 className="text-[13px] font-bold text-gray-900 mb-6 flex items-center gap-2"><FileText size={16} className="text-[#047857]" /> Vault Statement Log</h3>
                 
                 <div className="flex-1 flex flex-col gap-5">
                   {transactions.slice(0, 3).map((t, i) => (
@@ -1136,7 +1136,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                   ))}
                 </div>
 
-                <button onClick={() => onNavigate("history")} className="mt-6 text-[11px] font-bold text-purple-600 hover:text-purple-800 flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none transition-colors">
+                <button onClick={() => onNavigate("history")} className="mt-6 text-[11px] font-bold text-[#047857] hover:text-slate-900 flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none transition-colors">
                   View All Transactions <ArrowRight size={14} />
                 </button>
              </div>
@@ -1150,7 +1150,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                <h2 className="text-lg font-black text-gray-900 tracking-tight">Doorstep Delivery of Vault Physical Metal</h2>
                <p className="text-[11px] font-medium text-gray-500 mt-1">Redeem your virtual balance for certified 24K Gold & 99.9% Silver physical coins.</p>
              </div>
-             <button className="text-[11px] font-bold text-purple-600 flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none">
+             <button className="text-[11px] font-bold text-[#047857] flex items-center gap-1 cursor-pointer bg-transparent border-none outline-none">
                How it Works? <ArrowRight size={14} />
              </button>
           </div>
@@ -1195,28 +1195,28 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
         {/* Footer Badges */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600"><ShieldCheck size={14} /></div>
+             <div className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#047857]"><ShieldCheck size={14} /></div>
              <div>
                <div className="text-[10px] font-black text-gray-900">100% Secure</div>
                <div className="text-[9px] font-medium text-gray-500 leading-tight">Insured Storage</div>
              </div>
           </div>
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600"><CheckCircle2 size={14} /></div>
+             <div className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#047857]"><CheckCircle2 size={14} /></div>
              <div>
                <div className="text-[10px] font-black text-gray-900">Certified Purity</div>
                <div className="text-[9px] font-medium text-gray-500 leading-tight">99.9% Assurance</div>
              </div>
           </div>
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600"><RefreshCw size={14} /></div>
+             <div className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#047857]"><RefreshCw size={14} /></div>
              <div>
                <div className="text-[10px] font-black text-gray-900">Easy Buy & Sell</div>
                <div className="text-[9px] font-medium text-gray-500 leading-tight">Anytime, Anywhere</div>
              </div>
           </div>
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600"><HelpCircle size={14} /></div>
+             <div className="w-8 h-8 rounded-full bg-[#f8fafc] flex items-center justify-center text-[#047857]"><HelpCircle size={14} /></div>
              <div>
                <div className="text-[10px] font-black text-gray-900">24/7 Support</div>
                <div className="text-[9px] font-medium text-gray-500 leading-tight">We're here for you</div>

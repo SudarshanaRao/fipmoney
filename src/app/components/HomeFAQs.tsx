@@ -146,7 +146,7 @@ const faqs: FAQ[] = [
   {
     id: "17",
     question: "What happens to my money if a withdrawal fails?",
-    answer: "If a withdrawal fails due to bank issues, the money is **instantly and automatically refunded** to your FipMoney wallet.",
+    answer: "If a withdrawal fails due to bank issues, the amount is **instantly and automatically refunded** to your registered bank account or original payment source.",
     category: "withdrawal-issues"
   },
   {
@@ -201,19 +201,14 @@ export default function HomeFAQs() {
 
   return (
     <section className="relative py-14 md:py-16 font-sans w-full flex items-center justify-center overflow-hidden bg-white">
-      {/* Decorative blurred circles using brand colors */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
-      <div className="absolute bottom-20 right-10 w-64 h-64 bg-purple-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-100/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
-
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
         {/* Header */}
         <div className="text-center mb-12 max-w-2xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold text-slate-800 tracking-tight mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-slate-600 text-sm md:text-base leading-relaxed">
+          <p className="text-emerald-800 text-sm md:text-base leading-relaxed">
             Our platform is built to help you work smarter, not harder. It adapts to your needs and supports your goals. Make the most of every feature.
           </p>
         </div>
@@ -234,13 +229,13 @@ export default function HomeFAQs() {
                   }}
                   className={`w-full flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5 rounded-xl transition-all duration-300 font-semibold text-left
                     ${isActive
-                      ? 'bg-indigo-50 text-[#1e1b4b] shadow-sm border border-indigo-200/70 font-bold'
-                      : 'bg-white/40 text-slate-500 hover:bg-white/60 border border-transparent'
+                      ? 'bg-white text-slate-900 shadow-sm border border-emerald-300 font-bold'
+                      : 'bg-white/50 text-slate-600 hover:bg-white border border-transparent'
                     }
                   `}
                 >
                   <span className="text-sm sm:text-[15px]">{category.name}</span>
-                  <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isActive ? 'text-[#1e1b4b]' : 'text-slate-400'}`} />
+                  <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${isActive ? 'text-emerald-800' : 'text-slate-400'}`} />
                 </button>
               );
             })}
@@ -260,8 +255,8 @@ export default function HomeFAQs() {
                     exit={{ opacity: 0, y: -10 }}
                     className={`rounded-xl overflow-hidden transition-all duration-300
                       ${isExpanded
-                        ? 'bg-white shadow-sm border border-indigo-100/60'
-                        : 'bg-white/40 hover:bg-white/60 border border-transparent'
+                        ? 'bg-white shadow-sm border border-emerald-300'
+                        : 'bg-white/50 hover:bg-white border border-slate-200/40'
                       }
                     `}
                   >
@@ -269,12 +264,12 @@ export default function HomeFAQs() {
                       onClick={() => toggleFAQ(faq.id)}
                       className="w-full p-5 text-left flex items-start justify-between"
                     >
-                      <span className={`pr-4 font-semibold text-[15px] ${isExpanded ? 'text-[#1e1b4b]' : 'text-slate-700'}`}>
+                      <span className={`pr-4 font-semibold text-[15px] ${isExpanded ? 'text-slate-900' : 'text-slate-900'}`}>
                         {faq.question}
                       </span>
                       <div className="flex-shrink-0 mt-0.5">
                         {isExpanded ? (
-                          <X className="w-5 h-5 text-[#1e1b4b]" />
+                          <X className="w-5 h-5 text-emerald-800" />
                         ) : (
                           <Plus className="w-5 h-5 text-slate-400" />
                         )}
@@ -291,7 +286,7 @@ export default function HomeFAQs() {
                           className="overflow-hidden"
                         >
                           <div className="px-5 pb-5 pt-1">
-                            <p className="text-slate-600 text-[14px] leading-relaxed">
+                            <p className="text-emerald-800 text-[14px] leading-relaxed">
                               {renderFormattedAnswer(faq.answer)}
                             </p>
                           </div>

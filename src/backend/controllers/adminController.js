@@ -747,7 +747,7 @@ const DEFAULT_BBPS_TRANSACTIONS = [
     amount: 650,
     goldCashbackEarned: 0.008,
     goldCashbackFormatted: "+0.008 g Gold (₹65)",
-    paymentGateway: "FipMoney Wallet",
+    paymentGateway: "UPI AutoPay",
     bbpsRefNo: "CC01982736449",
     status: "Success",
     paymentDate: new Date("2026-08-20T08:15:00Z")
@@ -827,7 +827,7 @@ const DEFAULT_BBPS_TRANSACTIONS = [
     amount: 299,
     goldCashbackEarned: 0.004,
     goldCashbackFormatted: "+0.004 g Gold (₹30)",
-    paymentGateway: "FipMoney Wallet",
+    paymentGateway: "UPI AutoPay",
     bbpsRefNo: "CC01982736444",
     status: "Success",
     paymentDate: new Date("2026-08-18T19:50:00Z")

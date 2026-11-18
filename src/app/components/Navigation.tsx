@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Wallet, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight, X, Sparkles, User, PieChart, Calendar } from "lucide-react";
+import { Home, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight, X, Sparkles, User, PieChart, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Capacitor } from "@capacitor/core";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
@@ -12,7 +12,7 @@ export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | 
 
 export const navItems = [
   { id: "home",           Icon: Home,       label: "Dashboard" },
-  { id: "portfolio",      Icon: Wallet,     label: "Portfolio"  },
+  { id: "portfolio",      Icon: PieChart,   label: "Portfolio"  },
   { id: "sip",            Icon: TrendingUp, label: "Digital Gold & Silver"  },
   { id: "savings",        Icon: PiggyBank,  label: "Gold SIP Savings"       },
   { id: "silver-savings", Icon: Sparkles,   label: "Silver SIP Savings"     },
@@ -84,7 +84,7 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent, profi
 
   return (
     <>
-    <div className="hidden lg:flex w-64 bg-[#1e1b4b] flex-col py-6 px-4 shrink-0 h-screen sticky top-0 overflow-y-auto hide-scrollbar">
+    <div className="hidden lg:flex w-64 bg-gradient-to-b from-[#022c22] via-[#064e3b] to-[#022c22] border-r border-emerald-300/30 flex-col py-6 px-4 shrink-0 h-screen sticky top-0 overflow-y-auto hide-scrollbar">
       <div className="flex items-center gap-1.5 mb-8 px-2">
         <img src={fipMoneyLogo} alt="FM" className="w-16 h-16 object-contain hover:scale-105 transition-transform shrink-0" />
         <span className="text-2xl font-bold text-white tracking-wide">Fipmoney</span>
@@ -97,7 +97,7 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent, profi
           return (
             <button key={id} onClick={() => onTabChange(actualId as Tab)}
               className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm outline-none border-none cursor-pointer
-                ${active ? 'text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6]' : 'text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent'}`}
+                ${active ? 'text-white shadow-lg bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] border border-emerald-300/40' : 'text-white/80 hover:bg-white/10 hover:text-white bg-transparent'}`}
               >
               <Icon size={20} strokeWidth={active ? 2.5 : 2} />
               {label}
@@ -115,13 +115,13 @@ export const Sidebar = ({ activeTab, onTabChange, onLogout, onBecomeAgent, profi
           return (
             <button key={i} onClick={() => onTabChange(item.id as Tab)}
               className={`flex items-center justify-between gap-3 px-4 py-3 rounded-2xl transition-all duration-300 font-medium text-sm outline-none border-none cursor-pointer
-                ${active ? 'text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6]' : 'text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent'}`}
+                ${active ? 'text-white shadow-lg bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] border border-emerald-300/40' : 'text-white/80 hover:bg-white/10 hover:text-white bg-transparent'}`}
               >
               <div className="flex items-center gap-4 relative">
                 <div className="relative">
                   <item.Icon size={20} strokeWidth={active ? 2.5 : 2} />
                   {item.hasAlert && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1e1b4b] animate-pulse" />
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#064e3b] animate-pulse" />
                   )}
                 </div>
                 <span>{item.label}</span>
@@ -239,20 +239,20 @@ export const MobileDrawerNav = ({
       />
 
       {/* Sliding Mobile Navigation Drawer */}
-      <div className="fixed top-0 left-0 bottom-0 w-72 bg-[#1e1b4b] text-white z-[91] p-5 flex flex-col justify-between overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-250">
+      <div className="fixed top-0 left-0 bottom-0 w-72 bg-gradient-to-b from-[#022c22] via-[#064e3b] to-[#022c22] text-white z-[91] p-5 flex flex-col justify-between overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-250">
         <div>
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-indigo-900/60">
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-emerald-300/30">
             <div className="flex items-center gap-2">
               <img src={fipMoneyLogo} alt="Fipmoney" className="w-10 h-10 object-contain shrink-0" />
               <div className="flex flex-col">
                 <span className="text-base font-black text-white leading-none">Fipmoney</span>
-                <span className="text-[10px] text-indigo-300 font-bold mt-0.5">User Dashboard</span>
+                <span className="text-[10px] text-white font-bold mt-0.5">User Dashboard</span>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-indigo-200 hover:text-white transition-colors cursor-pointer outline-none border-none"
+              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white hover:text-white transition-colors cursor-pointer outline-none border-none"
             >
               <X size={18} />
             </button>
@@ -260,7 +260,7 @@ export const MobileDrawerNav = ({
 
           {/* Nav Items */}
           <nav className="space-y-1.5">
-            <div className="px-3 py-1 text-[10px] font-black text-indigo-300/70 uppercase tracking-wider">
+            <div className="px-3 py-1 text-[10px] font-black text-slate-300 uppercase tracking-wider">
               MAIN MENU
             </div>
 
@@ -275,8 +275,8 @@ export const MobileDrawerNav = ({
                   }}
                   className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-medium text-xs transition-all outline-none border-none cursor-pointer ${
                     active
-                      ? "text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6] font-bold"
-                      : "text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent"
+                      ? "text-white shadow-lg bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] border border-emerald-300/40 font-bold"
+                      : "text-white/80 hover:bg-white/10 hover:text-white bg-transparent"
                   }`}
                 >
                   <Icon size={18} strokeWidth={active ? 2.5 : 2} />
@@ -285,7 +285,7 @@ export const MobileDrawerNav = ({
               );
             })}
 
-            <div className="px-3 pt-3 pb-1 text-[10px] font-black text-indigo-300/70 uppercase tracking-wider">
+            <div className="px-3 pt-3 pb-1 text-[10px] font-black text-slate-300 uppercase tracking-wider">
               PREFERENCES & MORE
             </div>
 
@@ -304,15 +304,15 @@ export const MobileDrawerNav = ({
                   }}
                   className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl font-medium text-xs transition-all outline-none border-none cursor-pointer ${
                     active
-                      ? "text-white shadow-lg bg-gradient-to-r from-[#6d28d9] to-[#8b5cf6] font-bold"
-                      : "text-indigo-200 hover:bg-white/10 hover:text-white bg-transparent"
+                      ? "text-white shadow-lg bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] border border-emerald-300/40 font-bold"
+                      : "text-white/80 hover:bg-white/10 hover:text-white bg-transparent"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 relative">
                     <div className="relative">
                       <item.Icon size={18} strokeWidth={active ? 2.5 : 2} />
                       {item.hasAlert && (
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#1e1b4b] animate-pulse" />
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#064e3b] animate-pulse" />
                       )}
                     </div>
                     <span>{item.label}</span>
@@ -329,7 +329,7 @@ export const MobileDrawerNav = ({
         </div>
 
         {/* Footer section: DGA card & Logout */}
-        <div className="space-y-3 pt-4 border-t border-indigo-900/60 mt-4">
+        <div className="space-y-3 pt-4 border-t border-emerald-300/30 mt-4">
           <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#2a2115] via-[#1a140d] to-[#0f0b07] border border-[#d97706]/70 shadow-md relative overflow-hidden">
             <div className="flex items-center justify-between gap-1 mb-1">
               <span className="font-extrabold text-xs text-[#fde047]">
@@ -403,7 +403,7 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
               activeTab === "portfolio" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
-              <Wallet size={22} strokeWidth={activeTab === "portfolio" ? 2.5 : 2} />
+              <PieChart size={22} strokeWidth={activeTab === "portfolio" ? 2.5 : 2} />
             </div>
             <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
               activeTab === "portfolio" ? "text-amber-600 font-black" : "text-slate-500 font-medium"

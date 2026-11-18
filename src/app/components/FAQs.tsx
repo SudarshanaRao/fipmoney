@@ -129,7 +129,7 @@ const faqs: FAQ[] = [
   {
     id: "23",
     question: "What happens to my money if a withdrawal fails?",
-    answer: "If a withdrawal fails due to bank issues, the money is **instantly and automatically refunded** to your FipMoney wallet.",
+    answer: "If a withdrawal fails due to bank issues, the amount is **instantly and automatically refunded** to your registered bank account or original payment source.",
     category: "withdrawal-issues"
   },
 
