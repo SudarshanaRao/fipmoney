@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Account & Data Deletion | Fipmoney</title>
+  <meta name="description" content="Request deletion of your Fipmoney account and associated personal data. Read our account deletion steps and statutory data retention policy.">
+  <link rel="icon" type="image/png" href="/fipmoney_favicon_tight.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #047857;
+      --primary-dark: #064e3b;
+      --primary-deep: #022c22;
+      --primary-light: #ecfdf5;
+      --amber: #f59e0b;
+      --amber-light: #fffbeb;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-400: #94a3b8;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--slate-50);
+      color: var(--slate-700);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--slate-200);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--slate-900);
+    }
+
+    .brand-logo img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(4, 120, 87, 0.15);
+    }
+
+    main {
+      max-width: 900px;
+      margin: 36px auto 60px;
+      padding: 0 20px;
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, #022c22 0%, #064e3b 50%, #047857 100%);
+      border-radius: 24px;
+      padding: 40px;
+      color: #ffffff;
+      margin-bottom: 32px;
+      box-shadow: 0 12px 32px rgba(2, 44, 34, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-card h1 {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .hero-card p {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.88);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    .developer-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 13px;
+    }
+
+    .developer-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .content-card {
+      background: #ffffff;
+      border-radius: 20px;
+      border: 1px solid var(--slate-200);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .section-title svg {
+      color: var(--primary);
+    }
+
+    .step-box {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--slate-100);
+    }
+
+    .step-box:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid rgba(4, 120, 87, 0.2);
+    }
+
+    .step-content h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 4px;
+    }
+
+    .step-content p {
+      font-size: 13.5px;
+      color: var(--slate-600);
+    }
+
+    .alert-banner {
+      background: var(--amber-light);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+    }
+
+    .alert-banner strong {
+      color: #92400e;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .alert-banner p {
+      color: #78350f;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--slate-50);
+      color: var(--slate-900);
+      font-weight: 700;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--slate-200);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--slate-100);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-deleted {
+      background: var(--danger-light);
+      color: var(--danger);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .badge-retained {
+      background: var(--amber-light);
+      color: #92400e;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate-700);
+      margin-bottom: 6px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--slate-200);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--slate-900);
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.1);
+    }
+
+    .btn-submit {
+      background: var(--danger);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-submit:hover {
+      background: #b91c1c;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .contact-box {
+      background: var(--slate-50);
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 1px solid var(--slate-200);
+    }
+
+    .contact-box a {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .contact-box a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      border-top: 1px solid var(--slate-200);
+      background: #ffffff;
+      padding: 28px 20px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--slate-500);
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+      margin: 0 8px;
+    }
+
+    @media (max-width: 640px) {
+      .hero-card {
+        padding: 24px;
+      }
+      .hero-card h1 {
+        font-size: 24px;
+      }
+      .content-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="/" class="brand-logo">
+        <img src="/fipmoney_logo_final.png" alt="Fipmoney Logo" onerror="this.src='/fipmoney_icon_square.png'">
+        <span style="font-weight: 800; font-size: 20px; color: #064e3b; letter-spacing: -0.02em;">Fipmoney</span>
+      </a>
+      <span class="badge-pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Data Safety & Privacy
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Hero Card -->
+    <div class="hero-card">
+      <h1>Request Account & Data Deletion</h1>
+      <p>
+        At Fipmoney, we respect your right to privacy and ownership of your personal information. In accordance with Google Play Developer Policies and applicable data protection regulations, this page outlines how you can permanently delete your Fipmoney account and associated data.
+      </p>
+
+      <div class="developer-meta">
+        <span><strong>App Name:</strong> Fipmoney</span>
+        <span>•</span>
+        <span><strong>Developer:</strong> Fipmoney Technologies Private Limited</span>
+        <span>•</span>
+        <span><strong>Package ID:</strong> com.fipmoney.app</span>
+      </div>
+    </div>
+
+    <!-- Section 1: Steps to Delete Account -->
+    <div class="content-card">
+      <h2 class="section-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Steps to Request Account Deletion
+      </h2>
+      <p style="font-size: 14px; margin-bottom: 20px; color: var(--slate-600);">
+        You can submit an account deletion request either directly from inside the Fipmoney mobile app or via our web request form below without needing to keep the app installed.
+      </p>
+
+      <!-- Option A: In-App Steps -->
+      <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: var(--slate-900); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>📱 Method 1: Delete Directly Inside the Fipmoney App</span>
+        </h3>
+        
+        <div class="step-box">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Open App & Sign In</h3>
+            <p>Open the <strong>Fipmoney</strong> app on your Android device and log in with your registered mobile number.</p>
+          </div>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Go to Settings</h3>
+            <p>Tap your profile icon or navigate to the <strong>Settings</strong> tab from the main navigation menu.</p>
+          </div>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Select "Security & Account"</h3>
+            <p>Scroll down to the <strong>Account Management</strong> section and tap <strong>Delete Account & Data</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step-box">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Verify via OTP & Confirm</h3>
+            <p>Review the deletion summary, enter the OTP sent to your registered mobile number, and confirm permanent closure.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option B: Web Request Form -->
+      <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 16px; padding: 20px;">
+        <h3 style="font-size: 15px; font-weight: 800; color: var(--slate-900); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>🌐 Method 2: Submit Web Request (No App Required)</span>
+        </h3>
+        <p style="font-size: 13.5px; color: var(--slate-600); margin-bottom: 16px;">
+          If you have uninstalled the app or do not have access to your mobile device, submit the form below. Our support team will verify your identity via SMS/email and process the deletion within <strong>7 business days</strong>.
+        </p>
+
+        <form id="deletionForm" onsubmit="handleFormSubmit(event)">
+          <div class="form-group">
+            <label for="userName">Full Name (as per KYC)</label>
+            <input type="text" id="userName" required placeholder="Enter your full name">
+          </div>
+
+          <div class="form-group">
+            <label for="userMobile">Registered Mobile Number</label>
+            <input type="tel" id="userMobile" required placeholder="+91 98765 43210" pattern="[0-9+ -]{10,15}">
+          </div>
+
+          <div class="form-group">
+            <label for="userEmail">Registered Email Address (optional)</label>
+            <input type="email" id="userEmail" placeholder="yourname@example.com">
+          </div>
+
+          <div class="form-group">
+            <label for="deletionReason">Reason for Account Closure (optional)</label>
+            <select id="deletionReason">
+              <option value="no_longer_needed">No longer saving / investing</option>
+              <option value="privacy_concerns">Privacy concerns</option>
+              <option value="switching_service">Switching to another platform</option>
+              <option value="other">Other reason</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top: 18px;">
+            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: 500; font-size: 13px; cursor: pointer;">
+              <input type="checkbox" required style="width: auto; margin-top: 3px;">
+              <span>I confirm that I want to permanently delete my Fipmoney account. I understand that any remaining digital gold or silver holdings must be sold and credited to my bank account prior to deletion.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-submit">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Submit Account Deletion Request
+          </button>
+        </form>
+
+        <div id="successMessage" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px; margin-top: 16px; color: #065f46; font-size: 14px;">
+          <strong>Request Received!</strong> Your account deletion request has been registered under ticket #FM-DEL-<span id="ticketNum"></span>. A confirmation SMS will be sent to your registered mobile number. Our team will verify and complete your deletion within 7 business days.
+        </div>
+      </div>
+
+      <!-- Warning Box on Metals Vault Balance -->
+      <div class="alert-banner">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>
+          <strong>Important Note on Precious Metals Vault Balance</strong>
+          <p>
+            Before deleting your account, please ensure you sell any 24K Pure Digital Gold or 99.9% Digital Silver held in your vault. Proceeds are transferred directly to your verified bank account via IMPS. Unclaimed bullion cannot be recovered once your account access is terminated.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Data Retention & Deletion Policy -->
+    <div class="content-card">
+      <h2 class="section-title">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Types of Data Deleted vs. Retained
+      </h2>
+      <p style="font-size: 14px; color: var(--slate-600); margin-bottom: 16px;">
+        Google Play requires apps to clearly specify the types of data that are permanently deleted, what is retained, and the statutory legal retention periods.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 28%;">Data Category</th>
+              <th style="width: 32%;">Specific Data Types</th>
+              <th style="width: 18%;">Status</th>
+              <th style="width: 22%;">Retention Period</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Account & Identity</strong></td>
+              <td>Full name, profile photo, phone number mapping, email address, user code</td>
+              <td><span class="badge-deleted">Permanently Deleted</span></td>
+              <td>Purged within 7 days of confirmation</td>
+            </tr>
+            <tr>
+              <td><strong>Authentication & Security</strong></td>
+              <td>Login sessions, biometric verification tokens, device binding hashes, passwords</td>
+              <td><span class="badge-deleted">Permanently Deleted</span></td>
+              <td>Immediate revocation upon request</td>
+            </tr>
+            <tr>
+              <td><strong>Device & App Usage</strong></td>
+              <td>Device IP addresses, OS version, advertising IDs, app analytics, push tokens</td>
+              <td><span class="badge-deleted">Permanently Deleted</span></td>
+              <td>Purged within 7 days</td>
+            </tr>
+            <tr>
+              <td><strong>Marketing Preferences</strong></td>
+              <td>Promotional SMS/email opt-ins, referral tracking links, notification preferences</td>
+              <td><span class="badge-deleted">Permanently Deleted</span></td>
+              <td>Immediate</td>
+            </tr>
+            <tr>
+              <td><strong>Financial Transaction Records</strong></td>
+              <td>Purchase/sale invoices, payment gateway reference IDs (UPI/Bank UTR), metal ledger records</td>
+              <td><span class="badge-retained">Legally Retained</span></td>
+              <td><strong>5 Years</strong> as mandated by Section 12 of the <em>Prevention of Money Laundering Act (PMLA), 2002</em> and Income Tax Act, 1961.</td>
+            </tr>
+            <tr>
+              <td><strong>KYC Audit Proofs</strong></td>
+              <td>Aadhaar/PAN verification audit logs, compliance officer approval logs</td>
+              <td><span class="badge-retained">Legally Retained</span></td>
+              <td><strong>5 Years</strong> in secure, read-only cold storage for statutory audit compliance only.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="contact-box">
+        <h4 style="font-size: 14px; font-weight: 800; color: var(--slate-900); margin-bottom: 6px;">Questions about your personal data?</h4>
+        <p style="font-size: 13px; color: var(--slate-600);">
+          For any inquiries regarding data protection, right to erasure, or account closure, reach out to our Grievance & Data Protection Officer directly:
+          <br>
+          Email: <a href="mailto:support@fipmoney.com">support@fipmoney.com</a> | Phone: <a href="tel:+918001234567">+91 (800) 123-4567</a>
+          <br>
+          Address: <em>Fipmoney Technologies Private Limited, Financial District, Nanakramguda, Hyderabad, Telangana 500032, India.</em>
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Fipmoney Technologies Private Limited. All rights reserved.</p>
+    <p style="margin-top: 8px;">
+      <a href="/terms">Terms of Service</a> • 
+      <a href="/privacy">Privacy Policy</a> • 
+      <a href="/delete-account.html">Delete Account Policy</a> • 
+      <a href="/help">Help Center</a>
+    </p>
+  </footer>
+
+  <script>
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      var mobile = document.getElementById('userMobile').value;
+      var name = document.getElementById('userName').value;
+      var randomTicket = Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('ticketNum').textContent = randomTicket;
+      document.getElementById('deletionForm').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

@@ -1599,6 +1599,27 @@ export default function SettingsPage() {
                       </button>
                     </div>
                   </div>
+
+                  {/* Account Deletion Danger Zone */}
+                  <div className="pt-4 border-t border-red-100">
+                    <h4 className="text-sm font-bold text-red-600 mb-2 flex items-center gap-1.5">
+                      <Trash2 size={16} /> Danger Zone: Delete Account & Data
+                    </h4>
+                    <div className="p-4 bg-red-50/60 rounded-xl border border-red-200/80 text-xs text-red-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="font-bold">Permanent Account Closure</div>
+                        <p className="text-red-700/80 mt-0.5">Permanently delete your account, authentication tokens, and profile data per Google Play policy.</p>
+                      </div>
+                      <a
+                        href="/delete-account.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs cursor-pointer outline-none border-none text-center shrink-0 inline-flex items-center justify-center gap-1.5 no-underline"
+                      >
+                        <Trash2 size={13} /> Delete Account
+                      </a>
+                    </div>
+                  </div>
                 </motion.div>
               )}
 

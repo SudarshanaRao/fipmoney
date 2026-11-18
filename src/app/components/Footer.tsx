@@ -48,7 +48,8 @@ export default function Footer({ onNavigate }: FooterProps) {
         { label: 'About Us', action: 'about' },
         { label: 'Careers', action: 'careers' },
         { label: 'Terms & Conditions', action: 'terms' },
-        { label: 'Privacy Policy', action: 'privacy' }
+        { label: 'Privacy Policy', action: 'privacy' },
+        { label: 'Delete Account', action: 'delete-account' }
       ]
     }
   ];
