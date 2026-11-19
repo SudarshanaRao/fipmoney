@@ -274,3 +274,4 @@ export default function DeleteAccountPage({ onBack }: DeleteAccountPageProps) {
     </div>
   );
 }
+

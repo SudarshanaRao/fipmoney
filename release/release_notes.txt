@@ -1,20 +1,20 @@
 Release Name / Title:
-Fipmoney v1.0.1 - Direct Bank Settlement Update
+Fipmoney v1.0.2 - Device Compatibility & Hardware Fix
 
 Release Notes (<en-GB>):
 <en-GB>
-Welcome to Fipmoney v1.0.1!
+Welcome to Fipmoney v1.0.2!
+• Expanded device compatibility across Phones, Tablets, and Desktops
+• Non-essential hardware marked optional (Wi-Fi, Telephony, Biometrics)
 • Pure 24K Digital Gold & 99.9% Digital Silver savings
-• Direct-to-bank settlements for all sell orders (Zero wallet lock-in)
+• Direct-to-bank settlements for all sell orders
 • Automated Gold & Silver SIP starting from ₹10
-• 100% Insured Brink's vault storage & live price tracking
-• Fast UPI payments & biometric authentication
 </en-GB>
 
 Package Details:
 - App ID: com.fipmoney.app
-- Version Name: 1.0.1
-- Version Code: 2
+- Version Name: 1.0.2
+- Version Code: 3
 - Target SDK: 36
 - Min SDK: 24
 - Keystore: release/fipmoney-release.keystore
