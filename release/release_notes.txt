@@ -1,33 +1,21 @@
-Release Name / Title:
-Fipmoney v1.0.3 (4) - Modern UI Overhaul, 3D Auth & Legal Refresh
+Release Name / Title (< 50 chars):
+Fipmoney v1.0.3 - Modern UI & 3D Auth Refresh
 
-Release Notes (<en-GB>):
+Release Notes (<en-GB>, < 500 chars):
 <en-GB>
 Welcome to Fipmoney v1.0.3!
-• Unified Modern Authentication: Streamlined single-screen mobile entry with high-definition 3D visual assets
-• Luxury Brand Overhaul: Upgraded Emerald (#047857) and Gold design language across Dashboard, Navigation Drawer, and About Us
-• Redesigned Support Experience: Interactive Help Center featuring Smart Assistance, self-service tools, and direct WhatsApp support
-• Modern Legal & Compliance Hub: Comprehensive 100% fluid Terms & Conditions and Privacy Policy complying with DPDP Act 2023 & PMLA
-• Interactive Scroll Navigator: Circular dynamic scroll-to-top progress indicator for seamless document reading
-• Performance optimizations and bug fixes for a smoother gold and silver savings experience
+• Modern 3D Login: Single-screen sign-in with 3D visuals
+• Brand Emerald Refresh: Upgraded theme across Dashboard, Menu & About Us
+• Redesigned Support: Help Center with self-service tracking
+• Legal Hub: Responsive Terms & Privacy with scroll-to-top
+• Performance & stability enhancements
 </en-GB>
 
-Release Notes (en-US):
-Welcome to Fipmoney v1.0.3!
-• Unified Modern Authentication: Streamlined single-screen mobile entry with high-definition 3D visual assets
-• Luxury Brand Overhaul: Upgraded Emerald (#047857) and Gold design language across Dashboard, Navigation Drawer, and About Us
-• Redesigned Support Experience: Interactive Help Center featuring Smart Assistance, self-service tools, and direct WhatsApp support
-• Modern Legal & Compliance Hub: Comprehensive 100% fluid Terms & Conditions and Privacy Policy complying with DPDP Act 2023 & PMLA
-• Interactive Scroll Navigator: Circular dynamic scroll-to-top progress indicator for seamless document reading
-• Performance optimizations and bug fixes for a smoother gold and silver savings experience
-
 Package Details:
-- App Bundle: android/app/build/outputs/bundle/release/app-release.aab
+- Root Bundle: fipmoney-v1.0.3-vc4.aab
+- Gradle Bundle: android/app/build/outputs/bundle/release/app-release.aab
 - App ID: com.fipmoney.app
 - Version Name: 1.0.3
 - Version Code: 4
 - Target SDK: 36
 - Min SDK: 24
-- Keystore: android/app/fipmoney-release.keystore
-- Key Alias: fipmoney
-- Key/Store Password: fipmoney2026
