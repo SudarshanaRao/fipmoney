@@ -1,0 +1,17 @@
+{
+  "latestVersion": "1.0.4",
+  "latestVersionCode": 5,
+  "minSupportedVersionCode": 4,
+  "forceUpdate": false,
+  "title": "Update Available in Play Store",
+  "description": "A new version of Fipmoney is available on Google Play Store with latest features, enhanced security, and performance improvements.",
+  "releaseNotes": [
+    "Modern single-screen 3D mobile login & OTP verification",
+    "Brand Emerald (#047857) luxury theme upgrades",
+    "Redesigned Help Center with self-service issue resolver",
+    "Dynamic scroll-to-top progress indicator for legal documents",
+    "Enhanced security & faster bullion price updates"
+  ],
+  "playStoreUrl": "https://play.google.com/store/apps/details?id=com.fipmoney.app"
+}
+

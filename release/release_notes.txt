@@ -1,21 +1,20 @@
 Release Name / Title (< 50 chars):
-Fipmoney v1.0.3 - Modern UI & 3D Auth Refresh
+Fipmoney v1.0.4 - UI Inset Fix & In-App Update
 
 Release Notes (<en-GB>, < 500 chars):
 <en-GB>
-Welcome to Fipmoney v1.0.3!
-• Modern 3D Login: Single-screen sign-in with 3D visuals
-• Brand Emerald Refresh: Upgraded theme across Dashboard, Menu & About Us
-• Redesigned Support: Help Center with self-service tracking
-• Legal Hub: Responsive Terms & Privacy with scroll-to-top
-• Performance & stability enhancements
+Welcome to Fipmoney v1.0.4!
+• Notification Panel Fix: Optimized status bar insets for edge-to-edge screens
+• In-App Update Checker: Instant alerts when new Play Store releases arrive
+• Enhanced 3D Mobile Login: Seamless single-screen authentication
+• Performance and stability improvements across all Android devices
 </en-GB>
 
 Package Details:
-- Root Bundle: fipmoney-v1.0.3-vc4.aab
+- Root Bundle: fipmoney-v1.0.4-vc5.aab
 - Gradle Bundle: android/app/build/outputs/bundle/release/app-release.aab
 - App ID: com.fipmoney.app
-- Version Name: 1.0.3
-- Version Code: 4
+- Version Name: 1.0.4
+- Version Code: 5
 - Target SDK: 36
 - Min SDK: 24

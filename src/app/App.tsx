@@ -50,6 +50,7 @@ import { isBiometricLockEnabled } from "./utils/biometricService";
 import { SplashScreen as CapacitorSplashScreen } from "@capacitor/splash-screen";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
+import AppUpdateModal from "./components/AppUpdateModal";
 
 type PageType = 'home' | 'login' | 'signup' | 'dashboard' | 'recharge-details' | 'terms' | 'privacy' | 'delete-account' | 'account-deletion' | 'about' | 'careers' | 'help' | 'contact' | 'security' | 'press' | 'blog' | 'investors' | 'risk' | 'grievance' | 'investor-charter' | 'sip-calculator' | 'gold-sip-calculator' | 'gold-loan-calculator' | 'step-up-sip-calculator' | 'growth-calculator' | 'retirement-calculator' | 'cpc-8th-calculator' | 'cpc-7th-calculator' | 'gold-rate-calculator' | 'buy-gold' | 'sell-gold' | 'daily-savings' | 'savings' | 'silver-savings' | 'silver-sip' | 'digital-gold' | 'digital-silver' | 'instant-loan' | 'round-off' | 'jar-how-tos' | 'faqs' | 'guide' | 'live-metal-tracker' | 'portal-sec-9f8a3d7b2c' | 'admin' | 'admin-login' | 'admin-panel' | 'super-admin' | 'agent/login' | 'agent/dashboard' | 'agent-login' | 'agent-dashboard' | 'agent';
 
@@ -732,6 +733,9 @@ export default function App() {
           <BiometricLockScreen onUnlock={() => setIsAppLocked(false)} />
         )}
       </AnimatePresence>
+
+      {/* Google Play Store In-App Update Modal */}
+      <AppUpdateModal />
     </motion.div>
   );
 }

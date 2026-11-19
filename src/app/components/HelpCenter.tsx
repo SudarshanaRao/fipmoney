@@ -269,7 +269,7 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-[#047857] selection:text-white pb-24 md:pb-16">
       {/* ── TOP MODERN HEADER BAR ── */}
       {!isDashboardTab && (
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-2xs pt-[env(safe-area-inset-top,0px)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {onBack && (

@@ -77,7 +77,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-[#047857] selection:text-white w-full">
       {/* ── TOP STICKY HEADER (100% Width) ── */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs w-full">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs w-full pt-[env(safe-area-inset-top,0px)]">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button

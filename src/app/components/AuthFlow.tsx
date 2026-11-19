@@ -1034,13 +1034,16 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
          </div>
       </div>
       {/* ── MOBILE VIEW (flex lg:hidden) - Modern Redesigned UI ── */}
-      <div className="flex lg:hidden min-h-screen bg-[#F8FAFC] flex-col justify-between relative selection:bg-[#047857] selection:text-white w-full px-4 sm:px-6 py-5 font-sans overflow-y-auto">
+      <div 
+        className="flex lg:hidden min-h-screen bg-[#F8FAFC] flex-col justify-between relative selection:bg-[#047857] selection:text-white w-full px-4 sm:px-6 pb-6 font-sans overflow-y-auto"
+        style={{ paddingTop: "max(calc(env(safe-area-inset-top, 0px) + 1.5rem), 3.75rem)" }}
+      >
         {/* Soft Ambient Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-36 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-28 right-0 w-44 h-44 bg-amber-400/5 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Top App Header Bar */}
-        <div className="w-full flex items-center justify-between z-20 shrink-0 relative mb-4">
+        {/* Top App Header Bar - Safe spacing below notification panel */}
+        <div className="w-full flex items-center justify-between z-20 shrink-0 relative mt-1.5 mb-5">
           {/* Left: Back Button or Security Badge */}
           {step !== "mobile" ? (
             <button
