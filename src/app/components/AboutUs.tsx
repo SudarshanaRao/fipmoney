@@ -95,9 +95,9 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           <circle cx="750" cy="250" r="780" stroke="url(#goldGrad)" strokeWidth="4.4" />
           <defs>
             <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#c59325" stopOpacity="0.85" />
-              <stop offset="45%" stopColor="#f5ebd0" stopOpacity="0.5" />
-              <stop offset="100%" stopColor="#c59325" stopOpacity="0" />
+              <stop offset="0%" stopColor="#047857" stopOpacity="0.85" />
+              <stop offset="45%" stopColor="#10b981" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#047857" stopOpacity="0" />
             </linearGradient>
           </defs>
         </svg>
@@ -118,7 +118,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           <div className="h-6 w-[1.5px] bg-slate-200/80" />
 
           {/* About Us Heading */}
-          <span className="text-[#c59325] text-xs md:text-sm font-black uppercase tracking-wider bg-amber-50/90 border border-amber-200/80 px-3.5 py-1 rounded-full shadow-2xs">
+          <span className="text-[#047857] text-xs md:text-sm font-black uppercase tracking-wider bg-emerald-50 border border-emerald-200 px-3.5 py-1 rounded-full shadow-2xs">
             ABOUT US
           </span>
         </div>
@@ -142,7 +142,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-tight tracking-tight">
                 Fipmoney is built to<br />
-                <span className="text-[#c59325] bg-gradient-to-r from-[#c59325] to-[#e0b034] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#047857] via-[#059669] to-[#10b981] bg-clip-text text-transparent">
                   Simplify Your Finances
                 </span>
               </h1>
@@ -158,7 +158,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
                 const IconComponent = item.icon;
                 return (
                   <div key={idx} className="flex flex-col items-center text-center space-y-3">
-                    <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-[#c59325] shadow-sm hover:shadow-md hover:border-amber-100/50 hover:scale-105 transition-all duration-300">
+                    <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-[#047857] shadow-sm hover:shadow-md hover:border-emerald-200 hover:scale-105 transition-all duration-300">
                       <IconComponent className="w-6 h-6 stroke-[2]" />
                     </div>
                     <span className="text-[10px] sm:text-xs font-black text-slate-700 leading-tight">
@@ -192,7 +192,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-slate-100">
             {/* Stat 1 */}
             <div className="flex items-center justify-center space-x-4 pb-6 md:pb-0 md:px-6">
-              <div className="w-12 h-12 rounded-full bg-[#fdfaf2] border border-[#f5ebd0]/60 flex items-center justify-center text-[#c59325] shrink-0">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shrink-0">
                 <Users className="w-5 h-5 stroke-[2.5]" />
               </div>
               <div>
@@ -203,7 +203,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
 
             {/* Stat 2 */}
             <div className="flex items-center justify-center space-x-4 py-6 md:py-0 md:px-6">
-              <div className="w-12 h-12 rounded-full bg-[#fdfaf2] border border-[#f5ebd0]/60 flex items-center justify-center text-[#c59325] shrink-0">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shrink-0">
                 <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
               </div>
               <div>
@@ -214,7 +214,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
 
             {/* Stat 3 */}
             <div className="flex items-center justify-center space-x-4 pt-6 md:pt-0 md:px-6">
-              <div className="w-12 h-12 rounded-full bg-[#fdfaf2] border border-[#f5ebd0]/60 flex items-center justify-center text-[#c59325] shrink-0">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shrink-0">
                 <Star className="w-5 h-5 stroke-[2.5]" />
               </div>
               <div>
@@ -237,10 +237,10 @@ export default function AboutUs({ onBack }: AboutUsProps) {
             transition={{ duration: 0.3 }}
           >
             <div className="space-y-2 z-10 max-w-[60%] relative text-left">
-              <span className="text-[#ffd152] text-4xl font-serif leading-none block h-4">“</span>
-              <h3 className="text-xl font-black text-[#ffd152] tracking-tight">Our Mission</h3>
+              <span className="text-amber-400 text-4xl font-serif leading-none block h-4">“</span>
+              <h3 className="text-xl font-black text-amber-400 tracking-tight">Our Mission</h3>
               {/* Golden accent line underneath title */}
-              <div className="w-8 h-[2px] bg-[#ffd152] mt-1.5 mb-2.5" />
+              <div className="w-8 h-[2px] bg-amber-400 mt-1.5 mb-2.5" />
               <p className="text-[11px] font-bold text-slate-300 leading-relaxed">
                 To empower every individual in India with simple, secure and smart financial solutions.
               </p>
@@ -266,9 +266,9 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           >
             <div className="space-y-2 z-10 max-w-[55%] relative text-left">
               <div className="h-4" /> {/* spacer */}
-              <h3 className="text-xl font-black text-[#c59325] tracking-tight">Our Vision</h3>
+              <h3 className="text-xl font-black text-[#047857] tracking-tight">Our Vision</h3>
               {/* Golden accent line underneath title */}
-              <div className="w-8 h-[2px] bg-[#c59325] mt-1.5 mb-2.5" />
+              <div className="w-8 h-[2px] bg-[#047857] mt-1.5 mb-2.5" />
               <p className="text-[11px] font-bold text-slate-500 leading-relaxed">
                 To become India's most trusted financial ecosystem where everyone can achieve financial freedom effortlessly.
               </p>
@@ -293,9 +293,9 @@ export default function AboutUs({ onBack }: AboutUsProps) {
                 return (
                   <div 
                     key={idx} 
-                    className="flex items-center space-x-3 bg-white border border-slate-100/80 px-3 py-2 rounded-xl shadow-sm hover:border-amber-100/50 transition-colors"
+                    className="flex items-center space-x-3 bg-white border border-slate-100/80 px-3 py-2 rounded-xl shadow-sm hover:border-emerald-200/70 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-full bg-white border border-[#f5ebd0] flex items-center justify-center text-[#c59325] shrink-0 shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shrink-0 shadow-2xs">
                       <ValIcon className="w-4 h-4 stroke-[2]" />
                     </div>
                     <div className="text-left">
@@ -314,7 +314,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
         </section>
 
         {/* BOTTOM BANNER */}
-        <section className="rounded-3xl bg-[#fdfaf2] border border-[#f5ebd0]/60 p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <section className="rounded-3xl bg-gradient-to-r from-[#f0fdf4] via-[#ecfdf5] to-[#d1fae5]/50 border border-emerald-200/90 p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xs">
           <style>{`
             @import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
             .cursive-thankyou {
@@ -323,8 +323,8 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           `}</style>
           
           <div className="flex items-center space-x-5 text-left">
-            <div className="w-16 h-16 rounded-full bg-white border-4 border-[#fcf8ee] flex items-center justify-center shadow-[0_4px_12px_rgba(197,147,37,0.08)] shrink-0">
-              <Heart className="w-7 h-7 fill-[#c59325] text-[#c59325] stroke-[1.5]" />
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-emerald-100/80 flex items-center justify-center shadow-md shadow-emerald-900/10 shrink-0">
+              <Heart className="w-7 h-7 fill-[#047857] text-[#047857] stroke-[1.5]" />
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-slate-500">Fipmoney is more than just an app,</span>
@@ -333,7 +333,7 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           </div>
           
           <div className="shrink-0 text-center md:text-right pr-4">
-            <span className="cursive-thankyou text-4xl md:text-5xl text-[#c59325] font-normal leading-none block">
+            <span className="cursive-thankyou text-4xl md:text-5xl text-[#047857] font-normal leading-none block">
               Thank you for being a part of our journey!
             </span>
           </div>

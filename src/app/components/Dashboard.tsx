@@ -414,11 +414,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const metalName = metal === "gold" ? "Gold" : "Silver";
 
   const bbpsServices = [
-    { label: "Mobile Prepaid", Icon: Smartphone, color: "#8b5cf6", bg: "#f3e8ff" },
+    { label: "Mobile Prepaid", Icon: Smartphone, color: "#047857", bg: "#ecfdf5" },
     { label: "Electricity", Icon: Zap, color: "#eab308", bg: "#fef08a" },
     { label: "DTH", Icon: Tv, color: "#f59e0b", bg: "#fef3c7" },
     { label: "Credit Card", Icon: CreditCard, color: "#ef4444", bg: "#fee2e2" },
-    { label: "Mobile Postpaid", Icon: FileText, color: "#8b5cf6", bg: "#f3e8ff" },
+    { label: "Mobile Postpaid", Icon: FileText, color: "#047857", bg: "#ecfdf5" },
     { label: "Gas", Icon: Flame, color: "#f97316", bg: "#ffedd5" },
     { label: "Water", Icon: Droplets, color: "#3b82f6", bg: "#dbeafe" },
     { label: "FASTag", Icon: Car, color: "#10b981", bg: "#d1fae5" },
@@ -540,7 +540,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                               </div>
                               <div className="flex-1 min-w-0 pr-6">
                                 <div className="flex items-center justify-between gap-2 mb-1">
-                                  <h4 className={`text-sm font-bold truncate ${n.read ? 'text-gray-800' : 'text-[#1e1b4b] font-black'}`}>
+                                  <h4 className={`text-sm font-bold truncate ${n.read ? 'text-gray-800' : 'text-slate-900 font-black'}`}>
                                     {n.title}
                                   </h4>
                                   <span className="text-xs font-semibold text-gray-400 shrink-0">{n.time}</span>
@@ -1077,13 +1077,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </div>
 
           {/* First SIP Banner Card (Placed Below Live Price on Mobile Screens) */}
-          <div className="bg-[#fff1f2] border border-rose-100/90 rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
+          <div className="bg-gradient-to-br from-[#f0fdf4] via-[#ecfdf5] to-[#d1fae5]/60 border border-emerald-200/90 rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
             {/* Top Header Row */}
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-[#e11d48] tracking-tight">
+              <span className="text-xs font-extrabold text-[#047857] tracking-tight">
                 A message for you
               </span>
-              <div className="w-8 h-8 rounded-full bg-[#f43f5e] text-white flex items-center justify-center shadow-xs">
+              <div className="w-8 h-8 rounded-full bg-[#047857] text-white flex items-center justify-center shadow-xs">
                 <Mail size={16} />
               </div>
             </div>
@@ -1093,7 +1093,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               <div className="col-span-7 space-y-1.5 z-10 pr-1">
                 <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">
                   First SIP. Big Step. <br />
-                  <span className="text-[#be123c]">Bright Future.</span>
+                  <span className="text-[#047857]">Bright Future.</span>
                 </h3>
                 <p className="text-xs text-slate-600 font-medium leading-relaxed">
                   Begin your Gold SIP journey with just ₹10. It's quick, easy and rewarding.
@@ -1112,7 +1112,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             <div className="pt-1">
               <button
                 onClick={() => setTab("sip")}
-                className="w-full py-3 px-5 rounded-2xl font-black text-xs sm:text-sm bg-[#f43f5e] hover:bg-[#e11d48] text-white shadow-md shadow-rose-500/20 flex items-center justify-center gap-1 transition-all cursor-pointer border-none outline-none active:scale-[0.98]"
+                className="w-full py-3 px-5 rounded-2xl font-black text-xs sm:text-sm bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white shadow-md shadow-emerald-900/20 flex items-center justify-center gap-1 transition-all cursor-pointer border-none outline-none active:scale-[0.98]"
               >
                 <span>Start with ₹10</span>
                 <ChevronRight size={16} strokeWidth={3} />
@@ -1141,7 +1141,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               {/* Card 1: Save Daily */}
               <div 
                 onClick={() => setTab("savings")}
-                className="bg-[#f5f3ff] hover:bg-[#ede9fe] border border-slate-200 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+                className="bg-[#f0fdf4] hover:bg-[#dcfce7] border border-emerald-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
               >
                 <div className="flex items-center gap-3.5">
                   <div className="w-14 h-14 rounded-2xl bg-[#f8fafc] border border-slate-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
@@ -1210,7 +1210,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </div>
 
           {/* Become DGA Agent / Agent Dashboard Card (Below Live Price) */}
-          <div className="bg-gradient-to-br from-[#1e1b4b] via-[#2e1065] to-[#312e81] text-white rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
+          <div className="bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#047857] text-white rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4 border border-emerald-400/20">
             <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center border border-amber-400/30">
@@ -1445,10 +1445,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             {/* Row 1: 3 Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                {/* Vault Balance */}
-               <div className="bg-[#f3e8ff] rounded-3xl p-6 border border-emerald-300 flex flex-col justify-center relative overflow-hidden shadow-sm">
+               <div className="bg-gradient-to-br from-[#ecfdf5] via-[#f0fdf4] to-white rounded-3xl p-6 border border-emerald-200 flex flex-col justify-center relative overflow-hidden shadow-sm">
                  <h3 className="text-xs font-bold text-slate-900 mb-3 flex items-center gap-1.5">Vault Balance</h3>
                  <div className="flex items-center gap-3 mb-1 relative z-10">
-                   <h2 className="text-[26px] font-black text-[#2e1065] tracking-tight">{showBalance ? `${totalGrams.toFixed(2)} g` : "******"}</h2>
+                   <h2 className="text-[26px] font-black text-[#064e3b] tracking-tight">{showBalance ? `${totalGrams.toFixed(2)} g` : "******"}</h2>
                    <button onClick={() => setShowBalance(!showBalance)} className="bg-transparent border-none outline-none cursor-pointer"><Eye size={18} className="text-[#047857] hover:text-[#047857]" /></button>
                  </div>
                  <p className="text-xs font-bold text-slate-900/70 relative z-10">≈ ₹{portfolioVal.toLocaleString('en-IN')}</p>
@@ -1554,11 +1554,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                </div>
                <div className="grid grid-cols-4 md:grid-cols-8 gap-y-6 gap-x-2">
                   {[
-                    { label: "Mobile\nPrepaid", Icon: Smartphone, color: "#8b5cf6" },
+                    { label: "Mobile\nPrepaid", Icon: Smartphone, color: "#047857" },
                     { label: "Electricity", Icon: Zap, color: "#eab308" },
-                    { label: "DTH", Icon: Tv, color: "#8b5cf6" },
+                    { label: "DTH", Icon: Tv, color: "#047857" },
                     { label: "Credit Card", Icon: CreditCard, color: "#ef4444" },
-                    { label: "Mobile\nPostpaid", Icon: Smartphone, color: "#8b5cf6" },
+                    { label: "Mobile\nPostpaid", Icon: Smartphone, color: "#047857" },
                     { label: "Gas", Icon: Flame, color: "#f97316" },
                     { label: "Water", Icon: Droplets, color: "#3b82f6" },
                     { label: "More", Icon: Grid, color: "#9ca3af" },
@@ -1574,9 +1574,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             </div>
             
             {/* Row 4: Banner */}
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50/50 rounded-2xl p-6 border border-emerald-300/50 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-[#ecfdf5] via-[#f0fdf4] to-[#d1fae5]/50 rounded-2xl p-6 border border-emerald-200 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
                <div className="flex-1 relative z-10">
-                  <h3 className="text-lg font-bold text-[#312e81] mb-1">Secure. Simple. Smart.</h3>
+                  <h3 className="text-lg font-bold text-[#064e3b] mb-1">Secure. Simple. Smart.</h3>
                   <p className="text-xs text-gray-600 font-medium">All your financial needs in one place.</p>
                </div>
                <div className="flex flex-wrap gap-4 relative z-10 justify-center">
@@ -1628,7 +1628,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-emerald-950/20 rounded-full blur-xl pointer-events-none" />
                
                <h3 className="text-lg font-bold mb-2 relative z-10 tracking-tight">Upgrade to Premium</h3>
-               <p className="text-[11px] text-purple-200 leading-relaxed max-w-[65%] mb-5 relative z-10 font-medium">Unlock exclusive benefits and higher limits.</p>
+               <p className="text-[11px] text-emerald-100 leading-relaxed max-w-[65%] mb-5 relative z-10 font-medium">Unlock exclusive benefits and higher limits.</p>
                <button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer outline-none relative z-10 backdrop-blur-sm shadow-sm hover:shadow-md">Upgrade Now</button>
                
                <div className="absolute right-2 bottom-4 opacity-100 drop-shadow-xl z-0">
@@ -1906,7 +1906,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               </div>
 
               <div className="bg-white/80 border border-slate-200 p-3.5 rounded-2xl text-left flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-purple-100 text-[#7C3AED] flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#047857] border border-emerald-200 flex items-center justify-center shrink-0">
                   <ShieldCheck size={18} />
                 </div>
                 <div>
@@ -1962,7 +1962,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-amber-200/60 z-10 flex flex-col max-h-[90vh]"
             >
               {/* Header */}
-              <div className="bg-gradient-to-r from-[#1e1b4b] via-[#2a2468] to-[#1e1b4b] text-white p-6 relative">
+              <div className="bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#047857] text-white p-6 relative">
                 <button
                   onClick={() => {
                     setShowAgentModal(false);
@@ -2002,8 +2002,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                         <div className="text-emerald-800 font-extrabold text-xs mb-1">Gold Rewards</div>
                         <div className="text-[11px] text-gray-600 font-medium">Unlock 24K Gold coins & milestone tech gifts monthly.</div>
                       </div>
-                      <div className="bg-blue-50/70 border border-blue-200/60 p-3.5 rounded-2xl">
-                        <div className="text-blue-700 font-extrabold text-xs mb-1">Agent Dashboard</div>
+                      <div className="bg-emerald-50/70 border border-emerald-200/60 p-3.5 rounded-2xl">
+                        <div className="text-emerald-800 font-extrabold text-xs mb-1">Agent Dashboard</div>
                         <div className="text-[11px] text-gray-600 font-medium">Track clients, live volume & instant bank payouts.</div>
                       </div>
                       <div className="bg-emerald-50/70 border border-emerald-200/60 p-3.5 rounded-2xl">

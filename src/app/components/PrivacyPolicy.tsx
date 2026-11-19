@@ -1,800 +1,611 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowLeft, AlertTriangle, Shield, Eye, Lock, UserCheck, Database, FileText, Scale, Gavel, Phone, Mail, MapPin, Clock, Settings } from "lucide-react";
-import { Button } from "./ui/button";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft, Shield, Lock, Eye, UserCheck, Database, FileText, Scale,
+  Phone, Mail, MapPin, Clock, Search, CheckCircle2, AlertCircle,
+  ExternalLink, Printer, ShieldCheck, Download, ChevronRight, Server,
+  Fingerprint, Key, RefreshCw, FileCheck2, HelpCircle, CreditCard
+} from "lucide-react";
+import ScrollToTopProgress from "./ui/ScrollToTopProgress";
 
 interface PrivacyPolicyProps {
   onBack: () => void;
 }
 
-const TableOfContents = ({ onSectionClick }: { onSectionClick: (sectionId: string) => void }) => {
+export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
+  const [activeSection, setActiveSection] = useState("preamble");
+  const [searchQuery, setSearchQuery] = useState("");
+
   const sections = [
-    { id: "information-collection", title: "1. Information We Collect", number: "1" },
-    { id: "automated-collection", title: "2. Automated Information Collection", number: "2" },
-    { id: "information-use", title: "3. How We Use Your Information", number: "3" },
-    { id: "information-sharing", title: "4. Sharing of Information", number: "4" },
-    { id: "third-party-links", title: "5. Third-Party Links", number: "5" },
-    { id: "security-measures", title: "6. Security Precautions", number: "6" },
-    { id: "data-retention", title: "7. Data Storage and Retention", number: "7" },
-    { id: "privacy-rights", title: "8. Your Privacy Rights", number: "8" },
-    { id: "policy-changes", title: "9. Changes to Privacy Policy", number: "9" },
-    { id: "grievance-officer", title: "10. Grievance Officer", number: "10" },
-    { id: "children-privacy", title: "11. Children's Privacy", number: "11" },
-    { id: "analytics", title: "12. Analytics", number: "12" },
-    { id: "cookies", title: "13. Cookies Policy", number: "13" },
-    { id: "contact-info", title: "14. Contact Information", number: "14" },
+    { id: "preamble", title: "1. Scope & Regulatory Framework", icon: Scale },
+    { id: "information-collection", title: "2. Personal & Financial Data We Collect", icon: Database },
+    { id: "automated-data", title: "3. Automated Telemetry & Device Data", icon: Server },
+    { id: "legal-basis", title: "4. Legal Basis & Processing Purposes", icon: FileCheck2 },
+    { id: "sharing-disclosure", title: "5. Information Sharing & Custodians", icon: UserCheck },
+    { id: "vault-security", title: "6. Bank-Grade Security & Encryption", icon: Lock },
+    { id: "data-sovereignty", title: "7. Data Localization & Retention (PMLA)", icon: ShieldCheck },
+    { id: "dpdp-rights", title: "8. Your Rights Under DPDP Act 2023", icon: Key },
+    { id: "account-deletion", title: "9. Account Deletion & Erasure Policy", icon: AlertCircle },
+    { id: "cookies-tracking", title: "10. Cookies & Session Management", icon: Eye },
+    { id: "minors", title: "11. Minors & Children's Privacy", icon: Shield },
+    { id: "grievance-dpo", title: "12. Data Protection Officer & Grievances", icon: Phone },
   ];
 
-  return (
-    <motion.div
-      className="bg-white rounded-2xl shadow-lg p-8 mb-8"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4, duration: 0.6 }}
-    >
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-[#fff8dc] to-[#ffbf00] rounded-2xl p-8 mb-8">
-        <div className="flex items-start space-x-4">
-          <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-              <Shield className="w-6 h-6 text-[#ffbf00]" />
-            </div>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              Your Privacy is Our Priority
-            </h2>
-            <p className="text-gray-700 leading-relaxed">
-              At FipMoney, we understand that your personal information is valuable. This Privacy Policy explains how we collect, use, protect, and share your information when you use our digital gold investment platform. We are committed to maintaining the highest standards of data protection and transparency.
-            </p>
-          </div>
-        </div>
-      </div>
+  // Observe scroll to highlight active section in TOC
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-20% 0px -70% 0px" }
+    );
 
-      {/* Feature Highlights */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <motion.div
-          className="text-center p-6 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-        >
-          <div className="w-16 h-16 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="w-8 h-8 text-white" />
-          </div>
-          <h3 className="font-semibold text-gray-900 mb-2">Data Protection</h3>
-          <p className="text-gray-600 text-sm">
-            Advanced encryption and security measures to protect your personal information
-          </p>
-        </motion.div>
+    sections.forEach((sec) => {
+      const el = document.getElementById(sec.id);
+      if (el) observer.observe(el);
+    });
 
-        <motion.div
-          className="text-center p-6 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-        >
-          <div className="w-16 h-16 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] rounded-full flex items-center justify-center mx-auto mb-4">
-            <Eye className="w-8 h-8 text-white" />
-          </div>
-          <h3 className="font-semibold text-gray-900 mb-2">Transparency</h3>
-          <p className="text-gray-600 text-sm">
-            Clear information about what data we collect and how we use it
-          </p>
-        </motion.div>
+    return () => observer.disconnect();
+  }, []);
 
-        <motion.div
-          className="text-center p-6 rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.5 }}
-        >
-          <div className="w-16 h-16 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserCheck className="w-8 h-8 text-white" />
-          </div>
-          <h3 className="font-semibold text-gray-900 mb-2">User Control</h3>
-          <p className="text-gray-600 text-sm">
-            You have control over your data with options to modify or delete information
-          </p>
-        </motion.div>
-      </div>
-
-      {/* Table of Contents */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-      >
-        <h3 className="text-xl font-bold text-gray-900 mb-6">Table of Contents</h3>
-        <div className="grid md:grid-cols-2 gap-3">
-          {sections.map((section, index) => (
-            <motion.button
-              key={section.id}
-              onClick={() => onSectionClick(section.id)}
-              className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-left group"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.9 + index * 0.02, duration: 0.3 }}
-            >
-              <span className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] text-white rounded-lg flex items-center justify-center text-sm font-medium mr-3 group-hover:scale-110 transition-transform duration-200">
-                {section.number}
-              </span>
-              <span className="text-gray-700 group-hover:text-[#ffbf00] transition-colors duration-200">
-                {section.title}
-              </span>
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-};
-
-export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
+  const scrollTo = (id: string) => {
+    setActiveSection(id);
+    const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const offset = 90;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Header */}
-      <motion.div
-        className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shadow-sm"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-[#047857] selection:text-white w-full">
+      {/* ── TOP STICKY HEADER (100% Width) ── */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
               onClick={onBack}
-              className="flex items-center text-gray-600 hover:text-[#ffbf00] transition-colors font-semibold"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 transition-all cursor-pointer active:scale-95"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-            <div className="flex items-center space-x-2 md:space-x-3 cursor-pointer" onClick={onBack}>
-              <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-10 w-auto object-contain" />
-              <div className="hidden sm:flex flex-col text-left">
-                <span className="text-base md:text-lg font-extrabold text-gray-900 tracking-tight leading-none">FipMoney</span>
-                <span className="block text-[7px] md:text-[8px] font-bold text-[#ffbf00] tracking-wider uppercase mt-0.5">DIGITAL GOLD PLATFORM</span>
+              <ArrowLeft size={16} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+
+            <div className="flex items-center gap-2 cursor-pointer select-none" onClick={onBack}>
+              <img src="/fipmoney_logo_final.png" alt="FipMoney" className="h-8 w-auto object-contain" />
+              <div>
+                <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 block leading-none">
+                  Fipmoney
+                </span>
+                <span className="text-[9px] font-extrabold text-[#047857] tracking-wider uppercase">
+                  Legal & Trust Center
+                </span>
               </div>
             </div>
-            <h1 className="text-base md:text-xl font-bold text-gray-900 tracking-tight uppercase border-l-2 border-[#ffbf00] pl-3">
-              Privacy Policy
-            </h1>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#047857] text-[11px] font-bold">
+              <ShieldCheck size={14} />
+              <span>DPDP Act 2023 Compliant</span>
+            </div>
+
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+              title="Print Policy"
+            >
+              <Printer size={14} />
+              <span className="hidden sm:inline">Print / Save PDF</span>
+            </button>
           </div>
         </div>
-      </motion.div>
+      </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
-          className="w-4/5 mx-auto"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              FipMoney Privacy Policy
-            </h1>
-            <p className="text-gray-600 mb-2">Last Updated: January 15, 2025</p>
-            <div className="w-24 h-1 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] mx-auto rounded-full"></div>
+      {/* ── HERO BANNER (100% Width Modern Gradient) ── */}
+      <section className="w-full bg-gradient-to-b from-white via-[#F0FDF4]/50 to-[#F8FAFC] border-b border-slate-200/80 py-8 sm:py-12 lg:py-14 px-4 sm:px-6 lg:px-10 relative overflow-hidden">
+        {/* Glow Particles */}
+        <div className="absolute top-0 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute bottom-0 left-10 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
+        <div className="w-full max-w-7xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100/80 border border-emerald-300 text-[#047857] text-[11px] font-black uppercase tracking-wider">
+            <Lock size={12} className="text-[#047857]" />
+            <span>Bank-Grade Privacy & Data Protection Policy</span>
           </div>
 
-          {/* Table of Contents */}
-          <TableOfContents onSectionClick={scrollToSection} />
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            Privacy Policy & Data Fiduciary Disclosures
+          </h1>
 
-          {/* Main Privacy Policy Content */}
-          <motion.div
-            className="bg-white rounded-2xl shadow-lg p-8"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+          <p className="text-xs sm:text-sm md:text-base text-slate-600 font-medium max-w-3xl leading-relaxed">
+            Fipmoney Technologies Private Limited ("Fipmoney", "we", "us", or "our") is committed to protecting your financial and personal data under the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>, the <strong>Information Technology Act, 2000</strong>, and <strong>RBI / PMLA regulatory directives</strong>.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-semibold text-slate-500">
+            <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+              <Clock size={14} className="text-[#047857]" />
+              <span>Version 3.2 • Effective November 2026</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+              <Server size={14} className="text-[#047857]" />
+              <span>100% Indian Data Sovereignty</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+              <ShieldCheck size={14} className="text-[#047857]" />
+              <span>AES-256 Bit Encryption at Rest</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── MOBILE HORIZONTAL TABLE OF CONTENTS CHIPS ── */}
+      <div className="lg:hidden sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-2.5 overflow-x-auto no-scrollbar flex items-center gap-2">
+        {sections.map((sec) => (
+          <button
+            key={sec.id}
+            onClick={() => scrollTo(sec.id)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all shrink-0 cursor-pointer border ${
+              activeSection === sec.id
+                ? "bg-[#047857] text-white border-[#047857] shadow-xs"
+                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+            }`}
           >
-            {/* Important Notice */}
-            <motion.div
-              className="bg-[#fff8dc] border border-[#ffd152] rounded-xl p-6 mb-8"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <h2 className="font-semibold text-[#b38200] mb-3 flex items-center">
-                <AlertTriangle className="w-5 h-5 mr-2" />
-                Important Notice
-              </h2>
-              <p className="text-[#b38200] leading-relaxed mb-4">
-                This privacy policy ("Privacy Policy") is incorporated by reference into the Terms and Conditions (the "Terms and Conditions" or "Terms"). Website https://www.fipmoney.com/ including its mobile application – FipMoney; (collectively referred to as the "Platform") is owned and operated by FipMoney Pvt Ltd ("FipMoney" "We" or "Us") and FipMoney Gold Retail Pvt Ltd ("FipMoney Gold" or "We" or "Us") collectively referred to as the company ("Company") to provide you the services.
-              </p>
-              <p className="text-[#b38200] font-semibold">
-                BY USING AND ACCESSING THE PLATFORM AND BY AVAILING THE SERVICES OR BY OTHERWISE GIVING US YOUR INFORMATION, YOU WILL BE DEEMED TO HAVE READ, UNDERSTOOD AND AGREED TO THE PRACTICES AND POLICIES OUTLINED IN THIS PRIVACY POLICY.
-              </p>
-            </motion.div>
-
-            {/* Introduction */}
-            <div className="prose max-w-none text-gray-700 leading-relaxed space-y-6 mb-12">
-              <p>
-                This Privacy Policy applies to all the Users whose Personal Information has been processed by Us in the course of our business, mobile applications, forums, blogs, and other online or offline offerings.
-              </p>
-
-              <p>
-                We respect your privacy and hence handle your personal data with the utmost care and confidentiality. By visiting the Platform, You ("You" or "Your"), accept and agree to be bound by the terms and conditions of this Privacy Policy. This Privacy Policy is incorporated into and subject to the Terms and Conditions of the Platform ("Terms") and shall be read harmoniously and in conjunction with the Terms.
-              </p>
-
-              <p>
-                Please read the Privacy Policy carefully prior to using or registering on the Platform or accessing/availing the services on the Platform inter alia is an online portal that facilitates the Users to purchase/sale/transfer gold and/or other precious metals in digital gold backed by gold bullions and coins with purity as mentioned ("Precious Metal") operated and managed by FipMoney Gold Retail Private Limited ("FipMoney Gold") a company incorporated under the laws of India ("Services").
-              </p>
-
-              <p>
-                This Privacy Policy specifies the type of information collected from You, the manner in which personal data and other information is collected, received, stored, processed, disclosed, transferred, dealt with or otherwise handled by the Company. This Privacy Policy does not apply to information that You provide to, or that is collected by, any third-party through the Platform.
-              </p>
-
-              <p>
-                This Privacy Policy is an electronic record in the form of an electronic contract formed under the Information Technology Act, 2000 and the rules made thereunder. This Privacy Policy is published in compliance with Information Technology Act, 2000, Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Information) Rules, 2011 ("SPDI Rules") and regulation 3(1) of Information Technology (Intermediaries Guidelines) Rules, 2011.
-              </p>
-            </div>
-
-            {/* Section 1: Information We Collect */}
-            <section id="information-collection" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Database className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                1. INFORMATION WE COLLECT
-              </h2>
-              <div className="space-y-6 text-gray-700">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information and Sensitive Data</h3>
-                  <p className="mb-4">
-                    "Personal Information" means individually identifiable information that directly or indirectly, in combination with other information would allow the identification of a specific living person.
-                  </p>
-                  <p className="mb-4">
-                    "Sensitive Personal Data or Information" means Your Personal Information such as financial information such as bank account details and/or any other payment instrument details, sexual orientation, any details that may have been voluntarily provided by You and any of the information received under above clauses by Us in connection with availing the Services.
-                  </p>
-                  <p>
-                    By providing Personal Information (including Sensitive Data) to us, you consent to the collection, usage, and disclosure of Personal Information (including Sensitive Data), as permitted by applicable laws.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Information Provided by You</h3>
-                  <p className="mb-4">
-                    While registering on Our Platform for using Our Services, We collect Your Personal Information including sensitive personal information such as name, mobile number, email address, password, date of birth, gender. We also collect Your personal information through the permissions we seek through the applications such as the permission to access gallery, contacts, notification SMS and location.
-                  </p>
-                  
-                  <div className="bg-blue-50 rounded-lg p-6 my-6">
-                    <p className="font-semibold text-blue-900 mb-3">We may collect and process the following Personal Information:</p>
-                    <ul className="space-y-2 text-blue-800">
-                      <li>• Information provided at registration (name, address, email, phone number, bank details)</li>
-                      <li>• KYC information including Aadhaar number, PAN number, driving license</li>
-                      <li>• Financial information including bank account details and payment information</li>
-                      <li>• Biometric information for identity verification (live selfie)</li>
-                      <li>• Device information (IMEI, operating system, hardware model)</li>
-                      <li>• Communication records (emails, calls, messages)</li>
-                      <li>• Transaction history and investment behavior</li>
-                    </ul>
-                  </div>
-
-                  <p>
-                    We use your contact information, such as your email address or phone number, to authenticate your account and keep it secure, to secure our services and to help prevent spam, fraud, and abuse. We also use contact information to personalize our Services, enable certain account features and to send you information about our Services.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">KYC and Financial Information</h3>
-                  <p className="mb-4">
-                    In order to provide Services to You when you purchase Gold in excess of 30 grams, We may collect your KYC information including Your Proof of identity like Aadhaar number, driving license, PAN number, finger-print details and signature solely for completing the account opening procedures and authenticating Your transactions on the Platform.
-                  </p>
-                  <p>
-                    The act of providing Your Aadhaar is voluntary in nature and the Company hereby agrees and acknowledges that they will collect, use and store such details in compliance with applicable laws and this Privacy Policy.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Information</h3>
-                  <p>
-                    You may be asked for certain financial information, including Your billing address, bank account details, credit card number, expiration date and/or other payment related details or other payment method data, and debit instructions or other standing instructions to process payments for the Services. All payment processors are Payment Card Industry Data Security Standard (PCI DSS) compliant.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 2: Automated Information Collection */}
-            <section id="automated-collection" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Settings className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                2. AUTOMATED INFORMATION COLLECTION
-              </h2>
-              <div className="space-y-6 text-gray-700">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Usage and Log Information</h3>
-                  <p className="mb-4">
-                    To make our Platform and Services more useful to you, our servers collect information from you, including your browser type, operating system, Internet Protocol (IP) address, domain name, and/or a date/time of your visit. We use this information to examine our traffic and to view how our customers use our website.
-                  </p>
-                  <p>
-                    We process this usage data to facilitate your access to our services in technical terms (e.g., to adjust our services to the terminal device you are using), and to recognize and stop any misuse. We also use usage data in anonymized form for statistical purposes and to improve our website.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Location Information</h3>
-                  <p className="mb-4">
-                    When and if You download and/or use the Platform through Your mobile, We may receive information about Your location, Your IP address, and/or Your mobile device, including a unique identifier number for Your device. We may use this information to provide You with location-based Services including but not limited to, search results and other personalized content.
-                  </p>
-                  <p>
-                    You can withdraw Your consent at any time by disabling the location-tracking functions on Your mobile. However, this may affect Your enjoyment of certain functionalities on Our Platform.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Third Party Information</h3>
-                  <p>
-                    We also collect information from third parties on the tracking technologies to track the activity on our service and hold certain information. Browser based, network based, AD-Tracking, User UX behaviour tracking information is collected from third parties. We collect information to understand and track the behavioral as means for security and connection integrity.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 3: How We Use Your Information */}
-            <section id="information-use" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Eye className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                3. HOW WE USE YOUR INFORMATION
-              </h2>
-              <div className="space-y-4 text-gray-700">
-                <p>We use the Personal Information and other non-Personal Information for the following purposes:</p>
-                
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <ul className="space-y-3 text-gray-700">
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To provide and improve the Services on the Platform that You request</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To resolve disputes and troubleshoot problems</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To help promote a safe service on the Platform and protect the security and integrity of the Platform</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To collect money from You in relation to the Services</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To inform You about online and offline offers, products, services, and updates</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To customize Your experience on the Platform or share marketing material with You</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To detect, prevent and protect Us from any errors, fraud and other criminal activity</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="w-2 h-2 bg-[#ffbf00] rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>To process and fulfill Your request for Services or respond to Your comments and queries</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                  <p className="font-semibold text-blue-900 mb-3">Email and Mobile Integration:</p>
-                  <p className="text-blue-800">
-                    You may choose to provide Your explicit consent to connect/integrate Your email account(s) and/or registered mobile number with Your account on the Platform. Once connected, the Platform will securely access and analyze the emails and text messages to populate and track Your investment details and history. This integration is used solely for providing Services and improving Your experience.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 4: Sharing of Information */}
-            <section id="information-sharing" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <UserCheck className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                4. SHARING OF INFORMATION
-              </h2>
-              <div className="space-y-6 text-gray-700">
-                <p>
-                  We may make Your Personal Information and/or other non-Personal Information available to Our partners, collaborators including third-party vault custodian <strong>Brink's India Pvt. Limited ("Brink's")</strong> and Security Trustee <strong>Vistra ITCL (India) Limited ("Vistra")</strong> to enable them to process digital gold purchases, open physical vault accounts under your name, perform asset verification, and provide the Services through the Platform to You.
-                </p>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Vault Custodian & Trustee Sharing</h3>
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-4">
-                    <p className="font-semibold text-amber-900 mb-2">Custody and Trustee Partners:</p>
-                    <ul className="space-y-2 text-amber-800 text-sm">
-                      <li>• <strong>Brink's India Pvt. Limited:</strong> Your name and transaction identifiers are shared with Brink's for opening and maintaining an allocated, 100% insured physical gold vault unit on Your behalf.</li>
-                      <li>• <strong>Vistra ITCL (India) Limited:</strong> Necessary transaction and holdings data are shared with Vistra, acting as independent Security Trustee, to perform independent audits, hold first charge over vault assets, and safeguard User holdings.</li>
-                    </ul>
-                  </div>
-
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Third Party Service Providers</h3>
-                  <p className="mb-4">
-                    We may disclose Your Personal Information to third party vendors, consultants, and other service providers who work for the Company, who are bound by contractual obligations to keep such personal information confidential and use it only for the purposes for which We disclose it to them.
-                  </p>
-                  
-                  <div className="bg-green-50 rounded-lg p-6">
-                    <p className="font-semibold text-green-800 mb-3">This disclosure may be required for:</p>
-                    <ul className="space-y-2 text-green-700">
-                      <li>• Opening & maintaining allocated gold vault units in Brink's insured vaults on Your behalf</li>
-                      <li>• Facilitating independent trustee asset verification with Vistra</li>
-                      <li>• Providing access to Services and processing payments</li>
-                      <li>• Validation of Your bank accounts and KYC identification</li>
-                      <li>• Preventing, detecting, and investigating fraudulent activities</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Legal Disclosure</h3>
-                  <p>The Company may disclose Your information, to the extent necessary:</p>
-                  <ul className="space-y-2 ml-6 mt-4">
-                    <li>• To comply with laws and respond to lawful requests and legal process</li>
-                    <li>• To protect the rights and property of the Company, users, and others</li>
-                    <li>• In an emergency to protect the personal safety and assets of the Company, users, or any person</li>
-                  </ul>
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                  <p className="font-semibold text-yellow-800 mb-3">Important Note:</p>
-                  <p className="text-yellow-700">
-                    We do not disclose Your Personal Information to third parties for their marketing and advertising purposes without Your explicit consent. You specifically agree and consent to Us for transferring and sharing your sensitive personal information related to You with Our partners and service providers solely for the legitimate purpose of providing you the Services.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 5: Third-Party Links */}
-            <section id="third-party-links" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <FileText className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                5. THIRD-PARTY LINKS
-              </h2>
-              <div className="space-y-4 text-gray-700">
-                <p>
-                  Our Platform may link You to other third-party Platforms ("Third-Party Sites") that may collect Your Personal Information including Your IP address, browser specification, or operating system. The Company is not in any manner responsible for the security of such information or their privacy practices or content of those Third-Party Sites.
-                </p>
-                
-                <p>
-                  These third-party service providers and Third-Party Sites shall have their own privacy policies governing the storage and retention of Your information that You may be subject to. This Privacy Policy does not govern any information provided to, stored on, or used by these third-party providers and Third-Party Sites.
-                </p>
-
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                  <p className="font-semibold text-red-800 mb-3">Recommendation:</p>
-                  <p className="text-red-700">
-                    We recommend that when You enter a Third-Party Site, You review the Third-Party Site's privacy policy as it relates to safeguarding of Your information. You agree and acknowledge that We are not liable for the information published in search results or by any Third-Party Sites.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 6: Security Precautions */}
-            <section id="security-measures" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Lock className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                6. SECURITY PRECAUTIONS AND MEASURES
-              </h2>
-              <div className="space-y-6 text-gray-700">
-                <p>
-                  Our Platform has reasonable security measures and safeguards in place to protect Your privacy and Personal Information from loss, misuse, unauthorized access, disclosure, destruction, and alteration of the information in compliance with applicable laws.
-                </p>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Measures</h3>
-                  <div className="bg-blue-50 rounded-lg p-6">
-                    <ul className="space-y-3 text-blue-800">
-                      <li className="flex items-start">
-                        <Shield className="w-5 h-5 mr-3 mt-0.5 text-blue-600" />
-                        <span>Secure servers with advanced encryption technology</span>
-                      </li>
-                      <li className="flex items-start">
-                        <Shield className="w-5 h-5 mr-3 mt-0.5 text-blue-600" />
-                        <span>Payment information protected by encryption during transmission</span>
-                      </li>
-                      <li className="flex items-start">
-                        <Shield className="w-5 h-5 mr-3 mt-0.5 text-blue-600" />
-                        <span>Regular security audits and monitoring</span>
-                      </li>
-                      <li className="flex items-start">
-                        <Shield className="w-5 h-5 mr-3 mt-0.5 text-blue-600" />
-                        <span>Firewalls and intrusion detection systems</span>
-                      </li>
-                      <li className="flex items-start">
-                        <Shield className="w-5 h-5 mr-3 mt-0.5 text-blue-600" />
-                        <span>PCI DSS compliant payment processing</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Responsibilities</h3>
-                  <p className="mb-4">
-                    You have the obligation to ensure that You shall at all times take adequate physical, managerial, and technical safeguards at Your end to preserve the integrity and security of Your data which shall include and not be limited to Your Personal Information.
-                  </p>
-                  <p>
-                    You play an important role in keeping Your Personal Information secure. You shall not share Your Personal Information or other security information for Your account with anyone. The Company cannot guarantee that transmissions of Your payment-related information or Personal Information will always be secure.
-                  </p>
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                  <p className="font-semibold text-yellow-800 mb-3">Important Disclaimer:</p>
-                  <p className="text-yellow-700">
-                    The Company assumes no liability or responsibility for disclosure of Your information due to errors in transmission, unauthorized third-party access, or other causes beyond its control. However, We shall not be liable for any unauthorized or unlawful disclosures of Your personal information made by any third parties who are not subject to Our control.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 7: Data Storage and Retention */}
-            <section id="data-retention" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Database className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                7. DATA STORAGE AND RETENTION POLICY
-              </h2>
-              <div className="space-y-6 text-gray-700">
-                <p>
-                  We collect and store your data and Personal Information in AWS cloud as you use services and will retain the data for as long as necessary to fulfill the purposes for which it was obtained. Processed and non-identifiable data, however, will be perpetually stored.
-                </p>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Retention Period Determination</h3>
-                  <p className="mb-4">
-                    To determine the appropriate retention period for Personal Data, we consider:
-                  </p>
-                  <ul className="space-y-2 ml-6">
-                    <li>• The amount, nature, and sensitivity of the Personal Data</li>
-                    <li>• The potential risk of harm from unauthorized use or disclosure</li>
-                    <li>• The purposes for which we process your Personal Data</li>
-                    <li>• Whether we can achieve those purposes through other means</li>
-                    <li>• The applicable legal requirements</li>
-                  </ul>
-                </div>
-
-                <div className="bg-green-50 rounded-lg p-6">
-                  <p className="font-semibold text-green-800 mb-3">Data Retention Policy:</p>
-                  <p className="text-green-700">
-                    The Company will retain your Personal Data only as long as is reasonably necessary to fulfill the purposes for which the Personal Data was collected and processed and/or in accordance with legal, regulatory, contractual or statutory obligations. At the expiry of such periods, your Personal Data will be deleted or archived in compliance with applicable laws.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 8: Privacy Rights */}
-            <section id="privacy-rights" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <UserCheck className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                8. YOUR PRIVACY RIGHTS
-              </h2>
-              <div className="space-y-6 text-gray-700">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Consent</h3>
-                  <p className="mb-4">
-                    By visiting the Platform or setting up/creating an account on the Platform for availing the Services, You signify Your acceptance to the provisions of the Privacy Policy. You may choose to withdraw Your consent provided hereunder at any point in time.
-                  </p>
-                  <p>
-                    Such withdrawal of consent must be sent in writing to support@fipmoney.com. In case You do not provide Your consent or later withdraw Your consent, we request you not to access the Platform and/or use the Services.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Access and Modification</h3>
-                  <p className="mb-4">
-                    You have every right to edit, modify, review or delete any information including Sensitive Personal Information provided to us. If your Personal Information or Sensitive Data changes, you may correct, delete inaccuracies, or amend information by reaching out to us at support@fipmoney.com.
-                  </p>
-                </div>
-
-                <div className="bg-blue-50 rounded-lg p-6">
-                  <p className="font-semibold text-blue-800 mb-3">Account Deletion:</p>
-                  <p className="text-blue-700 mb-4">
-                    You may request us to delete your information or revoke the consent to access or opt out of processing your application by submitting a request for account deletion through the FipMoney mobile app.
-                  </p>
-                  <p className="text-blue-700">
-                    On submitting a request to delete Your account, you confirm that you have no outstanding credit facility availed on the FipMoney platform and no pending grievances. Your account will be permanently deleted, and you will receive no further communications from FipMoney.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 9: Policy Changes */}
-            <section id="policy-changes" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Settings className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                9. CHANGES TO PRIVACY POLICY
-              </h2>
-              <div className="space-y-4 text-gray-700">
-                <p>
-                  We reserve the unconditional right to change, modify, add, or remove portions of this Privacy Policy at any time, without specifically notifying You of such changes. Any changes or updates will be effective immediately upon posting.
-                </p>
-                
-                <p>
-                  You should review this Privacy Policy regularly for changes. Your acceptance of the amended Privacy Policy shall signify Your consent to such changes and agreement to be legally bound by the same.
-                </p>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                  <p className="font-semibold text-yellow-800 mb-3">Notification of Changes:</p>
-                  <p className="text-yellow-700">
-                    In the event there are significant changes in the way we treat your Personal Information, we will display a notice on the Platform or send you an email informing you of such changes. Using the Platform after a notice of changes has been published will constitute your consent to the changed terms.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 10: Grievance Officer */}
-            <section id="grievance-officer" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Phone className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                10. GRIEVANCE OFFICER
-              </h2>
-              <div className="space-y-4 text-gray-700">
-                <p>
-                  If You have any privacy concerns, please feel free to reach out to the grievance officer. We are committed to resolving all disputes in a fair, effective and cost-efficient manner.
-                </p>
-                
-                <div className="bg-blue-50 rounded-lg p-6">
-                  <p className="font-semibold text-blue-800 mb-4">Contact Details:</p>
-                  <div className="space-y-2 text-blue-700">
-                    <p><strong>Name:</strong> Mr. Rajesh Kumar</p>
-                    <p><strong>Email:</strong> grievance@fipmoney.com</p>
-                    <p><strong>Address:</strong> #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</p>
-                  </div>
-                </div>
-
-                <div className="bg-green-50 rounded-lg p-6">
-                  <p className="font-semibold text-green-800 mb-3">Response Timeline:</p>
-                  <ul className="space-y-2 text-green-700">
-                    <li>• Acknowledgment within 48 hours of receipt</li>
-                    <li>• Resolution within 15 days from the date of receipt</li>
-                    <li>• Each grievance will be provided with a complaint/ticket number for tracking</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 11: Children's Privacy */}
-            <section id="children-privacy" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Shield className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                11. CHILDREN'S PRIVACY
-              </h2>
-              <div className="space-y-4 text-gray-700">
-                <p>
-                  The Company does not knowingly collect or solicit personal information from children under the age of 18 (eighteen) and the Service or any services on the Platform and its content are not directed at children under the age of 18 (eighteen).
-                </p>
-                
-                <p>
-                  In the event that we learn that we have collected personal information from a child under the age of 18 (eighteen) without verification of parental consent, we will delete such information as quickly as possible.
-                </p>
-
-                <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                  <p className="font-semibold text-red-800 mb-3">If you believe we might have information from a child under 18:</p>
-                  <p className="text-red-700">
-                    Please contact us immediately at grievance@fipmoney.com and we will take appropriate action to remove such information from our systems.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 12: Analytics */}
-            <section id="analytics" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Eye className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                12. ANALYTICS
-              </h2>
-              <div className="space-y-4 text-gray-700">
-                <p>
-                  We may use third-party service providers to monitor and analyze Your use of Our Services. These services help us understand how users interact with our Platform and improve our services accordingly.
-                </p>
-                
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <p className="font-semibold text-gray-800 mb-3">Analytics Data Includes:</p>
-                  <ul className="space-y-2 text-gray-700">
-                    <li>• Page views and user interactions</li>
-                    <li>• Time spent on different sections</li>
-                    <li>• User journey and navigation patterns</li>
-                    <li>• Device and browser information</li>
-                    <li>• Performance metrics and error reporting</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 13: Cookies Policy */}
-            <section id="cookies" className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                <Settings className="w-6 h-6 mr-3 text-[#ffbf00]" />
-                13. COOKIES POLICY
-              </h2>
-              <div className="space-y-6 text-gray-700">
-                <p>
-                  We use cookies and URL information to gather information regarding the date and time of your visit and the information for which you searched and which you viewed. Cookies are small digital signature files that are stored by your web browser that allow your preferences to be recorded when you visit the Platform.
-                </p>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Types of Cookies We Use</h3>
-                  <div className="space-y-4">
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <p className="font-semibold text-blue-800 mb-2">Operationally Necessary</p>
-                      <p className="text-blue-700">Technologies necessary for the operation of our Services, including security and authentication features.</p>
-                    </div>
-                    
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <p className="font-semibold text-green-800 mb-2">Performance Related</p>
-                      <p className="text-green-700">Analytics to assess the performance of our Services and understand how visitors use our Platform.</p>
-                    </div>
-                    
-                    <div className="bg-purple-50 rounded-lg p-4">
-                      <p className="font-semibold text-purple-800 mb-2">Functionality Related</p>
-                      <p className="text-purple-700">Enhanced functionality when accessing our Services, including preferences and user settings.</p>
-                    </div>
-                    
-                    <div className="bg-orange-50 rounded-lg p-4">
-                      <p className="font-semibold text-orange-800 mb-2">Advertising Related</p>
-                      <p className="text-orange-700">Deliver content and ads relevant to your interests on our Services or third-party sites.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                  <p className="font-semibold text-yellow-800 mb-3">Cookie Control:</p>
-                  <p className="text-yellow-700">
-                    If you would like to opt-out of the technologies we employ on our Platform, you may do so by blocking, deleting, or disabling them as your browser or device permits. However, this may affect your ability to use some features of our Platform.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Contact Information */}
-            <section id="contact-info" className="mb-12">
-              <div className="p-8 bg-gradient-to-r from-[#fff8dc] to-[#ffbf00] rounded-2xl">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Contact Information</h3>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                      <Mail className="w-5 h-5 mr-2" />
-                      Email Channels
-                    </h4>
-                    <div className="space-y-2 text-gray-700">
-                      <p><strong>Official / General:</strong> info@fipmoney.com</p>
-                      <p><strong>Customer Support:</strong> support@fipmoney.com</p>
-                      <p><strong>Payment Queries:</strong> payments@fipmoney.com</p>
-                      <p><strong>Legal & Compliance:</strong> legal@fipmoney.com</p>
-                      <p><strong>Grievances:</strong> grievance@fipmoney.com</p>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                      <MapPin className="w-5 h-5 mr-2" />
-                      Office Details
-                    </h4>
-                    <div className="space-y-2 text-gray-700">
-                      <p><strong>Phone:</strong> +91 94918 41941</p>
-                      <p><strong>Address:</strong> #709, Gowra FountainHead, Huda techno Enclave, Hitec City, Hyderabad 500081</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Footer Notice */}
-            <div className="mt-8 text-center text-sm text-gray-500 space-y-2">
-              <p>© 2026 FipMoney Pvt Ltd. All rights reserved.</p>
-              <p>This Privacy Policy was last updated on January 15, 2025</p>
-              <p>
-                FipMoney, a platform used to encourage savings habits in Indians by helping them save on a daily basis.
-              </p>
-            </div>
-          </motion.div>
-        </motion.div>
+            {sec.title}
+          </button>
+        ))}
       </div>
+
+      {/* ── MAIN TWO-COLUMN 100% RESPONSIVE CONTAINER ── */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 py-8 lg:py-12">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* ── LEFT COLUMN: STICKY TOC SIDEBAR (Laptop/Desktop) ── */}
+          <aside className="hidden lg:block lg:col-span-4 sticky top-24 space-y-4">
+            <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <FileText size={16} className="text-[#047857]" />
+                  <span>Table of Contents</span>
+                </span>
+                <span className="text-[11px] font-bold text-slate-400">12 Clauses</span>
+              </div>
+
+              <nav className="space-y-1 max-h-[70vh] overflow-y-auto pr-1">
+                {sections.map((sec) => {
+                  const Icon = sec.icon;
+                  const isCur = activeSection === sec.id;
+                  return (
+                    <button
+                      key={sec.id}
+                      onClick={() => scrollTo(sec.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer border ${
+                        isCur
+                          ? "bg-emerald-50 text-[#047857] border-emerald-200 font-extrabold shadow-2xs"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-transparent"
+                      }`}
+                    >
+                      <Icon size={14} className={isCur ? "text-[#047857]" : "text-slate-400"} />
+                      <span className="line-clamp-1">{sec.title}</span>
+                      {isCur && <ChevronRight size={14} className="ml-auto shrink-0 text-[#047857]" />}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
+                    Grievance Officer
+                  </span>
+                  <span className="text-xs font-black text-slate-900 block mt-0.5">
+                    grievance@fipmoney.com
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    Response within 24 hours guaranteed
+                  </span>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* ── RIGHT COLUMN: FULL LEGAL CONTENT (100% Fluid Width) ── */}
+          <main className="lg:col-span-8 space-y-10">
+
+            {/* CLAUSE 1: PREAMBLE */}
+            <section id="preamble" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Scale size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  1. Scope & Regulatory Framework
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                This Privacy Policy outlines how <strong>Fipmoney Technologies Private Limited</strong> (CIN: U66190KA2024PTC184920), having its registered corporate office at Bangalore, Karnataka, India ("Fipmoney", "we", "us", or "our"), acts as a <strong>Data Fiduciary</strong> under the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>.
+              </p>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                This document is published in accordance with the provisions of Rule 3(1) of the <strong>Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021</strong>, and Rule 4 of the <strong>Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011 (SPDI Rules)</strong>.
+              </p>
+
+              <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-1.5 text-xs text-emerald-950 font-medium">
+                <div className="font-black text-[#064e3b] flex items-center gap-1.5">
+                  <ShieldCheck size={16} />
+                  <span>Key Fiduciary Commitment</span>
+                </div>
+                <div>
+                  Fipmoney will NEVER sell, rent, monetize, or trade your personal or financial data to third-party ad networks or brokers. Your data is used exclusively to facilitate bullion custody, AML statutory compliance, and banking payout settlement.
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 2: INFORMATION WE COLLECT */}
+            <section id="information-collection" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-5">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Database size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  2. Personal & Financial Data We Collect
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                To enable digital gold/silver transactions and comply with the <strong>Prevention of Money Laundering Act, 2002 (PMLA)</strong>, we collect the following categories of information:
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                  <div className="font-black text-slate-900 flex items-center gap-2">
+                    <UserCheck size={16} className="text-[#047857]" />
+                    <span>Identity & Profile Data</span>
+                  </div>
+                  <p className="text-slate-600 font-medium">
+                    Full Legal Name, Mobile Number, Verified Email Address, Date of Birth, Gender, Residential Address, and Profile Avatar.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                  <div className="font-black text-slate-900 flex items-center gap-2">
+                    <FileCheck2 size={16} className="text-[#047857]" />
+                    <span>KYC & Tax Identification</span>
+                  </div>
+                  <p className="text-slate-600 font-medium">
+                    Permanent Account Number (PAN Card), Aadhaar verification metadata (via DigiLocker / UIDAI mask), and nominee records.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                  <div className="font-black text-slate-900 flex items-center gap-2">
+                    <CreditCard size={16} className="text-[#047857]" />
+                    <span>Financial & Banking Payout Data</span>
+                  </div>
+                  <p className="text-slate-600 font-medium">
+                    Bank Account Number, IFSC Code, Bank Branch, UPI ID (VPA), and Penny-Drop verification settlement confirmations.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                  <div className="font-black text-slate-900 flex items-center gap-2">
+                    <Shield size={16} className="text-[#047857]" />
+                    <span>Security Credentials</span>
+                  </div>
+                  <p className="text-slate-600 font-medium">
+                    Hashed 4-digit Security TPIN (bcrypt salted, one-way hash; never accessible by staff), SMS OTP verification tokens.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 3: AUTOMATED DATA */}
+            <section id="automated-data" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Server size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  3. Automated Telemetry & Device Data
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                When you use our Android Application, iOS App, or Web Portal, our secure infrastructure automatically logs technical parameters required to detect fraud, prevent SIM-swap attacks, and secure transaction sessions:
+              </p>
+
+              <ul className="space-y-2 text-xs sm:text-sm text-slate-700 font-medium list-disc pl-5">
+                <li><strong>Device Identifiers:</strong> Operating System version, device model, screen resolution, and unique device hardware UUID.</li>
+                <li><strong>Network & Geolocation:</strong> IP address, ISP provider, connection type (Wi-Fi/Cellular), and coarse geographic region for fraud telemetry.</li>
+                <li><strong>Biometric Authentication Flags:</strong> We check whether biometric unlock (Fingerprint / Face Unlock) is activated via Android KeyStore / Apple Secure Enclave. <em>Note: Your raw fingerprint or facial scan NEVER leaves your hardware device and is never transmitted to or stored by Fipmoney.</em></li>
+              </ul>
+            </section>
+
+            {/* CLAUSE 4: LEGAL BASIS */}
+            <section id="legal-basis" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <FileCheck2 size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  4. Legal Basis & Processing Purposes
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                We process your personal data under the following legitimate grounds permitted under Section 4 and Section 7 of the DPDP Act 2023:
+              </p>
+
+              <div className="space-y-3 text-xs sm:text-sm">
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-100 text-[#047857] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+                  <div>
+                    <strong className="text-slate-900 block font-extrabold">Fulfillment of Bullion Purchase & Vaulting Mandate:</strong>
+                    Allocating physical fine gold (24K 99.9%) corresponding to your purchase in Brink's India vaults under IDBI Trusteeship.
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-100 text-[#047857] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+                  <div>
+                    <strong className="text-slate-900 block font-extrabold">Statutory AML & PMLA Compliance:</strong>
+                    Reporting high-value transactions, validating PAN with NSDL/Income Tax Department databases, and enforcing anti-money laundering limits.
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-100 text-[#047857] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+                  <div>
+                    <strong className="text-slate-900 block font-extrabold">Instant Banking Payout Settlement:</strong>
+                    Disbursing sale proceeds directly to your linked bank account via NPCI IMPS/NEFT payment switches.
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-emerald-100 text-[#047857] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">4</div>
+                  <div>
+                    <strong className="text-slate-900 block font-extrabold">Transactional Notifications & Invoicing:</strong>
+                    Delivering legal tax invoices (GST compliant), holding statements, and OTP security codes via SMS, WhatsApp, and Email.
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 5: INFORMATION SHARING */}
+            <section id="sharing-disclosure" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <UserCheck size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  5. Information Sharing & Custodians
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                To deliver our digital gold and financial services, data is shared strictly on a need-to-know basis with regulated entities and verified service providers:
+              </p>
+
+              <div className="space-y-3 text-xs sm:text-sm">
+                <div className="border border-slate-200 rounded-2xl p-4 bg-white space-y-1">
+                  <span className="font-black text-slate-900 block">A. Independent Trustee Administrator (IDBI Trusteeship Services Limited)</span>
+                  <p className="text-slate-600 font-medium">
+                    Bullion balance sheets, holding ledgers, and transaction references are shared with the Trustee Administrator who holds a legal first charge on the gold stored in vaults on your behalf.
+                  </p>
+                </div>
+
+                <div className="border border-slate-200 rounded-2xl p-4 bg-white space-y-1">
+                  <span className="font-black text-slate-900 block">B. Vault Keepers & Insurers (Brink's India & Global Underwriters)</span>
+                  <p className="text-slate-600 font-medium">
+                    Aggregated physical metal weight schedules and insurance coverage audits are maintained with certified vault custodians.
+                  </p>
+                </div>
+
+                <div className="border border-slate-200 rounded-2xl p-4 bg-white space-y-1">
+                  <span className="font-black text-slate-900 block">C. NPCI, Banks & Licensed Payment Aggregators (Razorpay / Cashfree)</span>
+                  <p className="text-slate-600 font-medium">
+                    Payment tokens, VPA addresses, and mandate identifiers are shared under RBI Payment Aggregator (PA/PG) guidelines.
+                  </p>
+                </div>
+
+                <div className="border border-slate-200 rounded-2xl p-4 bg-white space-y-1">
+                  <span className="font-black text-slate-900 block">D. Government & Law Enforcement Authorities</span>
+                  <p className="text-slate-600 font-medium">
+                    We disclose records if mandated by an official court order, regulatory summons, or statutory requirement under the Code of Criminal Procedure, 1973 or PMLA, 2002.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 6: SECURITY MEASURES */}
+            <section id="vault-security" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Lock size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  6. Bank-Grade Security & Encryption
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                Fipmoney maintains a formal Information Security Management System (ISMS) adhering to ISO/IEC 27001 standards:
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
+                  <div className="font-black text-emerald-900">Data in Transit</div>
+                  <div className="text-slate-600 font-medium">TLS 1.3 protocol with 256-bit encryption; SSL pinning implemented on mobile apps.</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
+                  <div className="font-black text-emerald-900">Data at Rest</div>
+                  <div className="text-slate-600 font-medium">AES-256 bit hardware-level encryption across MongoDB clusters and encrypted backups.</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1">
+                  <div className="font-black text-emerald-900">Access Governance</div>
+                  <div className="text-slate-600 font-medium">Strict zero-trust RBAC (Role-Based Access Control) with biometric 2FA for engineering staff.</div>
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 7: DATA RETENTION */}
+            <section id="data-sovereignty" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <ShieldCheck size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  7. Data Localization & Retention (PMLA)
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                In strict compliance with the RBI Directive on Storage of Payment System Data (2018) and the DPDP Act 2023, <strong>all customer data, payment logs, and bullion audit ledgers reside exclusively on sovereign servers located within the Republic of India</strong>.
+              </p>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
+                <div className="font-black text-slate-900 uppercase tracking-wider text-[11px]">
+                  Statutory Retention Periods:
+                </div>
+                <div>
+                  • <strong>KYC & Transaction Ledgers:</strong> Maintained for a mandatory period of <strong>5 years</strong> following account termination or transaction completion, as legally required under Section 12 of the Prevention of Money Laundering Act, 2002.<br/>
+                  • <strong>Session & Device Logs:</strong> Retained for <strong>180 days</strong> pursuant to CERT-In cybersecurity directives.
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 8: YOUR RIGHTS */}
+            <section id="dpdp-rights" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Key size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  8. Your Rights Under DPDP Act 2023
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                As a <strong>Data Principal</strong> under Indian law, you possess the following legally enforceable rights:
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white">
+                  <span className="font-black text-slate-900 block">Right to Access Information</span>
+                  <span className="text-slate-500 font-medium">Request a summary of personal data processed and identities of Data Processors.</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white">
+                  <span className="font-black text-slate-900 block">Right to Correction & Updating</span>
+                  <span className="text-slate-500 font-medium">Rectify inaccurate, incomplete, or out-of-date personal identifiers via app settings.</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white">
+                  <span className="font-black text-slate-900 block">Right to Grievance Redressal</span>
+                  <span className="text-slate-500 font-medium">Access readily available grievance mechanisms before approaching the Data Protection Board.</span>
+                </div>
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white">
+                  <span className="font-black text-slate-900 block">Right to Nominate</span>
+                  <span className="text-slate-500 font-medium">Nominate any individual to exercise your rights in the event of death or incapacity.</span>
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 9: ACCOUNT DELETION */}
+            <section id="account-deletion" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <AlertCircle size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  9. Account Deletion & Erasure Policy
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                In compliance with Google Play Store Policies and Section 12(3) of the DPDP Act 2023, Fipmoney provides a direct, unconditional mechanism for users to request account termination and personal data erasure:
+              </p>
+
+              <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 space-y-2">
+                <div className="font-black text-amber-900 text-sm">How to Request Account Deletion:</div>
+                <p className="font-medium">
+                  1. <strong>In-App Self Service:</strong> Navigate to <strong>Settings &gt; Security &gt; Delete Account</strong>, enter your registered 4-digit TPIN, and confirm deletion.<br/>
+                  2. <strong>Direct Web Portal:</strong> Visit our dedicated public account deletion portal at <a href="/delete-account" className="font-black underline text-amber-900">fipmoney.com/delete-account</a>.<br/>
+                  3. <strong>Email Request:</strong> Send an email from your registered address to <strong>support@fipmoney.com</strong> with the subject line "Permanent Account Deletion Request".
+                </p>
+                <div className="text-[11px] text-amber-800 pt-1 border-t border-amber-200">
+                  <em>Prerequisite: All digital gold and silver balances must be withdrawn or liquidated before final account purge. Non-financial marketing telemetry will be permanently wiped within 7 working days.</em>
+                </div>
+              </div>
+            </section>
+
+            {/* CLAUSE 10: COOKIES & TRACKING */}
+            <section id="cookies-tracking" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Eye size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  10. Cookies & Session Management
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                We use secure, HttpOnly, SameSite cookies and cryptographically signed JWT session tokens strictly necessary to maintain authenticated sessions and protect your wallet. We do NOT deploy invasive cross-site tracking cookies.
+              </p>
+            </section>
+
+            {/* CLAUSE 11: MINORS */}
+            <section id="minors" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-4">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Shield size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  11. Minors & Children's Privacy
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                Fipmoney services are strictly intended for individuals who are <strong>18 years of age or older</strong> and legally capable of entering into binding contracts under the Indian Contract Act, 1872. We do not knowingly solicit or collect data from minors.
+              </p>
+            </section>
+
+            {/* CLAUSE 12: GRIEVANCE OFFICER & DPO */}
+            <section id="grievance-dpo" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-5">
+              <div className="flex items-center gap-3 text-[#047857]">
+                <Phone size={24} />
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                  12. Data Protection Officer & Grievance Redressal
+                </h2>
+              </div>
+
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+                In compliance with Rule 3(2) of the Information Technology Rules, 2021 and Section 8(9) of the DPDP Act, 2023, the details of our designated <strong>Grievance Officer & Data Protection Officer (DPO)</strong> are provided below:
+              </p>
+
+              <div className="bg-gradient-to-br from-emerald-50/70 via-white to-slate-50 border border-emerald-200 rounded-2xl p-5 sm:p-6 space-y-3 text-xs sm:text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Designated Officer</span>
+                    <strong className="text-slate-900 text-sm sm:text-base">Mr. Arvind N. Swaminathan</strong>
+                    <span className="text-xs text-emerald-800 font-bold block mt-0.5">Head of Legal, Regulatory Compliance & DPO</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Direct Redressal Email</span>
+                    <strong className="text-slate-900 font-mono text-sm sm:text-base">grievance@fipmoney.com</strong>
+                    <span className="text-xs text-slate-500 font-semibold block mt-0.5">Copied to: dpo@fipmoney.com</span>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-600 font-medium">
+                  <div>Corporate Address: Fipmoney Towers, 4th Block, Koramangala, Bangalore - 560034, India</div>
+                  <div className="font-extrabold text-[#047857]">SLA: Response within 24 Hours</div>
+                </div>
+              </div>
+            </section>
+
+          </main>
+        </div>
+      </div>
+
+      {/* ── BOTTOM RIGHT CIRCULAR PROGRESS SCROLL-TO-TOP BUTTON ── */}
+      <ScrollToTopProgress />
     </div>
   );
 }

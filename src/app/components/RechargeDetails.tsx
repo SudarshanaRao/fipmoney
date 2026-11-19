@@ -26,7 +26,7 @@ const bbpsServices = [
   { label: "LPG Gas", Icon: Flame, color: "#ef4444", bg: "#fee2e2" },
   { label: "Landline Postpaid", Icon: Wifi, color: "#ec4899", bg: "#fce7f3" },
   { label: "Broadband", Icon: Wifi, color: "#06b6d4", bg: "#cffafe" },
-  { label: "Cable TV", Icon: MonitorPlay, color: "#8b5cf6", bg: "#f3e8ff" },
+  { label: "Cable TV", Icon: MonitorPlay, color: "#047857", bg: "#ecfdf5" },
   { label: "FASTag", Icon: Car, color: "#10b981", bg: "#d1fae5" },
   { label: "Health Insurance", Icon: Shield, color: "#f43f5e", bg: "#ffe4e6" },
 ];
@@ -405,7 +405,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
         <div className="flex h-screen bg-[#f8fafc] font-sans overflow-hidden text-gray-800">
           <Sidebar activeTab="bills" onTabChange={handleNavTabChange} onLogout={onBack} />
 
-          <div className="flex-1 flex flex-col min-w-0 overflow-y-auto items-center justify-center p-6 bg-gradient-to-br from-gray-50 via-purple-50/20 to-amber-50/20">
+          <div className="flex-1 flex flex-col min-w-0 overflow-y-auto items-center justify-center p-6 bg-gradient-to-br from-gray-50 via-emerald-50/20 to-amber-50/20">
             <div className="w-full max-w-md bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-2xl text-center space-y-6 relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
               
@@ -463,7 +463,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                       setShowTracking(false);
                       onBack();
                     }}
-                    className="w-full py-4 rounded-xl text-white text-sm font-extrabold shadow-lg hover:shadow-xl transition-all cursor-pointer outline-none border-none bg-gradient-to-r from-[#1e1b4b] via-[#312e81] to-[#4c1d95] hover:from-[#111827] hover:to-[#312e81] active:scale-[0.99] flex items-center justify-center gap-2"
+                    className="w-full py-4 rounded-xl text-white text-sm font-extrabold shadow-lg hover:shadow-xl transition-all cursor-pointer outline-none border-none bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] shadow-emerald-900/20 active:scale-[0.99] flex items-center justify-center gap-2"
                   >
                     Back to Dashboard <ChevronRight size={18} strokeWidth={2.5} />
                   </button>
@@ -607,7 +607,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                     <>
                       <div className="space-y-4">
                         {/* Header Banner */}
-                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100/60 text-xs font-semibold text-indigo-800 flex items-start gap-2.5">
+                        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-100/60 text-xs font-semibold text-emerald-800 flex items-start gap-2.5">
                           <CreditCard size={18} className="text-indigo-500 shrink-0 mt-0.5" />
                           <div>
                             <p className="font-extrabold text-indigo-900">Credit Card to Bank Transfer</p>
@@ -1099,7 +1099,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                     {/* Step-by-step */}
                     <div className="space-y-4">
                       {[
-                        { step: "1", title: "Choose Transfer Method", desc: "Select Bank Account, UPI ID, or Mobile Number to send funds.", gradient: "from-indigo-500 to-purple-500" },
+                        { step: "1", title: "Choose Transfer Method", desc: "Select Bank Account, UPI ID, or Mobile Number to send funds.", gradient: "from-[#047857] to-[#059669]" },
                         { step: "2", title: "Enter Card & Amount", desc: "Provide your credit card details and the amount to transfer.", gradient: "from-blue-500 to-cyan-500" },
                         { step: "3", title: "Pick Transfer Speed", desc: "Choose Instant, Next Day, or 2-Day transfer based on your urgency.", gradient: "from-amber-500 to-orange-500" },
                         { step: "4", title: "Receive Funds", desc: "Amount is credited to recipient via IMPS/NEFT/UPI securely.", gradient: "from-emerald-500 to-teal-500" },
@@ -1115,7 +1115,7 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
                     </div>
 
                     {/* Benefits */}
-                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100/60">
+                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-100/60">
                       <h4 className="text-[11px] font-extrabold text-indigo-800 mb-2">Why use CC to Bank?</h4>
                       <div className="space-y-1.5">
                         {[

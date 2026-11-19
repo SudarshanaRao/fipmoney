@@ -384,12 +384,12 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
             <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "sip" || activeTab === "savings" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
+              activeTab === "sip" || activeTab === "savings" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
               <PieChart size={22} strokeWidth={activeTab === "sip" || activeTab === "savings" ? 2.5 : 2} />
             </div>
             <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "sip" || activeTab === "savings" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
+              activeTab === "sip" || activeTab === "savings" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
             }`}>
               Invest
             </span>
@@ -401,12 +401,12 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
             <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "portfolio" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
+              activeTab === "portfolio" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
               <PieChart size={22} strokeWidth={activeTab === "portfolio" ? 2.5 : 2} />
             </div>
             <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "portfolio" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
+              activeTab === "portfolio" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
             }`}>
               Portfolio
             </span>
@@ -416,11 +416,11 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
           <div className="relative -top-3 flex flex-col items-center justify-center mx-1">
             <button
               onClick={() => onTabChange("home")}
-              className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 border-2 border-white cursor-pointer outline-none transition-transform active:scale-90"
+              className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#059669] text-white flex items-center justify-center shadow-lg shadow-emerald-900/30 border-2 border-white cursor-pointer outline-none transition-transform active:scale-90"
             >
               <Home size={22} strokeWidth={2.5} />
             </button>
-            <span className="text-[10px] font-black text-amber-600 tracking-tight mt-0.5">
+            <span className="text-[10px] font-black text-[#047857] tracking-tight mt-0.5">
               Home
             </span>
           </div>
@@ -431,12 +431,12 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
             <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "history" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
+              activeTab === "history" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
               <Calendar size={22} strokeWidth={activeTab === "history" ? 2.5 : 2} />
             </div>
             <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "history" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
+              activeTab === "history" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
             }`}>
               History
             </span>
@@ -448,12 +448,12 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
             <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "refer-and-earn" ? "text-amber-600 font-bold" : "text-slate-400 hover:text-slate-600"
+              activeTab === "refer-and-earn" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
               <Gift size={22} strokeWidth={activeTab === "refer-and-earn" ? 2.5 : 2} />
             </div>
             <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "refer-and-earn" ? "text-amber-600 font-black" : "text-slate-500 font-medium"
+              activeTab === "refer-and-earn" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
             }`}>
               Rewards
             </span>

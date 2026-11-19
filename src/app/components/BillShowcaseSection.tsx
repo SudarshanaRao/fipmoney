@@ -12,11 +12,11 @@ interface BillShowcaseSectionProps {
 }
 
 const billsList = [
-  { label: "Mobile Prepaid", desc: "Instant recharge on Jio, Airtel, VI, etc.", Icon: Smartphone, color: "#8b5cf6", bg: "#f3e8ff", hasPayNow: true },
+  { label: "Mobile Prepaid", desc: "Instant recharge on Jio, Airtel, VI, etc.", Icon: Smartphone, color: "#047857", bg: "#ecfdf5", hasPayNow: true },
   { label: "Electricity Bill", desc: "Pay electricity bills to 50+ state boards.", Icon: Zap, color: "#eab308", bg: "#fef08a", hasPayNow: true },
   { label: "DTH Connection", desc: "Recharge Tata Play, Dish TV, Airtel DTH.", Icon: Tv, color: "#f59e0b", bg: "#fef3c7", hasPayNow: true },
   { label: "Water & Piped Gas", desc: "Utility payments for water and gas.", Icon: Droplets, color: "#0ea5e9", bg: "#e0f2fe", hasPayNow: false },
-  { label: "Mobile Postpaid & Landline", desc: "Pay postpaid and landline bills.", Icon: PhoneCall, color: "#8b5cf6", bg: "#f3e8ff", hasPayNow: false },
+  { label: "Mobile Postpaid & Landline", desc: "Pay postpaid and landline bills.", Icon: PhoneCall, color: "#047857", bg: "#ecfdf5", hasPayNow: false },
   { label: "Broadband", desc: "Pay your internet broadband bills.", Icon: Wifi, color: "#06b6d4", bg: "#cffafe", hasPayNow: false },
   { label: "Insurance Premium", desc: "Pay your insurance premiums securely.", Icon: Shield, color: "#10b981", bg: "#d1fae5", hasPayNow: false },
   { label: "Loan EMI Repayment", desc: "Pay EMIs for your ongoing loans.", Icon: Landmark, color: "#6366f1", bg: "#e0e7ff", hasPayNow: false },

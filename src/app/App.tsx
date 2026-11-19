@@ -120,6 +120,11 @@ const ComingSoonPage = ({ title, onBack }: { title: string; onBack: () => void }
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => {
     if (typeof window !== 'undefined') {
+      const isNative = Capacitor.isNativePlatform();
+      const hasUserSession = !!sessionStorage.getItem("fm_logged_in_mobile");
+      if (isNative && !hasUserSession) {
+        return 'login';
+      }
       const path = window.location.pathname.slice(1);
       return (path as PageType) || 'home';
     }
@@ -165,6 +170,19 @@ export default function App() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const currentPath = window.location.pathname.slice(1);
+    const isNative = Capacitor.isNativePlatform();
+
+    // Native Android Route Guard:
+    // When running inside Android app, unauthenticated users MUST NOT see homepage or public landing pages.
+    // They are restricted strictly to 'login' and essential utility pages (help, terms, privacy, delete-account).
+    if (isNative && !isLoggedIn) {
+      const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
+      if (!allowedUnauthenticatedPages.includes(currentPath) || !allowedUnauthenticatedPages.includes(currentPage)) {
+        window.history.replaceState({}, '', '/login');
+        setCurrentPage('login');
+        return;
+      }
+    }
 
     // Dedicated Standalone Agent Dashboard Environment Route Guard
     if (currentPath === 'agent-dashboard' || currentPath === 'agent/dashboard' || currentPath === 'agent' || currentPage === 'agent-dashboard' as any) {
@@ -234,10 +252,32 @@ export default function App() {
     // Handle browser back/forward buttons
     const handlePopState = () => {
       const path = window.location.pathname.slice(1) || 'home';
+      if (Capacitor.isNativePlatform() && !isLoggedIn) {
+        const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
+        if (!allowedUnauthenticatedPages.includes(path)) {
+          window.history.replaceState({}, '', '/login');
+          setCurrentPage('login');
+          return;
+        }
+      }
       setCurrentPage(path as PageType);
     };
 
+    // Hardware back button handler for Android
+    const handleBackButton = (e: any) => {
+      if (Capacitor.isNativePlatform() && !isLoggedIn) {
+        if (currentPage === 'login' || currentPage === 'signup') {
+          (navigator as any).app?.exitApp?.();
+        } else {
+          e.preventDefault?.();
+          window.history.replaceState({}, '', '/login');
+          setCurrentPage('login');
+        }
+      }
+    };
+
     window.addEventListener('popstate', handlePopState);
+    document.addEventListener('backbutton', handleBackButton);
     
     // Add magnetic effect to buttons
     const addMagneticEffect = () => {
@@ -269,10 +309,18 @@ export default function App() {
     return () => {
       document.documentElement.style.scrollBehavior = 'auto';
       window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('backbutton', handleBackButton);
     };
-  }, []);
+  }, [currentPage, isLoggedIn]);
 
-  const navigateToPage = (page: PageType) => {
+  const navigateToPage = (targetPage: PageType) => {
+    let page = targetPage;
+    if (Capacitor.isNativePlatform() && !isLoggedIn) {
+      const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
+      if (!allowedUnauthenticatedPages.includes(page)) {
+        page = 'login';
+      }
+    }
     if (page === currentPage) return;
     
     // Save current scroll position if leaving home page
@@ -307,7 +355,21 @@ export default function App() {
     }, 150);
   };
 
-  const navigateToHome = () => navigateToPage('home');
+  const navigateToHome = () => {
+    if (Capacitor.isNativePlatform() && !isLoggedIn) {
+      navigateToPage('login');
+    } else {
+      navigateToPage('home');
+    }
+  };
+
+  const handleBackFromSubpage = () => {
+    if (Capacitor.isNativePlatform() && !isLoggedIn) {
+      navigateToPage('login');
+    } else {
+      navigateToHome();
+    }
+  };
 
   const navigateToGuide = (guideId: string) => {
     setCurrentGuideId(guideId);
@@ -416,33 +478,33 @@ export default function App() {
       case 'recharge-details':
         return <RechargeDetails onBack={() => navigateToPage('dashboard')} />;
       case 'terms':
-        return <TermsAndConditions onBack={navigateToHome} />;
+        return <TermsAndConditions onBack={handleBackFromSubpage} />;
       case 'privacy':
-        return <PrivacyPolicy onBack={navigateToHome} />;
+        return <PrivacyPolicy onBack={handleBackFromSubpage} />;
       case 'delete-account':
       case 'account-deletion':
-        return <DeleteAccountPage onBack={navigateToHome} />;
+        return <DeleteAccountPage onBack={handleBackFromSubpage} />;
       case 'about':
-        return <AboutUs onBack={navigateToHome} />;
+        return <AboutUs onBack={handleBackFromSubpage} />;
       case 'careers':
-        return <Careers onBack={navigateToHome} />;
+        return <Careers onBack={handleBackFromSubpage} />;
       case 'help':
-        return <HelpCenter onBack={navigateToHome} />;
+        return <HelpCenter onBack={handleBackFromSubpage} />;
       case 'contact':
-        return <ContactUs onBack={navigateToHome} />;
+        return <ContactUs onBack={handleBackFromSubpage} />;
       case 'security':
-        return <SecurityCenter onBack={navigateToHome} />;
+        return <SecurityCenter onBack={handleBackFromSubpage} />;
       case 'sip-calculator':
       case 'gold-sip-calculator':
-        return <ComingSoonPage title="SIP Calculator Coming Soon" onBack={navigateToHome} />;
+        return <ComingSoonPage title="SIP Calculator Coming Soon" onBack={handleBackFromSubpage} />;
       case 'faqs':
-        return <FAQs onBack={navigateToHome} />;
+        return <FAQs onBack={handleBackFromSubpage} />;
       
       // Feature pages
       case 'buy-gold':
-        return <BuyGold onBack={navigateToHome} />;
+        return <BuyGold onBack={handleBackFromSubpage} />;
       case 'sell-gold':
-        return <SellGold onBack={navigateToHome} />;
+        return <SellGold onBack={handleBackFromSubpage} />;
       case 'daily-savings':
       case 'weekly-savings':
       case 'monthly-savings':
@@ -454,31 +516,31 @@ export default function App() {
           </>
         );
       case 'digital-gold':
-        return <DigitalGold onBack={navigateToHome} />;
+        return <DigitalGold onBack={handleBackFromSubpage} />;
       case 'digital-silver':
-        return <DigitalSilver onBack={navigateToHome} />;
+        return <DigitalSilver onBack={handleBackFromSubpage} />;
       case 'instant-loan':
-        return <ComingSoonPage title="Instant Loan" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Instant Loan" onBack={handleBackFromSubpage} />;
       case 'round-off':
-        return <ComingSoonPage title="Round Off Savings" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Round Off Savings" onBack={handleBackFromSubpage} />;
       
 
       case 'step-up-sip-calculator':
-        return <ComingSoonPage title="Step Up SIP Calculator" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Step Up SIP Calculator" onBack={handleBackFromSubpage} />;
       case 'growth-calculator':
-        return <ComingSoonPage title="Growth Calculator" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Growth Calculator" onBack={handleBackFromSubpage} />;
       case 'retirement-calculator':
-        return <ComingSoonPage title="Retirement Calculator" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Retirement Calculator" onBack={handleBackFromSubpage} />;
       case 'cpc-8th-calculator':
-        return <ComingSoonPage title="8th CPC Salary Calculator" onBack={navigateToHome} />;
+        return <ComingSoonPage title="8th CPC Salary Calculator" onBack={handleBackFromSubpage} />;
       case 'cpc-7th-calculator':
-        return <ComingSoonPage title="7th CPC Salary Calculator" onBack={navigateToHome} />;
+        return <ComingSoonPage title="7th CPC Salary Calculator" onBack={handleBackFromSubpage} />;
       case 'gold-rate-calculator':
       case 'live-metal-tracker':
         return (
           <LiveMetalTracker
-            onBack={navigateToHome}
-            onNavigateToHome={navigateToHome}
+            onBack={handleBackFromSubpage}
+            onNavigateToHome={handleBackFromSubpage}
             onNavigateToBuyGold={() => navigateToPage('buy-gold')}
             onNavigateToBuySilver={() => navigateToPage('digital-silver')}
           />
@@ -487,13 +549,13 @@ export default function App() {
       // Help pages
       case 'jar-how-tos':
       case 'guide':
-        return <ComingSoonPage title="Guides & How-Tos" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Guides & How-Tos" onBack={handleBackFromSubpage} />;
         
       // Other pages
       case 'blog':
-        return <ComingSoonPage title="Blog" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Blog" onBack={handleBackFromSubpage} />;
       case 'press':
-        return <ComingSoonPage title="Press & Media" onBack={navigateToHome} />;
+        return <ComingSoonPage title="Press & Media" onBack={handleBackFromSubpage} />;
       case 'investors':
         return <ComingSoonPage title="Investor Relations" onBack={navigateToHome} />;
       case 'risk':

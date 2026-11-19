@@ -558,96 +558,69 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
   return (
     <div className="w-full min-h-screen flex font-sans bg-white overflow-hidden">
-      {/* ── LEFT PANEL ── */}
-      <div className="hidden lg:flex w-[48%] flex-col relative overflow-hidden bg-white">
+      {/* ── LEFT PANEL (Half of the Page on Desktop) ── */}
+      <div className="hidden lg:flex w-1/2 flex-col justify-between relative overflow-hidden bg-gradient-to-b from-[#F0FDF4]/50 via-white to-[#ECFDF5]/70 p-10 xl:p-14 border-r border-slate-100 h-screen">
          {/* Ambient Background Effects */}
-         <div className="absolute top-[10%] right-[20%] w-4 h-4 bg-white rounded-full blur-[2px] opacity-70 animate-pulse" />
-         <div className="absolute top-[40%] right-[30%] w-6 h-6 bg-white/40 blur-[4px] rounded-full animate-pulse" />
-         <div className="absolute top-[60%] left-[10%] w-3 h-3 bg-white rounded-full blur-[1px] opacity-50 animate-pulse" />
-         <div className="absolute -top-[10%] -right-[10%] w-[70%] h-[70%] bg-gradient-to-b from-white/70 to-transparent rounded-full blur-3xl opacity-80 pointer-events-none" />
+         <div className="absolute -top-20 -left-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+         <div className="absolute bottom-10 right-0 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
 
-         <div className="relative z-20 flex flex-col h-full p-12 lg:p-16 w-full">
-           {/* Top Logo */}
-           <div className="flex items-center gap-3 mb-12">
-              <img src={fipMoneyLogo} className="w-16 h-16 object-contain" alt="Logo" />
-              <span className="text-4xl font-black text-slate-900 tracking-tight">Fipmoney</span>
-           </div>
+         {/* Top Logo */}
+         <div className="relative z-20 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+               <img src={fipMoneyLogo} className="w-12 h-12 object-contain" alt="Fipmoney Logo" />
+               <span className="text-3xl font-black text-slate-900 tracking-tight">Fipmoney</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-[#047857] text-xs font-bold shadow-xs">
+               <ShieldCheck size={14} className="text-[#047857]" />
+               <span>100% Insured Vault</span>
+            </div>
+         </div>
 
-           <div className="max-w-[420px] relative z-20">
-              <h1 className="text-[40px] leading-[1.1] font-black text-slate-900 mb-4 tracking-tight">
-                Secure Your Wealth<br/>with Fipmoney
-              </h1>
-              <p className="text-slate-600 text-[15px] font-medium mb-12 leading-relaxed max-w-[340px]">
-                 Invest in 24K gold & 99.9% pure silver<br/>with complete security and transparency.
-              </p>
+         {/* Center: Large 3D Hero Asset taking the center stage (Half of the page) */}
+         <div className="relative z-20 flex-1 flex flex-col items-center justify-center my-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="relative w-full max-w-[440px] xl:max-w-[480px] flex items-center justify-center"
+            >
+              {/* Soft emerald glow behind 3D render */}
+              <div className="absolute inset-4 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none -z-10" />
+              <img 
+                src={step === "otp" ? "/otp-3d-hero.png" : "/login-3d-hero.png"} 
+                alt={step === "otp" ? "Fipmoney 3D OTP Verification" : "Fipmoney Secure Login"} 
+                className="w-full h-auto max-h-[440px] xl:max-h-[480px] object-contain drop-shadow-2xl select-none"
+              />
+            </motion.div>
+         </div>
 
-              <div className="flex flex-col gap-6">
-                 {/* Feature 1 */}
-                 <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shrink-0 text-[#047857] shadow-xs">
-                       <Shield size={24} strokeWidth={2} />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                       <h3 className="text-slate-900 font-bold text-[14px] mb-1">100% Insured Storage</h3>
-                       <p className="text-slate-600 text-[11px] font-medium leading-[1.4]">Your gold & silver is stored in<br/>insured vaults.</p>
-                    </div>
-                 </div>
-                 {/* Feature 2 */}
-                 <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shrink-0 text-[#047857] shadow-xs">
-                       <Coins size={24} strokeWidth={2} />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                       <h3 className="text-slate-900 font-bold text-[14px] mb-1">Buy & Sell Anytime</h3>
-                       <p className="text-slate-600 text-[11px] font-medium leading-[1.4]">Invest, sell or redeem anytime<br/>at live market prices.</p>
-                    </div>
-                 </div>
-                 {/* Feature 3 */}
-                 <div className="flex gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shrink-0 text-[#047857] shadow-xs">
-                       <BarChart3 size={24} strokeWidth={2} />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                       <h3 className="text-slate-900 font-bold text-[14px] mb-1">Real-time Prices</h3>
-                       <p className="text-slate-600 text-[11px] font-medium leading-[1.4]">Track live gold & silver prices<br/>and market trends.</p>
-                    </div>
+         {/* Bottom Glass Badge Strip */}
+         <div className="relative z-20">
+            <div className="bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl px-6 py-4 flex gap-6 items-center shadow-xs">
+              <div className="flex gap-3 items-center">
+                 <div className="text-[#047857]"><ShieldCheck size={20} /></div>
+                 <div>
+                    <div className="text-slate-900 text-[11px] font-black uppercase tracking-wider">Bank-Grade</div>
+                    <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">256-Bit SSL<br/>Encrypted</div>
                  </div>
               </div>
-           </div>
-
-           {/* Vault Image - Placed precisely at Bottom Right */}
-           <div className="absolute bottom-[110px] right-[-20px] w-[500px] z-10 pointer-events-none opacity-100">
-              <img src="/login_image.png" alt="Vault" className="w-full h-auto object-contain object-bottom right" />
-           </div>
-
-           {/* Bottom Glass Badge - Placed precisely at Bottom Left */}
-           <div className="absolute bottom-12 left-12 lg:left-16 z-20">
-              <div className="bg-[#f8fafc]/90 backdrop-blur-xl border border-slate-200 rounded-[16px] px-6 py-4 flex gap-6 items-center shadow-sm">
-                <div className="flex gap-3 items-center">
-                   <div className="text-[#047857]"><ShieldCheck size={20} /></div>
-                   <div>
-                      <div className="text-slate-900 text-[11px] font-black uppercase tracking-wider">Secure</div>
-                      <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">Bank-grade<br/>Security</div>
-                   </div>
-                </div>
-                <div className="w-px h-8 bg-slate-200" />
-                <div className="flex gap-3 items-center">
-                   <div className="text-[#047857]"><User size={20} /></div>
-                   <div>
-                      <div className="text-slate-900 text-[11px] font-black uppercase tracking-wider">Trusted</div>
-                      <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">By Millions of<br/>Users</div>
-                   </div>
-                </div>
-                <div className="w-px h-8 bg-slate-200" />
-                <div className="flex gap-3 items-center">
-                   <div className="text-[#047857]"><CheckCircle2 size={20} /></div>
-                   <div>
-                      <div className="text-slate-900 text-[11px] font-black uppercase tracking-wider">Certified</div>
-                      <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">Purity<br/>Assured</div>
-                   </div>
-                </div>
+              <div className="w-px h-8 bg-slate-200" />
+              <div className="flex gap-3 items-center">
+                 <div className="text-[#047857]"><Coins size={20} /></div>
+                 <div>
+                    <div className="text-slate-900 text-[11px] font-black uppercase tracking-wider">24K 99.9%</div>
+                    <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">Brink's Insured<br/>Vault Storage</div>
+                 </div>
               </div>
-           </div>
+              <div className="w-px h-8 bg-slate-200" />
+              <div className="flex gap-3 items-center">
+                 <div className="text-[#047857]"><CheckCircle2 size={20} /></div>
+                 <div>
+                    <div className="text-slate-900 text-[11px] font-black uppercase tracking-wider">Verified</div>
+                    <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">Instant Mobile<br/>OTP Access</div>
+                 </div>
+              </div>
+            </div>
          </div>
       </div>
 
@@ -746,26 +719,26 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
               {step === "mobile" && (
                  <FormSlide key="mobile" dir={dir}>
                     <div className="text-center mb-8">
-                        <h2 className="text-[28px] leading-tight font-black text-slate-900 mb-2 tracking-tight">
+                        <h2 className="text-[26px] leading-tight font-black text-slate-900 mb-2 tracking-tight">
                           {regStatus === "registered" ? (
-                            <>{t.welcomeBack}</>
+                            "Welcome Back 👋"
                           ) : regStatus === "new" ? (
-                            <>{t.createAccount}</>
+                            "Create Account ✨"
                           ) : checking ? (
-                            <>{t.verifyingNumber}</>
+                            "Checking Account... 🔍"
                           ) : (
-                            <>{t.welcomeToFipmoney}</>
+                            "Enter your 10-digit mobile number to proceed"
                           )}
                         </h2>
                         <p className="text-slate-600 text-[14px] font-medium leading-relaxed max-w-[340px] mx-auto">
                           {regStatus === "registered" ? (
-                            <>{t.accountFound.replace('{mobile}', mobile)}</>
+                            `Account found for +91 ${mobile}. Enter OTP to access your secure vault.`
                           ) : regStatus === "new" ? (
-                            <>{t.newUserDetected.replace('{mobile}', mobile)}</>
+                            "New user detected! Start saving in 24K Gold & 99.9% Silver in seconds."
                           ) : checking ? (
-                            <>{t.checkingDatabase}</>
+                            "Checking database for registered account..."
                           ) : (
-                            <>{t.enterMobileText}</>
+                            "Save & invest in 24K 99.9% pure gold & silver with Fipmoney"
                           )}
                         </p>
                     </div>
@@ -1060,34 +1033,91 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
             </AnimatePresence>
          </div>
       </div>
-            {/* ── MOBILE VIEW (flex lg:hidden) - Increased Asset Size & Font Sizes ── */}
-      <div className="flex lg:hidden min-h-screen bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fff7ed] flex-col items-center justify-between relative selection:bg-[#047857] selection:text-white w-full px-6 py-8 font-sans overflow-y-auto">
-        {/* Ambient Warm Gold Background Glow */}
-        
+      {/* ── MOBILE VIEW (flex lg:hidden) - Modern Redesigned UI ── */}
+      <div className="flex lg:hidden min-h-screen bg-[#F8FAFC] flex-col justify-between relative selection:bg-[#047857] selection:text-white w-full px-4 sm:px-6 py-5 font-sans overflow-y-auto">
+        {/* Soft Ambient Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-36 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-28 right-0 w-44 h-44 bg-amber-400/5 rounded-full blur-2xl pointer-events-none" />
+
+        {/* Top App Header Bar */}
+        <div className="w-full flex items-center justify-between z-20 shrink-0 relative mb-4">
+          {/* Left: Back Button or Security Badge */}
+          {step !== "mobile" ? (
+            <button
+              type="button"
+              onClick={() => {
+                setDir(-1);
+                setStep(step === "tpin" ? "profile" : step === "profile" ? "otp" : "mobile");
+              }}
+              className="w-10 h-10 rounded-xl bg-white border border-slate-200/90 shadow-xs flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer"
+            >
+              <ArrowLeft size={18} />
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200/80 shadow-xs text-[#047857] text-[11px] font-bold">
+              <ShieldCheck size={14} className="text-[#047857]" />
+              <span>100% Secure</span>
+            </div>
+          )}
+
+          {/* Center: Fipmoney Brand Logo */}
+          <div className="flex items-center gap-2">
+            <img src={fipMoneyLogo} alt="FipMoney" className="h-7 w-auto object-contain" />
+            <span className="font-black text-lg tracking-tight text-slate-900">Fipmoney</span>
+          </div>
+
+          {/* Right: Need Help Navigation */}
+          <button
+            type="button"
+            onClick={() => onNavigate("help")}
+            className="text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+          >
+            <HelpCircle size={13} className="text-[#047857]" />
+            <span>Need Help?</span>
+          </button>
+        </div>
+
+        {/* Action Loading Overlay with LoadingSpinner */}
+        <AnimatePresence>
+          {isActionLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-white/95 backdrop-blur-xs z-50 flex flex-col items-center justify-center gap-3 p-6 text-center"
+            >
+              <LoadingSpinner size={90} />
+              <p className="text-sm font-black text-slate-900 animate-pulse">
+                {loadingMsg || "Processing request..."}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <motion.div
-          className="w-full max-w-[420px] min-h-[calc(100vh-4rem)] relative z-10 flex flex-col items-center justify-between mx-auto"
+          className="w-full max-w-[420px] relative z-10 flex flex-col items-center mx-auto my-auto"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
         >
           {/* Upper Section: Image + Headers + Form */}
           <div className="w-full flex flex-col items-center my-auto">
             
-            {/* Top Asset Container with login-bro.png, otp-bro.png, account-profile.png & dashboard-bro.png */}
-            <div className="relative mb-6">
-              <div className="w-88 h-88 sm:w-96 sm:h-96 flex items-center justify-center mx-auto">
+            {/* Top Asset Container with login-3d-hero.png taking half of the page */}
+            <div className="relative w-full flex items-center justify-center mb-2 sm:mb-3">
+              <div className="relative w-full max-w-[340px] aspect-[5/4] max-h-[38vh] sm:max-h-[42vh] flex items-center justify-center mx-auto">
+                <div className="absolute inset-4 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none -z-10" />
                 <img 
                   src={
                     step === "otp"
-                      ? "/otp-bro.png"
+                      ? "/otp-3d-hero.png"
                       : step === "profile"
                       ? "/account-profile.png"
                       : step === "tpin"
                       ? "/tpin.png"
                       : step === "success"
                       ? "/dashboard-bro.png"
-                      : "/login-bro.png"
+                      : "/login-3d-hero.png"
                   } 
                   alt={
                     step === "otp"
@@ -1098,24 +1128,40 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                       ? "Security TPIN Setup"
                       : step === "success"
                       ? "Dashboard Welcome"
-                      : "Login Illustration"
+                      : "Fipmoney 3D Secure Login"
                   } 
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain drop-shadow-xl select-none"
                 />
               </div>
             </div>
 
-            {/* Title & Subtitle (Increased Font Sizes) */}
-            <div className="text-center mb-8 w-full">
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                {step === "mobile" && (regStatus === "new" ? "Create Account" : "Welcome Back")}
+            {/* Title & Subtitle */}
+            <div className="text-center mb-5 w-full px-2">
+              <h1 className="text-2xl sm:text-[26px] font-black text-slate-900 tracking-tight leading-snug">
+                {step === "mobile" && (
+                  regStatus === "registered"
+                    ? "Welcome Back 👋"
+                    : regStatus === "new"
+                    ? "Create Account ✨"
+                    : checking
+                    ? "Checking Account... 🔍"
+                    : "Enter your 10-digit mobile number to proceed"
+                )}
                 {step === "otp" && "Verify OTP"}
                 {step === "profile" && "Complete Profile"}
                 {step === "tpin" && "Set Security PIN"}
                 {step === "success" && "Welcome to FipMoney"}
               </h1>
-              <p className="text-sm sm:text-base text-slate-500 font-medium mt-1.5">
-                {step === "mobile" && "Enter your 10-digit mobile number to proceed"}
+              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1.5 max-w-[320px] mx-auto leading-relaxed">
+                {step === "mobile" && (
+                  regStatus === "registered"
+                    ? `Account found for +91 ${mobile}. Please continue to login.`
+                    : regStatus === "new"
+                    ? "New user detected! Start saving in 24K Gold & 99.9% Silver in seconds."
+                    : checking
+                    ? "Checking database for registered account..."
+                    : "Save & invest in 24K pure gold & 99.9% pure silver seamlessly."
+                )}
                 {step === "otp" && `Enter 6-digit code sent to +91 ${mobile}`}
                 {step === "profile" && "Almost there — just a few details."}
                 {step === "tpin" && "Create a 4-digit PIN for securing all your transactions."}
@@ -1125,70 +1171,84 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
 
             {/* Stepper Wizard Indicator for Profile & Security steps (Centered) */}
             {(step === "profile" || step === "tpin") && (
-              <div className="w-full relative flex items-center justify-center mb-7 px-1">
+              <div className="w-full relative flex items-center justify-center mb-5 px-1">
                 <button
                   type="button"
                   onClick={() => { setDir(-1); setStep(step === "tpin" ? "profile" : "otp"); }}
-                  className="absolute left-0 w-11 h-11 rounded-full bg-[#f8fafc] border border-slate-200 text-slate-900 flex items-center justify-center shadow-xs hover:bg-[#f8fafc] transition-all cursor-pointer z-10"
+                  className="absolute left-0 w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-900 flex items-center justify-center shadow-xs hover:bg-slate-50 transition-all cursor-pointer z-10"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={16} />
                 </button>
                 <div className="flex items-center gap-3">
                   <div className="flex flex-col items-center gap-1">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step === "profile" ? "bg-[#047857] text-white shadow-md shadow-amber-500/30" : "bg-white0 text-white"}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all ${step === "profile" ? "bg-[#047857] text-white shadow-md shadow-emerald-700/20" : "bg-emerald-100 text-emerald-800"}`}>
                       1
                     </div>
-                    <span className={`text-xs font-bold ${step === "profile" ? "text-[#047857] font-extrabold" : "text-slate-500"}`}>Profile</span>
+                    <span className={`text-[11px] font-bold ${step === "profile" ? "text-[#047857] font-extrabold" : "text-slate-500"}`}>Profile</span>
                   </div>
-                  <div className="w-16 h-0.5 bg-slate-200 mb-4" />
+                  <div className="w-14 h-0.5 bg-slate-200 mb-3" />
                   <div className="flex flex-col items-center gap-1">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all ${step === "tpin" ? "bg-[#047857] text-white shadow-md shadow-amber-500/30" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all ${step === "tpin" ? "bg-[#047857] text-white shadow-md shadow-emerald-700/20" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
                       2
                     </div>
-                    <span className={`text-xs font-bold ${step === "tpin" ? "text-[#047857] font-extrabold" : "text-slate-400"}`}>Security</span>
+                    <span className={`text-[11px] font-bold ${step === "tpin" ? "text-[#047857] font-extrabold" : "text-slate-400"}`}>Security</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Interactive Form Flow (Increased Font & Input Sizes) */}
-            <div className="w-full">
+            {/* Main Interactive Form Card */}
+            <div className="w-full bg-white rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
               <AnimatePresence mode="wait" custom={dir}>
                 {step === "mobile" && (
                   <FormSlide key="mobile" dir={dir}>
-                    <form onSubmit={(e) => { e.preventDefault(); handlePrimaryBtn(); }} className="space-y-6">
+                    <form onSubmit={(e) => { e.preventDefault(); handlePrimaryBtn(); }} className="space-y-4">
                       {/* Mobile Number Field */}
-                      <div className="space-y-2.5">
-                        <Label htmlFor="identifier" className="text-base sm:text-lg font-bold text-slate-800 block">
+                      <div className="space-y-2">
+                        <label htmlFor="identifier" className="text-xs font-black uppercase tracking-wider text-slate-600 block">
                           Mobile Number
-                        </Label>
-                        <div className="relative">
-                          <Input
+                        </label>
+                        <div className={`relative flex items-center rounded-2xl border-2 transition-all bg-white h-14 ${
+                          err 
+                            ? 'border-red-400 bg-red-50/20' 
+                            : 'border-slate-200 focus-within:border-[#047857] focus-within:ring-4 focus-within:ring-emerald-500/10'
+                        }`}>
+                          <div className="flex items-center gap-1.5 px-3.5 border-r border-slate-200 h-full bg-slate-50/70 rounded-l-2xl select-none">
+                            <span className="text-base">🇮🇳</span>
+                            <span className="text-sm font-bold text-slate-800">+91</span>
+                          </div>
+                          <input
                             id="identifier"
                             type="tel"
                             inputMode="numeric"
                             maxLength={10}
                             value={mobile}
+                            autoFocus
                             onChange={(e) => handleMobileChange(e.target.value)}
-                            placeholder="Enter your 10-digit mobile number"
-                            className="w-full h-14 px-4.5 bg-[#f8fafc] border border-slate-200 text-slate-900 placeholder:text-slate-600/60 focus:bg-[#f8fafc] focus:!border-[#047857] focus:!ring-1 focus:!ring-emerald-500 focus-visible:!border-[#047857] focus-visible:!ring-1 focus-visible:!ring-emerald-500 transition-all rounded-2xl font-medium text-base sm:text-lg outline-none shadow-sm"
+                            placeholder="Enter 10-digit mobile number"
+                            className="flex-1 h-full px-3.5 text-base sm:text-lg font-bold text-slate-900 tracking-wider placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal outline-none bg-transparent"
                           />
+                          {checking && (
+                            <div className="pr-3.5 flex items-center">
+                              <Loader2 className="w-5 h-5 animate-spin text-[#047857]" />
+                            </div>
+                          )}
                         </div>
 
+                        {/* Live Status Indicators */}
                         {checking && (
-                          <div className="flex items-center gap-2.5 text-[#047857] text-base sm:text-lg font-bold pt-1.5 pl-1">
-                            <Loader2 className="w-5 h-5 animate-spin text-amber-500 shrink-0" />
+                          <p className="text-xs font-bold text-[#047857] flex items-center gap-1.5 pt-1 pl-1">
                             <span>Checking account...</span>
-                          </div>
+                          </p>
                         )}
 
                         {regStatus === "registered" && (
                           <motion.div
                             initial={{ opacity: 0, y: -4 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-2.5 text-emerald-800 bg-white border border-emerald-300 px-4 py-2.5 rounded-xl text-base sm:text-lg font-extrabold mt-2.5 shadow-sm"
+                            className="flex items-center gap-2 text-[#047857] bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl text-xs font-bold mt-2 shadow-xs"
                           >
-                            <CheckCircle2 className="w-5.5 h-5.5 text-[#047857] shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-[#047857] shrink-0" />
                             <span>Account found! Welcome back.</span>
                           </motion.div>
                         )}
@@ -1197,90 +1257,60 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                           <motion.div
                             initial={{ opacity: 0, y: -4 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-2.5 text-slate-900 bg-white border border-emerald-300/90 px-4 py-2.5 rounded-xl text-base sm:text-lg font-extrabold mt-2.5 shadow-sm"
+                            className="flex items-center gap-2 text-emerald-800 bg-emerald-50/70 border border-emerald-200 px-3.5 py-2 rounded-xl text-xs font-bold mt-2 shadow-xs"
                           >
-                            <User className="w-5.5 h-5.5 text-[#047857] shrink-0" />
-                            <span>New user! Account will be created upon verification.</span>
+                            <User className="w-4 h-4 text-[#047857] shrink-0" />
+                            <span>New account will be created upon verification.</span>
                           </motion.div>
                         )}
 
                         {err && (
-                          <p className="text-red-500 text-base sm:text-lg font-bold pl-1 pt-1.5">
+                          <p className="text-red-500 text-xs font-bold pl-1 pt-1">
                             {err}
                           </p>
                         )}
                       </div>
 
-                      {/* Need Help Row */}
-                      <div className="flex items-center justify-end text-sm sm:text-base pt-1">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setShowGuidelinesModal(true);
-                          }}
-                          className="text-[#047857] font-extrabold hover:underline cursor-pointer border-none bg-transparent"
-                        >
-                          Need help?
-                        </button>
-                      </div>
-
-                      {/* Action Button */}
-                      <Button
+                      {/* Primary Action Button */}
+                      <button
                         type="submit"
-                        disabled={checking || mobile.length < 10}
-                        className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-emerald-900/20 transition-all duration-300 active:scale-[0.98] mt-7 flex items-center justify-center gap-2 cursor-pointer border-none disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed"
+                        disabled={checking || mobile.length !== 10}
+                        className={`w-full h-14 rounded-2xl font-black text-base transition-all shadow-md flex items-center justify-center gap-2 outline-none cursor-pointer ${
+                          mobile.length !== 10 || checking
+                            ? 'bg-slate-100 text-slate-400 border border-slate-200 shadow-none cursor-not-allowed'
+                            : 'bg-gradient-to-r from-[#047857] via-[#059669] to-[#047857] hover:brightness-105 text-white shadow-emerald-700/20 active:scale-[0.98]'
+                        }`}
                       >
                         {checking ? (
                           <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span>{regStatus === "new" ? "Creating Account..." : "Signing In..."}</span>
+                            <Loader2 className="w-5 h-5 animate-spin text-white" />
+                            <span>Verifying...</span>
                           </>
+                        ) : regStatus === "registered" ? (
+                          <span>Continue to Login →</span>
+                        ) : regStatus === "new" ? (
+                          <span>Create Account &amp; Continue →</span>
                         ) : (
-                          <span>{regStatus === "new" ? "Sign Up" : "Login"}</span>
+                          <span>Continue</span>
                         )}
-                      </Button>
+                      </button>
                     </form>
 
-                    {/* Footer Link */}
-                    <div className="mt-7 text-center">
-                      <p className="text-base sm:text-lg text-slate-500 font-semibold">
-                        {regStatus === "new" ? (
-                          <>
-                            Already have an account?{" "}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setRegStatus("registered");
-                                const inputEl = document.getElementById("identifier");
-                                if (inputEl) inputEl.focus();
-                              }}
-                              className="text-[#047857] font-black hover:underline text-base sm:text-lg transition-all ml-1 cursor-pointer bg-transparent border-none p-0"
-                            >
-                              Sign In
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            Don't have account?{" "}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setRegStatus("new");
-                                if (mobile.length === 10) {
-                                  handlePrimaryBtn();
-                                } else {
-                                  const inputEl = document.getElementById("identifier");
-                                  if (inputEl) inputEl.focus();
-                                  toast.success("Enter your mobile number to sign up!");
-                                }
-                              }}
-                              className="text-[#047857] font-black hover:underline text-base sm:text-lg transition-all ml-1 cursor-pointer bg-transparent border-none p-0"
-                            >
-                              Sign Up
-                            </button>
-                          </>
-                        )}
+                    {/* Trust & Policy Footer */}
+                    <div className="mt-5 pt-4 border-t border-slate-100 text-center space-y-2">
+                      <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-500">
+                        <ShieldCheck size={14} className="text-[#047857]" />
+                        <span>256-Bit SSL Encrypted • 100% Insured Brink's Vault</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        By continuing, you agree to our{" "}
+                        <span onClick={() => onNavigate("terms")} className="text-emerald-800 font-bold hover:underline cursor-pointer">
+                          Terms of Service
+                        </span>{" "}
+                        and{" "}
+                        <span onClick={() => onNavigate("privacy")} className="text-emerald-800 font-bold hover:underline cursor-pointer">
+                          Privacy Policy
+                        </span>.
                       </p>
                     </div>
                   </FormSlide>

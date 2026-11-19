@@ -220,7 +220,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                       min={10}
                       value={amount}
                       onChange={(e) => setAmount(Math.max(1, Number(e.target.value)))}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-9 pr-4 py-3 font-black text-slate-900 text-xl focus:outline-none focus:border-purple-600 transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-9 pr-4 py-3 font-black text-slate-900 text-xl focus:outline-none focus:border-[#047857] transition-all"
                     />
                   </div>
 
@@ -233,7 +233,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                             type="button"
                             onClick={() => setAmount(amt)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer border-none outline-none ${
-                              amount === amt ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              amount === amt ? 'bg-[#047857] text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹{amt}
@@ -246,7 +246,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                             type="button"
                             onClick={() => setAmount(amt)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer border-none outline-none ${
-                              amount === amt ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              amount === amt ? 'bg-[#047857] text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹{amt}
@@ -258,7 +258,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                             type="button"
                             onClick={() => setAmount(amt)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer border-none outline-none ${
-                              amount === amt ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              amount === amt ? 'bg-[#047857] text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                             }`}
                           >
                             ₹{amt}
@@ -278,7 +278,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                           type="button"
                           onClick={() => setWeeklyDay(day)}
                           className={`py-2 rounded-xl text-xs font-bold cursor-pointer border-none outline-none ${
-                            weeklyDay === day ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700'
+                            weeklyDay === day ? 'bg-[#047857] text-white' : 'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {day.slice(0, 3)}
@@ -298,7 +298,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                           type="button"
                           onClick={() => setMonthlyDate(d)}
                           className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer border-none outline-none ${
-                            monthlyDate === d ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-700'
+                            monthlyDate === d ? 'bg-[#047857] text-white' : 'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {d}th
@@ -312,7 +312,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Tenure</label>
-                    <span className="text-xs font-bold text-purple-700">{tenureYears} Years</span>
+                    <span className="text-xs font-bold text-emerald-700">{tenureYears} Years</span>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {[1, 3, 5, 10].map((yr) => (
@@ -322,7 +322,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                         onClick={() => setTenureYears(yr)}
                         className={`py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-none outline-none ${
                           tenureYears === yr
-                            ? 'bg-purple-600 text-white font-black shadow-2xs'
+                            ? 'bg-[#047857] text-white font-black shadow-2xs'
                             : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                         }`}
                       >
@@ -333,10 +333,10 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                 </div>
 
                 {/* Projected Returns Card */}
-                <div className="bg-gradient-to-br from-slate-900 to-purple-950 text-white rounded-2xl p-5 space-y-3">
+                <div className="bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#047857] text-white rounded-2xl p-5 space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <div className="text-[11px] font-bold text-purple-300">Expected Value ({tenureYears} Yrs)</div>
+                      <div className="text-[11px] font-bold text-emerald-200">Expected Value ({tenureYears} Yrs)</div>
                       <div className="text-2xl sm:text-3xl font-black text-white mt-0.5">
                         ₹{calculationData.totalValue.toLocaleString()}
                       </div>
@@ -346,13 +346,13 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-purple-800/50">
+                  <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-emerald-600/40">
                     <div>
-                      <span className="text-purple-300">Invested: </span>
+                      <span className="text-emerald-200">Invested: </span>
                       <span className="font-bold">₹{calculationData.totalInvested.toLocaleString()}</span>
                     </div>
                     <div>
-                      <span className="text-purple-300">Est. Returns: </span>
+                      <span className="text-emerald-200">Est. Returns: </span>
                       <span className="font-bold text-emerald-400">+₹{calculationData.estimatedReturn.toLocaleString()}</span>
                     </div>
                   </div>
@@ -364,7 +364,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                     setStep('success');
                     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer border-none outline-none transition-all"
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer border-none outline-none transition-all"
                 >
                   <span>Confirm SIP Mandate</span>
                   <ArrowRight size={16} />
@@ -399,7 +399,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Frequency</span>
-                  <span className="font-bold text-purple-700 capitalize">{frequency} ({getNextAutoPayDate()})</span>
+                  <span className="font-bold text-emerald-700 capitalize">{frequency} ({getNextAutoPayDate()})</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Tenure</span>
@@ -414,7 +414,7 @@ export default function SipSetupPage({ initialMetal = 'gold', initialPlan = 'dai
               <div className="flex gap-2">
                 <button
                   onClick={() => onNavigate(metal === 'silver' ? 'silver-savings' : 'savings')}
-                  className="flex-1 py-3 rounded-xl bg-purple-600 text-white font-bold text-xs cursor-pointer border-none outline-none"
+                  className="flex-1 py-3 rounded-xl bg-[#047857] hover:bg-[#064e3b] text-white font-bold text-xs cursor-pointer border-none outline-none"
                 >
                   View SIP Dashboard
                 </button>

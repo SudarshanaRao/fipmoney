@@ -16,24 +16,24 @@ interface BillsPageProps {
 }
 
 const services = [
-  { label: "Mobile Prepaid", Icon: Smartphone, color: "#8b5cf6", bg: "#f3e8ff", shadow: "rgba(139, 92, 246, 0.15)", category: "recharge" },
-  { label: "DTH", Icon: Tv, color: "#a855f7", bg: "#f3e8ff", shadow: "rgba(168, 85, 247, 0.15)", category: "recharge" },
+  { label: "Mobile Prepaid", Icon: Smartphone, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "recharge" },
+  { label: "DTH", Icon: Tv, color: "#059669", bg: "#ecfdf5", shadow: "rgba(5, 150, 105, 0.15)", category: "recharge" },
   { label: "Electricity", Icon: Zap, color: "#f59e0b", bg: "#fef3c7", shadow: "rgba(245, 158, 11, 0.15)", category: "utilities" },
   { label: "FASTag", Icon: Car, color: "#10b981", bg: "#d1fae5", shadow: "rgba(16, 185, 129, 0.15)", category: "recharge" },
-  { label: "Broadband", Icon: Wifi, color: "#3b82f6", bg: "#dbeafe", shadow: "rgba(59, 130, 246, 0.15)", category: "utilities" },
-  { label: "Landline Postpaid", Icon: FileText, color: "#ec4899", bg: "#fce7f3", shadow: "rgba(236, 72, 153, 0.15)", category: "utilities" },
+  { label: "Broadband", Icon: Wifi, color: "#0d9488", bg: "#ccfbf1", shadow: "rgba(13, 148, 136, 0.15)", category: "utilities" },
+  { label: "Landline Postpaid", Icon: FileText, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "utilities" },
   { label: "Gas", Icon: Flame, color: "#ef4444", bg: "#fee2e2", shadow: "rgba(239, 68, 68, 0.15)", category: "utilities" },
-  { label: "Water", Icon: Droplets, color: "#3b82f6", bg: "#dbeafe", shadow: "rgba(59, 130, 246, 0.15)", category: "utilities" },
+  { label: "Water", Icon: Droplets, color: "#0284c7", bg: "#e0f2fe", shadow: "rgba(2, 132, 199, 0.15)", category: "utilities" },
   { label: "Google Play", Icon: Play, color: "#10b981", bg: "#d1fae5", shadow: "rgba(16, 185, 129, 0.15)", category: "recharge" },
-  { label: "Cable TV", Icon: MonitorPlay, color: "#ec4899", bg: "#fce7f3", shadow: "rgba(236, 72, 153, 0.15)", category: "entertainment" },
-  { label: "Mobile Postpaid", Icon: Smartphone, color: "#8b5cf6", bg: "#f3e8ff", shadow: "rgba(139, 92, 246, 0.15)", category: "recharge" },
+  { label: "Cable TV", Icon: MonitorPlay, color: "#059669", bg: "#ecfdf5", shadow: "rgba(5, 150, 105, 0.15)", category: "entertainment" },
+  { label: "Mobile Postpaid", Icon: Smartphone, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "recharge" },
   { label: "LPG Gas", Icon: Flame, color: "#ef4444", bg: "#fee2e2", shadow: "rgba(239, 68, 68, 0.15)", category: "utilities" },
   { label: "Credit Card", Icon: CreditCard, color: "#ef4444", bg: "#fee2e2", shadow: "rgba(239, 68, 68, 0.15)", category: "financial" },
   { label: "Rent", Icon: Home, color: "#10b981", bg: "#d1fae5", shadow: "rgba(16, 185, 129, 0.15)", category: "financial" },
-  { label: "Education Fees", Icon: GraduationCap, color: "#8b5cf6", bg: "#f3e8ff", shadow: "rgba(139, 92, 246, 0.15)", category: "education" },
+  { label: "Education Fees", Icon: GraduationCap, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "education" },
   { label: "Insurance", Icon: Shield, color: "#06b6d4", bg: "#cffafe", shadow: "rgba(6, 182, 212, 0.15)", category: "financial" },
-  { label: "Subscriptions", Icon: Shield, color: "#8b5cf6", bg: "#f3e8ff", shadow: "rgba(139, 92, 246, 0.15)", category: "entertainment" },
-  { label: "More", Icon: MoreHorizontal, color: "#3b82f6", bg: "#dbeafe", shadow: "rgba(59, 130, 246, 0.15)", category: "other" }
+  { label: "Subscriptions", Icon: Shield, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "entertainment" },
+  { label: "More", Icon: MoreHorizontal, color: "#0d9488", bg: "#ccfbf1", shadow: "rgba(13, 148, 136, 0.15)", category: "other" }
 ];
 
 const CATEGORIES = [
@@ -80,7 +80,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
   const promoCards = [
     { title: "Refer & Earn", desc: "Invite friends and earn digital gold rewards directly in your vault.", icon: Users, gradient: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", action: "Refer Now" },
     { title: "Instant Cashbacks", desc: "Pay your utility bills and get assured cashbacks every month.", icon: Banknote, gradient: "linear-gradient(135deg, #064e3b 0%, #10b981 100%)", action: "Explore Offers" },
-    { title: "Bank-Grade Security", desc: "Your payments are protected with 256-bit encryption.", icon: Shield, gradient: "linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)", action: "Learn More" }
+    { title: "Bank-Grade Security", desc: "Your payments are protected with 256-bit encryption.", icon: Shield, gradient: "linear-gradient(135deg, #022c22 0%, #047857 100%)", action: "Learn More" }
   ];
 
   const filteredServices = services.filter(service => {
@@ -252,13 +252,13 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
                   key={tab.id}
                   onClick={() => setActiveSubTab(tab.id)}
                   className={`w-full text-left px-4 py-3.5 rounded-2xl font-semibold text-sm outline-none border-none cursor-pointer transition-all duration-300 flex items-center justify-between group
-                    ${active ? "bg-[#f5f3ff] text-[#6d28d9]" : "bg-transparent text-slate-600 hover:bg-slate-50"}`}
+                    ${active ? "bg-emerald-50 text-[#047857] font-bold" : "bg-transparent text-slate-600 hover:bg-slate-50"}`}
                 >
                   <div className="flex items-center gap-3">
-                    <tab.Icon size={18} className={active ? "text-[#6d28d9]" : "text-slate-400 group-hover:text-slate-500"} />
+                    <tab.Icon size={18} className={active ? "text-[#047857]" : "text-slate-400 group-hover:text-slate-500"} />
                     <span>{tab.label}</span>
                   </div>
-                  {active && <ChevronRight size={16} className="text-[#6d28d9]" />}
+                  {active && <ChevronRight size={16} className="text-[#047857]" />}
                 </button>
               );
             })}

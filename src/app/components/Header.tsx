@@ -279,7 +279,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                     {/* Savings Section */}
                     <div className="space-y-4">
                       <div className="flex items-center space-x-2 border-b border-gray-100 pb-2">
-                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-[#047857]">
                           <PiggyBank className="w-4 h-4" />
                         </div>
                         <span className="font-bold text-gray-900 text-sm">Gold Savings</span>
@@ -287,28 +287,28 @@ export default function Header({ onNavigate }: HeaderProps) {
                       <div className="flex flex-col space-y-1">
                         <button
                           onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
-                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50/50 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-[#047857] hover:bg-emerald-50/60 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
                         >
                           <span>Daily Savings</span>
-                          <span className="text-[9px] bg-purple-100 text-purple-700 font-extrabold px-1.5 py-0.5 rounded">₹100/d</span>
+                          <span className="text-[9px] bg-emerald-100 text-[#064e3b] font-extrabold px-1.5 py-0.5 rounded">₹100/d</span>
                         </button>
                         <button
                           onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
-                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50/50 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-[#047857] hover:bg-emerald-50/60 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
                         >
                           <span>Weekly Savings</span>
-                          <span className="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-1.5 py-0.5 rounded">₹1k/wk</span>
+                          <span className="text-[9px] bg-emerald-100 text-[#064e3b] font-extrabold px-1.5 py-0.5 rounded">₹1k/wk</span>
                         </button>
                         <button
                           onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
-                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50/50 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
+                          className="w-full text-left text-xs font-semibold text-gray-600 hover:text-[#047857] hover:bg-emerald-50/60 p-1.5 rounded-lg transition-all duration-200 flex items-center justify-between"
                         >
                           <span>Monthly Savings</span>
                           <span className="text-[9px] bg-amber-100 text-amber-700 font-extrabold px-1.5 py-0.5 rounded">₹5k/mo</span>
                         </button>
                         <button
                           onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))}
-                          className="w-full text-left text-xs font-bold text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-1.5 rounded-lg transition-all duration-200 mt-1"
+                          className="w-full text-left text-xs font-bold text-[#047857] hover:text-[#064e3b] hover:bg-emerald-50 p-1.5 rounded-lg transition-all duration-200 mt-1"
                         >
                           View Savings Page →
                         </button>
@@ -365,7 +365,7 @@ export default function Header({ onNavigate }: HeaderProps) {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 text-gray-600 hover:text-[#ffbf00] transition-colors duration-200"
+            className="md:hidden p-2 text-gray-600 hover:text-[#047857] transition-colors duration-200"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <motion.div
@@ -403,7 +403,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                     <div className="pl-4 flex flex-col space-y-2">
                       <button onClick={() => handleDropdownItemClick(() => onNavigate?.('buy-gold'))} className="text-left text-xs text-gray-600 hover:text-amber-500 py-1 font-semibold bg-transparent border-none">Buy Digital Gold</button>
                       <button onClick={() => handleDropdownItemClick(() => onNavigate?.('sell-gold'))} className="text-left text-xs text-gray-600 hover:text-amber-500 py-1 font-semibold bg-transparent border-none">Sell Digital Gold</button>
-                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))} className="text-left text-xs text-purple-700 hover:text-purple-900 py-1 font-bold bg-transparent border-none">Gold Savings (SIP)</button>
+                      <button onClick={() => handleDropdownItemClick(() => onNavigate?.('savings'))} className="text-left text-xs text-[#047857] hover:text-[#064e3b] py-1 font-bold bg-transparent border-none">Gold Savings (SIP)</button>
                     </div>
                   </div>
 
@@ -443,13 +443,13 @@ export default function Header({ onNavigate }: HeaderProps) {
                   {helpItems.map((item, index) => (
                     <motion.button
                       key={item.name}
-                      className="flex items-center space-x-3 w-full text-left text-gray-600 hover:text-[#ffbf00] py-2 transition-colors duration-200"
+                      className="flex items-center space-x-3 w-full text-left text-gray-600 hover:text-[#047857] py-2 transition-colors duration-200"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => handleDropdownItemClick(item.action)}
                     >
-                      <item.icon className="w-4 h-4 text-[#ffbf00]" />
+                      <item.icon className="w-4 h-4 text-[#047857]" />
                       <span className="text-sm">{item.name}</span>
                     </motion.button>
                   ))}
@@ -458,7 +458,7 @@ export default function Header({ onNavigate }: HeaderProps) {
                 {navItems.map((item, index) => (
                   <motion.button
                     key={item.name}
-                    className="text-left text-gray-600 hover:text-[#ffbf00] font-medium py-2 transition-colors duration-200 hover-gold"
+                    className="text-left text-gray-600 hover:text-[#047857] font-medium py-2 transition-colors duration-200"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -472,16 +472,17 @@ export default function Header({ onNavigate }: HeaderProps) {
               <div className="flex flex-col space-y-3 mt-6 pt-6 border-t border-gray-200">
                 <Button
                   variant="outline"
-                  className="border-[#ffbf00] text-[#b8860b] hover:bg-[#fffbea] font-semibold"
+                  className="border-slate-200 text-slate-900 hover:bg-emerald-50 hover:border-emerald-300 hover:text-[#047857] font-bold rounded-xl shadow-2xs"
                   onClick={() => handleDropdownItemClick(() => onNavigate?.('login'))}
                 >
-                  <LogIn className="w-4 h-4 mr-2" />
+                  <LogIn className="w-4 h-4 mr-2 text-emerald-600" />
                   Login
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] text-gray-900 shadow-lg font-bold"
+                  className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white shadow-md shadow-emerald-900/25 font-black rounded-xl border-none"
                   onClick={() => handleDropdownItemClick(() => onNavigate?.('signup'))}
                 >
+                  <Sparkles className="w-4 h-4 mr-1 text-amber-300" />
                   Start Savings Now
                 </Button>
               </div>

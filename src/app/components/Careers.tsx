@@ -1,7 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowLeft, Briefcase, MapPin, Clock, Users, Heart, Lightbulb, Trophy, Coffee } from "lucide-react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft, Briefcase, MapPin, Clock, Users, Heart, Lightbulb,
+  Trophy, Coffee, Sparkles, Send, CheckCircle2, ChevronRight,
+  ShieldCheck, Laptop, Rocket, ArrowRight, X, DollarSign
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
@@ -9,351 +14,451 @@ interface CareersProps {
   onBack: () => void;
 }
 
-const JobCard = ({ job, delay = 0 }) => (
-  <motion.div
-    className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 interactive-card border border-gray-100"
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.6 }}
-    viewport={{ once: true }}
-  >
-    <div className="flex items-start justify-between mb-4">
-      <div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">{job.title}</h3>
-        <div className="flex items-center space-x-4 text-sm text-gray-600">
-          <div className="flex items-center space-x-1">
-            <MapPin className="w-4 h-4" />
-            <span>{job.location}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Clock className="w-4 h-4" />
-            <span>{job.type}</span>
-          </div>
-        </div>
-      </div>
-      <Badge className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] text-white border-0">
-        {job.department}
-      </Badge>
-    </div>
-    
-    <p className="text-gray-600 mb-4 leading-relaxed">{job.description}</p>
-    
-    <div className="flex flex-wrap gap-2 mb-4">
-      {job.skills.map((skill, index) => (
-        <Badge key={index} variant="outline" className="text-xs">
-          {skill}
-        </Badge>
-      ))}
-    </div>
-    
-    <div className="flex items-center justify-between">
-      <div className="text-sm text-gray-500">
-        Posted {job.posted}
-      </div>
-      <Button className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] text-white border-0 interactive-button">
-        Apply Now
-      </Button>
-    </div>
-  </motion.div>
-);
-
-const BenefitCard = ({ icon: Icon, title, description, delay = 0 }) => (
-  <motion.div
-    className="text-center"
-    initial={{ opacity: 0, scale: 0.8 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    transition={{ delay, duration: 0.6 }}
-    viewport={{ once: true }}
-  >
-    <motion.div
-      className="w-16 h-16 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] rounded-2xl flex items-center justify-center mx-auto mb-4"
-      whileHover={{ scale: 1.1, rotate: 360 }}
-      transition={{ duration: 0.6 }}
-    >
-      <Icon className="w-8 h-8 text-white" />
-    </motion.div>
-    <h4 className="font-semibold text-gray-900 mb-2">{title}</h4>
-    <p className="text-gray-600 text-sm">{description}</p>
-  </motion.div>
-);
-
 export default function Careers({ onBack }: CareersProps) {
+  const [selectedDept, setSelectedDept] = useState("all");
+  const [applyingJob, setApplyingJob] = useState<any>(null);
+  const [applicantName, setApplicantName] = useState("");
+  const [applicantEmail, setApplicantEmail] = useState("");
+  const [applicantPhone, setApplicantPhone] = useState("");
+  const [applicantLinkedIn, setApplicantLinkedIn] = useState("");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const jobs = [
     {
-      title: "Senior Frontend Developer",
-      location: "Hyderabad, India",
-      type: "Full-time",
+      id: "fe-dev",
+      title: "Senior Fullstack / Frontend Engineer",
+      location: "Bengaluru, India (Hybrid)",
+      type: "Full-Time",
       department: "Engineering",
-      description: "Build beautiful and intuitive user interfaces for our gold investment platform using React, TypeScript, and modern web technologies.",
-      skills: ["React", "TypeScript", "Tailwind CSS", "Next.js", "GraphQL"],
-      posted: "2 days ago"
+      experience: "3-6 Years",
+      compensation: "₹24L - ₹38L + ESOPs",
+      description: "Build blazing-fast, mobile-first fintech interfaces for digital gold and silver savings, real-time bullion order books, and secure payment rails.",
+      skills: ["React", "TypeScript", "Tailwind CSS", "Node.js", "Capacitor"],
+      posted: "Active Hiring"
     },
     {
-      title: "Product Manager",
-      location: "Hyderabad, India",
-      type: "Full-time",
+      id: "be-eng",
+      title: "Senior Backend & Payment Systems Engineer",
+      location: "Bengaluru, India (Hybrid)",
+      type: "Full-Time",
+      department: "Engineering",
+      experience: "4-7 Years",
+      compensation: "₹28L - ₹45L + ESOPs",
+      description: "Architect mission-critical ledger infrastructure, bank payment gateways, UPI AutoPay recurring mandate schedulers, and Brink's vault reconciliation engines.",
+      skills: ["Node.js", "Python", "MongoDB", "Redis", "Kafka", "AWS"],
+      posted: "Priority Opening"
+    },
+    {
+      id: "pm-fintech",
+      title: "Lead Product Manager - Wealth & SIPs",
+      location: "Bengaluru, India (On-Site)",
+      type: "Full-Time",
       department: "Product",
-      description: "Lead product strategy and development for our core investment features. Work closely with engineering and design teams.",
-      skills: ["Product Strategy", "User Research", "Analytics", "Agile", "Fintech"],
-      posted: "1 week ago"
+      experience: "4-8 Years",
+      compensation: "₹30L - ₹48L + ESOPs",
+      description: "Drive the roadmap for micro-savings, daily gold SIP algorithms, gamified reward loops, and native mobile growth funnels.",
+      skills: ["Fintech", "User Growth", "Product Analytics", "A/B Testing", "Agile"],
+      posted: "Active Hiring"
     },
     {
-      title: "Backend Engineer",
-      location: "Hyderabad, India",
-      type: "Full-time",
-      department: "Engineering",
-      description: "Design and build scalable backend systems for handling millions of transactions and ensuring data security.",
-      skills: ["Node.js", "Python", "PostgreSQL", "AWS", "Microservices"],
-      posted: "3 days ago"
-    },
-    {
-      title: "DevOps Engineer",
-      location: "Remote",
-      type: "Full-time",
-      department: "Engineering",
-      description: "Maintain and scale our cloud infrastructure, implement CI/CD pipelines, and ensure 99.9% uptime.",
-      skills: ["AWS", "Docker", "Kubernetes", "Terraform", "Jenkins"],
-      posted: "5 days ago"
-    },
-    {
-      title: "UX/UI Designer",
-      location: "Hyderabad, India",
-      type: "Full-time",
+      id: "ux-designer",
+      title: "Senior Product Designer (UI / UX)",
+      location: "Bengaluru, India (Hybrid)",
+      type: "Full-Time",
       department: "Design",
-      description: "Create user-centered designs that make gold investment simple and delightful for our users.",
-      skills: ["Figma", "User Research", "Prototyping", "Design Systems", "Mobile Design"],
-      posted: "1 week ago"
+      experience: "3-5 Years",
+      compensation: "₹20L - ₹32L + ESOPs",
+      description: "Craft world-class luxury 3D fintech aesthetics, seamless onboarding flows, and accessible micro-interactions across web and mobile.",
+      skills: ["Figma", "Design Systems", "Prototyping", "Fintech UX", "Mobile Design"],
+      posted: "Active Hiring"
     },
     {
-      title: "Data Scientist",
-      location: "Hyderabad, India",
-      type: "Full-time",
+      id: "data-scientist",
+      title: "Quant & Risk Data Scientist",
+      location: "Bengaluru, India (Hybrid)",
+      type: "Full-Time",
       department: "Analytics",
-      description: "Analyze user behavior and market trends to drive data-driven product decisions and personalization.",
-      skills: ["Python", "SQL", "Machine Learning", "Statistics", "Tableau"],
-      posted: "4 days ago"
+      experience: "3-6 Years",
+      compensation: "₹25L - ₹40L + ESOPs",
+      description: "Build algorithmic price prediction models, market-making inventory hedging, and fraud detection classifiers for high-frequency transactions.",
+      skills: ["Python", "SQL", "Machine Learning", "Risk Modeling", "Time Series"],
+      posted: "Priority Opening"
+    },
+    {
+      id: "growth-lead",
+      title: "Growth & Performance Marketing Manager",
+      location: "Bengaluru, India (On-Site)",
+      type: "Full-Time",
+      department: "Growth",
+      experience: "3-5 Years",
+      compensation: "₹18L - ₹28L + Incentives",
+      description: "Lead user acquisition and viral referral loops across India, driving digital gold adoption and customer lifetime value.",
+      skills: ["User Acquisition", "Performance Ads", "Attribution", "Funnel Optimization"],
+      posted: "Active Hiring"
     }
   ];
 
   const benefits = [
     {
       icon: Heart,
-      title: "Health & Wellness",
-      description: "Comprehensive health insurance for you and your family, plus wellness programs"
-    },
-    {
-      icon: Lightbulb,
-      title: "Learning & Growth",
-      description: "Annual learning budget, conference attendance, and skill development programs"
+      title: "Comprehensive Health & Wellness",
+      description: "₹10L family floater health cover, zero-deductible OPD benefits, and annual wellness allowances."
     },
     {
       icon: Trophy,
-      title: "Equity & Bonuses",
-      description: "Competitive salary with equity participation and performance bonuses"
+      title: "Wealth Equity & Annual Bonuses",
+      description: "Generous ESOP grants with wealth-building upside and transparent quarterly performance bonuses."
+    },
+    {
+      icon: Laptop,
+      title: "Top-Tier Hardware & Work Setup",
+      description: "Latest Apple MacBook Pro (M3 Max / M4) plus dedicated ergonomic home office setup budget."
+    },
+    {
+      icon: Lightbulb,
+      title: "Learning & Conference Budget",
+      description: "Annual ₹1.5L personal development budget for tech conferences, books, and certifications."
     },
     {
       icon: Coffee,
-      title: "Work-Life Balance",
-      description: "Flexible working hours, remote options, and unlimited paid time off"
+      title: "Flexible Hybrid Culture",
+      description: "Outcome-driven work culture with flexible hours and unlimited paid leave policy."
     },
     {
-      icon: Users,
-      title: "Team Culture",
-      description: "Regular team outings, celebrations, and a collaborative work environment"
-    },
-    {
-      icon: Briefcase,
-      title: "Career Growth",
-      description: "Clear career progression paths and leadership development opportunities"
+      icon: Rocket,
+      title: "High-Impact Mission",
+      description: "Build financial freedom for the next 100 million Indian households saving in 24K pure gold."
     }
   ];
 
+  const filteredJobs = selectedDept === "all" ? jobs : jobs.filter(j => j.department.toLowerCase() === selectedDept.toLowerCase());
+
+  const handleApplySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!applicantName || !applicantEmail) return;
+    setIsSubmitted(true);
+  };
+
   return (
-    <motion.div
-      className="min-h-screen bg-white"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-    >
-      {/* Header */}
-      <motion.div
-        className="bg-gradient-to-r from-[#fff8dc] to-[#ffe485] border-b border-gray-200"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-[#047857] selection:text-white w-full pb-20">
+      {/* ── TOP STICKY HEADER (100% Width) ── */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
               onClick={onBack}
-              className="flex items-center space-x-2 text-gray-600 hover:text-[#ffbf00] interactive-button"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 transition-all cursor-pointer active:scale-95"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
-            </Button>
-            <div className="h-6 w-px bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
-              <Briefcase className="w-5 h-5 text-[#ffbf00]" />
-              <h1 className="text-2xl font-bold text-gray-900">Careers at FipMoney</h1>
+              <ArrowLeft size={16} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+
+            <div className="flex items-center gap-2 cursor-pointer select-none" onClick={onBack}>
+              <img src="/fipmoney_logo_final.png" alt="FipMoney" className="h-8 w-auto object-contain" />
+              <div>
+                <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 block leading-none">
+                  Fipmoney
+                </span>
+                <span className="text-[9px] font-extrabold text-[#047857] tracking-wider uppercase">
+                  Careers & Culture
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#047857] text-[11px] font-bold">
+              <Sparkles size={14} />
+              <span>We're Hiring • {jobs.length} Positions</span>
             </div>
           </div>
         </div>
-      </motion.div>
+      </header>
 
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-[#ffbf00] rounded-full blur-3xl float-animation"></div>
-          <div className="absolute bottom-20 right-20 w-40 h-40 bg-[#ffd152] rounded-full blur-3xl" style={{ animationDelay: '1s' }}></div>
+      {/* ── HERO BANNER (100% Fluid Width) ── */}
+      <section className="w-full bg-gradient-to-b from-white via-[#F0FDF4]/50 to-[#F8FAFC] border-b border-slate-200/80 py-10 sm:py-16 px-4 sm:px-6 lg:px-10 relative overflow-hidden text-center">
+        {/* Glow Particles */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute bottom-0 left-10 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
+        <div className="max-w-4xl mx-auto space-y-5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-300 text-[#047857] text-xs font-black uppercase tracking-wider">
+            <Rocket size={14} className="text-[#047857]" />
+            <span>Join Our High-Growth Engineering & Product Team</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+            Build the Future of{" "}
+            <span className="bg-gradient-to-r from-[#047857] via-[#059669] to-[#10b981] bg-clip-text text-transparent">
+              Digital Wealth
+            </span>{" "}
+            in India
+          </h1>
+
+          <p className="text-sm sm:text-base text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
+            At Fipmoney, we're democratizing 24K pure digital gold and automated micro-savings for millions of Indians. Join an elite, high-ownership team in Bengaluru.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2 text-xs font-bold text-slate-600">
+            <span className="bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">🚀 High-Velocity Execution</span>
+            <span className="bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">💰 Generous ESOPs</span>
+            <span className="bg-white px-3.5 py-1.5 rounded-xl border border-slate-200 shadow-2xs">📍 Koramangala, Bengaluru</span>
+          </div>
         </div>
+      </section>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.h2
-              className="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              Build the Future of{" "}
-              <span className="gradient-text">Digital Gold</span>{" "}
-              Investment
-            </motion.h2>
-            
-            <motion.p
-              className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              Join our mission to democratize wealth building in India. Work with a passionate team 
-              of innovators building India's most trusted digital gold platform.
-            </motion.p>
+      {/* ── MAIN CONTENT (100% Fluid Width) ── */}
+      <main className="w-full px-4 sm:px-6 lg:px-10 py-10 max-w-7xl mx-auto space-y-16">
+        
+        {/* ── OPEN POSITIONS SECTION ── */}
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Current Openings
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">
+                Explore open roles across Engineering, Product, Design, and Analytics.
+              </p>
+            </div>
 
+            {/* Department Filter Pills */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {["all", "Engineering", "Product", "Design", "Analytics", "Growth"].map((dept) => (
+                <button
+                  key={dept}
+                  onClick={() => setSelectedDept(dept)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black capitalize transition-all cursor-pointer border ${
+                    selectedDept.toLowerCase() === dept.toLowerCase()
+                      ? "bg-[#047857] text-white border-[#047857] shadow-xs"
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {dept}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Job Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {filteredJobs.map((job) => (
+              <motion.div
+                key={job.id}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-xs hover:border-emerald-300 transition-all flex flex-col justify-between space-y-5"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                        {job.title}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-semibold mt-1">
+                        <span className="flex items-center gap-1"><MapPin size={13} className="text-[#047857]" /> {job.location}</span>
+                        <span className="flex items-center gap-1"><Clock size={13} className="text-[#047857]" /> {job.type}</span>
+                        <span className="flex items-center gap-1"><Briefcase size={13} className="text-[#047857]" /> {job.experience}</span>
+                      </div>
+                    </div>
+                    <Badge className="bg-emerald-50 text-[#047857] border border-emerald-200 font-bold text-[10px] shrink-0">
+                      {job.department}
+                    </Badge>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    {job.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {job.skills.map((skill, sIdx) => (
+                      <span
+                        key={sIdx}
+                        className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block tracking-wider">Compensation</span>
+                    <span className="text-xs font-black text-[#064e3b]">{job.compensation}</span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setApplyingJob(job);
+                      setIsSubmitted(false);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white text-xs font-black transition-all cursor-pointer border-none shadow-sm flex items-center gap-1.5 active:scale-95"
+                  >
+                    <span>Apply Now</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── BENEFITS & PERKS GRID ── */}
+        <section className="space-y-6 pt-4">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Life & Perks at Fipmoney
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-semibold">
+              We take exceptional care of the people who build Fipmoney.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {benefits.map((b, idx) => {
+              const Icon = b.icon;
+              return (
+                <div
+                  key={idx}
+                  className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-3 hover:border-emerald-300 transition-all"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#047857] flex items-center justify-center font-bold">
+                    <Icon size={22} />
+                  </div>
+                  <h3 className="text-base font-black text-slate-900">{b.title}</h3>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">{b.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── BOTTOM CALL-TO-ACTION BANNER ── */}
+        <section className="rounded-3xl bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#047857] text-white p-8 sm:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div className="absolute right-0 bottom-0 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="space-y-2 max-w-xl text-center md:text-left relative z-10">
+            <span className="text-xs font-black uppercase tracking-wider text-emerald-300">Don't see your specific role?</span>
+            <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+              We always make room for exceptional talent.
+            </h3>
+            <p className="text-xs sm:text-sm text-emerald-100/80 font-medium">
+              Email your portfolio or resume directly to our founders and engineering leadership.
+            </p>
+          </div>
+
+          <a
+            href="mailto:careers@fipmoney.com?subject=Exceptional%20Talent%20Inquiry%20-%20Fipmoney"
+            className="px-7 py-3.5 rounded-2xl bg-white text-slate-900 hover:bg-emerald-50 font-black text-xs transition-all shadow-md shrink-0 cursor-pointer text-center no-underline relative z-10"
+          >
+            Email: careers@fipmoney.com
+          </a>
+        </section>
+
+      </main>
+
+      {/* ── FAST APPLICATION MODAL ── */}
+      <AnimatePresence>
+        {applyingJob && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs">
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 space-y-5 relative"
             >
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-[#ffbf00] to-[#ffd152] hover:from-[#e6a800] hover:to-[#ffbf00] text-white border-0 px-8 py-6 text-lg interactive-button"
+              <button
+                onClick={() => setApplyingJob(null)}
+                className="absolute right-5 top-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-black cursor-pointer border-none"
               >
-                View Open Positions
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-[#ffbf00] text-[#b38200] hover:bg-[#fff8dc] px-8 py-6 text-lg interactive-button"
-              >
-                Life at FipMoney
-              </Button>
+                ✕
+              </button>
+
+              <div className="pr-8">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#047857]">Application</span>
+                <h3 className="text-lg font-black text-slate-900 mt-0.5">{applyingJob.title}</h3>
+                <span className="text-xs text-slate-500 font-semibold">{applyingJob.department} • {applyingJob.location}</span>
+              </div>
+
+              {isSubmitted ? (
+                <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-300 text-center space-y-3">
+                  <CheckCircle2 size={32} className="text-[#047857] mx-auto" />
+                  <h4 className="text-base font-black text-slate-900">Application Received!</h4>
+                  <p className="text-xs text-slate-600 font-medium">
+                    Thank you, <strong>{applicantName}</strong>. Our hiring team will review your profile and reach out via {applicantEmail} within 2 business days.
+                  </p>
+                  <button
+                    onClick={() => setApplyingJob(null)}
+                    className="px-5 py-2 rounded-xl bg-[#047857] text-white text-xs font-bold cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleApplySubmit} className="space-y-3.5 text-xs">
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={applicantName}
+                      onChange={(e) => setApplicantName(e.target.value)}
+                      placeholder="e.g. Rahul Sharma"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={applicantEmail}
+                      onChange={(e) => setApplicantEmail(e.target.value)}
+                      placeholder="e.g. rahul@example.com"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Mobile Number</label>
+                      <input
+                        type="tel"
+                        required
+                        value={applicantPhone}
+                        onChange={(e) => setApplicantPhone(e.target.value)}
+                        placeholder="e.g. 9876543210"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">LinkedIn / Portfolio URL</label>
+                      <input
+                        type="url"
+                        value={applicantLinkedIn}
+                        onChange={(e) => setApplicantLinkedIn(e.target.value)}
+                        placeholder="linkedin.com/in/username"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white font-black text-xs transition-all cursor-pointer border-none shadow-md shadow-emerald-900/20 mt-2"
+                  >
+                    Submit Application
+                  </button>
+                </form>
+              )}
             </motion.div>
           </div>
-        </div>
-      </section>
-
-      {/* Why Work With Us */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Why Work With Us?</h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Join a company that values innovation, growth, and making a real impact on millions of lives
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((benefit, index) => (
-              <BenefitCard
-                key={benefit.title}
-                icon={benefit.icon}
-                title={benefit.title}
-                description={benefit.description}
-                delay={index * 0.1}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Open Positions */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Open Positions</h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We're always looking for talented individuals to join our growing team
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            {jobs.map((job, index) => (
-              <JobCard
-                key={job.title}
-                job={job}
-                delay={index * 0.1}
-              />
-            ))}
-          </div>
-
-          <motion.div
-            className="text-center mt-12"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <p className="text-gray-600 mb-4">
-              Don't see a role that fits? We're always interested in hearing from exceptional talent.
-            </p>
-            <Button
-              variant="outline"
-              className="border-2 border-[#ffbf00] text-[#b38200] hover:bg-[#fff8dc] interactive-button"
-            >
-              Send Us Your Resume
-            </Button>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-[#ffbf00] to-[#ffd152] text-white">
-        <div className="container mx-auto px-4 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-3xl font-bold mb-4">Ready to Make an Impact?</h3>
-            <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">
-              Join us in revolutionizing how India invests in gold and help millions build lasting wealth
-            </p>
-            <Button
-              size="lg"
-              className="bg-white text-[#ffbf00] hover:bg-gray-100 px-8 py-6 text-lg interactive-button"
-            >
-              Apply Today
-            </Button>
-          </motion.div>
-        </div>
-      </section>
-    </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

@@ -41,7 +41,7 @@ export default function ProfileCompletionWidget({
     <div className="w-full font-sans">
       {compact ? (
         /* Compact Card (Sidebar / Header Widget) */
-        <div className="bg-white/90 backdrop-blur-md rounded-[24px] p-4 border border-purple-100 shadow-xs relative overflow-hidden flex flex-col justify-between">
+        <div className="bg-white/90 backdrop-blur-md rounded-[24px] p-4 border border-emerald-200/80 shadow-xs relative overflow-hidden flex flex-col justify-between">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="flex items-center gap-2.5">
               {/* Radial Progress SVG */}
@@ -59,7 +59,7 @@ export default function ProfileCompletionWidget({
                     cx="24"
                     cy="24"
                     r={radius / 1.6}
-                    className="text-purple-600 stroke-current"
+                    className="text-[#047857] stroke-current"
                     strokeWidth="3.5"
                     strokeDasharray={2 * Math.PI * (radius / 1.6)}
                     initial={{ strokeDashoffset: 2 * Math.PI * (radius / 1.6) }}
@@ -79,7 +79,7 @@ export default function ProfileCompletionWidget({
               <div>
                 <div className="flex items-center gap-1.5">
                   <h4 className="text-xs font-black text-slate-900 tracking-tight">Profile Completion</h4>
-                  <Sparkles size={13} className="text-purple-500 shrink-0" />
+                  <Sparkles size={13} className="text-emerald-500 shrink-0" />
                 </div>
                 <span className={`inline-block px-2 py-0.5 mt-0.5 rounded-full text-[9px] font-extrabold border ${result.statusBadgeBg}`}>
                   {result.statusLabel}
@@ -89,7 +89,7 @@ export default function ProfileCompletionWidget({
 
             <button
               onClick={() => setShowTasksModal(!showTasksModal)}
-              className="text-[11px] font-bold text-purple-600 hover:text-purple-800 flex items-center gap-0.5 border-none bg-transparent cursor-pointer outline-none"
+              className="text-[11px] font-bold text-[#047857] hover:text-[#064e3b] flex items-center gap-0.5 border-none bg-transparent cursor-pointer outline-none"
             >
               <span>{result.percentage === 100 ? "View Details" : `${result.missingTasks.length} left`}</span>
               <ChevronRight size={13} strokeWidth={2.5} />
@@ -117,7 +117,7 @@ export default function ProfileCompletionWidget({
               </div>
               <button
                 onClick={() => onNavigate && onNavigate(result.missingTasks[0].targetTab)}
-                className="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-extrabold text-[9px] transition-all border border-purple-200/60 shrink-0 cursor-pointer outline-none"
+                className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#047857] font-extrabold text-[9px] transition-all border border-emerald-200 shrink-0 cursor-pointer outline-none"
               >
                 {result.missingTasks[0].actionText}
               </button>
@@ -126,7 +126,7 @@ export default function ProfileCompletionWidget({
         </div>
       ) : (
         /* Full Expanded Dashboard Banner Widget */
-        <div className="bg-gradient-to-br from-white via-purple-50/40 to-slate-50 rounded-[28px] p-6 border border-purple-100 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-gradient-to-br from-white via-emerald-50/40 to-slate-50 rounded-[28px] p-6 border border-emerald-200/80 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-5 w-full md:w-auto">
             {/* Radial Gauge */}
             <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
@@ -143,7 +143,7 @@ export default function ProfileCompletionWidget({
                   cx="40"
                   cy="40"
                   r={radius}
-                  className="text-purple-600 stroke-current"
+                  className="text-[#047857] stroke-current"
                   strokeWidth="6"
                   strokeDasharray={circumference}
                   initial={{ strokeDashoffset: circumference }}
@@ -184,7 +184,7 @@ export default function ProfileCompletionWidget({
             {result.missingTasks.length > 0 ? (
               <button
                 onClick={() => onNavigate && onNavigate(result.missingTasks[0].targetTab)}
-                className="px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm shadow-md shadow-purple-600/20 transition-all cursor-pointer flex items-center gap-1.5 border-none outline-none active:scale-95"
+                className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-xs sm:text-sm shadow-md shadow-emerald-900/20 transition-all cursor-pointer flex items-center gap-1.5 border-none outline-none active:scale-95"
               >
                 <span>{result.missingTasks[0].actionText} (+{result.missingTasks[0].weight}%)</span>
                 <ArrowRight size={15} strokeWidth={3} />
@@ -223,9 +223,9 @@ export default function ProfileCompletionWidget({
               </div>
 
               {/* Progress Summary Header */}
-              <div className="p-3.5 rounded-2xl bg-purple-50/70 border border-purple-100 flex items-center justify-between">
-                <span className="text-xs font-extrabold text-purple-900">Total Completion Score</span>
-                <span className="text-sm font-black text-purple-700">{result.percentage}%</span>
+              <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center justify-between">
+                <span className="text-xs font-extrabold text-[#064e3b]">Total Completion Score</span>
+                <span className="text-sm font-black text-[#047857]">{result.percentage}%</span>
               </div>
 
               {/* Task Items List */}
@@ -236,14 +236,14 @@ export default function ProfileCompletionWidget({
                     className={`p-3 rounded-2xl border flex items-center justify-between gap-3 transition-all ${
                       task.isCompleted
                         ? "bg-slate-50/70 border-slate-100"
-                        : "bg-white border-purple-100 shadow-2xs hover:border-purple-200"
+                        : "bg-white border-emerald-200/80 shadow-2xs hover:border-emerald-300"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 truncate">
                       {task.isCompleted ? (
                         <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
                       ) : (
-                        <div className="w-4 h-4 rounded-full border-2 border-purple-400 shrink-0" />
+                        <div className="w-4 h-4 rounded-full border-2 border-emerald-500 shrink-0" />
                       )}
                       <div className="truncate">
                         <div className={`text-xs font-bold ${task.isCompleted ? "text-slate-500 line-through" : "text-slate-900"}`}>
@@ -259,7 +259,7 @@ export default function ProfileCompletionWidget({
                           setShowTasksModal(false);
                           if (onNavigate) onNavigate(task.targetTab);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-[10px] shrink-0 border-none cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-extrabold text-[10px] shrink-0 border-none cursor-pointer"
                       >
                         +{task.weight}% {task.actionText}
                       </button>

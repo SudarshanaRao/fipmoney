@@ -468,10 +468,10 @@ export default function BecomeAgentPage() {
             <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
                 <span>Agent Status Tier</span>
-                <Award size={16} className="text-purple-500" />
+                <Award size={16} className="text-emerald-500" />
               </div>
-              <div className="text-2xl font-black text-purple-700">Diamond</div>
-              <div className="text-xs font-bold text-purple-600 flex items-center gap-1">
+              <div className="text-2xl font-black text-emerald-700">Diamond</div>
+              <div className="text-xs font-bold text-[#047857] flex items-center gap-1">
                 <Trophy size={12} /> Top 2% Partner Tier
               </div>
             </div>
@@ -534,7 +534,7 @@ export default function BecomeAgentPage() {
             </div>
 
             <div className="bg-white p-6 rounded-3xl border border-gray-150 shadow-2xs space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#047857] flex items-center justify-center font-bold">
                 <DollarSign size={20} />
               </div>
               <h4 className="text-sm font-extrabold text-gray-900">Payout Settlements</h4>
@@ -1007,7 +1007,7 @@ export default function BecomeAgentPage() {
                 </div>
               </div>
             ) : waitlistResult ? (
-              <div className="space-y-4 bg-gradient-to-br from-purple-50/70 via-amber-50/40 to-slate-50 rounded-3xl p-6 sm:p-8 border border-purple-100 shadow-xs">
+              <div className="space-y-4 bg-gradient-to-br from-emerald-50/70 via-amber-50/40 to-slate-50 rounded-3xl p-6 sm:p-8 border border-emerald-100 shadow-xs">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
                     <CheckCircle2 size={24} />
@@ -1027,20 +1027,20 @@ export default function BecomeAgentPage() {
                   </div>
                 </div>
 
-                <div className="bg-white/90 backdrop-blur rounded-2xl p-5 border border-purple-100/80 space-y-3 shadow-xs">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-50 pb-3">
+                <div className="bg-white/90 backdrop-blur rounded-2xl p-5 border border-emerald-100/80 space-y-3 shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-50 pb-3">
                     <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Your Official DGA Waitlist Number</span>
-                    <span className="font-black text-lg text-purple-700 bg-purple-100/80 px-3.5 py-1 rounded-xl w-fit">
+                    <span className="font-black text-lg text-emerald-700 bg-emerald-100/80 px-3.5 py-1 rounded-xl w-fit">
                       {waitlistResult.formattedWaitlistNumber || formatWaitlistNumber(waitlistResult.waitlistNumber)}
                     </span>
                   </div>
 
                   <div className="text-xs text-slate-600 font-medium leading-relaxed">
-                    Thank you for registering! Each user receives exactly one unique position in the waitlist sequence starting from <strong className="text-purple-700">DGA0001</strong>. We will notify you via mobile & email when early access opens.
+                    Thank you for registering! Each user receives exactly one unique position in the waitlist sequence starting from <strong className="text-emerald-700">DGA0001</strong>. We will notify you via mobile & email when early access opens.
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] font-bold text-purple-700 pt-1">
+                <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-700 pt-1">
                   <ShieldCheck size={16} />
                   <span>Single registration verified. Your spot is reserved.</span>
                 </div>
@@ -1056,7 +1056,7 @@ export default function BecomeAgentPage() {
                       placeholder="Enter your full name"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50"
                     />
                   </div>
 
@@ -1086,7 +1086,7 @@ export default function BecomeAgentPage() {
                     placeholder="Enter your email address"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50"
                   />
                 </div>
 
@@ -1114,7 +1114,7 @@ export default function BecomeAgentPage() {
                         verifyCommunicationAddress(formData.address, pincode, formData.city);
                       }
                     }}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50 resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50 resize-none"
                   />
                   {isAddressVerifying && (
                     <span className="text-[10px] font-bold text-indigo-600 animate-pulse mt-1 block">
@@ -1138,10 +1138,10 @@ export default function BecomeAgentPage() {
                       placeholder="e.g. 500001"
                       value={pincode}
                       onChange={handlePincodeChange}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50"
                     />
                     {pincodeMsg && (
-                      <span className="text-[10px] font-bold text-purple-700 mt-1 block">
+                      <span className="text-[10px] font-bold text-emerald-700 mt-1 block">
                         {pincodeMsg}
                       </span>
                     )}
@@ -1165,7 +1165,7 @@ export default function BecomeAgentPage() {
                   <select
                     value={formData.language}
                     onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-purple-600 bg-slate-50/50 cursor-pointer"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-[#047857] bg-slate-50/50 cursor-pointer"
                   >
                     {LANGUAGES.map((lang, idx) => (
                       <option key={idx} value={lang.split(" ")[0]}>
@@ -1188,17 +1188,17 @@ export default function BecomeAgentPage() {
                     id="agreeTerms"
                     checked={formData.agreeTerms}
                     onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
-                    className="rounded text-purple-600 focus:ring-purple-500 cursor-pointer"
+                    className="rounded text-[#047857] focus:ring-[#047857] cursor-pointer"
                   />
                   <label htmlFor="agreeTerms" className="text-xs text-slate-600 font-medium cursor-pointer">
-                    I agree to the <span className="text-purple-600 underline font-bold">Terms & Conditions</span> and <span className="text-purple-600 underline font-bold">Privacy Policy</span>.
+                    I agree to the <span className="text-[#047857] underline font-bold">Terms & Conditions</span> and <span className="text-[#047857] underline font-bold">Privacy Policy</span>.
                   </label>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || !formData.agreeTerms}
-                  className="w-full py-3.5 rounded-2xl font-bold text-sm text-white bg-[#6d28d9] hover:bg-[#5b21b6] transition-all shadow-md shadow-purple-900/20 border-none cursor-pointer outline-none active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-2xl font-bold text-sm text-white bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] transition-all shadow-md shadow-emerald-900/20 border-none cursor-pointer outline-none active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -1264,7 +1264,7 @@ export default function BecomeAgentPage() {
 
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-semibold relative z-10">
             <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-5 py-3 rounded-2xl shadow-2xs">
-              <Mail size={20} className="text-purple-600 shrink-0" />
+              <Mail size={20} className="text-[#047857] shrink-0" />
               <div>
                 <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Email Support</span>
                 <span className="font-black text-slate-900 text-xs sm:text-sm">support@fipmoney.com</span>
@@ -1272,7 +1272,7 @@ export default function BecomeAgentPage() {
             </div>
 
             <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-5 py-3 rounded-2xl shadow-2xs">
-              <Phone size={20} className="text-purple-600 shrink-0" />
+              <Phone size={20} className="text-[#047857] shrink-0" />
               <div>
                 <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Helpline</span>
                 <span className="font-black text-slate-900 text-xs sm:text-sm">+91 98765 43210</span>

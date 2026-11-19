@@ -111,19 +111,19 @@ export function calculateProfileCompletion(
 
   if (percentage >= 100) {
     statusLabel = "100% Complete";
-    statusColor = "text-emerald-700 font-extrabold";
-    statusBadgeBg = "bg-emerald-100/90 text-emerald-800 border-emerald-300/80";
-    progressGradient = "from-emerald-400 via-emerald-500 to-teal-500";
+    statusColor = "text-[#047857] font-extrabold";
+    statusBadgeBg = "bg-emerald-100 text-[#064e3b] border-emerald-300/80";
+    progressGradient = "from-[#064e3b] via-[#047857] to-[#10b981]";
   } else if (percentage >= 75) {
     statusLabel = "Almost Complete";
-    statusColor = "text-blue-700 font-extrabold";
-    statusBadgeBg = "bg-blue-100/90 text-blue-800 border-blue-300/80";
-    progressGradient = "from-blue-500 via-indigo-500 to-purple-600";
+    statusColor = "text-[#047857] font-extrabold";
+    statusBadgeBg = "bg-emerald-50 text-[#047857] border-emerald-200";
+    progressGradient = "from-[#047857] via-[#059669] to-[#10b981]";
   } else if (percentage >= 40) {
     statusLabel = "Intermediate";
-    statusColor = "text-purple-700 font-extrabold";
-    statusBadgeBg = "bg-purple-100/90 text-purple-800 border-purple-300/80";
-    progressGradient = "from-purple-500 via-violet-600 to-indigo-600";
+    statusColor = "text-emerald-700 font-extrabold";
+    statusBadgeBg = "bg-emerald-50/80 text-emerald-800 border-emerald-200";
+    progressGradient = "from-[#059669] via-emerald-500 to-teal-400";
   }
 
   return {

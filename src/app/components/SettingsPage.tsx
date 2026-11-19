@@ -1075,7 +1075,7 @@ export default function SettingsPage() {
                   <div
                     id="email-input-section"
                     className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200 transition-all rounded-2xl px-2 ${
-                      isEmailHighlighted || !email ? 'bg-purple-50/70 border-purple-200 ring-2 ring-purple-500/50 p-4' : ''
+                      isEmailHighlighted || !email ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/40 p-4' : ''
                     }`}
                   >
                     <div className="md:col-span-4">
@@ -1088,7 +1088,7 @@ export default function SettingsPage() {
                         )}
                       </div>
                       {isEmailHighlighted && (
-                        <span className="block text-[11px] text-purple-700 font-bold mt-1">
+                        <span className="block text-[11px] text-emerald-700 font-bold mt-1">
                           👉 Please add & verify your official email here!
                         </span>
                       )}
@@ -1106,7 +1106,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => handleStartFieldChange("email")}
-                        className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-sm font-extrabold px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0 shadow-sm"
+                        className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white text-sm font-extrabold px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0 shadow-sm shadow-emerald-900/20"
                       >
                         {!email || email.endsWith('@fipmoney.com') ? "Add & Verify Email" : "Change"}
                       </button>
@@ -1885,7 +1885,7 @@ export default function SettingsPage() {
         {/* Footer info blocks */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm mt-8">
            <div className="flex items-start gap-4">
-              <div className="p-3 bg-purple-50 rounded-full text-purple-600 shrink-0">
+              <div className="p-3 bg-emerald-50 rounded-full text-[#047857] shrink-0">
                  <Lock size={20} />
               </div>
               <div>
