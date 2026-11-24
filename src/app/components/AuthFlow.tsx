@@ -554,6 +554,16 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     }
   };
 
+  const handleGoToDashboard = () => {
+    if (currentUser) {
+      saveLoggedInUser(currentUser);
+    }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("fm_auth_state_change"));
+    }
+    onNavigate("dashboard");
+  };
+
   // Removed password strength calculation
 
   return (
@@ -1021,7 +1031,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                         )}
                        <p className="text-[15px] mb-10 text-slate-600 font-medium">Your premium digital gold portfolio awaits.</p>
                        <button 
-                         onClick={() => onNavigate("dashboard")}
+                         onClick={handleGoToDashboard}
                          className="w-full h-[56px] rounded-xl text-[15px] font-bold text-white bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] border border-[#F3F6E8]/30 shadow-lg shadow-emerald-900/20 transition-all flex items-center justify-center outline-none cursor-pointer"
                        >
                          Go to Dashboard <ChevronDown size={16} className="ml-1 -rotate-90 text-amber-300" />
@@ -1581,7 +1591,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                       </div>
                       <Button
                         type="button"
-                        onClick={() => onNavigate("dashboard")}
+                        onClick={handleGoToDashboard}
                         className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-emerald-900/20 transition-all duration-300 active:scale-[0.98] mt-7 flex items-center justify-center gap-2 cursor-pointer border-none disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed"
                       >
                         Go to Dashboard

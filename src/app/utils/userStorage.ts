@@ -254,7 +254,30 @@ export function saveLoggedInUser(user: MongoUser): void {
       sessionStorage.setItem("fm_session_id", user.sessionId);
       localStorage.setItem("fm_session_id", user.sessionId);
     }
+    window.dispatchEvent(new Event("fm_auth_state_change"));
   }
+}
+
+export function checkIsUserLoggedIn(): boolean {
+  if (typeof window === "undefined") return false;
+  const sessionMobile = sessionStorage.getItem("fm_logged_in_mobile");
+  if (sessionMobile && sessionMobile.trim() !== "") return true;
+
+  const raw = localStorage.getItem(LOGGED_IN_USER_KEY);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && (parsed.mobileNumber || parsed.userId || parsed.userCode)) {
+        if (parsed.mobileNumber && !sessionMobile) {
+          sessionStorage.setItem("fm_logged_in_mobile", parsed.mobileNumber);
+        }
+        return true;
+      }
+    } catch (e) {}
+  }
+
+  const sessionId = sessionStorage.getItem("fm_session_id") || localStorage.getItem("fm_session_id");
+  return !!sessionId;
 }
 
 export function getLoggedInUser(): MongoUser | null {
@@ -286,6 +309,7 @@ export function clearUserSession(): void {
         sessionStorage.removeItem(key);
       }
     });
+    window.dispatchEvent(new Event("fm_auth_state_change"));
   }
 }
 

@@ -1,7 +1,7 @@
 {
-  "latestVersion": "1.0.4",
-  "latestVersionCode": 5,
-  "minSupportedVersionCode": 4,
+  "latestVersion": "1.0.5",
+  "latestVersionCode": 6,
+  "minSupportedVersionCode": 5,
   "forceUpdate": false,
   "title": "Update Available in Play Store",
   "description": "A new version of Fipmoney is available on Google Play Store with latest features, enhanced security, and performance improvements.",

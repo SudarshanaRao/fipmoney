@@ -44,7 +44,7 @@ import AgentDashboard from "./components/AgentDashboard";
 import { OBFUSCATED_ADMIN_PATH } from "./utils/adminStorage";
 import { LoadingSpinner } from "./components/LottiePlayer";
 import { API_BASE_URL } from "./utils/apiConfig";
-import { clearUserSession } from "./utils/userStorage";
+import { clearUserSession, checkIsUserLoggedIn } from "./utils/userStorage";
 import BiometricLockScreen from "./components/BiometricLockScreen";
 import { isBiometricLockEnabled } from "./utils/biometricService";
 import { SplashScreen as CapacitorSplashScreen } from "@capacitor/splash-screen";
@@ -122,7 +122,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => {
     if (typeof window !== 'undefined') {
       const isNative = Capacitor.isNativePlatform();
-      const hasUserSession = !!sessionStorage.getItem("fm_logged_in_mobile");
+      const hasUserSession = checkIsUserLoggedIn();
       if (isNative && !hasUserSession) {
         return 'login';
       }
@@ -138,7 +138,7 @@ export default function App() {
   const [revokedMessage, setRevokedMessage] = useState("");
   const [isAppLocked, setIsAppLocked] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      const hasUserSession = !!sessionStorage.getItem("fm_logged_in_mobile");
+      const hasUserSession = checkIsUserLoggedIn();
       return hasUserSession && isBiometricLockEnabled();
     }
     return false;
@@ -151,7 +151,20 @@ export default function App() {
     return false;
   });
  
-  const isLoggedIn = typeof window !== 'undefined' ? !!sessionStorage.getItem("fm_logged_in_mobile") : false;
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => checkIsUserLoggedIn());
+
+  // Listen for real-time authentication changes across components & tabs
+  useEffect(() => {
+    const handleAuthChange = () => {
+      setIsLoggedIn(checkIsUserLoggedIn());
+    };
+    window.addEventListener("fm_auth_state_change", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+    return () => {
+      window.removeEventListener("fm_auth_state_change", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
+    };
+  }, []);
 
   // Initialize Native Android & iOS Status Bar with Safe Insets & Light Theme
   useEffect(() => {
@@ -172,11 +185,15 @@ export default function App() {
     if (typeof window === 'undefined') return;
     const currentPath = window.location.pathname.slice(1);
     const isNative = Capacitor.isNativePlatform();
+    const currentLoggedIn = checkIsUserLoggedIn();
+    if (currentLoggedIn !== isLoggedIn) {
+      setIsLoggedIn(currentLoggedIn);
+    }
 
     // Native Android Route Guard:
     // When running inside Android app, unauthenticated users MUST NOT see homepage or public landing pages.
     // They are restricted strictly to 'login' and essential utility pages (help, terms, privacy, delete-account).
-    if (isNative && !isLoggedIn) {
+    if (isNative && !currentLoggedIn) {
       const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
       if (!allowedUnauthenticatedPages.includes(currentPath) || !allowedUnauthenticatedPages.includes(currentPage)) {
         window.history.replaceState({}, '', '/login');
@@ -187,7 +204,7 @@ export default function App() {
 
     // Dedicated Standalone Agent Dashboard Environment Route Guard
     if (currentPath === 'agent-dashboard' || currentPath === 'agent/dashboard' || currentPath === 'agent' || currentPage === 'agent-dashboard' as any) {
-      if (isLoggedIn) {
+      if (currentLoggedIn) {
         if (currentPage !== 'agent-dashboard') setCurrentPage('agent-dashboard' as PageType);
       } else {
         window.history.replaceState({}, '', '/login');
@@ -197,14 +214,14 @@ export default function App() {
     }
 
     // Unauthenticated user trying to access /dashboard -> redirect to /login
-    if (!isLoggedIn && (currentPath === 'dashboard' || currentPath.startsWith('dashboard/') || currentPage === 'dashboard')) {
+    if (!currentLoggedIn && (currentPath === 'dashboard' || currentPath.startsWith('dashboard/') || currentPage === 'dashboard')) {
       window.history.replaceState({}, '', '/login');
       setCurrentPage('login');
       return;
     }
 
     // Authenticated user trying to access /, /login, or /signup -> redirect to /dashboard
-    if (isLoggedIn && (currentPath === '' || currentPath === 'home' || currentPath === 'login' || currentPath === 'signup' || currentPage === 'home' || currentPage === 'login' || currentPage === 'signup')) {
+    if (currentLoggedIn && (currentPath === '' || currentPath === 'home' || currentPath === 'login' || currentPath === 'signup' || currentPage === 'home' || currentPage === 'login' || currentPage === 'signup')) {
       window.history.replaceState({}, '', '/dashboard');
       setCurrentPage('dashboard');
       return;
@@ -253,7 +270,7 @@ export default function App() {
     // Handle browser back/forward buttons
     const handlePopState = () => {
       const path = window.location.pathname.slice(1) || 'home';
-      if (Capacitor.isNativePlatform() && !isLoggedIn) {
+      if (Capacitor.isNativePlatform() && !checkIsUserLoggedIn()) {
         const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
         if (!allowedUnauthenticatedPages.includes(path)) {
           window.history.replaceState({}, '', '/login');
@@ -266,7 +283,7 @@ export default function App() {
 
     // Hardware back button handler for Android
     const handleBackButton = (e: any) => {
-      if (Capacitor.isNativePlatform() && !isLoggedIn) {
+      if (Capacitor.isNativePlatform() && !checkIsUserLoggedIn()) {
         if (currentPage === 'login' || currentPage === 'signup') {
           (navigator as any).app?.exitApp?.();
         } else {
@@ -315,8 +332,14 @@ export default function App() {
   }, [currentPage, isLoggedIn]);
 
   const navigateToPage = (targetPage: PageType) => {
+    // Re-verify login status dynamically from storage right at the moment of navigation
+    const activeLoggedIn = checkIsUserLoggedIn();
+    if (activeLoggedIn !== isLoggedIn) {
+      setIsLoggedIn(activeLoggedIn);
+    }
+
     let page = targetPage;
-    if (Capacitor.isNativePlatform() && !isLoggedIn) {
+    if (Capacitor.isNativePlatform() && !activeLoggedIn) {
       const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
       if (!allowedUnauthenticatedPages.includes(page)) {
         page = 'login';
@@ -357,7 +380,7 @@ export default function App() {
   };
 
   const navigateToHome = () => {
-    if (Capacitor.isNativePlatform() && !isLoggedIn) {
+    if (Capacitor.isNativePlatform() && !checkIsUserLoggedIn()) {
       navigateToPage('login');
     } else {
       navigateToPage('home');
@@ -365,7 +388,7 @@ export default function App() {
   };
 
   const handleBackFromSubpage = () => {
-    if (Capacitor.isNativePlatform() && !isLoggedIn) {
+    if (Capacitor.isNativePlatform() && !checkIsUserLoggedIn()) {
       navigateToPage('login');
     } else {
       navigateToHome();

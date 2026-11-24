@@ -1,20 +1,20 @@
 Release Name / Title (< 50 chars):
-Fipmoney v1.0.4 - UI Inset Fix & In-App Update
+Fipmoney v1.0.5 - Dashboard Navigation Fix
 
 Release Notes (<en-GB>, < 500 chars):
 <en-GB>
-Welcome to Fipmoney v1.0.4!
-• Notification Panel Fix: Optimized status bar insets for edge-to-edge screens
-• In-App Update Checker: Instant alerts when new Play Store releases arrive
-• Enhanced 3D Mobile Login: Seamless single-screen authentication
-• Performance and stability improvements across all Android devices
+Welcome to Fipmoney v1.0.5!
+• Dashboard Navigation Fix: Seamless transition to dashboard after setup
+• Reactive Session Sync: Improved authentication state synchronization
+• In-App Update Engine: Instant alerts when new Play Store releases arrive
+• Performance and stability enhancements across all Android devices
 </en-GB>
 
 Package Details:
-- Root Bundle: fipmoney-v1.0.4-vc5.aab
+- Root Bundle: fipmoney-v1.0.5-vc6.aab
 - Gradle Bundle: android/app/build/outputs/bundle/release/app-release.aab
 - App ID: com.fipmoney.app
-- Version Name: 1.0.4
-- Version Code: 5
+- Version Name: 1.0.5
+- Version Code: 6
 - Target SDK: 36
 - Min SDK: 24
