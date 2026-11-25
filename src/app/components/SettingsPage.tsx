@@ -1,34 +1,62 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User, CreditCard, ShieldCheck, Heart, Sparkles,
   Trash2, Upload, CheckCircle2, AlertCircle, AlertTriangle, Info, ChevronRight,
   Shield, Check, HelpCircle, PhoneOff, Camera, Video, Loader2,
-  Save, Landmark, Lock, Trophy, Circle, Eye, Headset,
-  Laptop, Smartphone, Tablet, Globe, Clock, ShieldAlert
+  Save, Landmark, Lock, Trophy, Circle, Eye, EyeOff, Headset,
+  Laptop, Smartphone, Tablet, Globe, Clock, ShieldAlert,
+  Fingerprint, Copy, ArrowUpCircle, ExternalLink, RefreshCw, KeyRound,
+  FileCheck2, CheckCheck, Briefcase, Mail, Phone, Calendar
 } from "lucide-react";
 
 import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
 import { API_BASE_URL } from "../utils/apiConfig";
 import { getLoggedInUser, getUserAvatar, updateUserAvatar } from "../utils/userStorage";
-import ProfileCompletionWidget from "./ProfileCompletionWidget";
 import { calculateProfileCompletion } from "../utils/profileCompletionCalculator";
+import { 
+  checkBiometricAvailability, 
+  authenticateWithBiometrics, 
+  isBiometricLockEnabled, 
+  setBiometricLockEnabled 
+} from "../utils/biometricService";
+import { 
+  CURRENT_APP_VERSION, 
+  CURRENT_VERSION_CODE, 
+  fetchLatestAppVersion, 
+  openGooglePlayStore 
+} from "../utils/appUpdateService";
+import { Capacitor } from "@capacitor/core";
+import { toast } from "react-hot-toast";
 
-type SettingsTab = "profile" | "bank" | "nominee" | "security" | "sessions";
+type SettingsTab = "profile" | "bank" | "nominee" | "security" | "sessions" | "about";
 
 export default function SettingsPage() {
   const { showAlert, showConfirm, ModalComponent } = useFipModal();
   const [activeSubTab, setActiveSubTab] = useState<SettingsTab>("profile");
   const [isEmailHighlighted, setIsEmailHighlighted] = useState(false);
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
+  // Biometric Native State
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricType, setBiometricType] = useState("Fingerprint");
+  const [isBiometricActive, setIsBiometricActive] = useState(() => isBiometricLockEnabled());
+  const [isTogglingBiometric, setIsTogglingBiometric] = useState(false);
+
+  // App Update Checker State
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+
+  // Highlight email if navigated from Dashboard prompt
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const highlight = sessionStorage.getItem("fm_highlight_email");
       if (highlight === "true") {
         setIsEmailHighlighted(true);
+        setActiveSubTab("profile");
         sessionStorage.removeItem("fm_highlight_email");
         setTimeout(() => {
           const el = document.getElementById("email-input-section");
@@ -36,6 +64,22 @@ export default function SettingsPage() {
         }, 300);
       }
     }
+  }, []);
+
+  // Check native biometric availability on mount
+  useEffect(() => {
+    const checkBio = async () => {
+      try {
+        const res = await checkBiometricAvailability();
+        setBiometricAvailable(res.isAvailable);
+        if (res.biometryType) {
+          setBiometricType(res.biometryType === "FACE_AUTHENTICATION" ? "Face ID" : "Fingerprint");
+        }
+      } catch (e) {
+        console.warn("Biometric check notice:", e);
+      }
+    };
+    checkBio();
   }, []);
 
   // Load logged-in user details directly from database session
@@ -152,12 +196,11 @@ export default function SettingsPage() {
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isUsernameLocked) return;
-    // Allow ONLY letters, numbers, and underscores (_). No spaces, no other special chars.
     const cleaned = e.target.value.replace(/[^a-zA-Z0-9_]/g, "");
     setUsername(cleaned);
   };
 
-  // OTP Verification Modal states for email and mobile (current -> new verification flow)
+  // OTP Verification Modal states for email and mobile
   const [changeFieldType, setChangeFieldType] = useState<"email" | "mobile" | null>(null);
   const [changeStep, setChangeStep] = useState<1 | 2 | 3>(1);
   const [currentVerifyOtp, setCurrentVerifyOtp] = useState("");
@@ -173,7 +216,7 @@ export default function SettingsPage() {
   const fetchRealKycStatus = async () => {
     if (!loggedInMobile) return;
     try {
-      let res = await fetch(`${API_BASE_URL}/kyc/status?phone=${loggedInMobile}`);
+      const res = await fetch(`${API_BASE_URL}/kyc/status?phone=${loggedInMobile}`);
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.status) {
@@ -205,7 +248,7 @@ export default function SettingsPage() {
         panNo: panVal || panNumber || 'ABCDE1234F'
       };
 
-      let res = await fetch(`${API_BASE_URL}/kyc/submit`, {
+      const res = await fetch(`${API_BASE_URL}/kyc/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -241,62 +284,61 @@ export default function SettingsPage() {
             const level = user.kycLevel;
             if (isCompleted) setKycStatus("full kyc");
             
-            if (typeof setAadhaarVerified === 'function') {
-              setAadhaarVerified(isCompleted || (level && level.toLowerCase().includes("min")));
-            }
-            if (typeof setPanVerified === 'function') {
-              setPanVerified(isCompleted || (level && level.toLowerCase().includes("min")));
-            }
+            setAadhaarVerified(isCompleted || Boolean(level && level.toLowerCase().includes("min")));
+            setPanVerified(isCompleted || Boolean(level && level.toLowerCase().includes("min")));
 
-            if (user.fullName !== undefined) setFullName(user.fullName);
-            if (user.email) setEmail(user.email);
-            if (user.occupation) setJobTitle(user.occupation);
-            if (user.annualIncome) setIncomeRange(String(user.annualIncome));
-            if (user.username && !isUsernameLocked) setUsername(user.username);
-            if (user.referralCode) setReferralCode(user.referralCode);
-            if (user.profileImage) {
-              setAvatar(user.profileImage);
-              if (typeof window !== 'undefined') {
-                localStorage.setItem(`fm_user_avatar_${loggedInMobile}`, user.profileImage);
-              }
+            if (user.fullName && !fullName) setFullName(user.fullName);
+            if (user.username && !username) setUsername(user.username);
+            if (user.email && !email) setEmail(user.email);
+            if (user.occupation && !jobTitle) setJobTitle(user.occupation);
+            if (user.annualIncome && !incomeRange) setIncomeRange(String(user.annualIncome));
+            if (user.bankAccount) {
+              if (user.bankAccount.bankName && !bankName) setBankName(user.bankAccount.bankName);
+              if (user.bankAccount.accountNumber && !accountNumber) setAccountNumber(user.bankAccount.accountNumber);
+              if (user.bankAccount.ifscCode && !ifscCode) setIfscCode(user.bankAccount.ifscCode);
+            }
+            if (user.nominee) {
+              if (user.nominee.name && !nomineeName) setNomineeName(user.nominee.name);
+              if (user.nominee.relationship && !nomineeRelation) setNomineeRelation(user.nominee.relationship);
+              if (user.nominee.dob && !nomineeDob) setNomineeDob(user.nominee.dob);
             }
           }
         })
-        .catch(err => console.warn("Notice fetching user details:", err.message || err));
+        .catch(err => console.warn("Profile settings fetch notice:", err));
     }
-  }, [loggedInMobile, isUsernameLocked]);
+  }, [loggedInMobile]);
 
   // Aadhaar & PAN verification states
   const [aadhaarVerified, setAadhaarVerified] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min"));
   const [panVerified, setPanVerified] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min"));
-  const [aadhaarNumber, setAadhaarNumber] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min") ? "489218249419" : "");
+  const [aadhaarNumber, setAadhaarNumber] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min") ? "XXXX-XXXX-9012" : "");
   const [panNumber, setPanNumber] = useState(initialKyc.toLowerCase().includes("kyc") || initialKyc.toLowerCase().includes("min") ? "ABCDE1234F" : "");
   const [aadhaarOtp, setAadhaarOtp] = useState("");
   const [showAadhaarOtp, setShowAadhaarOtp] = useState(false);
   const [isLinkingAadhaar, setIsLinkingAadhaar] = useState(false);
   const [isLinkingPan, setIsLinkingPan] = useState(false);
 
-  // Real Dynamic Bank details (no static dummy defaults)
+  // Bank States
   const [bankName, setBankName] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem(`fm_bank_name_${loggedInMobile}`) || loggedInUser?.bankAccount?.bankName || "";
+      return localStorage.getItem(`fm_bank_name_${loggedInMobile}`) || "";
     }
-    return loggedInUser?.bankAccount?.bankName || "";
+    return "";
   });
   const [accountNumber, setAccountNumber] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem(`fm_bank_acc_${loggedInMobile}`) || loggedInUser?.bankAccount?.accountNumber || "";
+      return localStorage.getItem(`fm_bank_acc_${loggedInMobile}`) || "";
     }
-    return loggedInUser?.bankAccount?.accountNumber || "";
+    return "";
   });
   const [ifscCode, setIfscCode] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem(`fm_bank_ifsc_${loggedInMobile}`) || loggedInUser?.bankAccount?.ifscCode || "";
+      return localStorage.getItem(`fm_bank_ifsc_${loggedInMobile}`) || "";
     }
-    return loggedInUser?.bankAccount?.ifscCode || "";
+    return "";
   });
 
-  // Nominee Details
+  // Nominee States
   const [nomineeName, setNomineeName] = useState("");
   const [nomineeRelation, setNomineeRelation] = useState("spouse");
   const [nomineeDob, setNomineeDob] = useState("");
@@ -316,11 +358,6 @@ export default function SettingsPage() {
     return () => window.removeEventListener("fm_avatar_changed", handleAvatarChange);
   }, [loggedInMobile]);
 
-  // Dynamically calculate completion percentage based on exact user weights:
-  // Personal & Basic Info: 40%
-  // Job Title & Income Range: 20%
-  // Link Bank Account: 20%
-  // Nominee Verification: 20%
   // Real-Time Debounced Profile Autosave Effect
   useEffect(() => {
     if (!loggedInMobile) return;
@@ -390,6 +427,10 @@ export default function SettingsPage() {
   const { percentage, personalDone, personalScore, bankDone, nomineeDone, kycDone } = getCompletionStats();
 
   const handleSave = async () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(15);
+    }
+
     if (username.trim()) {
       const isValidFormat = /^[a-zA-Z0-9_]+$/.test(username.trim());
       if (!isValidFormat) {
@@ -408,7 +449,6 @@ export default function SettingsPage() {
 
     setIsSaving(true);
 
-    // Sync with backend API
     try {
       await fetch(`${API_BASE_URL}/users/update-profile`, {
         method: "POST",
@@ -442,7 +482,71 @@ export default function SettingsPage() {
 
     setIsSaving(false);
     setSaveSuccess(true);
+    toast.success("Profile changes saved successfully!", { position: "top-center" });
     setTimeout(() => setSaveSuccess(false), 3000);
+  };
+
+  // Toggle Native Biometric Fingerprint Lock
+  const handleToggleBiometric = async () => {
+    if (!Capacitor.isNativePlatform()) {
+      showAlert("Biometric lock is available inside the native Android mobile app.", "info", "Mobile Feature");
+      return;
+    }
+
+    setIsTogglingBiometric(true);
+    try {
+      if (!isBiometricActive) {
+        // Authenticate first before enabling
+        const authRes = await authenticateWithBiometrics(
+          "Enable Biometric Lock",
+          "Touch your fingerprint sensor to activate instant app lock"
+        );
+        if (authRes.success) {
+          setBiometricLockEnabled(true);
+          setIsBiometricActive(true);
+          toast.success("Fingerprint lock enabled successfully!", { position: "top-center" });
+          if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(25);
+        } else {
+          toast.error(authRes.error || "Biometric authentication cancelled.");
+        }
+      } else {
+        setBiometricLockEnabled(false);
+        setIsBiometricActive(false);
+        toast.success("Fingerprint lock disabled.");
+      }
+    } catch (e) {
+      console.error("Biometric toggle error:", e);
+    } finally {
+      setIsTogglingBiometric(false);
+    }
+  };
+
+  // Check for App Updates
+  const handleCheckForUpdates = async () => {
+    setIsCheckingUpdate(true);
+    try {
+      const info = await fetchLatestAppVersion();
+      if (info && info.latestVersionCode > CURRENT_VERSION_CODE) {
+        openGooglePlayStore(info.playStoreUrl);
+      } else {
+        toast.success(`You are on the latest version of Fipmoney (v${CURRENT_APP_VERSION})!`, { position: "top-center" });
+      }
+    } catch {
+      toast.success(`You are using the latest version (v${CURRENT_APP_VERSION})!`, { position: "top-center" });
+    } finally {
+      setIsCheckingUpdate(false);
+    }
+  };
+
+  // Copy User Code Helper
+  const handleCopyUserCode = () => {
+    const code = initialUserCode || `FIP${loggedInMobile.slice(-4)}`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(`#${code}`);
+      setCopiedCode(true);
+      toast.success(`User Code #${code} copied!`, { position: "top-center" });
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
   };
 
   const [isSendingOtp, setIsSendingOtp] = useState(false);
@@ -456,7 +560,6 @@ export default function SettingsPage() {
 
     if (type === "email") {
       const targetEmail = (email || loggedInUser?.email || "").trim();
-      // If user has NO existing email (or dummy email), skip Step 1 and go directly to Step 2 (enter new email)
       if (!targetEmail || targetEmail.endsWith('@fipmoney.com')) {
         setChangeStep(2);
         return;
@@ -468,7 +571,7 @@ export default function SettingsPage() {
     try {
       if (type === "email") {
         const targetEmail = (email || loggedInUser?.email || "").trim();
-        let res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
+        const res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: targetEmail, userName: fullName || loggedInUser?.username || "Valued Member" })
@@ -479,7 +582,7 @@ export default function SettingsPage() {
       } else {
         const targetMobile = mobileNumber || loggedInMobile;
         if (targetMobile) {
-          let res = await fetch(`${API_BASE_URL}/users/send-otp`, {
+          const res = await fetch(`${API_BASE_URL}/users/send-otp`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ mobile: targetMobile })
@@ -506,7 +609,7 @@ export default function SettingsPage() {
     try {
       if (changeFieldType === "email") {
         const targetEmail = email || loggedInUser?.email || "";
-        let res = await fetch(`${API_BASE_URL}/users/verify-email-otp`, {
+        const res = await fetch(`${API_BASE_URL}/users/verify-email-otp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: targetEmail, otp: currentVerifyOtp })
@@ -521,7 +624,7 @@ export default function SettingsPage() {
         }
       } else {
         const targetMobile = mobileNumber || loggedInMobile;
-        let res = await fetch(`${API_BASE_URL}/users/verify-otp`, {
+        const res = await fetch(`${API_BASE_URL}/users/verify-otp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: targetMobile, otp: currentVerifyOtp })
@@ -560,7 +663,7 @@ export default function SettingsPage() {
     setIsSendingOtp(true);
     try {
       if (changeFieldType === "email") {
-        let res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
+        const res = await fetch(`${API_BASE_URL}/users/send-email-otp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: newValueInput.trim(), userName: fullName || loggedInUser?.username || "Valued Member" })
@@ -575,7 +678,7 @@ export default function SettingsPage() {
         }
       } else {
         const cleanMobile = newValueInput.replace(/\D/g, "");
-        let res = await fetch(`${API_BASE_URL}/users/send-otp`, {
+        const res = await fetch(`${API_BASE_URL}/users/send-otp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: cleanMobile })
@@ -601,7 +704,7 @@ export default function SettingsPage() {
     setIsVerifyingOtp(true);
     try {
       if (changeFieldType === "email") {
-        let res = await fetch(`${API_BASE_URL}/users/verify-email-otp`, {
+        const res = await fetch(`${API_BASE_URL}/users/verify-email-otp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: newValueInput.trim(), otp: newVerifyOtp })
@@ -613,7 +716,6 @@ export default function SettingsPage() {
             localStorage.setItem(`fm_user_email_${loggedInMobile}`, newValueInput.trim());
           }
 
-          // Sync profile update with backend
           await fetch(`${API_BASE_URL}/users/update-profile`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -623,7 +725,7 @@ export default function SettingsPage() {
             })
           }).catch(console.error);
 
-          showAlert("Email address verified & updated successfully in database!", "success", "Verified & Saved");
+          showAlert("Email address verified & updated successfully!", "success", "Verified & Saved");
           setChangeFieldType(null);
           setChangeStep(1);
           setCurrentVerifyOtp("");
@@ -634,7 +736,7 @@ export default function SettingsPage() {
         }
       } else {
         const cleanMobile = newValueInput.replace(/\D/g, "");
-        let res = await fetch(`${API_BASE_URL}/users/verify-otp`, {
+        const res = await fetch(`${API_BASE_URL}/users/verify-otp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ mobile: cleanMobile, otp: newVerifyOtp })
@@ -759,11 +861,7 @@ export default function SettingsPage() {
           const data = await res.json();
           updateUserAvatar(null);
           setAvatar(null);
-          if (res.ok && data.success) {
-            showAlert("Profile photo removed successfully.", "success", "Photo Removed");
-          } else {
-            showAlert(data.message || "Profile photo removed", "info");
-          }
+          showAlert("Profile photo removed successfully.", "success", "Photo Removed");
         } catch (err) {
           console.error("Error deleting profile photo:", err);
           updateUserAvatar(null);
@@ -784,12 +882,10 @@ export default function SettingsPage() {
       const file = target.files?.[0];
       if (!file) return;
 
-      // 1. Instant local browser preview using URL.createObjectURL
       const localPreviewUrl = URL.createObjectURL(file);
       setAvatar(localPreviewUrl);
 
       try {
-        // 2. Request S3 Presigned Upload URL from backend API
         const presignedRes = await fetch(`${API_BASE_URL}/users/profile/image/upload-url`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -805,7 +901,6 @@ export default function SettingsPage() {
           const presignedData = await presignedRes.json();
 
           if (presignedData.success && presignedData.uploadUrl && presignedData.objectKey) {
-            // 3. Upload file DIRECTLY from browser -> Private S3 Bucket via presigned PUT URL
             const s3UploadRes = await fetch(presignedData.uploadUrl, {
               method: "PUT",
               headers: {
@@ -815,7 +910,6 @@ export default function SettingsPage() {
             });
 
             if (s3UploadRes.ok) {
-              // 4. Confirm upload with backend -> saves objectKey in MongoDB & generates view URL
               const confirmRes = await fetch(`${API_BASE_URL}/users/profile/image/confirm`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -838,7 +932,6 @@ export default function SettingsPage() {
           }
         }
 
-        // Fallback: Direct upload endpoint if S3 presigned URL is unavailable
         const formData = new FormData();
         formData.append("image", file);
         formData.append("mobile", loggedInMobile);
@@ -857,1371 +950,1453 @@ export default function SettingsPage() {
         }
         showAlert("Profile photo updated successfully!", "success");
       } catch (error) {
-        console.warn("S3 Upload warning (retaining optimistic preview):", error);
+        console.warn("S3 Upload warning:", error);
         showAlert("Profile photo updated!", "success");
       }
     };
     fileInput.click();
   };
 
+  const tabsConfig = [
+    { id: "profile", label: "Profile", icon: User },
+    { id: "bank", label: "Bank Account", icon: Landmark },
+    { id: "nominee", label: "Nominee", icon: Heart },
+    { id: "security", label: "Security & KYC", icon: ShieldCheck },
+    { id: "sessions", label: "Sessions", icon: Smartphone },
+    { id: "about", label: "App & Info", icon: Info },
+  ];
+
   return (
     <>
-    <div className="flex-1 h-screen overflow-y-auto bg-white">
-      <div className="p-6 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-8 pb-24 lg:pb-10">
+      <div className="flex-1 min-h-full overflow-y-auto bg-[#F8FAFC] text-slate-800 font-sans selection:bg-[#047857] selection:text-white pb-32 lg:pb-12">
+        
+        {/* Soft Ambient Radial Background Glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-48 left-0 w-80 h-80 bg-amber-400/5 rounded-full blur-3xl pointer-events-none -z-10" />
 
-        {/* Title */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
-          <div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Settings</h1>
-            <p className="text-sm text-gray-500 font-semibold mt-1 flex flex-wrap items-center gap-2">
-              <span>Manage your financial profile and account configurations</span>
-              <span className="text-gray-300 hidden sm:inline">•</span>
-              <span className="inline-flex items-center gap-1.5 text-amber-800 bg-amber-50/90 border border-amber-200/80 px-2.5 py-0.5 rounded-full text-xs font-bold shadow-2xs">
-                <Sparkles size={12} className="text-amber-500 animate-pulse" />
-                Auto-saves in real-time
+        {/* ══════════════════════════════════════════════════════════════════
+            MOBILE VIEW (lg:hidden) - Modern Luxury Redesigned Experience
+        ══════════════════════════════════════════════════════════════════ */}
+        <div className="lg:hidden px-4 sm:px-6 pt-3 space-y-5">
+          
+          {/* Top Sticky Header */}
+          <div className="flex items-center justify-between pb-1">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#047857] bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-full">
+                My Account
               </span>
-            </p>
-          </div>
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
+                Settings
+              </h1>
+            </div>
 
-          <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-3 rounded-lg text-white text-sm font-bold shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:shadow-none cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2 bg-[#d97706]"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white font-black text-xs shadow-md shadow-emerald-900/15 flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all outline-none border-none disabled:opacity-50"
             >
               {isSaving ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                <Loader2 size={13} className="animate-spin" />
               ) : saveSuccess ? (
-                <CheckCircle2 size={16} />
+                <CheckCircle2 size={13} className="text-amber-300" />
               ) : (
-                <Save size={16} />
+                <Save size={13} />
               )}
-              {saveSuccess ? "Saved!" : "Save Changes"}
+              <span>{saveSuccess ? "Saved!" : isSaving ? "Saving..." : "Save"}</span>
             </button>
           </div>
-        </div>
 
-        {/* Sub Navigation Tabs (Underline Layout with Framer Motion) */}
-        <div className="flex border-b border-gray-200 overflow-x-auto hide-scrollbar">
-          {[
-            { id: "profile", label: "Profile Details" },
-            { id: "bank", label: "Bank Account" },
-            { id: "nominee", label: "Nominee Setup" },
-            { id: "security", label: "Security & KYC" },
-            { id: "sessions", label: "Active Sessions" }
-          ].map((tab) => {
-            const active = activeSubTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveSubTab(tab.id as SettingsTab)}
-                className={`relative px-5 py-3 text-sm font-semibold transition-all cursor-pointer outline-none border-none bg-transparent whitespace-nowrap
-                  ${active ? "text-amber-600 font-bold" : "text-gray-500 hover:text-gray-800"}`}
-              >
-                {tab.label}
-                {active && (
-                  <motion.div
-                    layoutId="activeSubTabLine"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500"
+          {/* ── MOBILE HERO PROFILE IDENTITY CARD (Doppelrand Architecture) ── */}
+          <div className="relative p-1.5 rounded-[28px] bg-gradient-to-br from-emerald-500/20 via-emerald-100/30 to-amber-400/20 shadow-lg shadow-emerald-950/5">
+            <div className="relative bg-white rounded-[24px] p-5 border border-slate-100 shadow-[inset_0_1px_1px_rgba(255,255,255,0.9)] overflow-hidden">
+              
+              {/* Decorative background glow inside card */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="flex items-center gap-4">
+                {/* Avatar with Camera Overlay */}
+                <div className="relative shrink-0">
+                  <div className="w-18 h-18 rounded-2xl bg-gradient-to-br from-emerald-600 via-[#047857] to-teal-700 text-white flex items-center justify-center font-black text-2xl shadow-md border-2 border-white overflow-hidden relative">
+                    {avatar ? (
+                      <img src={avatar} alt={fullName || "User"} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{(fullName || username || "U").charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleUploadPhoto}
+                    title="Change Photo"
+                    className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl bg-white text-[#047857] border border-slate-200 shadow-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform"
+                  >
+                    <Camera size={14} />
+                  </button>
+                </div>
+
+                {/* Profile Identity Details */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h2 className="text-lg font-black text-slate-900 truncate tracking-tight">
+                      {fullName || username || "Fipmoney Member"}
+                    </h2>
+                    {kycStatus === "full kyc" && (
+                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-100/80 text-[#047857] text-[10px] font-black">
+                        <ShieldCheck size={11} className="text-[#047857]" /> Verified
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-500 font-semibold truncate mt-0.5 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                    <span>+91 {loggedInMobile || "98765 43210"}</span>
+                  </p>
+
+                  {/* Copyable User Code Pill */}
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      onClick={handleCopyUserCode}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-[11px] font-mono font-bold transition-colors cursor-pointer border border-slate-200/60"
+                    >
+                      <span>#{initialUserCode || `FIP${loggedInMobile.slice(-4)}`}</span>
+                      {copiedCode ? <CheckCheck size={11} className="text-[#047857]" /> : <Copy size={11} className="text-slate-400" />}
+                    </button>
+
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/70">
+                      Level 1 Investor
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Completion Bar */}
+              <div className="mt-4 pt-3.5 border-t border-slate-100">
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="font-extrabold text-slate-700 text-[11px] flex items-center gap-1">
+                    <Trophy size={13} className="text-amber-500" /> Profile Strength
+                  </span>
+                  <span className="font-black text-[#047857]">{percentage}% Complete</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-400 via-[#047857] to-[#059669] rounded-full transition-all duration-700"
+                    style={{ width: `${percentage}%` }}
                   />
-                )}
-              </button>
-            );
-          })}
-        </div>
+                </div>
+              </div>
 
-        {/* 2-Column Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            </div>
+          </div>
 
-          {/* LEFT: Live Form Column */}
-          <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] border border-gray-150 shadow-[0_10px_30px_rgba(0,0,0,0.015)] space-y-6">
-
-            <AnimatePresence mode="popLayout">
-              {activeSubTab === "profile" && (
-                <motion.div
-                  key="profile"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-6"
+          {/* ── MOBILE SEGMENTED SUB-TABS CAROUSEL ── */}
+          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar -mx-4 px-4 select-none">
+            {tabsConfig.map((t) => {
+              const active = activeSubTab === t.id;
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                    setActiveSubTab(t.id as SettingsTab);
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(8);
+                  }}
+                  className={`relative flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer outline-none border ${
+                    active
+                      ? "bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white border-transparent shadow-md shadow-emerald-950/15"
+                      : "bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50"
+                  }`}
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 bg-[#f8fafc] rounded-full border border-slate-200 text-gray-700">
-                         <User size={24} />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Profile Details</h3>
-                        <p className="text-sm text-gray-500 font-medium mt-0.5">Update your photo and personal details here.</p>
-                      </div>
-                    </div>
+                  <Icon size={14} className={active ? "text-amber-300" : "text-slate-400"} />
+                  <span>{t.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ── MOBILE TAB CONTENTS ── */}
+          <div className="space-y-4">
+            
+            {/* 1. PROFILE DETAILS TAB */}
+            {activeSubTab === "profile" && (
+              <motion.div
+                key="mob-profile"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                {/* Personal Information Group */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <User size={16} className="text-[#047857]" />
+                    <h3 className="text-sm font-black text-slate-900">Personal Information</h3>
                   </div>
 
-                  {/* User Code Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">User Code</label>
-                      <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Permanent Account Identifier</span>
-                    </div>
-                    <div className="md:col-span-8">
-                      <span className="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-black text-indigo-700 bg-indigo-50 border border-indigo-100 font-mono tracking-wider shadow-xs">
-                        #{initialUserCode || "FIP0001"}
-                      </span>
-                    </div>
+                  {/* Full Name */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Full Legal Name
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter legal name"
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none"
+                    />
                   </div>
 
-                  {/* Referral Code Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Referral Code</label>
-                      <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Share this to earn rewards</span>
-                    </div>
-                    <div className="md:col-span-8">
-                      <span className="inline-flex items-center px-4 py-2.5 rounded-xl text-sm font-black text-emerald-700 bg-emerald-50 border border-emerald-100 font-mono tracking-wider shadow-xs">
-                        {referralCode || "FIP12345"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Username Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Username</label>
-                      <span className="block text-[11px] text-gray-400 mt-0.5 font-medium">Letters, numbers & _ only</span>
-                    </div>
-                    <div className="md:col-span-8">
-                      <div className="flex max-w-lg rounded-lg shadow-sm border border-gray-200 overflow-hidden focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-50/55 transition-all">
-                        <span className="bg-[#f8fafc] px-3.5 py-2.5 text-sm text-gray-400 font-semibold border-r border-gray-200 select-none">
-                          fipmoney.com/
+                  {/* Username */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        Fipmoney Username
+                      </label>
+                      {isUsernameLocked && (
+                        <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                          Locked ({usernameDaysLeft}d left)
                         </span>
-                        <input
-                          type="text"
-                          value={username}
-                          disabled={isUsernameLocked}
-                          onChange={handleUsernameChange}
-                          placeholder="username_123"
-                          className={`flex-1 px-3.5 py-2.5 text-sm font-medium border-none outline-none ${
-                            isUsernameLocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed select-none' : 'bg-white text-gray-850'
-                          }`}
-                        />
-                      </div>
-                      {isUsernameLocked ? (
-                        <p className="text-[11px] font-bold text-amber-600 mt-1.5 flex items-center gap-1">
-                          <Lock size={13} /> Username locked. Next editable in {usernameDaysLeft} days (60-day policy).
-                        </p>
-                      ) : (
-                        <p className="text-[11px] font-medium text-gray-400 mt-1.5">
-                          Once set, your username is fixed and cannot be changed for 60 days.
-                        </p>
                       )}
                     </div>
-                  </div>
-
-
-
-                  {/* Photo Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Your photo</label>
-                      <span className="block text-xs text-gray-400 mt-1 font-semibold">This will be displayed on your profile.</span>
-                    </div>
-                    <div className="md:col-span-8 flex items-center gap-5">
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-lg border border-amber-200 shadow-sm uppercase overflow-hidden relative">
-                        <span>{(fullName || username || "F").charAt(0)}</span>
-                        {avatar && (
-                          <img
-                            src={avatar}
-                            alt="Avatar"
-                            className="absolute inset-0 w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLElement).style.display = "none";
-                            }}
-                          />
-                        )}
-                      </div>
-                      <div className="flex gap-4">
-                        <button
-                          onClick={handleUploadPhoto}
-                          className="text-xs font-bold text-[#d97706] hover:bg-orange-50 border border-[#d97706] bg-transparent rounded-lg px-4 py-2 cursor-pointer transition-colors outline-none"
-                        >
-                          Change Photo
-                        </button>
-                        <button
-                          onClick={handleRemovePhoto}
-                          className="text-xs font-bold text-red-500 hover:bg-red-50 border border-red-500 bg-transparent rounded-lg px-4 py-2 cursor-pointer transition-colors outline-none"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Full Name Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Full Name as per PAN</label>
-                    </div>
-                    <div className="md:col-span-8">
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">@</span>
                       <input
                         type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
+                        value={username}
+                        onChange={handleUsernameChange}
+                        disabled={isUsernameLocked}
+                        placeholder="your_username"
+                        className="w-full pl-8 pr-4 py-3 rounded-2xl text-sm font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400"
                       />
                     </div>
+                    <p className="text-[10px] text-slate-400 font-medium">
+                      Letters, numbers, and underscores only. Locked for 60 days once saved.
+                    </p>
                   </div>
 
-                  {/* Email Row */}
-                  <div
-                    id="email-input-section"
-                    className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200 transition-all rounded-2xl px-2 ${
-                      isEmailHighlighted || !email ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/40 p-4' : ''
-                    }`}
-                  >
-                    <div className="md:col-span-4">
-                      <div className="flex items-center gap-1.5">
-                        <label className="text-sm font-semibold text-gray-700">Email Address</label>
-                        {(!email || email.endsWith('@fipmoney.com')) && (
-                          <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                            Required ⚠️
-                          </span>
-                        )}
-                      </div>
-                      {isEmailHighlighted && (
-                        <span className="block text-[11px] text-emerald-700 font-bold mt-1">
-                          👉 Please add & verify your official email here!
-                        </span>
-                      )}
-                    </div>
-                    <div className="md:col-span-8 flex gap-3 max-w-lg items-center">
-                      <input
-                        type="email"
-                        value={email}
-                        placeholder="e.g. yourname@domain.com"
-                        readOnly
-                        className={`flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium border outline-none select-none ${
-                          !email ? 'bg-amber-50/60 border-amber-200 text-slate-800 placeholder:text-slate-400' : 'bg-[#f8fafc] border-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                      />
+                  {/* Email Section */}
+                  <div id="email-input-section" className={`space-y-1.5 p-3 rounded-2xl transition-all ${isEmailHighlighted ? "bg-amber-50/80 border-2 border-amber-400 animate-pulse" : ""}`}>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        Official Email
+                      </label>
                       <button
                         type="button"
                         onClick={() => handleStartFieldChange("email")}
-                        className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white text-sm font-extrabold px-5 py-2.5 rounded-xl transition-all cursor-pointer border-none shrink-0 shadow-sm shadow-emerald-900/20"
+                        className="text-[11px] font-black text-[#047857] hover:underline cursor-pointer"
                       >
-                        {!email || email.endsWith('@fipmoney.com') ? "Add & Verify Email" : "Change"}
+                        {email ? "Change Email" : "+ Add & Verify"}
                       </button>
                     </div>
+                    <input
+                      type="email"
+                      readOnly
+                      value={email || "No email verified yet"}
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-bold text-slate-700 bg-slate-100/80 border border-slate-200 cursor-default outline-none"
+                    />
                   </div>
 
-                  {/* Mobile Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Mobile Number</label>
-                    </div>
-                    <div className="md:col-span-8 flex gap-3 max-w-lg items-center">
-                      <input
-                        type="tel"
-                        value={mobileNumber}
-                        readOnly
-                        className="flex-1 px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-400 bg-[#f8fafc] border border-gray-200 outline-none select-none cursor-not-allowed"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleStartFieldChange("mobile")}
-                        className="bg-[#d97706] hover:bg-orange-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition-all cursor-pointer border-none shrink-0"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Masked PAN Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Permanent Account Number (PAN)</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      {panVerified ? (
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-[#f8fafc] px-3 py-2 rounded-lg border border-slate-200">
-                            XXXXX{panNumber.slice(-5, -1)}{panNumber.slice(-1)}
-                          </span>
-                          <span className="text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-600">
-                            Linked & Verified
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-red-500">Not Verified / Linked</span>
-                          <button
-                            type="button"
-                            onClick={() => setActiveSubTab("security")}
-                            className="text-xs font-black text-amber-500 hover:text-amber-600 bg-transparent border-none cursor-pointer outline-none"
-                          >
-                            Link PAN Now &rarr;
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Masked Aadhaar Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Aadhaar Number</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      {aadhaarVerified ? (
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold text-gray-800 font-mono tracking-wider bg-[#f8fafc] px-3 py-2 rounded-lg border border-slate-200">
-                            XXXX XXXX {aadhaarNumber.slice(-4)}
-                          </span>
-                          <span className="text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-600">
-                            Linked & Verified
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-red-500">Not Verified / Linked</span>
-                          <button
-                            type="button"
-                            onClick={() => setActiveSubTab("security")}
-                            className="text-xs font-black text-amber-500 hover:text-amber-600 bg-transparent border-none cursor-pointer outline-none"
-                          >
-                            Link Aadhaar Now &rarr;
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Income Range Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Annual Income Range</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <div className="relative max-w-lg">
-                        <select
-                          value={incomeRange}
-                          onChange={(e) => setIncomeRange(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all cursor-pointer appearance-none shadow-sm"
-                        >
-                          <option value="" disabled>Select Income Range</option>
-                          <option value="under2">Below ₹2 Lakhs</option>
-                          <option value="2to5">₹2 Lakhs - ₹5 Lakhs</option>
-                          <option value="5to10">₹5 Lakhs - ₹10 Lakhs</option>
-                          <option value="above10">Above ₹10 Lakhs</option>
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                          <ChevronRight size={14} className="rotate-90" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeSubTab === "bank" && (
-                <motion.div
-                  key="bank"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Bank Account</h3>
-                    <p className="text-xs text-gray-400 mt-1 font-semibold">Verify your linked bank account where investment dividends and cashouts are deposited.</p>
-                  </div>
-
-                  {/* Bank Name Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Bank Name</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <input
-                        type="text"
-                        value={bankName}
-                        onChange={(e) => setBankName(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Account Number Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Account Number</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <input
-                        type="text"
-                        value={accountNumber}
-                        onChange={(e) => setAccountNumber(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* IFSC Code Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">IFSC Code</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <input
-                        type="text"
-                        value={ifscCode}
-                        onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeSubTab === "nominee" && (
-                <motion.div
-                  key="nominee"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Nominee Setup</h3>
-                    <p className="text-xs text-gray-400 mt-1 font-semibold">Add a legal beneficiary to claim your vault balance and gold investments in case of eventualities.</p>
-                  </div>
-
-                  {/* Nominee Name */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Nominee Name</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <input
-                        type="text"
-                        value={nomineeName}
-                        placeholder="Enter Nominee Name"
-                        onChange={(e) => setNomineeName(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Relationship */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-5 border-b border-slate-200">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Relationship</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <div className="relative max-w-lg">
-                        <select
-                          value={nomineeRelation}
-                          onChange={(e) => setNomineeRelation(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg text-sm font-semibold text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all cursor-pointer appearance-none shadow-sm"
-                        >
-                          <option value="spouse">Spouse</option>
-                          <option value="father">Father</option>
-                          <option value="mother">Mother</option>
-                          <option value="sibling">Sibling</option>
-                          <option value="child">Child</option>
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                          <ChevronRight size={14} className="rotate-90" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Nominee Date of Birth */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4">
-                    <div className="md:col-span-4">
-                      <label className="text-sm font-semibold text-gray-700">Nominee Date of Birth</label>
-                    </div>
-                    <div className="md:col-span-8">
-                      <input
-                        type="date"
-                        value={nomineeDob}
-                        onChange={(e) => setNomineeDob(e.target.value)}
-                        className="w-full max-w-lg px-3.5 py-2.5 rounded-lg text-sm font-medium text-gray-800 bg-white border border-gray-200 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-50/55 transition-all shadow-sm"
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeSubTab === "security" && (
-                <motion.div
-                  key="security"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h3 className="text-sm font-black text-gray-800 uppercase tracking-wider">Security & Compliance</h3>
-                    <p className="text-xs text-gray-400 mt-1 font-semibold">Check security configurations and financial compliance parameters.</p>
-                  </div>
-
-                  {/* Two-Factor Authentication Toggle */}
-                  <div className="flex items-center justify-between py-5 border-b border-slate-200">
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-800">Two-Factor Authentication</h4>
-                      <p className="text-xs text-gray-400 mt-1 font-medium">Require secure OTP verification for major cashouts.</p>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer select-none">
-                      <div className="w-10 h-6 bg-amber-500 rounded-full flex items-center justify-end px-1 shadow-inner">
-                        <div className="w-4.5 h-4.5 bg-white rounded-full shadow" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* KYC Verification status */}
-                  {/* KYC Verification status */}
-                  {kycStatus.toLowerCase() === "pending" ? (
-                    <div className="py-5 border-b border-slate-200 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
-                          <p className="text-xs text-gray-400 mt-1 font-medium">Verify Aadhaar and PAN database linkage.</p>
-                        </div>
-                        <span className="px-3 py-1 rounded-full bg-red-50 text-red-600 font-extrabold text-[10px] border border-red-100 flex items-center gap-1">
-                          <AlertCircle size={12} /> KYC IS PENDING
-                        </span>
-                      </div>
-
-                      <div className="bg-amber-50/40 rounded-2xl p-5 border border-amber-100/50 space-y-5">
-                        <div>
-                          <h5 className="text-xs font-bold text-gray-700">Link Aadhaar & PAN</h5>
-                          <p className="text-[11px] text-gray-400 font-semibold mt-0.5">Please provide your Aadhaar and PAN credentials to set up a Minimum KYC tier.</p>
-                        </div>
-
-                        {/* Aadhaar Linking Field */}
-                        <div className="space-y-2 border-b border-slate-200 pb-4">
-                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">1. 12-Digit Aadhaar Number</label>
-                          {aadhaarVerified ? (
-                            <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold py-1">
-                              <CheckCircle2 size={14} className="text-emerald-500 shrink-0" /> Aadhaar Linked Successfully (XXXX XXXX {aadhaarNumber.slice(-4)})
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
-                              <div className="flex gap-2">
-                                <Input
-                                  type="text"
-                                  maxLength={12}
-                                  value={aadhaarNumber}
-                                  onChange={e => setAadhaarNumber(e.target.value.replace(/\D/g, ""))}
-                                  placeholder="Enter 12-digit Aadhaar Number"
-                                  className="rounded-xl text-xs font-semibold bg-white"
-                                  disabled={isLinkingAadhaar || showAadhaarOtp}
-                                />
-                                <button
-                                  onClick={handleVerifyAadhaar}
-                                  disabled={aadhaarNumber.length !== 12 || isLinkingAadhaar}
-                                  className="bg-amber-500 hover:bg-amber-600 disabled:bg-gray-250 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-none shrink-0"
-                                >
-                                  {isLinkingAadhaar ? "Sending..." : "Link"}
-                                </button>
-                              </div>
-
-                              {showAadhaarOtp && (
-                                <div className="bg-white p-3 rounded-xl border border-slate-200 space-y-2.5 shadow-sm max-w-sm">
-                                  <p className="text-[10px] font-bold text-amber-600 animate-pulse">✓ OTP sent to your registered UIDAI mobile number</p>
-                                  <div className="flex gap-2">
-                                    <Input
-                                      type="text"
-                                      maxLength={6}
-                                      value={aadhaarOtp}
-                                      onChange={e => setAadhaarOtp(e.target.value.replace(/\D/g, ""))}
-                                      placeholder="Enter 6-digit OTP (123456)"
-                                      className="rounded-xl text-xs font-semibold bg-white"
-                                    />
-                                    <button
-                                      onClick={handleVerifyAadhaarOtp}
-                                      disabled={aadhaarOtp.length < 6 || isLinkingAadhaar}
-                                      className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-xl transition-all cursor-pointer border-none"
-                                    >
-                                      Verify
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* PAN Linking Field */}
-                        <div className="space-y-2 pt-2">
-                          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">2. 10-Character PAN Number</label>
-                          {panVerified ? (
-                            <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold py-1">
-                              <CheckCircle2 size={14} className="text-emerald-500 shrink-0" /> PAN Verified Successfully ({panNumber.toUpperCase()})
-                            </div>
-                          ) : (
-                            <div className="flex gap-2">
-                              <Input
-                                type="text"
-                                maxLength={10}
-                                value={panNumber}
-                                onChange={e => setPanNumber(e.target.value.toUpperCase())}
-                                placeholder="Enter 10-char PAN (e.g. ABCDE1234F)"
-                                className="rounded-xl text-xs font-semibold bg-white"
-                                disabled={isLinkingPan}
-                              />
-                              <button
-                                onClick={handleVerifyPan}
-                                disabled={panNumber.length !== 10 || isLinkingPan}
-                                className="bg-amber-500 hover:bg-amber-600 disabled:bg-gray-250 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all cursor-pointer border-none shrink-0"
-                              >
-                                {isLinkingPan ? "Verifying..." : "Verify"}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                      </div>
-                    </div>
-                  ) : kycStatus.toLowerCase().includes("full") ? (
-                    <div className="flex items-center justify-between py-5 border-b border-slate-200">
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
-                        <p className="text-xs text-gray-400 mt-1 font-medium">Verify Aadhaar and PAN database linkage.</p>
-                      </div>
-                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 font-extrabold text-[10px] border border-emerald-100 flex items-center gap-1">
-                        <CheckCircle2 size={12} /> FULL KYC COMPLETED
+                  {/* Mobile Number */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        Primary Mobile (Linked)
+                      </label>
+                      <span className="text-[10px] font-black text-[#047857] flex items-center gap-1">
+                        <CheckCircle2 size={11} /> Verified
                       </span>
                     </div>
-                  ) : (
-                    <div className="py-5 border-b border-slate-200 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-800">Identity KYC Status</h4>
-                          <p className="text-xs text-gray-400 mt-1 font-medium">Verify Aadhaar and PAN database linkage.</p>
-                        </div>
-                        <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-600 font-extrabold text-[10px] border border-amber-100 flex items-center gap-1">
-                          <AlertCircle size={12} /> MIN KYC COMPLETED
-                        </span>
-                      </div>
+                    <input
+                      type="text"
+                      readOnly
+                      value={`+91 ${loggedInMobile}`}
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-mono font-bold text-slate-700 bg-slate-100/80 border border-slate-200 cursor-default outline-none"
+                    />
+                  </div>
+                </div>
 
-                      {/* Stepper for Full KYC upgrade */}
-                      <div className="bg-amber-50/40 rounded-2xl p-5 border border-amber-100/50 space-y-4">
-                        <div>
-                          <h5 className="text-xs font-bold text-gray-700">Upgrade to Full KYC</h5>
-                          <p className="text-[11px] text-gray-400 font-semibold mt-0.5 font-sans">Full KYC requires Min KYC details + a quick video verification call.</p>
-                        </div>
-
-                        <div className="relative pl-6 border-l-2 border-dashed border-amber-200/60 space-y-4 py-1">
-                          <div className="relative">
-                            <div className="absolute -left-[31px] top-0 w-4.5 h-4.5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[8px] font-black">✓</div>
-                            <p className="text-xs font-extrabold text-gray-800">1. Link PAN & Aadhaar (Completed)</p>
-                            <p className="text-[10px] text-gray-500 font-semibold">Verified against National Securities Depository portal.</p>
-                          </div>
-
-                          <div className="relative">
-                            <div className="absolute -left-[31px] top-0 w-4.5 h-4.5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[8px] font-black">2</div>
-                            <p className="text-xs font-extrabold text-gray-800">2. Video Call Verification (Pending)</p>
-                            <p className="text-[10px] text-gray-500 font-semibold">Join a 2-minute secure live call with a verification officer.</p>
-
-                            <button
-                              onClick={startVideoKyc}
-                              className="mt-3 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-4 py-2.5 rounded-xl transition-all cursor-pointer outline-none border-none shadow-sm flex items-center gap-1.5 hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                              <Sparkles size={12} /> Start Video Call Verification
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* KYC Limits & Tiers Table */}
-                  <div className="bg-white rounded-2xl border border-slate-200 p-5 border border-gray-150 shadow-sm space-y-4">
-                    <div>
-                      <h4 className="text-xs font-black text-gray-800 uppercase tracking-wider">KYC Tiers & Storage Limits</h4>
-                      <p className="text-[10px] text-gray-400 font-semibold mt-0.5">Compare asset buying, daily transfers, and secure storage capacity.</p>
-                    </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs font-semibold">
-                        <thead>
-                          <tr className="border-b border-slate-200 text-[10px] text-gray-450 font-bold uppercase tracking-wider">
-                            <th className="py-2.5 pr-2">Tier</th>
-                            <th className="py-2.5 pr-2">Buy Limit</th>
-                            <th className="py-2.5 pr-2">Transfer/Sell Limit</th>
-                            <th className="py-2.5">Max Vault Storage</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50 text-gray-700">
-                          <tr className={kycStatus === "pending" ? "bg-amber-50/45 text-amber-900 font-extrabold" : ""}>
-                            <td className="py-2.5 flex items-center gap-1.5 font-bold">
-                              {kycStatus === "pending" && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
-                              Pending KYC
-                            </td>
-                            <td className="py-2.5">₹0</td>
-                            <td className="py-2.5">₹0</td>
-                            <td className="py-2.5">0 g</td>
-                          </tr>
-                          <tr className={kycStatus === "Min Kyc" ? "bg-amber-50/45 text-amber-900 font-extrabold" : ""}>
-                            <td className="py-2.5 flex items-center gap-1.5 font-bold">
-                              {kycStatus === "Min Kyc" && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
-                              Minimum KYC
-                            </td>
-                            <td className="py-2.5">₹10,000 / txn</td>
-                            <td className="py-2.5">₹5,000 / day</td>
-                            <td className="py-2.5">50 g</td>
-                          </tr>
-                          <tr className={kycStatus === "full kyc" ? "bg-emerald-50/45 text-emerald-900 font-extrabold" : ""}>
-                            <td className="py-2.5 flex items-center gap-1.5 font-bold">
-                              {kycStatus === "full kyc" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
-                              Full KYC
-                            </td>
-                            <td className="py-2.5">Unlimited (₹25L/day)</td>
-                            <td className="py-2.5">Unlimited (₹10L/day)</td>
-                            <td className="py-2.5">1,000 g</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                {/* Professional & Financial Profile */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                    <Briefcase size={16} className="text-[#047857]" />
+                    <h3 className="text-sm font-black text-slate-900">Financial Profile</h3>
                   </div>
 
-                  {/* Logged in devices */}
-                  <div className="py-2">
-                    <h4 className="text-sm font-bold text-gray-800 mb-3">Active Device Sessions Overview</h4>
-                    <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-200/60 text-xs font-semibold text-amber-900 flex items-center justify-between">
-                      <span>Switch to the "Active Sessions" tab at the top for real-time remote device revocation.</span>
-                      <button
-                        onClick={() => setActiveSubTab("sessions")}
-                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs cursor-pointer outline-none border-none"
-                      >
-                        Manage Sessions →
-                      </button>
-                    </div>
+                  {/* Occupation */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Occupation / Profession
+                    </label>
+                    <select
+                      value={jobTitle}
+                      onChange={(e) => setJobTitle(e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none"
+                    >
+                      <option value="">Select Occupation</option>
+                      <option value="Salaried Employee">Salaried Employee</option>
+                      <option value="Business Owner / Self-Employed">Business Owner / Self-Employed</option>
+                      <option value="Professional (Doctor, CA, Lawyer)">Professional (Doctor, CA, Lawyer)</option>
+                      <option value="Freelancer / Consultant">Freelancer / Consultant</option>
+                      <option value="Student">Student</option>
+                      <option value="Homemaker">Homemaker</option>
+                      <option value="Retired">Retired</option>
+                    </select>
                   </div>
 
-                  {/* Account Deletion Danger Zone */}
-                  <div className="pt-4 border-t border-red-100">
-                    <h4 className="text-sm font-bold text-red-600 mb-2 flex items-center gap-1.5">
-                      <Trash2 size={16} /> Danger Zone: Delete Account & Data
-                    </h4>
-                    <div className="p-4 bg-red-50/60 rounded-xl border border-red-200/80 text-xs text-red-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <div className="font-bold">Permanent Account Closure</div>
-                        <p className="text-red-700/80 mt-0.5">Permanently delete your account, authentication tokens, and profile data per Google Play policy.</p>
-                      </div>
-                      <a
-                        href="/delete-account.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs cursor-pointer outline-none border-none text-center shrink-0 inline-flex items-center justify-center gap-1.5 no-underline"
-                      >
-                        <Trash2 size={13} /> Delete Account
-                      </a>
-                    </div>
+                  {/* Annual Income */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Annual Income Bracket
+                    </label>
+                    <select
+                      value={incomeRange}
+                      onChange={(e) => setIncomeRange(e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none"
+                    >
+                      <option value="">Select Annual Income</option>
+                      <option value="Below ₹3 Lakhs">Below ₹3 Lakhs</option>
+                      <option value="₹3 Lakhs - ₹5 Lakhs">₹3 Lakhs - ₹5 Lakhs</option>
+                      <option value="₹5 Lakhs - ₹10 Lakhs">₹5 Lakhs - ₹10 Lakhs</option>
+                      <option value="₹10 Lakhs - ₹25 Lakhs">₹10 Lakhs - ₹25 Lakhs</option>
+                      <option value="Above ₹25 Lakhs">Above ₹25 Lakhs</option>
+                    </select>
                   </div>
-                </motion.div>
-              )}
+                </div>
+              </motion.div>
+            )}
 
-              {activeSubTab === "sessions" && (
-                <motion.div
-                  key="sessions"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-6"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-amber-700">
-                      <ShieldAlert size={24} />
+            {/* 2. BANK ACCOUNT TAB */}
+            {activeSubTab === "bank" && (
+              <motion.div
+                key="mob-bank"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                {/* Instant Settlement Guarantee Banner */}
+                <div className="p-4 rounded-3xl bg-linear-to-r from-emerald-900 to-teal-800 text-white shadow-md relative overflow-hidden">
+                  <div className="absolute right-0 top-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                      <Landmark size={20} className="text-amber-300" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Active Sessions & Device Security</h3>
-                      <p className="text-xs text-gray-500 font-medium mt-0.5">
-                        Manage all devices currently signed into your account. Revoking a session immediately logs out that device.
+                      <h4 className="text-sm font-black">Direct Bank Settlements</h4>
+                      <p className="text-xs text-emerald-100/90 mt-0.5 leading-snug">
+                        Instant IMPS payouts for all 24K gold & silver sales directly into this account.
                       </p>
                     </div>
                   </div>
+                </div>
 
-                  {isSessionsLoading ? (
-                    <div className="flex items-center justify-center py-16 space-x-3 text-amber-600 font-bold text-sm bg-[#f8fafc]/50 rounded-2xl border border-slate-200">
-                      <Loader2 className="animate-spin" size={22} />
-                      <span>Fetching active sessions from database...</span>
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                  {/* Bank Name */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Bank Name
+                    </label>
+                    <input
+                      type="text"
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      placeholder="e.g. State Bank of India, HDFC, ICICI"
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none"
+                    />
+                  </div>
+
+                  {/* Account Number */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        Account Number
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowAccountNumber(!showAccountNumber)}
+                        className="text-xs font-bold text-slate-500 flex items-center gap-1 cursor-pointer"
+                      >
+                        {showAccountNumber ? <EyeOff size={13} /> : <Eye size={13} />}
+                        <span>{showAccountNumber ? "Hide" : "Show"}</span>
+                      </button>
                     </div>
-                  ) : sessionsList.length === 0 ? (
-                    <div className="p-8 text-center bg-[#f8fafc] rounded-2xl border border-gray-150 space-y-2">
-                      <ShieldCheck size={32} className="mx-auto text-gray-400" />
-                      <p className="text-sm font-bold text-gray-700">No active device sessions found</p>
-                      <p className="text-xs text-gray-400 font-medium">Log out and log back in to register your current session.</p>
+                    <input
+                      type={showAccountNumber ? "text" : "password"}
+                      value={accountNumber}
+                      onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
+                      placeholder="Enter bank account number"
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-mono font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none"
+                    />
+                  </div>
+
+                  {/* IFSC Code */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      IFSC Code
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={11}
+                      value={ifscCode}
+                      onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                      placeholder="e.g. SBIN0001234"
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-mono font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none tracking-wider"
+                    />
+                  </div>
+
+                  {/* Beneficiary Name Note */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed">
+                    <p className="font-semibold text-slate-800 flex items-center gap-1.5 mb-1">
+                      <ShieldCheck size={14} className="text-[#047857]" /> Bank Account Verification Note
+                    </p>
+                    The beneficiary name on the bank account must match your KYC name (<strong>{fullName || "User"}</strong>).
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 3. NOMINEE TAB */}
+            {activeSubTab === "nominee" && (
+              <motion.div
+                key="mob-nominee"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                <div className="p-4 rounded-3xl bg-linear-to-r from-amber-500/10 via-amber-100/30 to-emerald-500/10 border border-amber-200/80 text-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <Heart size={20} className="text-amber-600 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-black text-slate-900">Legal Nominee Protection</h4>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        Your physical 24K gold stored in Brink's vaults is legally assigned to your nominee.
+                      </p>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {sessionsList.map((s, idx) => {
-                        const currentIdInStorage = typeof window !== 'undefined' ? (sessionStorage.getItem("fm_session_id") || localStorage.getItem("fm_session_id") || "") : "";
-                        const isCurrentSession = Boolean(s.isCurrent || (currentIdInStorage && s.sessionId === currentIdInStorage));
-                        const isRevokingThis = revokingSessionId === s.sessionId;
+                  </div>
+                </div>
 
-                        let DeviceIcon = Laptop;
-                        const deviceNameLower = (s.deviceName || '').toLowerCase();
-                        const deviceOsLower = (s.deviceOS || '').toLowerCase();
-                        if (deviceNameLower.includes('mobile') || deviceOsLower.includes('android') || deviceOsLower.includes('ios')) {
-                          DeviceIcon = Smartphone;
-                        } else if (deviceNameLower.includes('tablet')) {
-                          DeviceIcon = Tablet;
-                        }
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                  {/* Nominee Name */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Nominee Full Legal Name
+                    </label>
+                    <input
+                      type="text"
+                      value={nomineeName}
+                      onChange={(e) => setNomineeName(e.target.value)}
+                      placeholder="Enter legal nominee name"
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none"
+                    />
+                  </div>
 
+                  {/* Relationship Quick Pills */}
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Relationship with Nominee
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {["spouse", "son", "daughter", "father", "mother", "brother", "sister", "other"].map((rel) => {
+                        const isSelected = nomineeRelation.toLowerCase() === rel;
                         return (
-                          <div
-                            key={s.sessionId || idx}
-                            className={`p-5 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                              isCurrentSession
-                                ? "bg-amber-50/40 border-amber-200 shadow-xs"
-                                : "bg-white border-gray-200 hover:border-gray-300 shadow-2xs"
+                          <button
+                            key={rel}
+                            type="button"
+                            onClick={() => setNomineeRelation(rel)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize transition-all cursor-pointer border ${
+                              isSelected
+                                ? "bg-[#047857] text-white border-[#047857] shadow-xs"
+                                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                             }`}
                           >
-                            <div className="flex items-start gap-4">
-                              <div className={`p-3 rounded-xl ${isCurrentSession ? "bg-amber-500 text-white" : "bg-gray-100 text-gray-600"}`}>
-                                <DeviceIcon size={22} />
-                              </div>
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <h4 className="text-sm font-black text-gray-850">
-                                    {s.browser || 'Browser'} on {s.deviceOS || 'Unknown OS'}
-                                  </h4>
-                                  {isCurrentSession && (
-                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200">
-                                      Current Device
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-gray-500 font-semibold flex-wrap">
-                                  <span className="flex items-center gap-1">
-                                    <Globe size={13} className="text-gray-400" /> IP: {s.ipAddress || '127.0.0.1'}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock size={13} className="text-gray-400" />
-                                    {s.lastActiveAt ? new Date(s.lastActiveAt).toLocaleString() : 'Active now'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
+                            {rel}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-                            <div>
-                              {isCurrentSession ? (
-                                <span className="inline-block text-xs font-bold text-gray-400 italic px-3 py-1.5 bg-gray-100 rounded-lg select-none">
-                                  Current Session
-                                </span>
-                              ) : (
-                                <button
-                                  onClick={() => handleRevokeSession(s.sessionId)}
-                                  disabled={isRevokingThis}
-                                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-xs border border-red-200 cursor-pointer transition-all flex items-center justify-center gap-1.5 outline-none shadow-2xs hover:shadow-xs"
-                                >
-                                  {isRevokingThis ? (
-                                    <>
-                                      <Loader2 size={13} className="animate-spin" /> Revoking...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Trash2 size={13} /> Revoke Session
-                                    </>
-                                  )}
-                                </button>
-                              )}
+                  {/* Nominee DOB */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                      Nominee Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      value={nomineeDob}
+                      onChange={(e) => setNomineeDob(e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl text-sm font-bold text-slate-900 bg-[#F8FAFC] border-2 border-slate-200/80 focus:border-[#047857] focus:bg-white transition-all outline-none"
+                    />
+                  </div>
+
+                  {/* Allocation Badge */}
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/60 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-black text-emerald-900">Portfolio Custody Allocation</p>
+                      <p className="text-[11px] text-emerald-700">100% Legal Ownership Transfer</p>
+                    </div>
+                    <span className="text-sm font-black text-[#047857]">100%</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 4. SECURITY & KYC TAB (Capacitor Biometric Integration) */}
+            {activeSubTab === "security" && (
+              <motion.div
+                key="mob-security"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                {/* Native Capacitor Biometric Lock Card */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-[#047857] flex items-center justify-center shrink-0 border border-emerald-200/60">
+                        <Fingerprint size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-slate-900">{biometricType} App Lock</h4>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          Secure opening of Fipmoney app with biometric hardware
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Toggle Switch */}
+                    <button
+                      type="button"
+                      disabled={isTogglingBiometric}
+                      onClick={handleToggleBiometric}
+                      className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        isBiometricActive ? "bg-[#047857]" : "bg-slate-300"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                          isBiometricActive ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span>Hardware Sensor:</span>
+                    <strong className="text-slate-800">
+                      {Capacitor.isNativePlatform()
+                        ? (biometricAvailable ? "Supported & Ready" : "Hardware Not Enrolled")
+                        : "Available on Mobile App"}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Aadhaar & PAN Status Card */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-3.5">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck size={16} className="text-[#047857]" />
+                      <h4 className="text-sm font-black text-slate-900">Government KYC Verification</h4>
+                    </div>
+                    <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                      kycStatus === "full kyc"
+                        ? "bg-emerald-100 text-[#047857]"
+                        : "bg-amber-100 text-amber-800"
+                    }`}>
+                      {kycStatus === "full kyc" ? "Verified" : "Action Required"}
+                    </span>
+                  </div>
+
+                  {/* Aadhaar Row */}
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs">
+                        UID
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">Aadhaar Card</p>
+                        <p className="text-[11px] text-slate-400 font-mono">
+                          {aadhaarNumber || "XXXX-XXXX-9012"}
+                        </p>
+                      </div>
+                    </div>
+                    {aadhaarVerified ? (
+                      <span className="text-xs font-black text-[#047857] flex items-center gap-1">
+                        <CheckCircle2 size={14} /> Linked
+                      </span>
+                    ) : (
+                      <button
+                        onClick={handleVerifyAadhaar}
+                        disabled={isLinkingAadhaar}
+                        className="px-3 py-1.5 rounded-xl bg-[#047857] text-white text-xs font-bold shadow-xs cursor-pointer"
+                      >
+                        {isLinkingAadhaar ? "Verifying..." : "Link"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* PAN Row */}
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/70">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs">
+                        PAN
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">PAN Card</p>
+                        <p className="text-[11px] text-slate-400 font-mono uppercase">
+                          {panNumber || "ABCDE1234F"}
+                        </p>
+                      </div>
+                    </div>
+                    {panVerified ? (
+                      <span className="text-xs font-black text-[#047857] flex items-center gap-1">
+                        <CheckCircle2 size={14} /> Linked
+                      </span>
+                    ) : (
+                      <button
+                        onClick={handleVerifyPan}
+                        disabled={isLinkingPan}
+                        className="px-3 py-1.5 rounded-xl bg-[#047857] text-white text-xs font-bold shadow-xs cursor-pointer"
+                      >
+                        {isLinkingPan ? "Verifying..." : "Link"}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Video KYC Button */}
+                  {kycStatus !== "full kyc" && (
+                    <button
+                      type="button"
+                      onClick={startVideoKyc}
+                      className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-white font-extrabold text-xs shadow-md shadow-amber-900/10 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
+                    >
+                      <Video size={16} />
+                      <span>Start 2-Minute Video KYC Verification</span>
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* 5. ACTIVE SESSIONS TAB */}
+            {activeSubTab === "sessions" && (
+              <motion.div
+                key="mob-sessions"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <Smartphone size={16} className="text-[#047857]" />
+                      <h4 className="text-sm font-black text-slate-900">Active Devices</h4>
+                    </div>
+                    <button
+                      onClick={fetchSessions}
+                      className="text-xs font-bold text-[#047857] flex items-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw size={12} className={isSessionsLoading ? "animate-spin" : ""} /> Refresh
+                    </button>
+                  </div>
+
+                  {/* Current Device Highlight */}
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 text-[#047857] flex items-center justify-center">
+                        <Smartphone size={20} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-black text-slate-900">
+                            {Capacitor.isNativePlatform() ? "Android Mobile App" : "Current Browser"}
+                          </p>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        </div>
+                        <p className="text-[11px] text-slate-500">Active Now • This Device</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black uppercase text-[#047857] bg-white border border-emerald-200 px-2 py-0.5 rounded-md">
+                      Current
+                    </span>
+                  </div>
+
+                  {/* Remote Devices List */}
+                  {sessionsList.length > 0 ? (
+                    <div className="space-y-2.5">
+                      {sessionsList.map((s, idx) => {
+                        const currentSessionId = typeof window !== 'undefined' ? (sessionStorage.getItem("fm_session_id") || localStorage.getItem("fm_session_id") || "") : "";
+                        const isCurrent = s.sessionId === currentSessionId;
+                        if (isCurrent) return null;
+                        return (
+                          <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Laptop size={18} className="text-slate-500" />
+                              <div>
+                                <p className="text-xs font-bold text-slate-800">{s.deviceName || "Other Device"}</p>
+                                <p className="text-[10px] text-slate-400 font-mono">{s.ipAddress || "Encrypted IP"}</p>
+                              </div>
                             </div>
+                            <button
+                              onClick={() => handleRevokeSession(s.sessionId)}
+                              className="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold border border-red-200 cursor-pointer"
+                            >
+                              Log Out
+                            </button>
                           </div>
                         );
                       })}
                     </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 text-center py-3">No other active devices detected.</p>
                   )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 6. APP & INFO TAB (Play Store Version Checker) */}
+            {activeSubTab === "about" && (
+              <motion.div
+                key="mob-about"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-4"
+              >
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-[#047857] flex items-center justify-center shrink-0">
+                      <ArrowUpCircle size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black text-slate-900">Fipmoney Application</h4>
+                      <p className="text-xs text-slate-500">
+                        Version {CURRENT_APP_VERSION} (Build {CURRENT_VERSION_CODE})
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Current Version:</span>
+                      <strong className="text-slate-800">v{CURRENT_APP_VERSION}</strong>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Platform:</span>
+                      <strong className="text-slate-800">{Capacitor.isNativePlatform() ? "Android APK" : "Web Application"}</strong>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Protection:</span>
+                      <strong className="text-[#047857] flex items-center gap-1">
+                        <ShieldCheck size={12} /> Google Play Protect
+                      </strong>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleCheckForUpdates}
+                    disabled={isCheckingUpdate}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white font-extrabold text-xs shadow-md shadow-emerald-950/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all"
+                  >
+                    <RefreshCw size={14} className={isCheckingUpdate ? "animate-spin" : ""} />
+                    <span>{isCheckingUpdate ? "Checking Play Store..." : "Check for Play Store Updates"}</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
 
           </div>
 
-          {/* RIGHT: Completion Status Indicator Sidebar Card */}
-          <div className="lg:col-span-4 space-y-6">
-
-            {/* Completion Percentage card */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col items-center text-center">
-              <div className="flex items-center gap-2 mb-6 w-full justify-center">
-                <Trophy size={18} className="text-[#d97706]" />
-                <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Profile Completion</h3>
-              </div>
-
-              <div className="relative w-36 h-36 flex items-center justify-center p-1">
-                <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90 overflow-visible">
-                  <circle cx="60" cy="60" r="50" stroke="#f1f5f9" strokeWidth="8" fill="transparent" />
-                  <circle
-                    cx="60" cy="60" r="50"
-                    stroke={
-                      percentage <= 20 ? "#ef4444" : percentage <= 40 ? "#f97316" : percentage <= 60 ? "#f59e0b" : percentage <= 80 ? "#3b82f6" : "#10b981"
-                    }
-                    strokeWidth="8" fill="transparent"
-                    strokeDasharray={2 * Math.PI * 50}
-                    strokeDashoffset={2 * Math.PI * 50 * (1 - percentage / 100)}
-                    strokeLinecap="round" className="transition-all duration-500 ease-out"
-                  />
-                </svg>
-                <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-3xl font-black text-gray-800 leading-none">{percentage}%</span>
-                  <span className="text-[9px] font-extrabold text-gray-500 uppercase tracking-wider mt-1.5">Completed</span>
-                </div>
-              </div>
-
-              {/* Status Priority Badge */}
-              <div className="mt-5 w-full">
-                {percentage <= 20 && (
-                  <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
-                    <AlertCircle size={16} className="text-red-500 shrink-0 animate-pulse" />
-                    <span>Highest Priority: Action Needed (20%)</span>
-                  </div>
+          {/* ── FLOATING MOBILE BOTTOM SAVE BAR ── */}
+          <div className="fixed bottom-18 left-0 right-0 z-30 px-4 py-2 pointer-events-none">
+            <div className="max-w-md mx-auto pointer-events-auto">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-sm shadow-xl shadow-emerald-950/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer border border-emerald-400/30"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Saving Profile...</span>
+                  </>
+                ) : saveSuccess ? (
+                  <>
+                    <CheckCircle2 size={16} className="text-amber-300" />
+                    <span>Changes Saved!</span>
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    <span>Save All Changes</span>
+                  </>
                 )}
-                {percentage === 40 && (
-                  <div className="p-3 rounded-2xl bg-orange-50 border border-orange-200 text-orange-800 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
-                    <AlertTriangle size={16} className="text-orange-500 shrink-0" />
-                    <span>High Priority: Action Needed (40%)</span>
-                  </div>
-                )}
-                {percentage === 60 && (
-                  <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
-                    <AlertTriangle size={16} className="text-amber-500 shrink-0" />
-                    <span>Medium Priority: Complete Profile (60%)</span>
-                  </div>
-                )}
-                {percentage === 80 && (
-                  <div className="p-3 rounded-2xl bg-blue-50 border border-blue-200 text-blue-800 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
-                    <Info size={16} className="text-blue-500 shrink-0" />
-                    <span>Almost Completed (80%)</span>
-                  </div>
-                )}
-                {percentage === 100 && (
-                  <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center gap-2 text-xs font-bold shadow-2xs">
-                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    <span>100% Profile Complete & Verified</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Progress checklist detail items matching the 4 Settings sections */}
-              <div className="w-full mt-6 space-y-3">
-                {/* 1. Personal & Basic Info (40%) */}
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <div className="flex items-center gap-2">
-                    {personalDone ? (
-                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : (
-                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
-                    )}
-                    <span className="text-gray-700 font-bold text-[13px]">Personal & Basic Info</span>
-                  </div>
-                  <span className={`text-xs font-black ${personalDone ? "text-emerald-600" : "text-gray-400"}`}>{personalScore}%</span>
-                </div>
-
-                {/* 2. Link Bank Account (20%) */}
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <div className="flex items-center gap-2">
-                    {bankDone ? (
-                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : (
-                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
-                    )}
-                    <span className="text-gray-700 font-bold text-[13px]">Link Bank Account</span>
-                  </div>
-                  <span className={`text-xs font-black ${bankDone ? "text-emerald-600" : "text-gray-400"}`}>{bankDone ? "20%" : "0%"}</span>
-                </div>
-
-                {/* 3. Nominee Verification (20%) */}
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <div className="flex items-center gap-2">
-                    {nomineeDone ? (
-                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : (
-                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
-                    )}
-                    <span className="text-gray-700 font-bold text-[13px]">Nominee Verification</span>
-                  </div>
-                  <span className={`text-xs font-black ${nomineeDone ? "text-emerald-600" : "text-gray-400"}`}>{nomineeDone ? "20%" : "0%"}</span>
-                </div>
-
-                {/* 4. Security & KYC (20%) */}
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <div className="flex items-center gap-2">
-                    {kycDone ? (
-                      <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-                    ) : (
-                      <AlertTriangle size={16} className="text-amber-500 shrink-0" />
-                    )}
-                    <span className="text-gray-700 font-bold text-[13px]">Security & KYC</span>
-                  </div>
-                  <span className={`text-xs font-black ${kycDone ? "text-emerald-600" : "text-gray-400"}`}>{kycDone ? "20%" : "0%"}</span>
-                </div>
-              </div>
+              </button>
             </div>
+          </div>
 
-            {/* Security Compliance Card */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 border border-gray-150 shadow-sm flex flex-col relative overflow-hidden mt-6">
-              <div className="flex items-center gap-2 mb-4 relative z-10">
-                <ShieldCheck size={18} className="text-[#d97706]" />
-                <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Security Compliance</h3>
-              </div>
-              <p className="text-[12px] font-medium text-gray-500 leading-relaxed relative z-10">
-                Fipmoney complies with SEBI digital asset registry codes. All PAN and bank details are encrypted locally before transfer.
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            DESKTOP VIEW (hidden lg:block) - Preserved & Theme-Aligned
+        ══════════════════════════════════════════════════════════════════ */}
+        <div className="hidden lg:block p-8 lg:p-10 max-w-7xl mx-auto space-y-8">
+          {/* Title */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+            <div>
+              <h1 className="text-3xl font-black text-gray-900 tracking-tight">Settings</h1>
+              <p className="text-sm text-gray-500 font-semibold mt-1 flex flex-wrap items-center gap-2">
+                <span>Manage your financial profile and account configurations</span>
+                <span className="text-gray-300 hidden sm:inline">•</span>
+                <span className="inline-flex items-center gap-1.5 text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full text-xs font-bold shadow-2xs">
+                  <Sparkles size={12} className="text-[#047857] animate-pulse" />
+                  Auto-saves in real-time
+                </span>
               </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-6 py-3 rounded-xl text-white text-sm font-black shadow-md shadow-emerald-950/15 hover:shadow-lg disabled:bg-gray-300 disabled:shadow-none cursor-pointer outline-none border-none transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669]"
+              >
+                {isSaving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                ) : saveSuccess ? (
+                  <CheckCircle2 size={16} />
+                ) : (
+                  <Save size={16} />
+                )}
+                {saveSuccess ? "Saved!" : "Save Changes"}
+              </button>
+            </div>
+          </div>
+
+          {/* Sub Navigation Tabs */}
+          <div className="flex border-b border-gray-200 overflow-x-auto hide-scrollbar">
+            {tabsConfig.map((tab) => {
+              const active = activeSubTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveSubTab(tab.id as SettingsTab)}
+                  className={`relative px-5 py-3 text-sm font-semibold transition-all cursor-pointer outline-none border-none bg-transparent whitespace-nowrap
+                    ${active ? "text-[#047857] font-bold" : "text-gray-500 hover:text-gray-800"}`}
+                >
+                  {tab.label}
+                  {active && (
+                    <motion.div
+                      layoutId="activeSubTabLine"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#047857]"
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 2-Column Desktop Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Left Form Column */}
+            <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] border border-gray-150 shadow-xs space-y-6">
+              <AnimatePresence mode="popLayout">
+                
+                {/* Desktop Profile Form */}
+                {activeSubTab === "profile" && (
+                  <motion.div
+                    key="desk-profile"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-6"
+                  >
+                    {/* Avatar Upload */}
+                    <div className="flex items-center gap-4 pb-4 border-b border-slate-100">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#064e3b] to-[#047857] text-white flex items-center justify-center font-black text-xl overflow-hidden relative">
+                        {avatar ? (
+                          <img src={avatar} alt={fullName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{(fullName || "U").charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900">Profile Photo</h4>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <button
+                            type="button"
+                            onClick={handleUploadPhoto}
+                            className="px-3 py-1.5 rounded-lg bg-emerald-50 text-[#047857] font-bold text-xs hover:bg-emerald-100 cursor-pointer border border-emerald-200"
+                          >
+                            Upload Photo
+                          </button>
+                          {avatar && (
+                            <button
+                              type="button"
+                              onClick={handleRemovePhoto}
+                              className="px-3 py-1.5 rounded-lg text-red-600 font-bold text-xs hover:bg-red-50 cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Full Legal Name</label>
+                        <input
+                          type="text"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857]"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Username (@)</label>
+                        <input
+                          type="text"
+                          value={username}
+                          onChange={handleUsernameChange}
+                          disabled={isUsernameLocked}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857] disabled:bg-slate-100"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Official Email</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="email"
+                            readOnly
+                            value={email || "No email verified"}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold bg-slate-50 text-slate-600 outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleStartFieldChange("email")}
+                            className="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 cursor-pointer shrink-0"
+                          >
+                            Change
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Mobile Number</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={`+91 ${loggedInMobile}`}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold bg-slate-50 text-slate-600 outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Occupation</label>
+                        <input
+                          type="text"
+                          value={jobTitle}
+                          onChange={(e) => setJobTitle(e.target.value)}
+                          placeholder="e.g. Software Engineer"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857]"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Annual Income</label>
+                        <select
+                          value={incomeRange}
+                          onChange={(e) => setIncomeRange(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857] bg-white"
+                        >
+                          <option value="">Select Annual Income</option>
+                          <option value="Below ₹3 Lakhs">Below ₹3 Lakhs</option>
+                          <option value="₹3 Lakhs - ₹5 Lakhs">₹3 Lakhs - ₹5 Lakhs</option>
+                          <option value="₹5 Lakhs - ₹10 Lakhs">₹5 Lakhs - ₹10 Lakhs</option>
+                          <option value="₹10 Lakhs - ₹25 Lakhs">₹10 Lakhs - ₹25 Lakhs</option>
+                          <option value="Above ₹25 Lakhs">Above ₹25 Lakhs</option>
+                        </select>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Desktop Bank Account */}
+                {activeSubTab === "bank" && (
+                  <motion.div
+                    key="desk-bank"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-5"
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Bank Name</label>
+                        <input
+                          type="text"
+                          value={bankName}
+                          onChange={(e) => setBankName(e.target.value)}
+                          placeholder="Bank Name"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857]"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Account Number</label>
+                        <input
+                          type="password"
+                          value={accountNumber}
+                          onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
+                          placeholder="Account Number"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857]"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">IFSC Code</label>
+                        <input
+                          type="text"
+                          value={ifscCode}
+                          onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                          placeholder="IFSC Code"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857]"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Desktop Nominee Setup */}
+                {activeSubTab === "nominee" && (
+                  <motion.div
+                    key="desk-nominee"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-5"
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Nominee Name</label>
+                        <input
+                          type="text"
+                          value={nomineeName}
+                          onChange={(e) => setNomineeName(e.target.value)}
+                          placeholder="Legal Nominee Name"
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857]"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Relationship</label>
+                        <select
+                          value={nomineeRelation}
+                          onChange={(e) => setNomineeRelation(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857] bg-white"
+                        >
+                          <option value="spouse">Spouse</option>
+                          <option value="son">Son</option>
+                          <option value="daughter">Daughter</option>
+                          <option value="father">Father</option>
+                          <option value="mother">Mother</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600">Date of Birth</label>
+                        <input
+                          type="date"
+                          value={nomineeDob}
+                          onChange={(e) => setNomineeDob(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold outline-none focus:border-[#047857]"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Desktop Security Tab */}
+                {activeSubTab === "security" && (
+                  <motion.div
+                    key="desk-sec"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-5"
+                  >
+                    <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Fingerprint size={22} className="text-[#047857]" />
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900">Biometric Security</h4>
+                          <p className="text-xs text-slate-500">Scan fingerprint to unlock Fipmoney on mobile</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleToggleBiometric}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                          isBiometricActive ? "bg-[#047857]" : "bg-slate-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            isBiometricActive ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                        <p className="text-xs font-bold text-slate-700">Aadhaar Status</p>
+                        <p className="text-sm font-black text-slate-900 mt-1">{aadhaarNumber || "XXXX-XXXX-9012"}</p>
+                        <span className="text-[11px] font-bold text-[#047857] mt-2 inline-block">✓ Linked & Verified</span>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                        <p className="text-xs font-bold text-slate-700">PAN Status</p>
+                        <p className="text-sm font-black text-slate-900 mt-1">{panNumber || "ABCDE1234F"}</p>
+                        <span className="text-[11px] font-bold text-[#047857] mt-2 inline-block">✓ Linked & Verified</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Desktop Active Sessions */}
+                {activeSubTab === "sessions" && (
+                  <motion.div
+                    key="desk-sessions"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <h4 className="text-sm font-bold text-slate-900">Active Devices & Browsers</h4>
+                      <button
+                        onClick={fetchSessions}
+                        className="text-xs font-bold text-[#047857] flex items-center gap-1 cursor-pointer"
+                      >
+                        <RefreshCw size={12} className={isSessionsLoading ? "animate-spin" : ""} /> Refresh
+                      </button>
+                    </div>
+                    {sessionsList.map((s, idx) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Laptop size={20} className="text-slate-500" />
+                          <div>
+                            <p className="text-sm font-bold text-slate-800">{s.deviceName || "Desktop Session"}</p>
+                            <p className="text-xs text-slate-400 font-mono">{s.ipAddress || "Encrypted IP"}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleRevokeSession(s.sessionId)}
+                          className="px-3 py-1.5 rounded-xl bg-red-50 text-red-600 text-xs font-bold border border-red-200 hover:bg-red-100 cursor-pointer"
+                        >
+                          Revoke
+                        </button>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+
+                {/* Desktop App & Info */}
+                {activeSubTab === "about" && (
+                  <motion.div
+                    key="desk-about"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-4"
+                  >
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                      <h4 className="text-sm font-bold text-slate-900">Fipmoney Wealth App</h4>
+                      <p className="text-xs text-slate-500">
+                        Version {CURRENT_APP_VERSION} (Build {CURRENT_VERSION_CODE})
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleCheckForUpdates}
+                        disabled={isCheckingUpdate}
+                        className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white font-bold text-xs shadow-sm flex items-center gap-2 cursor-pointer"
+                      >
+                        <RefreshCw size={14} className={isCheckingUpdate ? "animate-spin" : ""} />
+                        <span>{isCheckingUpdate ? "Checking..." : "Check for Updates"}</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+              </AnimatePresence>
+            </div>
+
+            {/* Right Sidebar: Profile Completion & Security */}
+            <div className="lg:col-span-4 space-y-6">
               
-              {/* Decorative graphic */}
-              <div className="mt-8 flex justify-center items-center relative h-32 w-full">
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-orange-50 rounded-full z-0 blur-3xl opacity-60" />
-                 <Shield size={110} strokeWidth={1} className="text-orange-100 fill-orange-50 relative z-10" />
-                 <Check size={40} strokeWidth={4} className="text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] z-20" />
-                 <Lock size={36} strokeWidth={1.5} className="text-orange-200 fill-orange-50 absolute left-1/2 top-1/2 ml-4 mt-2 z-30 drop-shadow-sm bg-white rounded-md p-1" />
+              {/* Profile Completion Circle */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 border border-gray-150 shadow-sm flex flex-col items-center text-center">
+                <div className="flex items-center gap-2 mb-6 w-full justify-center">
+                  <Trophy size={18} className="text-[#d97706]" />
+                  <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Profile Completion</h3>
+                </div>
+
+                <div className="relative w-36 h-36 flex items-center justify-center p-1">
+                  <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90 overflow-visible">
+                    <circle cx="60" cy="60" r="50" stroke="#f1f5f9" strokeWidth="8" fill="transparent" />
+                    <circle
+                      cx="60" cy="60" r="50"
+                      stroke={percentage <= 40 ? "#f97316" : percentage <= 80 ? "#f59e0b" : "#047857"}
+                      strokeWidth="8" fill="transparent"
+                      strokeDasharray={2 * Math.PI * 50}
+                      strokeDashoffset={2 * Math.PI * 50 * (1 - percentage / 100)}
+                      strokeLinecap="round" className="transition-all duration-500 ease-out"
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center justify-center">
+                    <span className="text-3xl font-black text-gray-800 leading-none">{percentage}%</span>
+                    <span className="text-[9px] font-extrabold text-gray-500 uppercase tracking-wider mt-1.5">Completed</span>
+                  </div>
+                </div>
+
+                <div className="w-full mt-6 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-700 font-bold">Personal & Basic Info</span>
+                    <span className="text-[#047857] font-black">{personalScore}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-700 font-bold">Bank Account</span>
+                    <span className={bankDone ? "text-[#047857] font-black" : "text-slate-400"}>{bankDone ? "20%" : "0%"}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-700 font-bold">Nominee Verification</span>
+                    <span className={nomineeDone ? "text-[#047857] font-black" : "text-slate-400"}>{nomineeDone ? "20%" : "0%"}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-700 font-bold">Security & KYC</span>
+                    <span className={kycDone ? "text-[#047857] font-black" : "text-slate-400"}>{kycDone ? "20%" : "0%"}</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Security Compliance Card */}
+              <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex flex-col relative overflow-hidden">
+                <div className="flex items-center gap-2 mb-2 relative z-10">
+                  <ShieldCheck size={18} className="text-[#047857]" />
+                  <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Security & Custody</h3>
+                </div>
+                <p className="text-xs text-gray-500 leading-relaxed relative z-10">
+                  Fipmoney adheres strictly to Indian bullion compliance standards. Pure 24K 99.9% physical gold vaulted with Brink's India with IDBI Trusteeship legal protection.
+                </p>
+              </div>
+
             </div>
 
           </div>
         </div>
 
-        {/* Footer info blocks */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm mt-8">
-           <div className="flex items-start gap-4">
-              <div className="p-3 bg-emerald-50 rounded-full text-[#047857] shrink-0">
-                 <Lock size={20} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-gray-900">Secure Data</h4>
-                 <p className="text-[11px] text-gray-500 font-semibold mt-1">Your data is protected with bank-grade encryption.</p>
-              </div>
-           </div>
-           <div className="flex items-start gap-4">
-              <div className="p-3 bg-orange-50 rounded-full text-orange-600 shrink-0">
-                 <ShieldCheck size={20} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-gray-900">Verified Accounts</h4>
-                 <p className="text-[11px] text-gray-500 font-semibold mt-1">All accounts are verified and linked for safe transactions.</p>
-              </div>
-           </div>
-           <div className="flex items-start gap-4">
-              <div className="p-3 bg-blue-50 rounded-full text-blue-600 shrink-0">
-                 <Eye size={20} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-gray-900">Privacy First</h4>
-                 <p className="text-[11px] text-gray-500 font-semibold mt-1">We do not share your information with third parties.</p>
-              </div>
-           </div>
-           <div className="flex items-start gap-4">
-              <div className="p-3 bg-green-50 rounded-full text-green-600 shrink-0">
-                 <Headset size={20} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-gray-900">Need Help?</h4>
-                 <p className="text-[11px] text-gray-500 font-semibold mt-1">Our support team is available 24/7 to assist you.</p>
-                 <button className="text-[11px] font-bold text-[#d97706] mt-2 bg-transparent border-none p-0 flex items-center gap-1 cursor-pointer">
-                    Contact Support <ChevronRight size={12} />
-                 </button>
-              </div>
-           </div>
-        </div>
+        {/* Video KYC Call Overlay */}
+        <AnimatePresence>
+          {showVideoCall && (
+            <motion.div
+              className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="bg-[#0f172a] text-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl relative border border-slate-800 flex flex-col h-[500px]"
+                initial={{ scale: 0.95, y: 15 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 15 }}
+              >
+                <div className="bg-[#1e293b] px-6 py-4 flex items-center justify-between border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <Video size={16} className="text-red-500 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Live Video Verification</span>
+                  </div>
+                  <button onClick={cancelVideoKyc} className="text-slate-400 hover:text-white text-xs font-bold">
+                    Cancel
+                  </button>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                  <div className="w-20 h-20 rounded-full bg-emerald-500/20 text-[#047857] flex items-center justify-center border-2 border-emerald-500/40">
+                    <ShieldCheck size={40} className="text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">Live KYC Session</h3>
+                    <p className="text-xs text-slate-400 mt-1">Connecting to automated verification agent...</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-[#1e293b] flex items-center justify-center">
+                  {videoStep === "done" ? (
+                    <button
+                      onClick={() => setShowVideoCall(false)}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black px-6 py-2.5 rounded-xl cursor-pointer"
+                    >
+                      Finish Verification
+                    </button>
+                  ) : (
+                    <span className="text-xs text-slate-400 animate-pulse">Verification in progress...</span>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </div>
 
-      {/* Video KYC Call Overlay */}
+      {/* Email / Mobile Change Verification Modal */}
       <AnimatePresence>
-        {showVideoCall && (
+        {changeFieldType !== null && (
           <motion.div
-            className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-[#0f172a] text-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl relative border border-slate-850 flex flex-col h-[520px]"
-              initial={{ scale: 0.95, y: 15 }}
+              className="bg-white text-slate-800 rounded-3xl p-6 max-w-md w-full relative border border-slate-200 shadow-2xl space-y-5"
+              initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
+              exit={{ scale: 0.95, y: 10 }}
             >
-              {/* Header */}
-              <div className="bg-[#1e293b] px-6 py-4 flex items-center justify-between border-b border-slate-850">
-                <div className="flex items-center gap-2">
-                  <Video size={16} className="text-red-500 animate-pulse" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Live Video Verification</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-red-500">
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                  REC 00:{videoStep === "connecting" ? "00" : "12"}
-                </div>
-              </div>
-
-              {/* Viewport splits */}
-              <div className="flex-1 grid grid-cols-2 gap-4 p-6 bg-slate-950">
-                {/* Officer Video */}
-                <div className="bg-[#1e293b] rounded-2xl relative overflow-hidden flex flex-col items-center justify-center border border-slate-800">
-                  {videoStep === "connecting" ? (
-                    <div className="text-center space-y-3">
-                      <Loader2 size={32} className="animate-spin text-amber-500 mx-auto" />
-                      <p className="text-xs font-bold text-slate-400">Connecting to officer...</p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Officer Face Mockup */}
-                      <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center border-2 border-amber-500 relative">
-                        <User size={48} className="text-slate-400" />
-                        <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center border-2 border-[#1e293b]">
-                          <CheckCircle2 size={12} className="text-white" />
-                        </div>
-                      </div>
-                      <p className="text-xs font-bold text-slate-300 mt-3">Sarah (KYC Officer)</p>
-
-                      {/* Voice waveform mockup */}
-                      {videoStep !== "verifying" && videoStep !== "done" && (
-                        <div className="flex gap-1 items-end h-6 mt-4">
-                          {[0, 1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (
-                            <motion.div
-                              key={i}
-                              className="w-0.5 bg-amber-500 rounded-full"
-                              animate={{ height: [4, h * 4, 4] }}
-                              transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.05 }}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                  <span className="absolute bottom-3 left-3 text-[9px] font-bold bg-black/60 px-2 py-0.5 rounded text-slate-300">Live Agent Feed</span>
-                </div>
-
-                {/* User Camera Preview */}
-                <div className="bg-[#1e293b] rounded-2xl relative overflow-hidden flex flex-col items-center justify-center border border-slate-800">
-                  {videoStep === "connecting" ? (
-                    <div className="text-center space-y-2">
-                      <Camera size={24} className="text-slate-550 mx-auto" />
-                      <p className="text-xs font-bold text-slate-400">Starting camera...</p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* User mockup camera picture */}
-                      <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center border-2 border-dashed border-slate-650 relative overflow-hidden">
-                        <img src={avatar} className="w-full h-full object-cover" />
-                        {videoStep === "pan" && (
-                          <div className="absolute inset-0 bg-amber-500/25 flex items-center justify-center text-[10px] font-black text-amber-250">
-                            PAN CARD READY
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-xs font-bold text-slate-300 mt-3">{fullName}</p>
-
-                      {/* Framing Overlay box */}
-                      {videoStep === "pan" ? (
-                        <div className="absolute inset-4 border-2 border-dashed border-amber-500/50 rounded-xl flex items-center justify-center pointer-events-none">
-                          <span className="text-[8px] bg-amber-500/90 text-black font-black px-2 py-0.5 rounded">ALIGN PAN CARD HERE</span>
-                        </div>
-                      ) : (
-                        <div className="absolute inset-4 border border-dashed border-emerald-500/35 rounded-xl pointer-events-none" />
-                      )}
-                    </>
-                  )}
-                  <span className="absolute bottom-3 left-3 text-[9px] font-bold bg-black/60 px-2 py-0.5 rounded text-slate-300">Your Preview</span>
-                </div>
-              </div>
-
-              {/* Subtitles box */}
-              <div className="bg-slate-900 p-4 border-t border-slate-850 text-center min-h-[70px] flex items-center justify-center px-8">
-                <p className="text-xs font-medium text-slate-300 italic tracking-wide">
-                  {videoStep === "connecting" && "System: Setting up end-to-end encrypted connection with verification office..."}
-                  {videoStep === "intro" && "Sarah: Hello! I'm Sarah from the compliance desk. Can you please state your name and confirm you are opening a Fipmoney gold vault?"}
-                  {videoStep === "pan" && "Sarah: Great! Now please hold up your physical PAN card to the camera so we can log the database records."}
-                  {videoStep === "verifying" && "System: Capturing records. Running AI verification against NSDL database..."}
-                  {videoStep === "done" && "Sarah: Verification complete! Everything checks out. Your account has been upgraded to Full KYC."}
+              <div>
+                <h3 className="text-lg font-black text-slate-900 capitalize">
+                  {(!email || email.endsWith('@fipmoney.com')) && changeFieldType === "email"
+                    ? "Add & Verify Email Address"
+                    : `Change ${changeFieldType === "email" ? "Email Address" : "Mobile Number"}`}
+                </h3>
+                <p className="text-xs text-gray-400 font-semibold mt-1">
+                  {(!email || email.endsWith('@fipmoney.com')) && changeFieldType === "email"
+                    ? (changeStep === 2 ? "Enter your official email address below." : "Enter 6-digit OTP sent to your email.")
+                    : (changeStep === 1 ? "Step 1: Cross-verify your current identity." : changeStep === 2 ? "Step 2: Enter your new details." : "Step 3: Verify your new details.")
+                  }
                 </p>
               </div>
 
-              {/* Footer action bar */}
-              <div className="bg-[#1e293b] px-6 py-4 flex items-center justify-between border-t border-slate-850">
-                <button
-                  onClick={cancelVideoKyc}
-                  disabled={videoStep === "done"}
-                  className="bg-transparent text-slate-400 hover:text-white hover:bg-slate-850 disabled:opacity-50 text-xs font-extrabold px-4 py-2.5 rounded-xl transition-all cursor-pointer outline-none border border-slate-700 flex items-center gap-1.5"
-                >
-                  <PhoneOff size={14} /> Cancel call
-                </button>
-
-                {videoStep === "done" ? (
-                  <button
-                    onClick={() => setShowVideoCall(false)}
-                    className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black px-6 py-2.5 rounded-xl transition-all cursor-pointer outline-none border-none shadow-md"
-                  >
-                    Finish & Upgrade Account
-                  </button>
-                ) : (
-                  <div className="text-[10px] text-slate-400 font-bold animate-pulse">
-                    Verification in progress...
+              {changeStep === 1 && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Verify Current {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
+                    </label>
+                    <p className="text-[11px] font-bold text-[#047857] leading-normal bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">
+                      🔑 Verification OTP sent via email to: {changeFieldType === "email" ? email : mobileNumber}.
+                    </p>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={currentVerifyOtp}
+                      onChange={(e) => setCurrentVerifyOtp(e.target.value.replace(/\D/g, ""))}
+                      placeholder="Enter 6-digit OTP"
+                      className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-[#047857] focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
+                    />
                   </div>
-                )}
-              </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setChangeFieldType(null);
+                        setCurrentVerifyOtp("");
+                      }}
+                      className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-600 cursor-pointer transition-colors outline-none"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleVerifyCurrentOtp}
+                      disabled={currentVerifyOtp.length !== 6 || isVerifyingOtp}
+                      className="flex-1 py-3 rounded-xl bg-[#047857] hover:bg-[#065f46] disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      {isVerifyingOtp ? <Loader2 size={14} className="animate-spin" /> : "Next →"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {changeStep === 2 && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      New {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
+                    </label>
+                    <input
+                      type={changeFieldType === "email" ? "email" : "tel"}
+                      value={newValueInput}
+                      onChange={(e) => setNewValueInput(e.target.value)}
+                      placeholder={changeFieldType === "email" ? "name@example.com" : "Enter 10-digit number"}
+                      className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-[#047857] focus:bg-white transition-all shadow-sm"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setChangeFieldType(null);
+                        setChangeStep(1);
+                        setCurrentVerifyOtp("");
+                      }}
+                      className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-600 cursor-pointer transition-colors outline-none"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSendNewOtp}
+                      disabled={isSendingOtp}
+                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      {isSendingOtp ? <Loader2 size={14} className="animate-spin" /> : "Send OTP"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {changeStep === 3 && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Verify New {changeFieldType === "email" ? "Email" : "Mobile"}
+                    </label>
+                    <p className="text-[11px] font-bold text-[#047857] leading-normal bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">
+                      🔑 OTP verification sent to: {newValueInput}. Check inbox.
+                    </p>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={newVerifyOtp}
+                      onChange={(e) => setNewVerifyOtp(e.target.value.replace(/\D/g, ""))}
+                      placeholder="Enter 6-digit OTP"
+                      className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-[#047857] focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setChangeStep(2)}
+                      className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-600 cursor-pointer transition-colors outline-none"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleVerifyNewOtp}
+                      disabled={newVerifyOtp.length !== 6 || isVerifyingOtp}
+                      className="flex-1 py-3 rounded-xl bg-[#047857] hover:bg-[#065f46] disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      {isVerifyingOtp ? <Loader2 size={14} className="animate-spin" /> : "Verify & Change"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-    </div>
-
-    {/* Email / Mobile Change Verification Modal */}
-    <AnimatePresence>
-      {changeFieldType !== null && (
-        <motion.div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            className="bg-white text-slate-800 rounded-3xl p-6 max-w-md w-full relative border border-slate-200 shadow-2xl space-y-5"
-            initial={{ scale: 0.95, y: 10 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.95, y: 10 }}
-          >
-            <div>
-              <h3 className="text-lg font-black text-slate-900 capitalize">
-                {(!email || email.endsWith('@fipmoney.com')) && changeFieldType === "email"
-                  ? "Add & Verify Email Address"
-                  : `Change ${changeFieldType === "email" ? "Email Address" : "Mobile Number"}`}
-              </h3>
-              <p className="text-xs text-gray-400 font-semibold mt-1">
-                {(!email || email.endsWith('@fipmoney.com')) && changeFieldType === "email"
-                  ? (changeStep === 2 ? "Enter your official email address below." : "Enter 6-digit OTP sent to your email.")
-                  : (changeStep === 1 ? "Step 1: Cross-verify your current identity." : changeStep === 2 ? "Step 2: Enter your new details." : "Step 3: Verify your new details.")
-                }
-              </p>
-            </div>
-
-            {changeStep === 1 && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Verify Current {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
-                  </label>
-                  <p className="text-[11px] font-bold text-amber-600 leading-normal bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
-                    🔑 Verification OTP sent via email to: {changeFieldType === "email" ? email : mobileNumber}. Please enter 6-digit code.
-                  </p>
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={currentVerifyOtp}
-                    onChange={(e) => setCurrentVerifyOtp(e.target.value.replace(/\D/g, ""))}
-                    placeholder="Enter 6-digit OTP"
-                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setChangeFieldType(null);
-                      setCurrentVerifyOtp("");
-                    }}
-                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleVerifyCurrentOtp}
-                    disabled={currentVerifyOtp.length !== 6 || isVerifyingOtp}
-                    className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
-                  >
-                    {isVerifyingOtp ? <Loader2 size={14} className="animate-spin" /> : "Next \u2192"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {changeStep === 2 && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    New {changeFieldType === "email" ? "Email Address" : "Mobile Number"}
-                  </label>
-                  <input
-                    type={changeFieldType === "email" ? "email" : "tel"}
-                    value={newValueInput}
-                    onChange={(e) => setNewValueInput(e.target.value)}
-                    placeholder={changeFieldType === "email" ? "name@example.com" : "Enter 10-digit number"}
-                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setChangeFieldType(null);
-                      setChangeStep(1);
-                      setCurrentVerifyOtp("");
-                    }}
-                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSendNewOtp}
-                    disabled={isSendingOtp}
-                    className="flex-1 py-3 rounded-xl text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
-                    style={{ background: "linear-gradient(135deg, #b87312, #efb652)" }}
-                  >
-                    {isSendingOtp ? <Loader2 size={14} className="animate-spin" /> : "Send OTP"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {changeStep === 3 && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Verify New {changeFieldType === "email" ? "Email" : "Mobile"}
-                  </label>
-                  <p className="text-[11px] font-bold text-amber-600 leading-normal bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
-                    🔑 OTP verification email sent to: {newValueInput}. Check inbox/spam folder.
-                  </p>
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={newVerifyOtp}
-                    onChange={(e) => setNewVerifyOtp(e.target.value.replace(/\D/g, ""))}
-                    placeholder="Enter 6-digit OTP"
-                    className="w-full px-4 py-3 rounded-xl text-sm font-semibold text-gray-800 bg-[#f8fafc] border border-gray-200 outline-none focus:border-amber-500 focus:bg-white transition-all shadow-sm text-center tracking-widest font-mono"
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setChangeStep(2)}
-                    className="flex-1 py-3 rounded-xl border border-gray-200 bg-white hover:bg-[#f8fafc] text-xs font-bold text-gray-605 cursor-pointer transition-colors outline-none"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleVerifyNewOtp}
-                    disabled={newVerifyOtp.length !== 6 || isVerifyingOtp}
-                    className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-black cursor-pointer transition-all border-none outline-none shadow-sm flex items-center justify-center gap-1.5"
-                  >
-                    {isVerifyingOtp ? <Loader2 size={14} className="animate-spin" /> : "Verify & Change"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-
-    {ModalComponent}
+      {ModalComponent}
     </>
   );
 }
