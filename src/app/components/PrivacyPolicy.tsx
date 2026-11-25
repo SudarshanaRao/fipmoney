@@ -359,7 +359,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                   <div className="w-6 h-6 rounded-lg bg-emerald-100 text-[#047857] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
                   <div>
                     <strong className="text-slate-900 block font-extrabold">Fulfillment of Bullion Purchase & Vaulting Mandate:</strong>
-                    Allocating physical fine gold (24K 99.9%) corresponding to your purchase in Brink's India vaults under IDBI Trusteeship.
+                    Allocating physical fine gold (24K 99.9%) corresponding to your purchase in India's trusted institutional vaults under IDBI Trusteeship.
                   </div>
                 </div>
 
@@ -411,7 +411,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                 </div>
 
                 <div className="border border-slate-200 rounded-2xl p-4 bg-white space-y-1">
-                  <span className="font-black text-slate-900 block">B. Vault Keepers & Insurers (Brink's India & Global Underwriters)</span>
+                  <span className="font-black text-slate-900 block">B. Vault Keepers & Insurers (India's Trusted Institutional Vaults & Global Underwriters)</span>
                   <p className="text-slate-600 font-medium">
                     Aggregated physical metal weight schedules and insurance coverage audits are maintained with certified vault custodians.
                   </p>

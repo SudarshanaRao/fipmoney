@@ -90,7 +90,7 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
     },
     {
       icon: ShieldCheck,
-      title: "Brink's Vault & Insurance",
+      title: "Institutional Vault & Insurance",
       description: "100% insured physical storage & IDBI trusteeship",
       count: 5,
       id: "security"
@@ -129,9 +129,9 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
     {
       id: "faq-3",
       question: "Is my gold physically stored and insured?",
-      answer: "Yes, 100%! Every milligram of 24K pure gold you buy is backed by physical bullion stored in **Brink's Grade-A Insured Vaults** under the supervision of **IDBI Trustee Administrator**. Your holdings are covered by comprehensive insurance against fire, theft, and natural calamities.",
+      answer: "Yes, 100%! Every milligram of 24K pure gold you buy is backed by physical bullion stored in **India's Grade-A Insured Vaults** under the supervision of **IDBI Trustee Administrator**. Your holdings are covered by comprehensive insurance against fire, theft, and natural calamities.",
       category: "security",
-      tags: ["brinks", "vault", "insured", "idbi trustee", "safety"]
+      tags: ["vault", "insured", "bank-grade", "idbi trustee", "safety"]
     },
     {
       id: "faq-4",
@@ -213,8 +213,8 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
       let reply = "";
       if (q.includes("withdraw") || q.includes("bank") || q.includes("sell")) {
         reply = "⚡ **Instant Withdrawal Process:**\n1. Head over to **Portfolio > Sell Gold**.\n2. Enter the grams or amount you wish to withdraw.\n3. Verify with your 4-digit TPIN.\n4. Funds will be transferred to your linked bank account via **IMPS within 30 seconds to 5 minutes**.\n\n*Note: Ensure your bank account is verified under Settings > Bank Details.*";
-      } else if (q.includes("insured") || q.includes("brink") || q.includes("vault") || q.includes("safe")) {
-        reply = "🛡️ **100% Vault Security Guarantee:**\n- All 24K 99.9% fine gold is stored in high-security **Brink's India vaults**.\n- Supervised by an independent **Trustee Administrator (IDBI)**.\n- Insured with global underwriters against fire, theft, and natural perils.\n- You own direct physical title to the bullion at all times.";
+      } else if (q.includes("insured") || q.includes("vault") || q.includes("safe") || q.includes("security")) {
+        reply = "🛡️ **100% Vault Security Guarantee:**\n- All 24K 99.9% fine gold is stored in high-security **India's trusted institutional vaults**.\n- Supervised by an independent **Trustee Administrator (IDBI)**.\n- Insured with global underwriters against fire, theft, and natural perils.\n- You own direct physical title to the bullion at all times.";
       } else if (q.includes("sip") || q.includes("daily") || q.includes("pause") || q.includes("cancel")) {
         reply = "🔄 **Managing your Gold SIP:**\n- You can pause or cancel your SIP anytime from **Portfolio > Manage SIP** with zero cancellation fees.\n- SIPs use official NPCI UPI AutoPay rails.\n- To modify the daily or monthly amount, simply adjust the mandate inside the app.";
       } else if (q.includes("kyc") || q.includes("pan") || q.includes("document")) {
@@ -242,7 +242,7 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
         reference: orderQuery.toUpperCase(),
         status: "COMPLETED & SECURED",
         asset: "24K 99.9% Pure Gold",
-        vaultReceipt: "BRINKS-VAULT-IN-" + Math.floor(100000 + Math.random() * 900000),
+        vaultReceipt: "TRUSTED-VAULT-IN-" + Math.floor(100000 + Math.random() * 900000),
         trusteeVerified: true,
         timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
         settlement: "Instant UPI IMPS Rail Verified"
@@ -378,7 +378,7 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Quick:</span>
                   {[
                     "Instant Withdrawal",
-                    "Brink's Vault",
+                    "India's Trusted Vault",
                     "Daily SIP",
                     "KYC Verification",
                     "Doorstep Delivery"
@@ -426,7 +426,7 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
                   </div>
                   <div>
                     <div className="text-[10px] font-bold text-slate-400 uppercase">Vault Protection</div>
-                    <div className="text-xs font-black text-slate-900">100% Brink's Insured</div>
+                    <div className="text-xs font-black text-slate-900">100% Bank-Grade Insured</div>
                   </div>
                 </div>
               </div>
@@ -731,7 +731,7 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
 
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700">Brink's Vault Custody</span>
+                    <span className="text-xs font-bold text-slate-700">India's Trusted Vault Custody</span>
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   </div>
                   <div className="text-xl font-black text-slate-900">100% Backed</div>
@@ -1094,7 +1094,7 @@ export default function HelpCenter({ onBack, isDashboardTab = false }: HelpCente
                         <option value="payments">Payments & Bank Withdrawals</option>
                         <option value="sip">Gold SIP & Mandates</option>
                         <option value="kyc">KYC & Account Verification</option>
-                        <option value="vault">Brink's Vault & Bullion Custody</option>
+                        <option value="vault">India's Trusted Vault & Bullion Custody</option>
                         <option value="delivery">Physical Coin Delivery</option>
                         <option value="other">General Technical Support</option>
                       </select>

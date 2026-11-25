@@ -849,7 +849,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   <div className="flex items-center justify-between text-center my-1">
                     <div className="flex-1">
                       <span className="text-[11px] font-bold text-slate-500 block mb-1">Vault</span>
-                      <span className="text-[13px] font-extrabold text-slate-800">Brink's</span>
+                      <span className="text-[13px] font-extrabold text-slate-800">Bank-Grade</span>
                     </div>
 
                     <div className="h-8 border-r border-dashed border-slate-300 mx-1" />
@@ -1302,7 +1302,7 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   </div>
                   <div className="text-2xl sm:text-3xl font-black text-purple-700">{agent.totalGoldGramsManaged} g</div>
                   <div className="text-[11px] text-slate-500 font-semibold mt-2">
-                    Stored in Brink's Insured Vaults
+                    Stored in India's Trusted Vaults
                   </div>
                 </div>
               </div>
@@ -1630,10 +1630,10 @@ export default function AgentDashboard({ onLogout }: AgentDashboardProps) {
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
                     <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">Ready WhatsApp Message Copy</h4>
                     <p className="text-xs text-slate-700 leading-relaxed font-medium bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs">
-                      "Namaste! Start building your wealth with 24K 99.9% Pure Digital Gold on FipMoney starting with just ₹10. Fully insured in Brink's Vaults. Register here: https://www.test.fipmoney.com/signup?agent={agent.agentCode}"
+                      "Namaste! Start building your wealth with 24K 99.9% Pure Digital Gold on FipMoney starting with just ₹10. Fully insured in India's Trusted Vaults. Register here: https://www.test.fipmoney.com/signup?agent={agent.agentCode}"
                     </p>
                     <a
-                      href={`https://wa.me/?text=${encodeURIComponent(`Namaste! Start building your wealth with 24K 99.9% Pure Digital Gold on FipMoney starting with just ₹10. Fully insured in Brink's Vaults. Register here: https://www.test.fipmoney.com/signup?agent=${agent.agentCode}`)}`}
+                      href={`https://wa.me/?text=${encodeURIComponent(`Namaste! Start building your wealth with 24K 99.9% Pure Digital Gold on FipMoney starting with just ₹10. Fully insured in India's Trusted Vaults. Register here: https://www.test.fipmoney.com/signup?agent=${agent.agentCode}`)}`}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-colors cursor-pointer shadow-md shadow-emerald-500/20"

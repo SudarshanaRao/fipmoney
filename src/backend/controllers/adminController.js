@@ -982,8 +982,8 @@ let currentBenchmarkGoldRate = 7815.00;
 const DEFAULT_GOLD_HOLDINGS_AUDIT_LOGS = [
   {
     auditRefId: "VLT-2026-9812",
-    vaultLocation: "Mumbai Brink's Vault",
-    custodian: "Brink's India",
+    vaultLocation: "Mumbai Secure Vault",
+    custodian: "India's Trusted Vaults",
     movementType: "Bullion Deposit",
     weightKg: 15.500,
     weightFormatted: "+15.500 kg",
@@ -992,8 +992,8 @@ const DEFAULT_GOLD_HOLDINGS_AUDIT_LOGS = [
   },
   {
     auditRefId: "VLT-2026-9804",
-    vaultLocation: "Bangalore Vistra Vault",
-    custodian: "Vistra Trustee",
+    vaultLocation: "Bangalore Reserve Vault",
+    custodian: "Regulated Trustee",
     movementType: "Trustee Audit Scan",
     weightKg: 42.100,
     weightFormatted: "42.100 kg",
@@ -1002,8 +1002,8 @@ const DEFAULT_GOLD_HOLDINGS_AUDIT_LOGS = [
   },
   {
     auditRefId: "VLT-2026-9799",
-    vaultLocation: "Delhi Brink's Vault",
-    custodian: "Brink's India",
+    vaultLocation: "Delhi Secure Vault",
+    custodian: "India's Trusted Vaults",
     movementType: "SIP Reserve Allocation",
     weightKg: 8.250,
     weightFormatted: "+8.250 kg",
@@ -1022,8 +1022,8 @@ const DEFAULT_GOLD_HOLDINGS_AUDIT_LOGS = [
   },
   {
     auditRefId: "VLT-2026-9775",
-    vaultLocation: "Mumbai Brink's Vault",
-    custodian: "Brink's India",
+    vaultLocation: "Mumbai Secure Vault",
+    custodian: "India's Trusted Vaults",
     movementType: "Monthly Bullion Deposit",
     weightKg: 25.000,
     weightFormatted: "+25.000 kg",
@@ -1047,15 +1047,15 @@ export const getGoldHoldingsSummary = async (req, res) => {
     const auditJournal = await GoldHolding.find().sort({ createdAt: -1 });
 
     const totalPhysicalVaultGoldKg = 154.850;
-    const brinksWeight = 92.450;
-    const vistraWeight = 42.100;
+    const custodyWeight = 92.450;
+    const trusteeWeight = 42.100;
     const mmtcWeight = 20.300;
     const unallocatedSurplusKg = 20.200;
 
     const rate = currentBenchmarkGoldRate;
     const totalAssetValueCrNum = (totalPhysicalVaultGoldKg * 1000 * rate) / 10000000;
-    const brinksValueCrNum = (brinksWeight * 1000 * rate) / 10000000;
-    const vistraValueCrNum = (vistraWeight * 1000 * rate) / 10000000;
+    const custodyValueCrNum = (custodyWeight * 1000 * rate) / 10000000;
+    const trusteeValueCrNum = (trusteeWeight * 1000 * rate) / 10000000;
     const mmtcValueCrNum = (mmtcWeight * 1000 * rate) / 10000000;
 
     const summary = {
@@ -1067,20 +1067,20 @@ export const getGoldHoldingsSummary = async (req, res) => {
       unallocatedLiquidSurplus: `${unallocatedSurplusKg.toFixed(3)} kg`,
       custodians: [
         {
-          id: "brinks",
-          name: "Brink's Vault Logistics",
+          id: "custody",
+          name: "Institutional Vault Logistics",
           location: "Mumbai & Delhi Secure Vaults",
           badge: "Primary Custodian",
-          weight: `${brinksWeight.toFixed(3)} kg`,
-          valuation: `₹${brinksValueCrNum.toFixed(2)} Cr`
+          weight: `${custodyWeight.toFixed(3)} kg`,
+          valuation: `₹${custodyValueCrNum.toFixed(2)} Cr`
         },
         {
-          id: "vistra",
-          name: "Vistra Security Trustee",
+          id: "trustee",
+          name: "Regulated Security Trustee",
           location: "Bangalore Vault Reserve",
           badge: "Legal Trustee",
-          weight: `${vistraWeight.toFixed(3)} kg`,
-          valuation: `₹${vistraValueCrNum.toFixed(2)} Cr`
+          weight: `${trusteeWeight.toFixed(3)} kg`,
+          valuation: `₹${trusteeValueCrNum.toFixed(2)} Cr`
         },
         {
           id: "mmtc",
@@ -1193,8 +1193,8 @@ export const triggerTrusteeAudit = async (req, res) => {
     const auditRefId = `VLT-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const newEntry = await GoldHolding.create({
       auditRefId,
-      vaultLocation: "Bangalore Vistra Vault",
-      custodian: "Vistra Trustee",
+      vaultLocation: "Bangalore Reserve Vault",
+      custodian: "Regulated Trustee",
       movementType: "Instant Trustee Physical Audit",
       weightKg: 154.850,
       weightFormatted: "154.850 kg",

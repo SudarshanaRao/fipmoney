@@ -558,7 +558,7 @@ export default function AppMenuPage({
             <span className="text-xs font-black text-emerald-900/60">Fipmoney Wealth</span>
           </div>
           <p className="text-[10px] font-semibold text-slate-400">
-            100% Insured Brink's Vault Storage • SSL 256-Bit Encryption
+            100% Insured Bank-Grade Vault Storage • SSL 256-Bit Encryption
           </p>
         </div>
 

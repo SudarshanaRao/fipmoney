@@ -82,7 +82,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             </div>
 
             <p className="text-emerald-800 text-sm leading-relaxed font-medium">
-              India's trusted digital gold and payments platform. Buy, sell, and store digital gold and silver starting from just ₹1. Secured in 100% insured physical vaults by Brink's and protected by independent Security Trustee Vistra.
+              India's trusted digital gold and payments platform. Buy, sell, and store digital gold and silver starting from just ₹1. Secured in 100% insured bank-grade physical vaults and protected by independent Regulated Security Trustees.
             </p>
             
             <div className="w-14 h-1 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] rounded-full mt-5 mb-5 shadow-xs"></div>
@@ -137,8 +137,8 @@ export default function Footer({ onNavigate }: FooterProps) {
             {[
               { title: 'VERIFIED PLATFORM', subtitle: '100% trusted & verified', icon: Shield, logo: null },
               { title: 'SECURE PLATFORM', subtitle: 'Safe payments & data', icon: Lock, logo: null },
-              { title: 'BRINK\'S VAULTS', subtitle: '100% insured physical vaults', icon: Database, logo: '/brinks-logo.svg' },
-              { title: 'VISTRA TRUSTEE', subtitle: 'Independent legal safeguard', icon: Coins, logo: '/vistra-logo.svg' }
+              { title: 'BANK-GRADE VAULTS', subtitle: '100% insured physical vaults', icon: Database, logo: null },
+              { title: 'REGULATED TRUSTEE', subtitle: 'Independent legal safeguard', icon: Coins, logo: null }
             ].map((item, idx) => (
               <div key={idx} className={`flex items-center gap-4 ${idx !== 0 ? 'pt-5 sm:pt-0 sm:pl-5 lg:pl-7' : ''}`}>
                 <div className="w-12 h-12 rounded-full bg-[#f8fafc] border border-emerald-300 flex items-center justify-center shrink-0 p-2 shadow-xs">
@@ -206,13 +206,13 @@ export default function Footer({ onNavigate }: FooterProps) {
                <div className="flex flex-col items-center gap-1.5">
                  <span className="text-[8px] text-white/80 font-black uppercase tracking-widest">VAULT CUSTODIAN</span>
                  <div className="bg-[#f8fafc] px-3.5 py-1.5 rounded-xl shadow-xs border border-amber-400/40 hover:border-amber-400 flex items-center justify-center h-8 transition-colors">
-                   <img src="/brinks-logo.svg" alt="Brink's Vault Custodian" className="h-4.5 w-auto object-contain" />
+                   <span className="text-[11px] font-black text-slate-800">India's Trusted Vaults</span>
                  </div>
                </div>
                <div className="flex flex-col items-center gap-1.5">
                  <span className="text-[8px] text-white/80 font-black uppercase tracking-widest">SECURITY TRUSTEE</span>
                  <div className="bg-[#f8fafc] px-3.5 py-1.5 rounded-xl shadow-xs border border-amber-400/40 hover:border-amber-400 flex items-center justify-center h-8 transition-colors">
-                   <img src="/vistra-logo.svg" alt="Vistra Security Trustee" className="h-4.5 w-auto object-contain" />
+                   <span className="text-[11px] font-black text-slate-800">Regulated Trustees</span>
                  </div>
                </div>
             </div>

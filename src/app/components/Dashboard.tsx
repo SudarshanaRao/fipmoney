@@ -1705,7 +1705,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               24K Pure Digital Bullion • Financial Freedom
             </p>
             <p className="text-[9.5px] font-semibold text-slate-400 mt-1">
-              100% Insured Brink's Vaults • Regulated IDBI Custody
+              100% Insured Bank-Grade Vaults • Regulated IDBI Custody
             </p>
           </div>
 

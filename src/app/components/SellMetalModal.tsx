@@ -677,7 +677,7 @@ export default function SellMetalModal({
                 <div className="flex items-center justify-between border-t border-slate-200/60 pt-2 mt-2 text-xs font-semibold text-slate-500">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck size={14} className="text-emerald-600" />
-                    <span>Real-time {metalName.toLowerCase()} sell rate powered by SafeGold</span>
+                    <span>Real-time {metalName.toLowerCase()} sell rate powered by Live Bullion Market Benchmarks</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-slate-400 font-bold">
                     <span>Last updated: 10:30:45 AM</span>
@@ -693,7 +693,7 @@ export default function SellMetalModal({
                     <Shield size={18} strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-black text-white leading-tight">Instant Bank Payout via SafeGold</h4>
+                    <h4 className="text-xs sm:text-sm font-black text-white leading-tight">Instant Direct Bank Payout</h4>
                     <p className="text-[10px] sm:text-xs text-emerald-200/80 font-medium mt-0.5">
                       Funds transferred directly to linked bank account within 60 seconds with 0% vault fee.
                     </p>

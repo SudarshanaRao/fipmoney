@@ -120,8 +120,8 @@ This API documentation is hosted on an obfuscated secret route (\`/${process.env
           properties: {
             _id: { type: 'string', example: '66a4f91e92d2b4001e4a3b1e' },
             auditRefId: { type: 'string', example: 'VLT-2026-9812' },
-            vaultLocation: { type: 'string', example: "Mumbai Brink's Vault" },
-            custodian: { type: 'string', example: "Brink's India" },
+            vaultLocation: { type: 'string', example: "Mumbai Secure Vault" },
+            custodian: { type: 'string', example: "India's Trusted Vaults" },
             movementType: { type: 'string', example: 'Bullion Deposit' },
             weightKg: { type: 'number', example: 15.5 },
             weightFormatted: { type: 'string', example: '+15.500 kg' },

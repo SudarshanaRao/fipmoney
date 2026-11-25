@@ -20,7 +20,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
   const sections = [
     { id: "preamble", title: "1. Regulatory Status & Preamble", icon: Scale },
     { id: "eligibility", title: "2. User Eligibility & KYC Mandate", icon: UserCheck },
-    { id: "custodial-structure", title: "3. 100% Physical Custody & Brink's Vaulting", icon: Landmark },
+    { id: "custodial-structure", title: "3. 100% Physical Custody & Institutional Vaulting", icon: Landmark },
     { id: "trustee-charge", title: "4. Independent Trustee Administrator (IDBI)", icon: ShieldCheck },
     { id: "pricing-gst", title: "5. Spot Wholesale Pricing, Spreads & 3% GST", icon: Coins },
     { id: "purchase-mechanics", title: "6. Buying Digital Gold & Silver", icon: DollarSign },
@@ -154,7 +154,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
             </div>
             <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
               <Landmark size={14} className="text-[#047857]" />
-              <span>Custody: Brink's India Vaults</span>
+              <span>Custody: India's Trusted Vaults</span>
             </div>
             <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
               <ShieldCheck size={14} className="text-[#047857]" />
@@ -284,12 +284,12 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               <div className="flex items-center gap-3 text-[#047857]">
                 <Landmark size={24} />
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900">
-                  3. 100% Physical Custody & Brink's Vaulting
+                  3. 100% Physical Custody & Institutional Vaulting
                 </h2>
               </div>
 
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                Every unit of digital gold purchased through Fipmoney corresponds to physical fine gold of <strong>24 Karat purity (99.5% minimum, 99.9% standard, or 99.99% fine gold adhering to IS 1417:2016 standards)</strong> physically stored in Grade-A high-security vaults managed by <strong>Brink's India Private Limited</strong>.
+                Every unit of digital gold purchased through Fipmoney corresponds to physical fine gold of <strong>24 Karat purity (99.5% minimum, 99.9% standard, or 99.99% fine gold adhering to IS 1417:2016 standards)</strong> physically stored in Grade-A high-security vaults managed by <strong>India's leading certified institutional vault partners</strong>.
               </p>
 
               <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2 text-xs text-emerald-950">
@@ -319,7 +319,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
                   <strong className="text-slate-900 block font-black">Legal First Charge</strong>
-                  <span className="text-slate-600 font-medium">The Trustee holds an exclusive legal first charge over all bullion vaulted with Brink's on behalf of customers.</span>
+                  <span className="text-slate-600 font-medium">The Trustee holds an exclusive legal first charge over all bullion held in certified vaults on behalf of customers.</span>
                 </div>
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
                   <strong className="text-slate-900 block font-black">Insolvency Protection</strong>
@@ -435,7 +435,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               </div>
 
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                100% of the bullion held in Brink's India vaults is insured by leading global underwriters against risks of <strong>burglary, theft, fire, lightning, earthquake, cyclone, and transit perils</strong>.
+                100% of the bullion held in institutional vaults is insured by leading global underwriters against risks of <strong>burglary, theft, fire, lightning, earthquake, cyclone, and transit perils</strong>.
               </p>
 
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-medium">

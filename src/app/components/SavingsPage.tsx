@@ -1528,7 +1528,7 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
 
                   <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-slate-500">
                     <ShieldCheck size={14} className="text-emerald-600" />
-                    <span>100% Insured Storage by Brink's & Regulated Vault</span>
+                    <span>100% Insured Storage by India's Trusted Vaults</span>
                   </div>
 
                   {/* Done Button */}

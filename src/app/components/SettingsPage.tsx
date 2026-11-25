@@ -1393,7 +1393,7 @@ export default function SettingsPage() {
                     <div>
                       <h4 className="text-sm font-black text-slate-900">Legal Nominee Protection</h4>
                       <p className="text-xs text-slate-600 mt-0.5">
-                        Your physical 24K gold stored in Brink's vaults is legally assigned to your nominee.
+                        Your physical 24K gold stored in India's trusted vaults is legally assigned to your nominee.
                       </p>
                     </div>
                   </div>
@@ -2178,7 +2178,7 @@ export default function SettingsPage() {
                   <h3 className="text-sm font-extrabold text-gray-900 tracking-tight">Security & Custody</h3>
                 </div>
                 <p className="text-xs text-gray-500 leading-relaxed relative z-10">
-                  Fipmoney adheres strictly to Indian bullion compliance standards. Pure 24K 99.9% physical gold vaulted with Brink's India with IDBI Trusteeship legal protection.
+                  Fipmoney adheres strictly to Indian bullion compliance standards. Pure 24K 99.9% physical gold vaulted with India's trusted institutional vaults with IDBI Trusteeship legal protection.
                 </p>
               </div>
 

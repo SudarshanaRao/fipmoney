@@ -408,7 +408,7 @@ export default function SilverSavingsPage({ onNavigate }: { onNavigate: (page: s
                       100% Insured 999 Digital Silver Storage
                     </h4>
                     <p className="text-xs font-medium text-slate-300 mt-0.5">
-                      Your Silver is stored in Brink's physical vaults and audited by independent trustees.
+                      Your Silver is stored in India's trusted physical vaults and audited by independent trustees.
                     </p>
                   </div>
                 </div>
@@ -1262,7 +1262,7 @@ export default function SilverSavingsPage({ onNavigate }: { onNavigate: (page: s
 
                   <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold text-slate-500">
                     <ShieldCheck size={14} className="text-emerald-600" />
-                    <span>100% Insured Storage by Brink's & Regulated Vault</span>
+                    <span>100% Insured Storage by India's Trusted Vaults</span>
                   </div>
 
                   {/* Done Button */}

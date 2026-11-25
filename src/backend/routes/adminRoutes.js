@@ -736,7 +736,7 @@ router.put('/bbps-transactions/:id/status', updateBbpsTransactionStatus);
  *     tags:
  *       - Admin Dashboard & Security
  *     summary: Fetch Gold Holdings & Physical Vault Treasury Telemetry
- *     description: Retrieve total physical vault gold reserves (kg), live 24K benchmark rate, custodian distributions (Brinks, Vistra, MMTC), form factor breakdowns, and physical audit journal entries.
+ *     description: Retrieve total physical vault gold reserves (kg), live 24K benchmark rate, custodian distributions (Institutional Vaults, Regulated Trustees, MMTC), form factor breakdowns, and physical audit journal entries.
  *     responses:
  *       200:
  *         description: Gold holdings telemetry and vault audit journal retrieved successfully
@@ -797,10 +797,10 @@ router.put('/gold-holdings/rate', updateGoldRateBenchmark);
  *             properties:
  *               vaultLocation:
  *                 type: string
- *                 example: "Mumbai Brink's Vault"
+ *                 example: "Mumbai Secure Vault"
  *               custodian:
  *                 type: string
- *                 example: "Brink's India"
+ *                 example: "India's Trusted Vaults"
  *               movementType:
  *                 type: string
  *                 example: "Bullion Deposit"
@@ -830,7 +830,7 @@ router.post('/gold-holdings/audit', createVaultAuditEntry);
  *     tags:
  *       - Admin Dashboard & Security
  *     summary: Trigger Instant Trustee Physical Audit Scan
- *     description: Execute an instant physical audit scan by SEBI Vistra Trustee across all physical vault locations.
+ *     description: Execute an instant physical audit scan by Regulated Security Trustees across all physical vault locations.
  *     responses:
  *       200:
  *         description: Instant trustee audit scan executed successfully

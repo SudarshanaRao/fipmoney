@@ -889,8 +889,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     totalVaultAssetValue: "₹121.02 Cr",
     unallocatedLiquidSurplus: "20.200 kg",
     custodians: [
-      { id: "brinks", name: "Brink's Vault Logistics", location: "Mumbai & Delhi Secure Vaults", badge: "Primary Custodian", weight: "92.450 kg", valuation: "₹72.25 Cr" },
-      { id: "vistra", name: "Vistra Security Trustee", location: "Bangalore Vault Reserve", badge: "Legal Trustee", weight: "42.100 kg", valuation: "₹32.90 Cr" },
+      { id: "custody", name: "Institutional Vault Logistics", location: "Mumbai & Delhi Secure Vaults", badge: "Primary Custodian", weight: "92.450 kg", valuation: "₹72.25 Cr" },
+      { id: "trustee", name: "Regulated Security Trustee", location: "Bangalore Vault Reserve", badge: "Legal Trustee", weight: "42.100 kg", valuation: "₹32.90 Cr" },
       { id: "mmtc", name: "Augmont & MMTC Mint", location: "Hyderabad Minting Reserve", badge: "Mint Custody", weight: "20.300 kg", valuation: "₹15.86 Cr" }
     ],
     formFactorBreakdown: [
@@ -958,7 +958,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
   const handleTriggerTrusteeAuditScan = async () => {
     try {
-      triggerToast('Initiating SEBI Vistra Trustee Audit Scan...');
+      triggerToast('Initiating Regulated Security Trustee Audit Scan...');
       let res = await fetch(`${API_BASE_URL}/admin/gold-holdings/trigger-audit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -966,7 +966,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
       const json = await res.json();
       if (res.ok && json.success) {
         triggerToast(json.message || 'Trustee Audit Scan completed & logged!');
-        addAuditLog('Executed Instant SEBI Vistra Trustee Audit Scan', 'Gold Vault Audit', 'Success');
+        addAuditLog('Executed Instant Regulated Trustee Audit Scan', 'Gold Vault Audit', 'Success');
         fetchGoldHoldings();
       } else {
         triggerToast(json.message || 'Failed to execute trustee audit');
@@ -2671,7 +2671,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <div className="text-[10px] font-black uppercase tracking-wider opacity-90">TOTAL PHYSICAL VAULT GOLD</div>
                 <div className="text-3xl font-black mt-1">{goldHoldingsSummary?.totalPhysicalVaultGoldKg || "154.850 kg"}</div>
                 <div className="text-[11px] mt-2 font-bold opacity-95 flex items-center gap-1">
-                  <CheckCircle size={12} /> 100% Insured at Brink's & Vistra Vaults
+                  <CheckCircle size={12} /> 100% Insured at India's Trusted Vaults
                 </div>
               </div>
 
@@ -2679,7 +2679,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-wider">VAULT RESERVE COVERAGE RATIO</div>
                 <div className="text-2xl font-black text-slate-900 mt-1">{goldHoldingsSummary?.vaultReserveCoverageRatio || "102.4%"} Coverage</div>
                 <div className="text-[11px] font-bold text-emerald-600 mt-2 flex items-center gap-1">
-                  <ShieldCheck size={13} /> Audited Daily by Vistra Trustee
+                  <ShieldCheck size={13} /> Audited Daily by Regulated Security Trustee
                 </div>
               </div>
 
@@ -2705,15 +2705,15 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {(goldHoldingsSummary?.custodians || [
-                  { id: "brinks", name: "Brink's Vault Logistics", location: "Mumbai & Delhi Secure Vaults", badge: "Primary Custodian", weight: "92.450 kg", valuation: "₹72.25 Cr" },
-                  { id: "vistra", name: "Vistra Security Trustee", location: "Bangalore Vault Reserve", badge: "Legal Trustee", weight: "42.100 kg", valuation: "₹32.90 Cr" },
+                  { id: "custody", name: "Institutional Vault Logistics", location: "Mumbai & Delhi Secure Vaults", badge: "Primary Custodian", weight: "92.450 kg", valuation: "₹72.25 Cr" },
+                  { id: "trustee", name: "Regulated Security Trustee", location: "Bangalore Vault Reserve", badge: "Legal Trustee", weight: "42.100 kg", valuation: "₹32.90 Cr" },
                   { id: "mmtc", name: "Augmont & MMTC Mint", location: "Hyderabad Minting Reserve", badge: "Mint Custody", weight: "20.300 kg", valuation: "₹15.86 Cr" }
                 ]).map((c: any, i: number) => (
                   <div key={c.id || i} className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs hover:border-purple-300 transition-all">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${c.id === 'brinks' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
-                            c.id === 'vistra' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' :
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${c.id === 'custody' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
+                            c.id === 'trustee' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' :
                               'bg-amber-50 border border-amber-200 text-amber-700'
                           }`}>
                           {c.id ? c.id.toUpperCase() : 'VAULT'}
@@ -2723,8 +2723,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           <div className="text-[10px] font-bold text-slate-400">{c.location}</div>
                         </div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${c.id === 'brinks' ? 'bg-blue-100 text-blue-700' :
-                          c.id === 'vistra' ? 'bg-emerald-100 text-emerald-700' :
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${c.id === 'custody' ? 'bg-blue-100 text-blue-700' :
+                          c.id === 'trustee' ? 'bg-emerald-100 text-emerald-700' :
                             'bg-amber-100 text-amber-700'
                         }`}>{c.badge}</span>
                     </div>
@@ -2860,11 +2860,11 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
                     {(goldAuditJournal.length > 0 ? goldAuditJournal : [
-                      { auditRefId: "VLT-2026-9812", vaultLocation: "Mumbai Brink's Vault", custodian: "Brink's India", movementType: "Bullion Deposit", weightFormatted: "+15.500 kg", purityCert: "BIS Hallmarked #MMTC-8921", auditStatus: "Verified & Insured" },
-                      { auditRefId: "VLT-2026-9804", vaultLocation: "Bangalore Vistra Vault", custodian: "Vistra Trustee", movementType: "Trustee Audit Scan", weightFormatted: "42.100 kg", purityCert: "SEBI Audit Cert #VST-4491", auditStatus: "Audited & Verified" },
-                      { auditRefId: "VLT-2026-9799", vaultLocation: "Delhi Brink's Vault", custodian: "Brink's India", movementType: "SIP Reserve Allocation", weightFormatted: "+8.250 kg", purityCert: "Augmont Hallmarked #AUG-3329", auditStatus: "Verified & Insured" },
+                      { auditRefId: "VLT-2026-9812", vaultLocation: "Mumbai Secure Vault", custodian: "India's Trusted Vaults", movementType: "Bullion Deposit", weightFormatted: "+15.500 kg", purityCert: "BIS Hallmarked #MMTC-8921", auditStatus: "Verified & Insured" },
+                      { auditRefId: "VLT-2026-9804", vaultLocation: "Bangalore Reserve Vault", custodian: "Regulated Trustee", movementType: "Trustee Audit Scan", weightFormatted: "42.100 kg", purityCert: "SEBI Audit Cert #VST-4491", auditStatus: "Audited & Verified" },
+                      { auditRefId: "VLT-2026-9799", vaultLocation: "Delhi Secure Vault", custodian: "India's Trusted Vaults", movementType: "SIP Reserve Allocation", weightFormatted: "+8.250 kg", purityCert: "Augmont Hallmarked #AUG-3329", auditStatus: "Verified & Insured" },
                       { auditRefId: "VLT-2026-9788", vaultLocation: "Hyderabad Mint Reserve", custodian: "MMTC-PAMP", movementType: "Mint Coin Dispatch", weightFormatted: "-2.400 kg", purityCert: "Mint Assay Cert #PAMP-9912", auditStatus: "Dispatched to Doorstep" },
-                      { auditRefId: "VLT-2026-9775", vaultLocation: "Mumbai Brink's Vault", custodian: "Brink's India", movementType: "Monthly Bullion Deposit", weightFormatted: "+25.000 kg", purityCert: "BIS Hallmarked #MMTC-7718", auditStatus: "Verified & Insured" },
+                      { auditRefId: "VLT-2026-9775", vaultLocation: "Mumbai Secure Vault", custodian: "India's Trusted Vaults", movementType: "Monthly Bullion Deposit", weightFormatted: "+25.000 kg", purityCert: "BIS Hallmarked #MMTC-7718", auditStatus: "Verified & Insured" },
                     ]).map((row: any, idx: number) => (
                       <tr key={row._id || row.auditRefId || idx} className="hover:bg-slate-50">
                         <td className="p-3.5 font-black text-slate-900 font-mono">{row.auditRefId}</td>
@@ -5536,7 +5536,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   </div>
                   <div>
                     <div className="text-[10px] text-amber-700/80 font-medium">Custody Vault:</div>
-                    <div className="font-bold text-slate-700 text-[11px]">Brink's Vault (Vistra Trustee)</div>
+                    <div className="font-bold text-slate-700 text-[11px]">Institutional Vault (Regulated Trustee)</div>
                   </div>
                 </div>
 

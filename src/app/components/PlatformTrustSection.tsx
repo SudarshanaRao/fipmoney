@@ -27,7 +27,7 @@ export default function PlatformTrustSection() {
       accentBorder: "group-hover:border-amber-400"
     },
     {
-      title: "Stored in a Brink's Vault",
+      title: "Stored in India's Trusted Vaults",
       subtitle: "Bank-Grade Security",
       desc: "Housed in multi-tier, 24x7 monitored physical bank vaults with 100% Lloyds-backed insurance coverage for total peace of mind.",
       icon: Lock,
@@ -36,8 +36,8 @@ export default function PlatformTrustSection() {
     },
     {
       title: "Gold Held in Your Name",
-      subtitle: "Vistra Trustee Safeguard",
-      desc: "Independent trustee Vistra legally holds ownership strictly in your name, protecting your gold independent of FipMoney.",
+      subtitle: "Regulated Trustee Safeguard",
+      desc: "Independent regulated trustees legally hold ownership strictly in your name, protecting your gold independent of FipMoney.",
       icon: ShieldCheck,
       iconBg: "bg-white text-[#047857] border-emerald-300",
       accentBorder: "group-hover:border-[#047857]"

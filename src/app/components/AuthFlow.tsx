@@ -619,7 +619,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                  <div className="text-[#047857]"><Coins size={20} /></div>
                  <div>
                     <div className="text-slate-900 text-[11px] font-black uppercase tracking-wider">24K 99.9%</div>
-                    <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">Brink's Insured<br/>Vault Storage</div>
+                    <div className="text-slate-600 text-[10px] font-semibold mt-0.5 leading-[1.1]">India's Trusted<br/>Insured Vaults</div>
                  </div>
               </div>
               <div className="w-px h-8 bg-slate-200" />
@@ -1313,7 +1313,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     <div className="mt-5 pt-4 border-t border-slate-100 text-center space-y-2">
                       <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-500">
                         <ShieldCheck size={14} className="text-[#047857]" />
-                        <span>256-Bit SSL Encrypted • 100% Insured Brink's Vault</span>
+                        <span>256-Bit SSL Encrypted • 100% Insured Bank-Grade Vaults</span>
                       </div>
                       <p className="text-[11px] text-slate-400 leading-relaxed">
                         By continuing, you agree to our{" "}

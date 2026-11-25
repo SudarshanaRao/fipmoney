@@ -125,7 +125,7 @@ export default function RiskDisclosure({ onBack }: RiskDisclosureProps) {
             <div className="space-y-4 text-gray-700 text-sm leading-relaxed border-t border-gray-100 pt-6">
               <h3 className="text-lg font-bold text-gray-900 mb-2">Platform Disclaimers</h3>
               <p>
-                1. <strong>FipMoney Pvt Ltd</strong> operates the FipMoney technology platform. FipMoney Pvt Ltd does not act as a custodian, trustee, or direct seller of digital gold. Sourcing, custody, and vaulting are managed exclusively by certified physical vault partner Brink's and independent Security Trustee Vistra ITCL.
+                1. <strong>FipMoney Pvt Ltd</strong> operates the FipMoney technology platform. FipMoney Pvt Ltd does not act as a custodian, trustee, or direct seller of digital gold. Sourcing, custody, and vaulting are managed exclusively by India's certified physical vault partners and independent Regulated Security Trustees.
               </p>
               <p>
                 2. Sells and purchases are bound by buyer-seller agreements and terms determined by the partner provider. Investors are requested to read product documents, transaction fees, and spreads before executing transactions.

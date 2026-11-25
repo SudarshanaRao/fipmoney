@@ -30,25 +30,25 @@ const faqs: FAQ[] = [
   {
     id: "1",
     question: "Is FipMoney App safe to use?",
-    answer: "FipMoney app is **100% safe and secure** for your Gold & Silver investments. All physical gold and silver purchased on FipMoney is stored in high-security, **100% insured physical vaults** operated by **Brink's India** — the global leader in vault logistics. Furthermore, independent **Security Trustee Vistra ITCL** safeguards customer assets, holding a **first exclusive charge** over physical bullion on behalf of users.",
+    answer: "FipMoney app is **100% safe and secure** for your Gold & Silver investments. All physical gold and silver purchased on FipMoney is stored in high-security, **100% insured physical vaults** operated by **India's trusted institutional vaults** — leaders in secure bullion logistics. Furthermore, independent **Regulated Security Trustees** safeguard customer assets, holding a **first exclusive charge** over physical bullion on behalf of users.",
     category: "fipmoney-app"
   },
   {
     id: "2",
     question: "Who is the vault custodian and how is my Gold stored?",
-    answer: "Our physical gold and silver vaulting partner is **Brink's (Brink's Global Services)**. When you buy digital gold on FipMoney, an allocated physical vault unit is opened on your behalf under your name/account at Brink's. The gold is **24 Karat 999.9 pure** and **100% insured** against theft, fire, damage, and natural disasters.",
+    answer: "Our physical gold and silver is stored in **India's leading certified institutional vaults**. When you buy digital gold on FipMoney, an allocated physical vault unit is secured on your behalf under your name/account in bank-grade vaults. The gold is **24 Karat 999.9 pure** and **100% insured** against theft, fire, damage, and natural disasters.",
     category: "insurance-trustee"
   },
   {
     id: "3",
     question: "Who is the Security Trustee Administrator and what is their role?",
-    answer: "**Vistra ITCL (India) Limited ('Vistra')** is the independent **Security Trustee Administrator** appointed to protect customer interests. Vistra holds a **legal first charge** over the physical gold stored in Brink's vaults and conducts periodic independent audits to ensure **100% of user balances match physical gold held in vaults** at all times.",
+    answer: "Independent **Regulated Security Trustees** are appointed to protect customer interests. The Trustee holds a **legal first charge** over all physical gold stored in institutional vaults and conducts periodic independent audits to ensure **100% of user balances match physical gold held in vaults** at all times.",
     category: "insurance-trustee"
   },
   {
     id: "4",
     question: "How does the vault opening process work on FipMoney?",
-    answer: "When you buy digital gold starting from **₹1**, FipMoney buys equivalent **24K 999.9 pure physical gold** and opens/allocates a physical gold vault account unit on your behalf with Brink's. Your gold stays **100% insured** in Brink's vaults and **legally protected by Security Trustee Vistra** until you decide to sell or request physical delivery.",
+    answer: "When you buy digital gold starting from **₹1**, FipMoney buys equivalent **24K 999.9 pure physical gold** and opens/allocates a physical gold vault account unit on your behalf with India's trusted vaults. Your gold stays **100% insured** in bank-grade vaults and **legally protected by Regulated Security Trustees** until you decide to sell or request physical delivery.",
     category: "insurance-trustee"
   },
   {

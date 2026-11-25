@@ -44,7 +44,7 @@ export default function Careers({ onBack }: CareersProps) {
       department: "Engineering",
       experience: "4-7 Years",
       compensation: "₹28L - ₹45L + ESOPs",
-      description: "Architect mission-critical ledger infrastructure, bank payment gateways, UPI AutoPay recurring mandate schedulers, and Brink's vault reconciliation engines.",
+      description: "Architect mission-critical ledger infrastructure, bank payment gateways, UPI AutoPay recurring mandate schedulers, and institutional vault reconciliation engines.",
       skills: ["Node.js", "Python", "MongoDB", "Redis", "Kafka", "AWS"],
       posted: "Priority Opening"
     },

@@ -41,7 +41,7 @@ export default function BankGradeSecurityBanner() {
           </motion.p>
         </div>
 
-        {/* OFFICIAL PARTNERS LOGO BANNER (BRINK'S & VISTRA) */}
+        {/* OFFICIAL CUSTODIAL & TRUSTEE BANNER */}
         <motion.div
           className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-[0_10px_40px_rgba(0,0,0,0.04)] relative overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
@@ -56,20 +56,20 @@ export default function BankGradeSecurityBanner() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center md:justify-around gap-8 md:gap-12 w-full">
-              {/* Brink's Logo Card */}
+              {/* Institutional Vault Card */}
               <div className="flex items-center gap-4 bg-[#f8fafc] border border-slate-200 px-6 py-3.5 rounded-2xl hover:bg-amber-50/40 transition-colors">
-                <img src="/brinks-logo.svg" alt="Secured by Brink's" className="h-7 md:h-8 w-auto object-contain" />
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 font-black text-sm">VLT</div>
                 <div className="text-left border-l border-slate-200 pl-4">
-                  <div className="text-xs font-black text-slate-900">Brink's Vault Custody</div>
+                  <div className="text-xs font-black text-slate-900">India's Trusted Vaults</div>
                   <div className="text-[10px] font-bold text-slate-600">24x7 Monitored & 100% Insured</div>
                 </div>
               </div>
 
-              {/* Vistra Logo Card */}
+              {/* Trustee Safeguard Card */}
               <div className="flex items-center gap-4 bg-[#f8fafc] border border-slate-200 px-6 py-3.5 rounded-2xl hover:bg-white transition-colors">
-                <img src="/vistra-logo.svg" alt="Vistra Security Trustee" className="h-7 md:h-8 w-auto object-contain" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 font-black text-sm">TRU</div>
                 <div className="text-left border-l border-slate-200 pl-4">
-                  <div className="text-xs font-black text-slate-900">Vistra Security Trustee</div>
+                  <div className="text-xs font-black text-slate-900">Regulated Security Trustee</div>
                   <div className="text-[10px] font-bold text-slate-600">Independent Legal Safeguard</div>
                 </div>
               </div>

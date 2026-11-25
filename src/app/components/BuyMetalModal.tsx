@@ -120,7 +120,7 @@ export default function BuyMetalModal({
   // Timeframe
   const [timeframe, setTimeframe] = useState<Timeframe>("24H");
 
-  // Current locked price (SafeGold +0/g)
+  // Current locked price (Live Bullion Benchmark +0/g)
   const currentLockedPrice = lockedRate;
 
   // Chart Data
@@ -740,9 +740,9 @@ export default function BuyMetalModal({
                     <Shield size={18} strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-black text-white leading-tight">100% Secure & Insured by SafeGold</h4>
+                    <h4 className="text-xs sm:text-sm font-black text-white leading-tight">100% Secure & Insured by India's Trusted Vaults</h4>
                     <p className="text-[10px] sm:text-xs text-white/80 font-medium mt-0.5">
-                      Your order will be sent to SafeGold. SafeGold stores and handles your {metalName.toLowerCase()} in 100% secure, insured bank-grade vaults.
+                      Your order is fulfilled by India's trusted bullion providers and stored in 100% secure, insured bank-grade vaults.
                     </p>
                   </div>
                 </div>
@@ -750,7 +750,7 @@ export default function BuyMetalModal({
                 <div className="hidden sm:flex items-center gap-3 text-xs font-bold text-indigo-200 shrink-0 ml-3">
                   <div className="flex items-center gap-1">
                     <ShieldCheck size={14} className="text-amber-400" />
-                    <span>SafeGold Vaults</span>
+                    <span>India's Trusted Vaults</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Sparkles size={14} className="text-amber-400" />
