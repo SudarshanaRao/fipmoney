@@ -977,7 +977,7 @@ export default function SettingsPage() {
         {/* ══════════════════════════════════════════════════════════════════
             MOBILE VIEW (lg:hidden) - Modern Luxury Redesigned Experience
         ══════════════════════════════════════════════════════════════════ */}
-        <div className="lg:hidden px-4 sm:px-6 pt-3 space-y-5">
+        <div className="lg:hidden px-4 sm:px-6 pt-3 space-y-5 pb-40">
           
           {/* Top Sticky Header */}
           <div className="flex items-center justify-between pb-1">
@@ -1375,6 +1375,17 @@ export default function SettingsPage() {
                     </p>
                     The beneficiary name on the bank account must match your KYC name (<strong>{fullName || "User"}</strong>).
                   </div>
+
+                  {/* Save Bank Details Button */}
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white font-extrabold text-xs shadow-md shadow-emerald-950/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all disabled:opacity-50"
+                  >
+                    {isSaving ? <Loader2 size={14} className="animate-spin" /> : saveSuccess ? <CheckCircle2 size={14} /> : <Save size={14} />}
+                    <span>{isSaving ? "Saving..." : saveSuccess ? "Bank Details Saved!" : "Save Bank Details"}</span>
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -1461,6 +1472,17 @@ export default function SettingsPage() {
                     </div>
                     <span className="text-sm font-black text-[#047857]">100%</span>
                   </div>
+
+                  {/* Save Nominee Details Button */}
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white font-extrabold text-xs shadow-md shadow-emerald-950/20 flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all disabled:opacity-50"
+                  >
+                    {isSaving ? <Loader2 size={14} className="animate-spin" /> : saveSuccess ? <CheckCircle2 size={14} /> : <Save size={14} />}
+                    <span>{isSaving ? "Saving..." : saveSuccess ? "Nominee Saved!" : "Save Nominee Details"}</span>
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -1730,6 +1752,9 @@ export default function SettingsPage() {
             )}
 
           </div>
+
+          {/* Bottom Nav Clearance Spacer */}
+          <div className="h-28 w-full pointer-events-none shrink-0" aria-hidden="true" />
 
         </div>
 

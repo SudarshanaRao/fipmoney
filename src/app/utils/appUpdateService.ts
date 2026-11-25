@@ -12,8 +12,8 @@ export interface AppVersionInfo {
   playStoreUrl: string;
 }
 
-export const CURRENT_APP_VERSION = "1.0.5";
-export const CURRENT_VERSION_CODE = 6;
+export const CURRENT_APP_VERSION = "1.0.6";
+export const CURRENT_VERSION_CODE = 7;
 export const PLAY_STORE_PACKAGE_ID = "com.fipmoney.app";
 export const PLAY_STORE_MARKET_URL = `market://details?id=${PLAY_STORE_PACKAGE_ID}`;
 export const PLAY_STORE_WEB_URL = `https://play.google.com/store/apps/details?id=${PLAY_STORE_PACKAGE_ID}`;

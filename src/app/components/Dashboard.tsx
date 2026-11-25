@@ -456,137 +456,6 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   </div>
                 )}
               </button>
-
-              {/* 50% Screen Slide-over Notification Panel */}
-              <AnimatePresence>
-                {showNotifications && (
-                  <>
-                    {/* Backdrop Overlay */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setShowNotifications(false)}
-                      className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50"
-                    />
-
-                    {/* 50% Screen Slide-over Drawer */}
-                    <motion.div
-                      initial={{ x: "100%" }}
-                      animate={{ x: 0 }}
-                      exit={{ x: "100%" }}
-                      transition={{ type: "spring", damping: 28, stiffness: 280 }}
-                      className="fixed top-0 right-0 h-full w-full md:w-[50vw] bg-white z-[51] shadow-2xl flex flex-col font-sans border-l border-slate-200"
-                    >
-                      {/* Panel Header */}
-                      <div className="p-6 bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] text-white flex items-center justify-between shrink-0 shadow-md">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-amber-400/20 flex items-center justify-center text-amber-400 border border-amber-400/30">
-                            <Bell size={22} strokeWidth={2.5} />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2.5">
-                              <h2 className="text-lg font-black tracking-tight">Notification Panel</h2>
-                              {unreadCount > 0 && (
-                                <span className="bg-red-500 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-xs">
-                                  {unreadCount} Unread
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-white/80 font-medium mt-0.5">Real-time alerts, market updates & transaction logs</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {unreadCount > 0 && (
-                            <button
-                              onClick={markAllAsRead}
-                              className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors border border-white/15 cursor-pointer outline-none flex items-center gap-1.5"
-                            >
-                              <CheckCheck size={16} /> Mark all read
-                            </button>
-                          )}
-                          <button
-                            onClick={() => setShowNotifications(false)}
-                            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
-                          >
-                            <X size={20} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Panel Body List */}
-                      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50">
-                        {notifications.length === 0 ? (
-                          <div className="h-full flex flex-col items-center justify-center py-20 text-center">
-                            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
-                              <Bell size={40} />
-                            </div>
-                            <h3 className="text-base font-bold text-gray-800 mb-1">No notifications right now</h3>
-                            <p className="text-xs text-gray-500 max-w-xs">We'll notify you here when you receive new updates, market signals, or transaction alerts.</p>
-                          </div>
-                        ) : (
-                          notifications.map((n) => (
-                            <motion.div
-                              key={n.id}
-                              layout
-                              onClick={() => markAsRead(n.id)}
-                              className={`p-5 rounded-2xl border transition-all cursor-pointer relative group flex gap-4 items-start ${
-                                n.read
-                                  ? 'bg-[#f8fafc] border-slate-200 hover:border-emerald-300 shadow-xs'
-                                  : 'bg-[#f8fafc] border-slate-200 shadow-md shadow-black/5 ring-1 ring-emerald-500/20'
-                              }`}
-                            >
-                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-xs ${n.iconBg}`}>
-                                <n.Icon size={22} strokeWidth={2.5} />
-                              </div>
-                              <div className="flex-1 min-w-0 pr-6">
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <h4 className={`text-sm font-bold truncate ${n.read ? 'text-gray-800' : 'text-slate-900 font-black'}`}>
-                                    {n.title}
-                                  </h4>
-                                  <span className="text-xs font-semibold text-gray-400 shrink-0">{n.time}</span>
-                                </div>
-                                <p className="text-xs text-gray-600 font-medium leading-relaxed mb-2">
-                                  {n.desc}
-                                </p>
-                                {!n.read && (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-white px-2 py-0.5 rounded-md border border-emerald-300">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#047857] animate-pulse" /> New Alert
-                                  </span>
-                                )}
-                              </div>
-                              <button
-                                onClick={(e) => deleteNotification(n.id, e)}
-                                className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-2 transition-all rounded-lg hover:bg-red-50 cursor-pointer border-none bg-transparent outline-none absolute right-3 top-3"
-                                title="Dismiss"
-                              >
-                                <X size={16} />
-                              </button>
-                            </motion.div>
-                          ))
-                        )}
-                      </div>
-
-                      {/* Panel Footer */}
-                      <div className="p-5 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
-                        <button
-                          onClick={() => setNotifications([])}
-                          disabled={notifications.length === 0}
-                          className="text-xs font-bold text-gray-400 hover:text-red-600 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-none bg-transparent outline-none flex items-center gap-1.5"
-                        >
-                          <X size={14} /> Clear All Notifications
-                        </button>
-                        <button
-                          onClick={() => setShowNotifications(false)}
-                          className="px-5 py-2.5 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/20 border border-amber-400/40 transition-colors cursor-pointer outline-none"
-                        >
-                          Close Panel
-                        </button>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
             </div>
             <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab("settings")}>
                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-slate-200 shadow-xs">
@@ -1798,7 +1667,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           clearUserSession();
           sessionStorage.removeItem("fm_logged_in_name");
         }
-        onNavigate("home");
+        onNavigate("login");
       }} onBecomeAgent={() => setTab("become-agent")} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
@@ -1880,7 +1749,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 sessionStorage.removeItem("fm_logged_in_mobile");
                 sessionStorage.removeItem("fm_logged_in_name");
               }
-              onNavigate("home");
+              onNavigate("login");
             }}
             onBecomeAgent={() => setTab("become-agent")}
             profileCompletion={profileCompletion}
@@ -1890,6 +1759,138 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         )}
       </div>
       <MobileNav activeTab={tab} onTabChange={setTab} profileCompletion={profileCompletion} />
+
+      {/* Global Slide-over Notification Panel (Desktop + Mobile) */}
+      <AnimatePresence>
+        {showNotifications && (
+          <div className="fixed inset-0 z-[9999] overflow-hidden">
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowNotifications(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            />
+
+            {/* Slide-over Drawer */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              className="fixed top-0 right-0 h-full w-full sm:w-[480px] md:w-[500px] bg-white shadow-2xl flex flex-col font-sans border-l border-slate-200 z-10"
+            >
+              {/* Panel Header */}
+              <div className="p-5 sm:p-6 bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] text-white flex items-center justify-between shrink-0 shadow-md pt-[calc(1.25rem+env(safe-area-inset-top,0px))]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-400/20 flex items-center justify-center text-amber-400 border border-amber-400/30 shrink-0">
+                    <Bell size={22} strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base sm:text-lg font-black tracking-tight">Notification Panel</h2>
+                      {unreadCount > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full shadow-xs">
+                          {unreadCount} Unread
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] sm:text-xs text-white/80 font-medium mt-0.5">Real-time alerts & updates</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold transition-colors border border-white/15 cursor-pointer outline-none flex items-center gap-1"
+                    >
+                      <CheckCheck size={14} /> Mark all
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowNotifications(false)}
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
+                    aria-label="Close notification panel"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Panel Body List */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4 bg-gray-50/50">
+                {notifications.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center py-20 text-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
+                      <Bell size={32} />
+                    </div>
+                    <h3 className="text-sm font-bold text-gray-800 mb-1">No notifications right now</h3>
+                    <p className="text-xs text-gray-500 max-w-xs">We'll notify you here when you receive new updates, market signals, or transaction alerts.</p>
+                  </div>
+                ) : (
+                  notifications.map((n) => (
+                    <motion.div
+                      key={n.id}
+                      layout
+                      onClick={() => markAsRead(n.id)}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer relative group flex gap-3.5 items-start ${
+                        n.read
+                          ? 'bg-[#f8fafc] border-slate-200 hover:border-emerald-300 shadow-2xs'
+                          : 'bg-white border-emerald-200 shadow-md shadow-emerald-950/5 ring-1 ring-emerald-500/20'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-2xs ${n.iconBg}`}>
+                        <n.Icon size={18} strokeWidth={2.5} />
+                      </div>
+                      <div className="flex-1 min-w-0 pr-6">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <h4 className={`text-xs sm:text-sm font-bold truncate ${n.read ? 'text-gray-800' : 'text-slate-900 font-black'}`}>
+                            {n.title}
+                          </h4>
+                          <span className="text-[10px] sm:text-xs font-semibold text-gray-400 shrink-0">{n.time}</span>
+                        </div>
+                        <p className="text-[11px] sm:text-xs text-gray-600 font-medium leading-relaxed mb-2">
+                          {n.desc}
+                        </p>
+                        {!n.read && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#047857] animate-pulse" /> New Alert
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => deleteNotification(n.id, e)}
+                        className="opacity-70 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1.5 transition-all rounded-lg hover:bg-red-50 cursor-pointer border-none bg-transparent outline-none absolute right-2.5 top-2.5"
+                        title="Dismiss"
+                      >
+                        <X size={15} />
+                      </button>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+
+              {/* Panel Footer */}
+              <div className="p-4 sm:p-5 bg-white border-t border-slate-200 flex items-center justify-between shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+                <button
+                  onClick={() => setNotifications([])}
+                  disabled={notifications.length === 0}
+                  className="text-xs font-bold text-gray-400 hover:text-red-600 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed border-none bg-transparent outline-none flex items-center gap-1.5"
+                >
+                  <X size={14} /> Clear All
+                </button>
+                <button
+                  onClick={() => setShowNotifications(false)}
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/20 border border-amber-400/40 transition-colors cursor-pointer outline-none"
+                >
+                  Close Panel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Missing Email Modal Popup */}
       <AnimatePresence>

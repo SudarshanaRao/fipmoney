@@ -118,13 +118,39 @@ const ComingSoonPage = ({ title, onBack }: { title: string; onBack: () => void }
   </motion.div>
 );
 
+// Helper to reliably detect Android app / mobile environment
+export const isMobileOrAppEnvironment = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  // 1. Capacitor Native platform (Android / iOS)
+  if (Capacitor.isNativePlatform() || Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
+    return true;
+  }
+  // 2. Capacitor window object check
+  if ((window as any).Capacitor?.isNative || (window as any).Capacitor?.isNativePlatform?.()) {
+    return true;
+  }
+  // 3. User agent check for Android / Capacitor webview / mobile wrapper
+  const ua = navigator.userAgent || '';
+  if (/android/i.test(ua) || /capacitor/i.test(ua) || /fipmoney/i.test(ua) || /wv/i.test(ua)) {
+    return true;
+  }
+  // 4. Mobile screen viewport width (<= 768px)
+  if (window.innerWidth <= 768) {
+    return true;
+  }
+  return false;
+};
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => {
     if (typeof window !== 'undefined') {
-      const isNative = Capacitor.isNativePlatform();
+      const isMobileApp = isMobileOrAppEnvironment();
       const hasUserSession = checkIsUserLoggedIn();
-      if (isNative && !hasUserSession) {
-        return 'login';
+      // On mobile / Android app environment:
+      // An unauthenticated user MUST NOT see the website homepage.
+      // Initial page MUST strictly be 'login' (or 'dashboard' if already logged in).
+      if (isMobileApp) {
+        return hasUserSession ? 'dashboard' : 'login';
       }
       const path = window.location.pathname.slice(1);
       return (path as PageType) || 'home';
@@ -184,16 +210,16 @@ export default function App() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const currentPath = window.location.pathname.slice(1);
-    const isNative = Capacitor.isNativePlatform();
+    const isMobileApp = isMobileOrAppEnvironment();
     const currentLoggedIn = checkIsUserLoggedIn();
     if (currentLoggedIn !== isLoggedIn) {
       setIsLoggedIn(currentLoggedIn);
     }
 
-    // Native Android Route Guard:
-    // When running inside Android app, unauthenticated users MUST NOT see homepage or public landing pages.
+    // Mobile / Android App Route Guard:
+    // When running inside Android app or mobile view, unauthenticated users MUST NOT see homepage or public landing pages.
     // They are restricted strictly to 'login' and essential utility pages (help, terms, privacy, delete-account).
-    if (isNative && !currentLoggedIn) {
+    if (isMobileApp && !currentLoggedIn) {
       const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
       if (!allowedUnauthenticatedPages.includes(currentPath) || !allowedUnauthenticatedPages.includes(currentPage)) {
         window.history.replaceState({}, '', '/login');
@@ -339,7 +365,7 @@ export default function App() {
     }
 
     let page = targetPage;
-    if (Capacitor.isNativePlatform() && !activeLoggedIn) {
+    if (isMobileOrAppEnvironment() && !activeLoggedIn) {
       const allowedUnauthenticatedPages = ['login', 'signup', 'help', 'contact', 'terms', 'privacy', 'delete-account', 'account-deletion'];
       if (!allowedUnauthenticatedPages.includes(page)) {
         page = 'login';
@@ -380,7 +406,9 @@ export default function App() {
   };
 
   const navigateToHome = () => {
-    if (Capacitor.isNativePlatform() && !checkIsUserLoggedIn()) {
+    if (checkIsUserLoggedIn()) {
+      navigateToPage('dashboard');
+    } else if (isMobileOrAppEnvironment()) {
       navigateToPage('login');
     } else {
       navigateToPage('home');
@@ -388,7 +416,7 @@ export default function App() {
   };
 
   const handleBackFromSubpage = () => {
-    if (Capacitor.isNativePlatform() && !checkIsUserLoggedIn()) {
+    if (isMobileOrAppEnvironment() && !checkIsUserLoggedIn()) {
       navigateToPage('login');
     } else {
       navigateToHome();
@@ -589,6 +617,11 @@ export default function App() {
       case 'investor-charter':
         return <ComingSoonPage title="Investor Charter" onBack={navigateToHome} />;
       default:
+        // In mobile / Android app environment, an unauthenticated user MUST NEVER see the website landing structure.
+        // They are strictly kept on the Login/Signup screen.
+        if (isMobileOrAppEnvironment() && !isLoggedIn) {
+          return <AuthFlow onNavigate={navigateToPage} onLoginSuccess={handleLoginSuccess} initialMode="login" />;
+        }
         return (
           <>
             {/* Header */}
@@ -685,7 +718,8 @@ export default function App() {
                                      currentPage.startsWith('admin') || currentPath.startsWith('admin') ||
                                      currentPage.startsWith('portal-sec') || currentPath.startsWith('portal-sec');
                 
-                if (isDashboard || isAgentDashboard || isAuthOrAdmin) {
+                const isMobileUnauth = isMobileOrAppEnvironment() && !isLoggedIn;
+                if (isDashboard || isAgentDashboard || isAuthOrAdmin || isMobileUnauth) {
                   return null;
                 }
                 return <Footer onNavigate={navigateToPage} />;

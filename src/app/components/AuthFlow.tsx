@@ -153,6 +153,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState("");
   const [regStatus,   setRegStatus]   = useState<"registered" | "new" | null>(null);
+  const [registeredUserName, setRegisteredUserName] = useState<string>("");
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -281,6 +282,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
     setErr("");
     setRegStatus(null);
     setCurrentUser(null);
+    setRegisteredUserName("");
 
     if (val.length === 10) {
       setChecking(true);
@@ -294,9 +296,11 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
         setChecking(false);
         if (data.exists) {
           setRegStatus("registered");
-          // Optionally fetch user data, but for auth flow we don't strictly need full user yet
+          const displayName = data.name || data.username || data.fullName || (typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_name") || localStorage.getItem("fm_logged_in_name")) : "") || "";
+          setRegisteredUserName(displayName);
         } else {
           setRegStatus("new");
+          setRegisteredUserName("");
         }
       } catch (err) {
         setChecking(false);
@@ -731,24 +735,26 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                     <div className="text-center mb-8">
                         <h2 className="text-[26px] leading-tight font-black text-slate-900 mb-2 tracking-tight">
                           {regStatus === "registered" ? (
-                            "Welcome Back 👋"
+                            registeredUserName ? `Welcome Back, ${registeredUserName} 👋` : "Welcome Back 👋"
                           ) : regStatus === "new" ? (
                             "Create Account ✨"
                           ) : checking ? (
                             "Checking Account... 🔍"
                           ) : (
-                            "Enter your 10-digit mobile number to proceed"
+                            "Welcome to Fipmoney"
                           )}
                         </h2>
                         <p className="text-slate-600 text-[14px] font-medium leading-relaxed max-w-[340px] mx-auto">
                           {regStatus === "registered" ? (
-                            `Account found for +91 ${mobile}. Enter OTP to access your secure vault.`
+                            registeredUserName 
+                              ? `Account found for ${registeredUserName} (+91 ${mobile}). Enter OTP to proceed.`
+                              : `Account found for +91 ${mobile}. Enter OTP to proceed.`
                           ) : regStatus === "new" ? (
-                            "New user detected! Start saving in 24K Gold & 99.9% Silver in seconds."
+                            "New user detected! Set up your account in seconds."
                           ) : checking ? (
-                            "Checking database for registered account..."
+                            "Verifying mobile number..."
                           ) : (
-                            "Save & invest in 24K 99.9% pure gold & silver with Fipmoney"
+                            "Enter your mobile number to get started"
                           )}
                         </p>
                     </div>
@@ -1116,10 +1122,10 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
           {/* Upper Section: Image + Headers + Form */}
           <div className="w-full flex flex-col items-center my-auto">
             
-            {/* Top Asset Container with login-3d-hero.png taking half of the page */}
-            <div className="relative w-full flex items-center justify-center mb-2 sm:mb-3">
-              <div className="relative w-full max-w-[340px] aspect-[5/4] max-h-[38vh] sm:max-h-[42vh] flex items-center justify-center mx-auto">
-                <div className="absolute inset-4 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none -z-10" />
+            {/* Top Asset Container with login-3d-hero.png */}
+            <div className="relative w-full flex items-center justify-center mb-3 sm:mb-4">
+              <div className="relative w-full max-w-[290px] sm:max-w-[330px] aspect-[5/4] max-h-[34vh] sm:max-h-[38vh] flex items-center justify-center mx-auto">
+                <div className="absolute inset-2 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none -z-10" />
                 <img 
                   src={
                     step === "otp"
@@ -1143,37 +1149,37 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                       ? "Dashboard Welcome"
                       : "Fipmoney 3D Secure Login"
                   } 
-                  className="w-full h-full object-contain drop-shadow-xl select-none"
+                  className="w-full h-full object-contain drop-shadow-2xl select-none"
                 />
               </div>
             </div>
 
             {/* Title & Subtitle */}
             <div className="text-center mb-5 w-full px-2">
-              <h1 className="text-2xl sm:text-[26px] font-black text-slate-900 tracking-tight leading-snug">
+              <h1 className="text-2xl sm:text-[28px] font-black text-slate-900 tracking-tight leading-snug">
                 {step === "mobile" && (
                   regStatus === "registered"
-                    ? "Welcome Back 👋"
+                    ? (registeredUserName ? `Welcome Back, ${registeredUserName} 👋` : "Welcome Back 👋")
                     : regStatus === "new"
                     ? "Create Account ✨"
                     : checking
                     ? "Checking Account... 🔍"
-                    : "Enter your 10-digit mobile number to proceed"
+                    : "Welcome to Fipmoney"
                 )}
                 {step === "otp" && "Verify OTP"}
                 {step === "profile" && "Complete Profile"}
                 {step === "tpin" && "Set Security PIN"}
                 {step === "success" && "Welcome to FipMoney"}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1.5 max-w-[320px] mx-auto leading-relaxed">
+              <p className="text-sm sm:text-[15px] text-slate-600 font-semibold mt-1.5 max-w-[340px] mx-auto leading-relaxed">
                 {step === "mobile" && (
                   regStatus === "registered"
-                    ? `Account found for +91 ${mobile}. Please continue to login.`
+                    ? (registeredUserName ? `Account found for ${registeredUserName} (+91 ${mobile})` : `Account found for +91 ${mobile}`)
                     : regStatus === "new"
-                    ? "New user detected! Start saving in 24K Gold & 99.9% Silver in seconds."
+                    ? "New user detected! Set up your account in seconds."
                     : checking
                     ? "Checking database for registered account..."
-                    : "Save & invest in 24K pure gold & 99.9% pure silver seamlessly."
+                    : "Enter your mobile number to get started"
                 )}
                 {step === "otp" && `Enter 6-digit code sent to +91 ${mobile}`}
                 {step === "profile" && "Almost there — just a few details."}
@@ -1238,7 +1244,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                             value={mobile}
                             autoFocus
                             onChange={(e) => handleMobileChange(e.target.value)}
-                            placeholder="Enter 10-digit mobile number"
+                            placeholder="Enter mobile number"
                             className="flex-1 h-full px-3.5 text-base sm:text-lg font-bold text-slate-900 tracking-wider placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal outline-none bg-transparent"
                           />
                           {checking && (
@@ -1262,7 +1268,7 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                             className="flex items-center gap-2 text-[#047857] bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl text-xs font-bold mt-2 shadow-xs"
                           >
                             <CheckCircle2 className="w-4 h-4 text-[#047857] shrink-0" />
-                            <span>Account found! Welcome back.</span>
+                            <span>{registeredUserName ? `Account found: ${registeredUserName}! Welcome back.` : "Account found! Welcome back."}</span>
                           </motion.div>
                         )}
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowLeft, FileText, AlertCircle } from "lucide-react";
+import ScrollToTopProgress from "./ui/ScrollToTopProgress";
 
 interface ReferralTermsAndConditionsProps {
   onBack: () => void;
@@ -84,6 +85,8 @@ export default function ReferralTermsAndConditions({ onBack }: ReferralTermsAndC
         </div>
 
       </div>
+
+      <ScrollToTopProgress />
     </div>
   );
 }

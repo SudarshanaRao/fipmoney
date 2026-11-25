@@ -165,9 +165,13 @@ export const checkMobile = async (req, res, next) => {
     const user = await User.findOne({ mobileNumber: cleanMobile });
 
     if (user) {
+      const preferredName = user.username?.trim() || user.firstName?.trim() || user.fullName?.trim()?.split(' ')[0] || user.fullName?.trim() || '';
       return res.status(200).json({
         success: true,
         exists: true,
+        name: preferredName,
+        username: user.username || '',
+        fullName: user.fullName || '',
         message: 'User exists in database'
       });
     } else {

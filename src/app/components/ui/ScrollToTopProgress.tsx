@@ -17,23 +17,35 @@ export default function ScrollToTopProgress({ containerId }: ScrollToTopProgress
 
     const handleScroll = () => {
       const targetElement = getTarget();
+      let current = 0;
+      let total = 0;
+
+      // 1. Check target container scroll
       if (targetElement) {
-        const total = targetElement.scrollHeight - targetElement.clientHeight;
-        const current = targetElement.scrollTop;
-        if (total > 0) {
-          const percent = Math.min(100, Math.max(0, (current / total) * 100));
-          setProgress(percent);
+        const tTotal = targetElement.scrollHeight - targetElement.clientHeight;
+        const tCurrent = targetElement.scrollTop;
+        if (tTotal > 10 && tCurrent > 0) {
+          current = tCurrent;
+          total = tTotal;
         }
-        setIsVisible(current > 150);
-      } else {
-        const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-        const currentScroll = window.scrollY;
-        if (totalScroll > 0) {
-          const percent = Math.min(100, Math.max(0, (currentScroll / totalScroll) * 100));
-          setProgress(percent);
-        }
-        setIsVisible(currentScroll > 150);
       }
+
+      // 2. If target container is not scrolling, check window / document scroll
+      if (current === 0) {
+        const doc = document.documentElement || document.body;
+        const wTotal = (doc.scrollHeight || document.body.scrollHeight) - window.innerHeight;
+        const wCurrent = window.scrollY || window.pageYOffset || doc.scrollTop || 0;
+        if (wTotal > 10 && wCurrent > 0) {
+          current = wCurrent;
+          total = wTotal;
+        }
+      }
+
+      if (total > 0) {
+        const percent = Math.min(100, Math.max(0, (current / total) * 100));
+        setProgress(percent);
+      }
+      setIsVisible(current > 80);
     };
 
     const targetEl = getTarget();
@@ -41,22 +53,42 @@ export default function ScrollToTopProgress({ containerId }: ScrollToTopProgress
       targetEl.addEventListener("scroll", handleScroll, { passive: true });
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    document.body.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
 
+    // Re-check target element attachment
+    const interval = setInterval(() => {
+      const el = getTarget();
+      if (el) {
+        el.removeEventListener("scroll", handleScroll);
+        el.addEventListener("scroll", handleScroll, { passive: true });
+      }
+    }, 1000);
+
     return () => {
-      if (targetEl) {
-        targetEl.removeEventListener("scroll", handleScroll);
+      clearInterval(interval);
+      const el = getTarget();
+      if (el) {
+        el.removeEventListener("scroll", handleScroll);
       }
       window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+      document.body.removeEventListener("scroll", handleScroll);
     };
   }, [containerId]);
 
   const scrollToTop = () => {
     const targetElement = containerId ? document.getElementById(containerId) : null;
-    if (targetElement) {
+    if (targetElement && targetElement.scrollTop > 0) {
       targetElement.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (document.documentElement) {
+      document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    if (document.body) {
+      document.body.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -77,7 +109,7 @@ export default function ScrollToTopProgress({ containerId }: ScrollToTopProgress
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           title={`Scroll to top (${Math.round(progress)}%)`}
-          className="fixed bottom-24 right-5 sm:bottom-8 sm:right-8 z-50 w-[52px] h-[52px] rounded-full bg-white/95 backdrop-blur-md shadow-xl shadow-emerald-950/20 border border-slate-200/90 flex items-center justify-center cursor-pointer group outline-none"
+          className="fixed bottom-8 right-5 sm:bottom-8 sm:right-8 z-[9999] w-[52px] h-[52px] rounded-full bg-white/95 backdrop-blur-md shadow-2xl shadow-emerald-950/20 border border-slate-200/90 flex items-center justify-center cursor-pointer group outline-none active:scale-95"
           aria-label="Scroll to top"
         >
           {/* Circular Progress SVG */}
