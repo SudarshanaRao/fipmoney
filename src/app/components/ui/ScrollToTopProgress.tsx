@@ -4,28 +4,60 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 
-export default function ScrollToTopProgress() {
+interface ScrollToTopProgressProps {
+  containerId?: string;
+}
+
+export default function ScrollToTopProgress({ containerId }: ScrollToTopProgressProps = {}) {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const getTarget = () => (containerId ? document.getElementById(containerId) : null);
+
     const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const currentScroll = window.scrollY;
-      if (totalScroll > 0) {
-        const percent = Math.min(100, Math.max(0, (currentScroll / totalScroll) * 100));
-        setProgress(percent);
+      const targetElement = getTarget();
+      if (targetElement) {
+        const total = targetElement.scrollHeight - targetElement.clientHeight;
+        const current = targetElement.scrollTop;
+        if (total > 0) {
+          const percent = Math.min(100, Math.max(0, (current / total) * 100));
+          setProgress(percent);
+        }
+        setIsVisible(current > 150);
+      } else {
+        const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const currentScroll = window.scrollY;
+        if (totalScroll > 0) {
+          const percent = Math.min(100, Math.max(0, (currentScroll / totalScroll) * 100));
+          setProgress(percent);
+        }
+        setIsVisible(currentScroll > 150);
       }
-      setIsVisible(currentScroll > 150);
     };
 
+    const targetEl = getTarget();
+    if (targetEl) {
+      targetEl.addEventListener("scroll", handleScroll, { passive: true });
+    }
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
+    return () => {
+      if (targetEl) {
+        targetEl.removeEventListener("scroll", handleScroll);
+      }
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [containerId]);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const targetElement = containerId ? document.getElementById(containerId) : null;
+    if (targetElement) {
+      targetElement.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const size = 52;
@@ -45,7 +77,7 @@ export default function ScrollToTopProgress() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           title={`Scroll to top (${Math.round(progress)}%)`}
-          className="fixed bottom-6 right-6 z-50 w-[52px] h-[52px] rounded-full bg-white/95 backdrop-blur-md shadow-xl shadow-emerald-950/20 border border-slate-200/90 flex items-center justify-center cursor-pointer group outline-none"
+          className="fixed bottom-24 right-5 sm:bottom-8 sm:right-8 z-50 w-[52px] h-[52px] rounded-full bg-white/95 backdrop-blur-md shadow-xl shadow-emerald-950/20 border border-slate-200/90 flex items-center justify-center cursor-pointer group outline-none"
           aria-label="Scroll to top"
         >
           {/* Circular Progress SVG */}

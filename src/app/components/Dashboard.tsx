@@ -25,6 +25,7 @@ import PortfolioPage from "./PortfolioPage";
 import ReferAndEarn from "./ReferAndEarn";
 import TermsAndConditions from "./TermsAndConditions";
 import ReferralTermsAndConditions from "./ReferralTermsAndConditions";
+import PrivacyPolicy from "./PrivacyPolicy";
 import AgentOtpModal from "./AgentOtpModal";
 import SavingsPage from "./SavingsPage";
 import SilverSavingsPage from "./SilverSavingsPage";
@@ -1678,6 +1679,36 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
              
           </div>
 
+          {/* ── FIPMONEY SIGNATURE WATERMARK (Luxury Cursive Brand Crest) ── */}
+          <div className="mt-14 mb-4 pt-8 border-t border-slate-100 flex flex-col items-center justify-center text-center select-none relative">
+            <style>{`
+              @import url('https://fonts.googleapis.com/css2?family=Allura&family=Great+Vibes&display=swap');
+              .fipmoney-watermark-sig {
+                font-family: 'Great Vibes', 'Allura', cursive;
+              }
+            `}</style>
+
+            {/* Subtle Crest & Accent Lines */}
+            <div className="flex items-center gap-3 mb-1.5 opacity-60">
+              <div className="h-[1px] w-12 bg-gradient-to-r from-transparent via-[#047857]/40 to-[#047857]" />
+              <img src="/fipmoney_logo_final.png" alt="Fipmoney" className="h-6 w-auto object-contain" />
+              <div className="h-[1px] w-12 bg-gradient-to-l from-transparent via-[#047857]/40 to-[#047857]" />
+            </div>
+
+            {/* Stylish Signature Watermark */}
+            <span className="fipmoney-watermark-sig text-5xl sm:text-6xl tracking-wide bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#10b981] bg-clip-text text-transparent font-normal opacity-85 leading-tight py-1">
+              Fipmoney
+            </span>
+
+            {/* Watermark Slogan */}
+            <p className="text-[10px] font-black tracking-[0.28em] uppercase text-emerald-950/45 mt-0.5">
+              24K Pure Digital Bullion • Financial Freedom
+            </p>
+            <p className="text-[9.5px] font-semibold text-slate-400 mt-1">
+              100% Insured Brink's Vaults • Regulated IDBI Custody
+            </p>
+          </div>
+
         </div>
       </div>
     </div>
@@ -1771,37 +1802,39 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
       }} onBecomeAgent={() => setTab("become-agent")} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Top Header Bar for Mobile Screens (lg:hidden) - Clean branding without redundant side menu */}
-        <header className="lg:hidden bg-white border-b border-slate-200 shrink-0 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-          <div className="flex items-center gap-2.5">
-            <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-8 w-auto object-contain" />
-            <span className="font-black text-slate-900 text-base tracking-tight">Fipmoney</span>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setShowNotifications(prev => !prev)}
-              className="relative border w-9 h-9 rounded-full flex items-center justify-center shadow-2xs bg-[#f8fafc] border-slate-200 text-slate-900 cursor-pointer outline-none"
-            >
-              <Bell size={17} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[8px] text-white font-bold flex items-center justify-center border-2 border-white">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            <div
-              onClick={() => setTab("settings")}
-              className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative cursor-pointer shadow-2xs border border-slate-200"
-            >
-              <span>{(userName || "U").charAt(0)}</span>
-              {userAvatar && (
-                <img src={userAvatar} alt={userName} className="absolute inset-0 w-full h-full object-cover" />
-              )}
+        {/* Top Header Bar for Mobile Screens (lg:hidden) - Hidden on legal/document pages to prevent double header */}
+        {!["terms", "referral-terms", "privacy"].includes(tab) && (
+          <header className="lg:hidden bg-white border-b border-slate-200 shrink-0 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-8 w-auto object-contain" />
+              <span className="font-black text-slate-900 text-base tracking-tight">Fipmoney</span>
             </div>
-          </div>
-        </header>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => setShowNotifications(prev => !prev)}
+                className="relative border w-9 h-9 rounded-full flex items-center justify-center shadow-2xs bg-[#f8fafc] border-slate-200 text-slate-900 cursor-pointer outline-none"
+              >
+                <Bell size={17} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[8px] text-white font-bold flex items-center justify-center border-2 border-white">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              <div
+                onClick={() => setTab("settings")}
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative cursor-pointer shadow-2xs border border-slate-200"
+              >
+                <span>{(userName || "U").charAt(0)}</span>
+                {userAvatar && (
+                  <img src={userAvatar} alt={userName} className="absolute inset-0 w-full h-full object-cover" />
+                )}
+              </div>
+            </div>
+          </header>
+        )}
         {tab === "home" ? (
           <MainDashboard />
         ) : tab === "portfolio" ? (
@@ -1833,9 +1866,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         ) : tab === "refer-and-earn" ? (
           <ReferAndEarn onNavigate={(target) => setTab(target as Tab)} />
         ) : tab === "terms" ? (
-          <TermsAndConditions onBack={() => setTab("refer-and-earn")} />
+          <TermsAndConditions onBack={() => setTab("menu")} />
         ) : tab === "referral-terms" ? (
-          <ReferralTermsAndConditions onBack={() => setTab("refer-and-earn")} />
+          <ReferralTermsAndConditions onBack={() => setTab("menu")} />
+        ) : tab === "privacy" ? (
+          <PrivacyPolicy onBack={() => setTab("menu")} />
         ) : tab === "menu" ? (
           <AppMenuPage 
             onNavigate={(target) => setTab(target as Tab)}

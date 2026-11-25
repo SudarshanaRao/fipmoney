@@ -57,16 +57,21 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
   const scrollTo = (id: string) => {
     setActiveSection(id);
     const element = document.getElementById(id);
+    const container = document.getElementById("terms-scroll-container");
     if (element) {
-      const offset = 90;
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
+      if (container) {
+        const offset = 80;
+        const containerTop = container.getBoundingClientRect().top;
+        const elementTop = element.getBoundingClientRect().top;
+        const scrollTarget = container.scrollTop + (elementTop - containerTop) - offset;
+        container.scrollTo({ top: Math.max(0, scrollTarget), behavior: "smooth" });
+      } else {
+        const offset = 90;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const offsetPosition = elementRect - bodyRect - offset;
+        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+      }
     }
   };
 
@@ -75,7 +80,11 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-[#047857] selection:text-white w-full">
+    <div 
+      id="terms-scroll-container" 
+      className="flex-1 h-full w-full overflow-y-auto overflow-x-hidden bg-[#F8FAFC] text-slate-900 font-sans selection:bg-[#047857] selection:text-white pb-36"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
       {/* ── TOP STICKY HEADER (100% Width) ── */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs w-full pt-[env(safe-area-inset-top,0px)]">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-16 flex items-center justify-between">
@@ -88,14 +97,13 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
               <span className="hidden sm:inline">Back</span>
             </button>
 
-            <div className="flex items-center gap-2 cursor-pointer select-none" onClick={onBack}>
-              <img src="/fipmoney_logo_final.png" alt="FipMoney" className="h-8 w-auto object-contain" />
+            <div className="flex items-center gap-2 select-none">
               <div>
                 <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 block leading-none">
-                  Fipmoney
+                  Terms of Service
                 </span>
-                <span className="text-[9px] font-extrabold text-[#047857] tracking-wider uppercase">
-                  User Terms & Bullion Custody
+                <span className="text-[10px] font-extrabold text-[#047857] tracking-wider uppercase">
+                  Custodial Trust & User Agreement
                 </span>
               </div>
             </div>
@@ -500,7 +508,7 @@ export default function TermsAndConditions({ onBack }: TermsAndConditionsProps) 
       </div>
 
       {/* ── BOTTOM RIGHT CIRCULAR PROGRESS SCROLL-TO-TOP BUTTON ── */}
-      <ScrollToTopProgress />
+      <ScrollToTopProgress containerId="terms-scroll-container" />
     </div>
   );
 }

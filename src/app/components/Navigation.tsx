@@ -8,7 +8,7 @@ import { API_BASE_URL } from "../utils/apiConfig";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "become-agent" | "menu";
+export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "privacy" | "become-agent" | "menu";
 
 export const navItems = [
   { id: "home",           Icon: Home,       label: "Dashboard" },
