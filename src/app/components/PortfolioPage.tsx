@@ -789,16 +789,16 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                       <div key={tx.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
                          <div className="flex items-center gap-3.5">
                             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-                               tx.category === "Gold" ? "bg-amber-50 border border-amber-100" :
-                               tx.category === "Silver" ? "bg-purple-50 border border-purple-100" :
-                               "bg-blue-50 border border-blue-100"
+                               tx.category === "Gold" ? "bg-amber-50 border border-amber-200/80" :
+                               tx.category === "Silver" ? "bg-slate-100 border border-slate-200" :
+                               "bg-emerald-50 border border-emerald-200/80"
                             }`}>
                                {tx.category === "Gold" ? (
                                   <img src="/gold-bars.png" alt="Gold" className="w-6 h-6 object-contain" />
                                ) : tx.category === "Silver" ? (
                                   <img src="/silver.png" alt="Silver" className="w-6 h-6 object-contain" />
                                ) : (
-                                  <ArrowUpRight size={18} className="text-blue-600" />
+                                  <ArrowUpRight size={18} className="text-[#047857]" />
                                )}
                             </div>
                             <div>

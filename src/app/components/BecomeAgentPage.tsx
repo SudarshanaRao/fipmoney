@@ -457,10 +457,10 @@ export default function BecomeAgentPage() {
             <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs space-y-2">
               <div className="flex items-center justify-between text-xs font-bold text-gray-400 uppercase tracking-wider">
                 <span>Active Portfolio</span>
-                <Users size={16} className="text-blue-500" />
+                <Users size={16} className="text-[#047857]" />
               </div>
               <div className="text-2xl font-black text-gray-900">42 Clients</div>
-              <div className="text-xs font-bold text-blue-600 flex items-center gap-1">
+              <div className="text-xs font-bold text-[#047857] flex items-center gap-1">
                 <Plus size={12} /> +6 new this week
               </div>
             </div>

@@ -1307,7 +1307,7 @@ export default function HistoryPage() {
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-md space-y-3">
             <div className="flex justify-between items-center pb-2 border-b border-slate-200">
               <span className="text-xs font-bold text-gray-800">Filter Transactions</span>
-              <button onClick={() => setShowFilterModal(false)} className="text-xs font-bold text-blue-600 bg-transparent border-none outline-none cursor-pointer">Close</button>
+              <button onClick={() => setShowFilterModal(false)} className="text-xs font-bold text-[#047857] hover:text-[#064e3b] bg-transparent border-none outline-none cursor-pointer">Close</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -1420,19 +1420,19 @@ export default function HistoryPage() {
                     );
                   } else if (tx.iconType === "bills") {
                     return (
-                      <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] border border-purple-200/80 text-[#047857] flex items-center justify-center shadow-2xs shrink-0">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-[#047857] flex items-center justify-center shadow-2xs shrink-0">
                         <FileText size={22} strokeWidth={2.2} />
                       </div>
                     );
                   } else if (tx.iconType === "rewards") {
                     return (
-                      <div className="w-12 h-12 rounded-2xl bg-pink-50 border border-pink-200/80 text-pink-600 flex items-center justify-center shadow-2xs shrink-0">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-[#047857] flex items-center justify-center shadow-2xs shrink-0">
                         <Gift size={22} strokeWidth={2.2} />
                       </div>
                     );
                   } else {
                     return (
-                      <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200/80 text-blue-600 flex items-center justify-center shadow-2xs shrink-0">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-[#047857] flex items-center justify-center shadow-2xs shrink-0">
                         <ArrowUpRight size={22} strokeWidth={2.2} />
                       </div>
                     );
@@ -1441,7 +1441,7 @@ export default function HistoryPage() {
 
                 const isPositive = tx.amount > 0;
                 let amountColor = isPositive ? "text-emerald-600" : "text-[#047857]";
-                if (!isPositive && tx.title.includes("Gold")) amountColor = "text-blue-600";
+                if (!isPositive && tx.title.includes("Gold")) amountColor = "text-[#047857]";
                 if (!isPositive && tx.title.includes("Bank")) amountColor = "text-red-600";
 
                 const statusStyle = 
