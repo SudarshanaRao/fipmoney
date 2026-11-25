@@ -31,6 +31,7 @@ import SilverSavingsPage from "./SilverSavingsPage";
 import GoldSipSetupPage from "./GoldSipSetupPage";
 import SilverSipSetupPage from "./SilverSipSetupPage";
 import BecomeAgentPage from "./BecomeAgentPage";
+import AppMenuPage from "./AppMenuPage";
 import PersonalizedSuggestionCard from "./PersonalizedSuggestionCard";
 import ProfileCompletionWidget from "./ProfileCompletionWidget";
 import { clearUserSession, getLoggedInUser, getUserAvatar } from "../utils/userStorage";
@@ -137,7 +138,6 @@ const getInitialUserTab = (): Tab => {
 
 export default function Dashboard({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [tab, setTabState] = useState<Tab>(() => getInitialUserTab());
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const setTab = (newTab: Tab) => {
     setTabState(newTab);
@@ -1770,39 +1770,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         onNavigate("home");
       }} onBecomeAgent={() => setTab("become-agent")} />
 
-      <MobileDrawerNav
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        activeTab={tab}
-        onTabChange={setTab}
-        onLogout={() => {
-          if (typeof window !== 'undefined') {
-            clearUserSession();
-            sessionStorage.removeItem("fm_logged_in_name");
-          }
-          onNavigate("home");
-        }}
-        onBecomeAgent={() => setTab("become-agent")}
-        profileCompletion={profileCompletion}
-      />
-
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Top Header Bar for Mobile Screens (lg:hidden) */}
+        {/* Top Header Bar for Mobile Screens (lg:hidden) - Clean branding without redundant side menu */}
         <header className="lg:hidden bg-white border-b border-slate-200 shrink-0 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsMobileMenuOpen(prev => !prev)}
-              className="p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer outline-none border-none bg-transparent"
-              aria-label="Toggle Navigation Menu"
-              title="Toggle Menu"
-            >
-              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-
-            <div className="flex items-center gap-2">
-              <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-8 w-auto object-contain" />
-              <span className="font-black text-slate-900 text-sm tracking-tight">Fipmoney</span>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-8 w-auto object-contain" />
+            <span className="font-black text-slate-900 text-base tracking-tight">Fipmoney</span>
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -1863,6 +1836,20 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           <TermsAndConditions onBack={() => setTab("refer-and-earn")} />
         ) : tab === "referral-terms" ? (
           <ReferralTermsAndConditions onBack={() => setTab("refer-and-earn")} />
+        ) : tab === "menu" ? (
+          <AppMenuPage 
+            onNavigate={(target) => setTab(target as Tab)}
+            onLogout={() => {
+              if (typeof window !== 'undefined') {
+                clearUserSession();
+                sessionStorage.removeItem("fm_logged_in_mobile");
+                sessionStorage.removeItem("fm_logged_in_name");
+              }
+              onNavigate("home");
+            }}
+            onBecomeAgent={() => setTab("become-agent")}
+            profileCompletion={profileCompletion}
+          />
         ) : (
           <MainDashboard />
         )}

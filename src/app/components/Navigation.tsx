@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight, X, Sparkles, User, PieChart, Calendar } from "lucide-react";
+import { Home, TrendingUp, Zap, Clock, Settings, LogOut, Landmark, Gift, HelpCircle, ChevronLeft, PiggyBank, Award, ChevronRight, X, Sparkles, User, PieChart, Calendar, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Capacitor } from "@capacitor/core";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
@@ -8,7 +8,7 @@ import { API_BASE_URL } from "../utils/apiConfig";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "become-agent";
+export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "become-agent" | "menu";
 
 export const navItems = [
   { id: "home",           Icon: Home,       label: "Dashboard" },
@@ -200,175 +200,9 @@ interface MobileDrawerNavProps extends NavProps {
   onClose: () => void;
 }
 
-export const MobileDrawerNav = ({
-  activeTab,
-  onTabChange,
-  onLogout,
-  onBecomeAgent,
-  profileCompletion = 100,
-  isOpen,
-  onClose,
-}: MobileDrawerNavProps) => {
-  const [isApprovedDga, setIsApprovedDga] = React.useState(false);
-
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const mobile = sessionStorage.getItem("fm_logged_in_mobile");
-      const saved = localStorage.getItem("fm_dga_waitlist_data");
-      let localIsApproved = false;
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed.isApproved || parsed.status === "approved" || parsed.status === "APPROVED") {
-            localIsApproved = true;
-          }
-        } catch (e) {}
-      }
-      setIsApprovedDga(localIsApproved);
-    }
-  }, []);
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="lg:hidden">
-      {/* Backdrop Overlay */}
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[90] transition-opacity"
-      />
-
-      {/* Sliding Mobile Navigation Drawer */}
-      <div className="fixed top-0 left-0 bottom-0 w-72 bg-gradient-to-b from-[#022c22] via-[#064e3b] to-[#022c22] text-white z-[91] p-5 flex flex-col justify-between overflow-y-auto shadow-2xl animate-in slide-in-from-left duration-250">
-        <div>
-          {/* Header */}
-          <div className="flex items-center justify-between pb-4 mb-4 border-b border-emerald-300/30">
-            <div className="flex items-center gap-2">
-              <img src={fipMoneyLogo} alt="Fipmoney" className="w-10 h-10 object-contain shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-base font-black text-white leading-none">Fipmoney</span>
-                <span className="text-[10px] text-white font-bold mt-0.5">User Dashboard</span>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white hover:text-white transition-colors cursor-pointer outline-none border-none"
-            >
-              <X size={18} />
-            </button>
-          </div>
-
-          {/* Nav Items */}
-          <nav className="space-y-1.5">
-            <div className="px-3 py-1 text-[10px] font-black text-slate-300 uppercase tracking-wider">
-              MAIN MENU
-            </div>
-
-            {navItems.map(({ id, Icon, label }) => {
-              const active = activeTab === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => {
-                    onTabChange(id as Tab);
-                    onClose();
-                  }}
-                  className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl font-medium text-xs transition-all outline-none border-none cursor-pointer ${
-                    active
-                      ? "text-white shadow-lg bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] border border-emerald-300/40 font-bold"
-                      : "text-white/80 hover:bg-white/10 hover:text-white bg-transparent"
-                  }`}
-                >
-                  <Icon size={18} strokeWidth={active ? 2.5 : 2} />
-                  <span>{label}</span>
-                </button>
-              );
-            })}
-
-            <div className="px-3 pt-3 pb-1 text-[10px] font-black text-slate-300 uppercase tracking-wider">
-              PREFERENCES & MORE
-            </div>
-
-            {[
-              { id: "refer-and-earn", label: "Referral Rewards", Icon: Gift },
-              { id: "settings", label: "Settings", Icon: Settings, hasAlert: profileCompletion < 50 },
-              { id: "help", label: "Help & Support", Icon: HelpCircle },
-            ].map((item, i) => {
-              const active = activeTab === item.id;
-              return (
-                <button
-                  key={i}
-                  onClick={() => {
-                    onTabChange(item.id as Tab);
-                    onClose();
-                  }}
-                  className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl font-medium text-xs transition-all outline-none border-none cursor-pointer ${
-                    active
-                      ? "text-white shadow-lg bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] border border-emerald-300/40 font-bold"
-                      : "text-white/80 hover:bg-white/10 hover:text-white bg-transparent"
-                  }`}
-                >
-                  <div className="flex items-center gap-3.5 relative">
-                    <div className="relative">
-                      <item.Icon size={18} strokeWidth={active ? 2.5 : 2} />
-                      {item.hasAlert && (
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#064e3b] animate-pulse" />
-                      )}
-                    </div>
-                    <span>{item.label}</span>
-                  </div>
-                  {item.hasAlert && (
-                    <span className="text-[9px] font-black text-red-300 bg-red-500/20 px-1.5 py-0.5 rounded-full border border-red-400/30">
-                      &lt;50%
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Footer section: DGA card & Logout */}
-        <div className="space-y-3 pt-4 border-t border-emerald-300/30 mt-4">
-          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#2a2115] via-[#1a140d] to-[#0f0b07] border border-[#d97706]/70 shadow-md relative overflow-hidden">
-            <div className="flex items-center justify-between gap-1 mb-1">
-              <span className="font-extrabold text-xs text-[#fde047]">
-                {isApprovedDga ? "DGA Portal" : "Become an Agent"}
-              </span>
-              <span className="bg-[#5c2707]/90 text-[#fde047] border border-[#d97706]/80 text-[9px] font-black px-2 py-0.5 rounded-full">
-                {isApprovedDga ? "Verified" : "New"}
-              </span>
-            </div>
-            <p className="text-[10px] font-semibold text-[#fef3c7]/85 mb-2.5">
-              {isApprovedDga ? "Access verified DGA Portal & terminal." : "Earn commissions as a Digital Gold Agent."}
-            </p>
-            <button
-              onClick={() => {
-                onClose();
-                if (onBecomeAgent) onBecomeAgent();
-                else onTabChange("become-agent" as any);
-              }}
-              className="w-full py-2 px-3 rounded-xl font-black text-[11px] text-[#3a1a00] bg-gradient-to-r from-[#fbbf24] via-[#f59e0b] to-[#d97706] hover:from-[#fde047] active:scale-[0.98] transition-all flex items-center justify-center gap-1 border-none cursor-pointer outline-none"
-            >
-              <span>{isApprovedDga ? "Access DGA Portal" : "Become an Agent"}</span>
-              <ChevronRight size={13} strokeWidth={3.5} />
-            </button>
-          </div>
-
-          <button
-            onClick={() => {
-              onClose();
-              onLogout();
-            }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl font-bold text-xs text-white border border-red-400/40 bg-gradient-to-r from-[#dc2626] via-[#ef4444] to-[#991b1b] hover:from-[#ef4444] cursor-pointer outline-none active:scale-[0.98] relative overflow-hidden"
-          >
-            <LogOut size={18} className="text-white shrink-0" strokeWidth={2.5} />
-            <span className="tracking-wide">Logout</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+export const MobileDrawerNav = (_props: MobileDrawerNavProps) => {
+  // Mobile side drawer menu completely removed per design requirement
+  return null;
 };
 
 export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: Omit<NavProps, "onLogout">) => {
@@ -442,20 +276,20 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             </span>
           </button>
 
-          {/* 5. Rewards */}
+          {/* 5. Menu (replaces Rewards, includes Rewards Hub inside) */}
           <button
-            onClick={() => onTabChange("refer-and-earn")}
+            onClick={() => onTabChange("menu")}
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
             <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "refer-and-earn" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
+              activeTab === "menu" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
             }`}>
-              <Gift size={22} strokeWidth={activeTab === "refer-and-earn" ? 2.5 : 2} />
+              <Menu size={22} strokeWidth={activeTab === "menu" ? 2.5 : 2} />
             </div>
             <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "refer-and-earn" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
+              activeTab === "menu" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
             }`}>
-              Rewards
+              Menu
             </span>
           </button>
 

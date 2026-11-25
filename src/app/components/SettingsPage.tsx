@@ -1259,6 +1259,33 @@ export default function SettingsPage() {
                       <option value="Above ₹25 Lakhs">Above ₹25 Lakhs</option>
                     </select>
                   </div>
+
+                  {/* Inline Save Changes Button */}
+                  <div className="pt-3">
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] text-white font-black text-sm shadow-md shadow-emerald-950/15 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer border border-emerald-400/30 disabled:opacity-50"
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          <span>Saving Profile...</span>
+                        </>
+                      ) : saveSuccess ? (
+                        <>
+                          <CheckCircle2 size={16} className="text-amber-300" />
+                          <span>Changes Saved!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} />
+                          <span>Save Changes</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -1702,35 +1729,6 @@ export default function SettingsPage() {
               </motion.div>
             )}
 
-          </div>
-
-          {/* ── FLOATING MOBILE BOTTOM SAVE BAR ── */}
-          <div className="fixed bottom-18 left-0 right-0 z-30 px-4 py-2 pointer-events-none">
-            <div className="max-w-md mx-auto pointer-events-auto">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={isSaving}
-                className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-sm shadow-xl shadow-emerald-950/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer border border-emerald-400/30"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    <span>Saving Profile...</span>
-                  </>
-                ) : saveSuccess ? (
-                  <>
-                    <CheckCircle2 size={16} className="text-amber-300" />
-                    <span>Changes Saved!</span>
-                  </>
-                ) : (
-                  <>
-                    <Save size={16} />
-                    <span>Save All Changes</span>
-                  </>
-                )}
-              </button>
-            </div>
           </div>
 
         </div>
