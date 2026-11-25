@@ -66,10 +66,13 @@ export default function AppMenuPage({
   }, [loggedInMobile]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-32 selection:bg-[#047857] selection:text-white">
-      {/* ── TOP HEADER (Safe-Area Aware) ── */}
+    <div 
+      className="flex-1 h-full w-full overflow-y-auto overflow-x-hidden bg-[#F8FAFC] pb-36 selection:bg-[#047857] selection:text-white"
+      style={{ WebkitOverflowScrolling: "touch" }}
+    >
+      {/* ── TOP SUB-HEADER ── */}
       <div 
-        className="bg-white border-b border-slate-200/80 px-4 sm:px-6 pt-[calc(1rem+env(safe-area-inset-top,0px))] pb-4 sticky top-0 z-20 shadow-2xs"
+        className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3.5 sticky top-0 z-20 shadow-2xs"
       >
         <div className="max-w-xl mx-auto flex items-center justify-between">
           <div>
@@ -556,3 +559,4 @@ export default function AppMenuPage({
     </div>
   );
 }
+
