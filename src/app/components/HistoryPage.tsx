@@ -558,7 +558,7 @@ export function downloadInvoicePDF(tx: Transaction) {
   window.addEventListener('message', handleMessage);
 }
 
-export default function HistoryPage() {
+export default function HistoryPage({ onNavigate }: { onNavigate?: (tab: string, tx?: Transaction) => void } = {}) {
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<{[key: string]: boolean}>({});
@@ -812,6 +812,26 @@ export default function HistoryPage() {
       iconType: "bank"
     }
   ];
+
+  const handleSelectMobileTx = (tx: any) => {
+    const finalTx: Transaction = tx.rawTx || {
+      id: tx.id || tx.refId,
+      type: tx.title.includes("Gold") || tx.title.includes("Silver") || tx.category === "gold" ? "Buy" : "Bill Pay",
+      category: tx.category === "silver" ? "Silver" : "Gold",
+      amount: Math.abs(tx.amount),
+      grams: tx.subtitle?.match(/([0-9.]+\s*g)/i)?.[1] || (tx.category === "gold" ? "0.0401" : undefined),
+      date: new Date().toISOString(),
+      status: tx.status === "completed" ? "Completed" : "Failed",
+      paymentMethod: "UPI",
+      source: tx.title
+    };
+    try {
+      sessionStorage.setItem("fm_selected_tx", JSON.stringify(finalTx));
+    } catch (e) {}
+    if (onNavigate) {
+      onNavigate("transaction-details", finalTx);
+    }
+  };
 
   // Mobile filtered list computation
   const getMobileDisplayTxs = () => {
@@ -1122,7 +1142,14 @@ export default function HistoryPage() {
                         return (
                           <div 
                             key={tx.id} 
-                            onClick={() => downloadInvoicePDF(tx)}
+                            onClick={() => {
+                              try {
+                                sessionStorage.setItem("fm_selected_tx", JSON.stringify(tx));
+                              } catch (e) {}
+                              if (onNavigate) {
+                                onNavigate("transaction-details", tx);
+                              }
+                            }}
                             className="p-4 flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors cursor-pointer"
                           >
                             
@@ -1455,7 +1482,8 @@ export default function HistoryPage() {
                 return (
                   <div 
                     key={tx.id} 
-                    className="bg-white rounded-[24px] p-5 border border-slate-200 shadow-sm space-y-4"
+                    onClick={() => handleSelectMobileTx(tx)}
+                    className="bg-white rounded-[24px] p-5 border border-slate-200 shadow-sm space-y-4 cursor-pointer hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.99]"
                   >
                   {/* Top Row: Icon + Title/Subtitle + Amount/Status */}
                   <div className="flex items-start justify-between gap-3">
@@ -1492,8 +1520,12 @@ export default function HistoryPage() {
                     </div>
 
                     <button 
-                      onClick={() => tx.rawTx ? downloadInvoicePDF(tx.rawTx) : null}
-                      className="text-gray-400 hover:text-gray-700 transition-colors p-1 cursor-pointer outline-none bg-transparent border-none"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectMobileTx(tx);
+                      }}
+                      className="text-gray-400 hover:text-emerald-700 transition-colors p-1 cursor-pointer outline-none bg-transparent border-none"
+                      title="View details"
                     >
                       <Eye size={16} />
                     </button>

@@ -29,7 +29,8 @@ import {
   XCircle,
   ArrowLeft,
   HelpCircle,
-  Scale
+  Scale,
+  Bell
 } from "lucide-react";
 import {
   AreaChart,
@@ -120,6 +121,13 @@ export default function BuyMetalModal({
   // Timeframe
   const [timeframe, setTimeframe] = useState<Timeframe>("24H");
 
+  // User Initial for Brand Header
+  const userInitial = useMemo(() => {
+    if (typeof window === "undefined") return "U";
+    const name = sessionStorage.getItem("fm_logged_in_name") || "Demo User";
+    return name.trim().charAt(0).toUpperCase() || "U";
+  }, []);
+
   // Current locked price (Live Bullion Benchmark +0/g)
   const currentLockedPrice = lockedRate;
 
@@ -128,35 +136,42 @@ export default function BuyMetalModal({
   const lowPrice = useMemo(() => Math.min(...chartData.map(d => d.price)), [chartData]);
   const highPrice = useMemo(() => Math.max(...chartData.map(d => d.price)), [chartData]);
 
-  // Calculations
-  const calculatedGrams = useMemo(() => {
-    if (buyMode === "grams") return Number(gramsInput) || 0;
-    const amt = Number(amountInput) || 0;
-    return amt / currentLockedPrice;
-  }, [buyMode, amountInput, gramsInput, currentLockedPrice]);
-
-  const calculatedAmount = useMemo(() => {
+  // Calculations: When user pays ₹1000, 3% GST (₹30) is taken and ₹970 is added as gold
+  const totalPayable = useMemo(() => {
     if (buyMode === "amount") return Number(amountInput) || 0;
     const g = Number(gramsInput) || 0;
-    return g * currentLockedPrice;
+    const metalVal = g * currentLockedPrice;
+    return metalVal > 0 ? metalVal / 0.97 : 0;
   }, [buyMode, amountInput, gramsInput, currentLockedPrice]);
 
-  const gstAmount = useMemo(() => calculatedAmount * 0.03, [calculatedAmount]);
-  const totalPayable = useMemo(() => calculatedAmount + gstAmount, [calculatedAmount, gstAmount]);
+  const gstAmount = useMemo(() => totalPayable * 0.03, [totalPayable]);
+  const netMetalValue = useMemo(() => totalPayable - gstAmount, [totalPayable, gstAmount]);
+
+  const calculatedGrams = useMemo(() => {
+    if (buyMode === "grams") return Number(gramsInput) || 0;
+    if (currentLockedPrice <= 0) return 0;
+    return netMetalValue / currentLockedPrice;
+  }, [buyMode, gramsInput, netMetalValue, currentLockedPrice]);
+
+  const calculatedAmount = useMemo(() => {
+    return totalPayable;
+  }, [totalPayable]);
 
   // Carry values seamlessly when toggling mode
   const handleSwitchMode = (mode: "amount" | "grams") => {
     if (mode === "grams" && buyMode === "amount") {
       const amt = Number(amountInput) || 0;
       if (amt > 0) {
-        const g = amt / currentLockedPrice;
+        const netVal = amt * 0.97;
+        const g = netVal / currentLockedPrice;
         setGramsInput(g.toFixed(4));
       }
     } else if (mode === "amount" && buyMode === "grams") {
       const g = Number(gramsInput) || 0;
       if (g > 0) {
-        const amt = g * currentLockedPrice;
-        setAmountInput(amt.toFixed(2));
+        const netVal = g * currentLockedPrice;
+        const total = netVal / 0.97;
+        setAmountInput(total.toFixed(2));
       }
     }
     setBuyMode(mode);
@@ -295,22 +310,40 @@ export default function BuyMetalModal({
           {/* ======================================================== */}
           {/* MOBILE VIEW ONLY (< lg screens) Dynamic Gold/Silver Theme */}
           {/* ======================================================== */}
-          <div className="lg:hidden flex flex-col space-y-3.5 w-full max-w-md mx-auto text-slate-800 font-sans p-1 mt-12">
+          <div className="lg:hidden flex flex-col space-y-3.5 w-full max-w-md mx-auto text-slate-800 font-sans p-1">
             
-            {/* Top Bar Header */}
-            <div className="relative flex items-center justify-between pb-2 border-b border-slate-200">
-              <button
-                onClick={onClose}
-                className="w-9 h-9 rounded-full bg-slate-100/90 hover:bg-slate-200 text-slate-700 flex items-center justify-center border-none outline-none cursor-pointer z-10"
-              >
-                <ArrowLeft size={18} />
-              </button>
-              <h2 className="text-lg font-bold text-[#0f172a] tracking-tight absolute inset-x-0 text-center pointer-events-none">
-                Buy {metalName}
-              </h2>
-              <button className="w-8 h-8 rounded-full border border-slate-200 text-slate-400 flex items-center justify-center bg-white outline-none cursor-pointer z-10">
-                <HelpCircle size={16} />
-              </button>
+            {/* Top Bar Header matching Brand Header */}
+            <div className="flex items-center justify-between pb-2.5 pt-1 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                {onClose && (
+                  <button
+                    onClick={onClose}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center border-none outline-none cursor-pointer mr-0.5"
+                    aria-label="Back"
+                    title="Back"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                )}
+                <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-7 w-auto object-contain" />
+                <span className="font-black text-slate-900 text-base tracking-tight">Fipmoney</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="relative border w-8 h-8 rounded-full flex items-center justify-center shadow-2xs bg-[#f8fafc] border-slate-200 text-slate-900 cursor-pointer outline-none"
+                  aria-label="Notifications"
+                >
+                  <Bell size={16} />
+                </button>
+
+                <div
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-[#064e3b] via-[#047857] to-[#059669] text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative shadow-2xs border border-emerald-300 select-none"
+                >
+                  <span>{userInitial}</span>
+                </div>
+              </div>
             </div>
 
             {/* 1. Live Gold/Silver Price Card */}
@@ -458,37 +491,43 @@ export default function BuyMetalModal({
               </div>
             </div>
 
-            {/* 6. Price Breakdown Accordion */}
-            <div
-              onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
-              className="bg-[#fafafa] rounded-2xl p-3 border border-slate-200/90 flex items-center justify-between cursor-pointer hover:bg-slate-100/50 transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${themeSubCardBg}`}>
-                  <Layers size={16} />
+            {/* 6. Price Breakdown (Unified Single Container) */}
+            <div className="bg-[#fafafa] rounded-2xl border border-slate-200/90 overflow-hidden">
+              <div
+                onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
+                className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-100/60 transition-colors select-none"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${themeSubCardBg}`}>
+                    <Layers size={16} />
+                  </div>
+                  <h4 className="font-extrabold text-slate-900 text-xs">Price Breakdown</h4>
                 </div>
-                <h4 className="font-extrabold text-slate-900 text-xs">Price Breakdown</h4>
+                <ChevronDown size={16} className={`text-slate-400 transition-transform duration-200 ${isBreakdownOpen ? 'rotate-180' : ''}`} />
               </div>
-              <ChevronDown size={16} className={`text-slate-400 transition-transform ${isBreakdownOpen ? 'rotate-180' : ''}`} />
-            </div>
 
-            {/* Expanded Price Breakdown Details if open */}
-            {isBreakdownOpen && (
-              <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5 border border-slate-200">
-                <div className="flex justify-between text-slate-600">
-                  <span>Base Amount</span>
-                  <span className="font-bold">₹{calculatedAmount.toFixed(2)}</span>
+              {/* Expanded Price Breakdown Details inside the same container */}
+              {isBreakdownOpen && (
+                <div className="px-3.5 pb-3.5 pt-1.5 text-xs space-y-1.5 border-t border-slate-200/70 bg-white">
+                  <div className="flex justify-between text-slate-600">
+                    <span>Total Amount Paid</span>
+                    <span className="font-bold text-slate-900">₹{totalPayable.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-600">
+                    <span>GST (3%)</span>
+                    <span className="font-bold text-slate-900">₹{gstAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-900 font-bold border-t border-slate-100 pt-1.5">
+                    <span>Net {metalName} Value Added</span>
+                    <span className={themeText}>₹{netMetalValue.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-500 text-[11px] font-semibold pt-0.5">
+                    <span>{metalName} Quantity</span>
+                    <span className="font-bold text-slate-700">{calculatedGrams.toFixed(4)} g</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-slate-600">
-                  <span>GST (3%)</span>
-                  <span className="font-bold">₹{gstAmount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1.5">
-                  <span>Total Amount</span>
-                  <span>₹{totalPayable.toFixed(2)}</span>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* 7. Total Payable & Buy CTA Button */}
             <div className="flex items-center justify-between gap-3 pt-1">
@@ -849,10 +888,8 @@ export default function BuyMetalModal({
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-500 flex items-center gap-1">
-                    Making Charges <Info size={11} className="text-slate-400" />
-                  </span>
-                  <span className="font-black text-slate-900">+₹0.00</span>
+                  <span className="font-semibold text-slate-500">Net {metalName} Value Added</span>
+                  <span className="font-black text-slate-900">₹{netMetalValue.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-slate-500">GST (3%)</span>

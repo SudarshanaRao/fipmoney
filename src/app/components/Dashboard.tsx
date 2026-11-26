@@ -37,7 +37,8 @@ import FipmoneySignature from "./ui/FipmoneySignature";
 import PersonalizedSuggestionCard from "./PersonalizedSuggestionCard";
 import ProfileCompletionWidget from "./ProfileCompletionWidget";
 import { clearUserSession, getLoggedInUser, getUserAvatar } from "../utils/userStorage";
-import { getTransactions } from "../utils/transactionStorage";
+import { getTransactions, Transaction } from "../utils/transactionStorage";
+import TransactionDetailsPage from "./TransactionDetailsPage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
 import { decryptData256 } from "../utils/cryptoUtils";
 import React from "react";
@@ -94,6 +95,7 @@ const tabSlugMap: Record<string, string> = {
   "setup-sip": "dashboard/setup-sip",
   "setup-silver-sip": "dashboard/setup-silver-sip",
   history: "dashboard/transactions",
+  "transaction-details": "dashboard/transaction-details",
   bills: "dashboard/bills",
   refer: "dashboard/referrals",
   settings: "dashboard/settings",
@@ -116,6 +118,7 @@ const getInitialUserTab = (): Tab => {
         "setup-sip": "setup-sip" as Tab,
         "setup-silver-sip": "setup-silver-sip" as Tab,
         transactions: "history",
+        "transaction-details": "transaction-details",
         bills: "bills",
         referrals: "refer",
         settings: "settings",
@@ -129,6 +132,7 @@ const getInitialUserTab = (): Tab => {
     else if (path === "setup-sip" || path === "setup-gold-sip") return "setup-sip" as Tab;
     else if (path === "setup-silver-sip") return "setup-silver-sip" as Tab;
     else if (path === "history" || path === "transactions") return "history";
+    else if (path === "transaction-details") return "transaction-details";
     else if (path === "bills") return "bills";
     else if (path === "refer") return "refer";
     else if (path === "settings") return "settings";
@@ -161,6 +165,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           overview: "home",
           savings: "savings",
           transactions: "history",
+          "transaction-details": "transaction-details",
           bills: "bills",
           referrals: "refer",
           settings: "settings",
@@ -292,6 +297,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const [isMetalManuallySelected, setIsMetalManuallySelected] = useState(false);
   const [quickBuyMetal, setQuickBuyMetal] = useState<"gold" | "silver">("gold");
   const [quickBuyAmount, setQuickBuyAmount] = useState<number>(100);
+  const [selectedTxForDetails, setSelectedTxForDetails] = useState<Transaction | null>(null);
 
   // Auto carousel for Live Price Card (changes between gold and silver every 5s unless manually selected)
   useEffect(() => {
@@ -471,18 +477,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             </button>
           </div>
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab("settings")}>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-slate-200 shadow-xs">
-              <span>{(userName || "U").charAt(0)}</span>
-              {userAvatar && (
-                <img
-                  src={userAvatar}
-                  alt={userName}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = "none";
-                  }}
-                />
-              )}
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#064e3b] via-[#047857] to-[#059669] text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-emerald-300 shadow-xs select-none">
+              <span>{(userName || "U").trim().charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col hidden sm:flex">
               <span className="text-[11px] text-gray-500 font-medium">Welcome back,</span>
@@ -1555,7 +1551,18 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                   </div>
                 ) : (
                   recentTransactions.map((t, i) => (
-                    <div key={i} className="flex items-center gap-3">
+                    <div 
+                      key={i} 
+                      onClick={() => {
+                        setSelectedTxForDetails(t);
+                        try {
+                          sessionStorage.setItem("fm_selected_tx", JSON.stringify(t));
+                        } catch (e) {}
+                        setTab("transaction-details");
+                      }}
+                      className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 -mx-1.5 rounded-xl transition-all active:scale-[0.99]"
+                      title="View transaction details"
+                    >
                       <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-gray-50/50 shadow-sm bg-white text-[#047857]">
                         <Coins size={16} strokeWidth={2.5} />
                       </div>
@@ -1588,34 +1595,23 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   );
 
   const renderNotificationsPage = () => (
-    <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-[#fcfdfd] flex flex-col p-6 lg:p-8 max-w-[1200px] mx-auto w-full">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] border border-emerald-300 flex items-center justify-center shadow-xs">
-              <Bell size={22} strokeWidth={2.5} />
-            </div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Notification Center</h1>
-          </div>
-          <p className="text-xs text-gray-500 font-medium mt-1">Manage your updates, security alerts, and investment reminders.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              className="px-4 py-2.5 rounded-xl bg-white text-emerald-800 font-bold text-xs hover:bg-[#f8fafc] transition-colors border border-slate-200/60 cursor-pointer outline-none flex items-center gap-2 shadow-xs"
-            >
-              <CheckCheck size={16} /> Mark all as read
-            </button>
-          )}
+    <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-[#fcfdfd] flex flex-col p-4 sm:p-6 lg:p-8 max-w-[1200px] mx-auto w-full">
+      <div className="flex items-center justify-end gap-3 mb-4">
+        {unreadCount > 0 && (
           <button
-            onClick={() => setNotifications([])}
-            disabled={notifications.length === 0}
-            className="px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-xs hover:bg-gray-200 transition-colors border-none cursor-pointer outline-none disabled:opacity-50"
+            onClick={markAllAsRead}
+            className="px-4 py-2 rounded-xl bg-white text-emerald-800 font-bold text-xs hover:bg-[#f8fafc] transition-colors border border-slate-200/60 cursor-pointer outline-none flex items-center gap-2 shadow-xs"
           >
-            Clear All
+            <CheckCheck size={16} /> Mark all as read
           </button>
-        </div>
+        )}
+        <button
+          onClick={() => setNotifications([])}
+          disabled={notifications.length === 0}
+          className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 font-bold text-xs hover:bg-gray-200 transition-colors border-none cursor-pointer outline-none disabled:opacity-50"
+        >
+          Clear All
+        </button>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex-1">
@@ -1674,8 +1670,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
       }} onBecomeAgent={() => setTab("become-agent")} />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Top Header Bar for Mobile Screens (lg:hidden) - Hidden on legal/document pages to prevent double header */}
-        {!["terms", "referral-terms", "privacy"].includes(tab) && (
+        {/* Top Header Bar for Mobile Screens (lg:hidden) - Hidden on legal/document pages & dedicated details page to prevent double header */}
+        {!["terms", "referral-terms", "privacy", "transaction-details", "notifications"].includes(tab) && (
           <header className="lg:hidden bg-white border-b border-slate-200 shrink-0 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex items-center justify-between sticky top-0 z-30 shadow-2xs">
             <div className="flex items-center gap-2.5">
               <img src="/fipmoney_logo_final.png" alt="FipMoney Logo" className="h-8 w-auto object-contain" />
@@ -1697,12 +1693,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
               <div
                 onClick={() => setTab("settings")}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative cursor-pointer shadow-2xs border border-slate-200"
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-[#064e3b] via-[#047857] to-[#059669] text-white flex items-center justify-center font-black text-xs uppercase overflow-hidden relative cursor-pointer shadow-2xs border border-emerald-300 select-none"
               >
-                <span>{(userName || "U").charAt(0)}</span>
-                {userAvatar && (
-                  <img src={userAvatar} alt={userName} className="absolute inset-0 w-full h-full object-cover" />
-                )}
+                <span>{(userName || "U").trim().charAt(0).toUpperCase()}</span>
               </div>
             </div>
           </header>
@@ -1726,7 +1719,24 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         ) : (tab as string) === "setup-silver-sip" ? (
           <SilverSipSetupPage onNavigate={(target) => setTab(target as Tab)} />
         ) : tab === "history" ? (
-          <HistoryPage />
+          <HistoryPage onNavigate={(target, tx) => {
+            if (tx) {
+              setSelectedTxForDetails(tx);
+            }
+            setTab(target as Tab);
+          }} />
+        ) : tab === "transaction-details" ? (
+          <TransactionDetailsPage
+            transaction={selectedTxForDetails}
+            onBack={() => setTab("history")}
+            onRepeatInvestment={(_amt, cat) => {
+              if (cat?.toLowerCase().includes("silver")) {
+                setTab("silver-savings");
+              } else {
+                setTab("savings");
+              }
+            }}
+          />
         ) : tab === "help" ? (
           <HelpSupportPage />
         ) : tab === "notifications" ? (
@@ -1784,41 +1794,25 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               transition={{ type: "spring", damping: 28, stiffness: 280 }}
               className="fixed top-0 right-0 h-full w-full sm:w-[480px] md:w-[500px] bg-white shadow-2xl flex flex-col font-sans border-l border-slate-200 z-10"
             >
-              {/* Panel Header */}
-              <div className="p-5 sm:p-6 bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] text-white flex items-center justify-between shrink-0 shadow-md pt-[calc(1.25rem+env(safe-area-inset-top,0px))]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-400/20 flex items-center justify-center text-amber-400 border border-amber-400/30 shrink-0">
-                    <Bell size={22} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-base sm:text-lg font-black tracking-tight">Notification Panel</h2>
-                      {unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full shadow-xs">
-                          {unreadCount} Unread
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] sm:text-xs text-white/80 font-medium mt-0.5">Real-time alerts & updates</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {unreadCount > 0 && (
-                    <button
-                      onClick={markAllAsRead}
-                      className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold transition-colors border border-white/15 cursor-pointer outline-none flex items-center gap-1"
-                    >
-                      <CheckCheck size={14} /> Mark all
-                    </button>
-                  )}
+              {/* Minimal Top Close Bar (Notification panel header removed) */}
+              <div className="px-5 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between shrink-0">
+                {unreadCount > 0 ? (
                   <button
-                    onClick={() => setShowNotifications(false)}
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
-                    aria-label="Close notification panel"
+                    onClick={markAllAsRead}
+                    className="text-xs font-bold text-[#047857] hover:underline cursor-pointer border-none bg-transparent flex items-center gap-1.5"
                   >
-                    <X size={18} />
+                    <CheckCheck size={14} /> Mark all as read
                   </button>
-                </div>
+                ) : (
+                  <div />
+                )}
+                <button
+                  onClick={() => setShowNotifications(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer outline-none border-none"
+                  aria-label="Close notification panel"
+                >
+                  <X size={18} />
+                </button>
               </div>
 
               {/* Panel Body List */}

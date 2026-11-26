@@ -8,7 +8,7 @@ import { API_BASE_URL } from "../utils/apiConfig";
 const G_LT = "#efb652";
 const G_DK = "#b87312";
 
-export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "privacy" | "become-agent" | "menu";
+export type Tab = "home" | "portfolio" | "sip" | "savings" | "silver-savings" | "bills" | "history" | "settings" | "banking" | "offers" | "help" | "notifications" | "refer-and-earn" | "terms" | "referral-terms" | "privacy" | "become-agent" | "menu" | "transaction-details";
 
 export const navItems = [
   { id: "home",           Icon: Home,       label: "Dashboard" },
@@ -206,9 +206,18 @@ export const MobileDrawerNav = (_props: MobileDrawerNavProps) => {
 };
 
 export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: Omit<NavProps, "onLogout">) => {
+  const isInvestActive = activeTab === "sip" || activeTab === "savings" || activeTab === "silver-savings";
+  const isPortfolioActive = activeTab === "portfolio";
+  const isHomeActive = activeTab === "home";
+  const isHistoryActive = activeTab === "history" || activeTab === "transaction-details";
+  const isMenuActive = activeTab === "menu" || activeTab === "settings";
+
+  const activeCircleClass = "w-10 h-10 rounded-full bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#059669] text-white flex items-center justify-center shadow-md shadow-emerald-900/25 transition-all";
+  const inactiveCircleClass = "w-10 h-10 rounded-full bg-transparent text-slate-400 hover:text-slate-600 flex items-center justify-center transition-all";
+
   return (
     <div className="lg:hidden">
-      {/* Android/iOS Bottom Navigation Bar matching screenshot */}
+      {/* Android/iOS Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] px-3 pt-1.5 pb-[max(0.6rem,env(safe-area-inset-bottom,0px))] rounded-t-3xl">
         <div className="max-w-md mx-auto flex items-center justify-between">
           
@@ -217,13 +226,11 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             onClick={() => onTabChange("sip")}
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
-            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "sip" || activeTab === "savings" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
-            }`}>
-              <PieChart size={22} strokeWidth={activeTab === "sip" || activeTab === "savings" ? 2.5 : 2} />
+            <div className={isInvestActive ? activeCircleClass : inactiveCircleClass}>
+              <PieChart size={20} strokeWidth={isInvestActive ? 2.5 : 2} />
             </div>
-            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "sip" || activeTab === "savings" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
+            <span className={`text-[10.5px] mt-0.5 font-bold transition-colors ${
+              isInvestActive ? "text-[#047857] font-black" : "text-slate-400 font-medium"
             }`}>
               Invest
             </span>
@@ -234,60 +241,56 @@ export const MobileNav = ({ activeTab, onTabChange, profileCompletion = 100 }: O
             onClick={() => onTabChange("portfolio")}
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
-            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "portfolio" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
-            }`}>
-              <PieChart size={22} strokeWidth={activeTab === "portfolio" ? 2.5 : 2} />
+            <div className={isPortfolioActive ? activeCircleClass : inactiveCircleClass}>
+              <PieChart size={20} strokeWidth={isPortfolioActive ? 2.5 : 2} />
             </div>
-            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "portfolio" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
+            <span className={`text-[10.5px] mt-0.5 font-bold transition-colors ${
+              isPortfolioActive ? "text-[#047857] font-black" : "text-slate-400 font-medium"
             }`}>
               Portfolio
             </span>
           </button>
 
-          {/* 3. Home (Centered Raised Active Button) */}
-          <div className="relative -top-3 flex flex-col items-center justify-center mx-1">
-            <button
-              onClick={() => onTabChange("home")}
-              className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#059669] text-white flex items-center justify-center shadow-lg shadow-emerald-900/30 border-2 border-white cursor-pointer outline-none transition-transform active:scale-90"
-            >
-              <Home size={22} strokeWidth={2.5} />
-            </button>
-            <span className="text-[10px] font-black text-[#047857] tracking-tight mt-0.5">
+          {/* 3. Home (Parallel to remaining tabs) */}
+          <button
+            onClick={() => onTabChange("home")}
+            className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
+          >
+            <div className={isHomeActive ? activeCircleClass : inactiveCircleClass}>
+              <Home size={20} strokeWidth={isHomeActive ? 2.5 : 2} />
+            </div>
+            <span className={`text-[10.5px] mt-0.5 font-bold transition-colors ${
+              isHomeActive ? "text-[#047857] font-black" : "text-slate-400 font-medium"
+            }`}>
               Home
             </span>
-          </div>
+          </button>
 
           {/* 4. History */}
           <button
             onClick={() => onTabChange("history")}
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
-            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "history" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
-            }`}>
-              <Calendar size={22} strokeWidth={activeTab === "history" ? 2.5 : 2} />
+            <div className={isHistoryActive ? activeCircleClass : inactiveCircleClass}>
+              <Calendar size={20} strokeWidth={isHistoryActive ? 2.5 : 2} />
             </div>
-            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "history" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
+            <span className={`text-[10.5px] mt-0.5 font-bold transition-colors ${
+              isHistoryActive ? "text-[#047857] font-black" : "text-slate-400 font-medium"
             }`}>
               History
             </span>
           </button>
 
-          {/* 5. Menu (replaces Rewards, includes Rewards Hub inside) */}
+          {/* 5. Menu */}
           <button
             onClick={() => onTabChange("menu")}
             className="flex-1 flex flex-col items-center justify-center py-1 cursor-pointer border-none bg-transparent outline-none active:scale-95 transition-transform"
           >
-            <div className={`p-1 rounded-full transition-all flex items-center justify-center ${
-              activeTab === "menu" ? "text-[#047857] font-bold" : "text-slate-400 hover:text-slate-600"
-            }`}>
-              <Menu size={22} strokeWidth={activeTab === "menu" ? 2.5 : 2} />
+            <div className={isMenuActive ? activeCircleClass : inactiveCircleClass}>
+              <Menu size={20} strokeWidth={isMenuActive ? 2.5 : 2} />
             </div>
-            <span className={`text-[11px] mt-0.5 font-bold transition-colors ${
-              activeTab === "menu" ? "text-[#047857] font-black" : "text-slate-500 font-medium"
+            <span className={`text-[10.5px] mt-0.5 font-bold transition-colors ${
+              isMenuActive ? "text-[#047857] font-black" : "text-slate-400 font-medium"
             }`}>
               Menu
             </span>

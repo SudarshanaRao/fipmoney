@@ -9,7 +9,7 @@ import {
   Save, Landmark, Lock, Trophy, Circle, Eye, EyeOff, Headset,
   Laptop, Smartphone, Tablet, Globe, Clock, ShieldAlert,
   Fingerprint, Copy, ArrowUpCircle, ExternalLink, RefreshCw, KeyRound,
-  FileCheck2, CheckCheck, Briefcase, Mail, Phone, Calendar
+  FileCheck2, CheckCheck, Briefcase, Mail, Phone, Calendar, Pencil
 } from "lucide-react";
 
 import { Input } from "./ui/input";
@@ -991,18 +991,15 @@ export default function SettingsPage() {
             </div>
 
             <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] text-white font-black text-xs shadow-md shadow-emerald-900/15 flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all outline-none border-none disabled:opacity-50"
+              onClick={() => {
+                setActiveSubTab("profile");
+                const input = document.querySelector('input[placeholder="Enter legal name"]') as HTMLInputElement;
+                if (input) input.focus();
+              }}
+              title="Edit Profile"
+              className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-sm text-slate-700 hover:text-[#047857] hover:border-emerald-300 flex items-center justify-center cursor-pointer active:scale-95 transition-all outline-none"
             >
-              {isSaving ? (
-                <Loader2 size={13} className="animate-spin" />
-              ) : saveSuccess ? (
-                <CheckCircle2 size={13} className="text-amber-300" />
-              ) : (
-                <Save size={13} />
-              )}
-              <span>{saveSuccess ? "Saved!" : isSaving ? "Saving..." : "Save"}</span>
+              <Pencil size={18} className="text-[#047857]" />
             </button>
           </div>
 
@@ -1014,23 +1011,11 @@ export default function SettingsPage() {
               <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
 
               <div className="flex items-center gap-4">
-                {/* Avatar with Camera Overlay */}
+                {/* Avatar with initial letter */}
                 <div className="relative shrink-0">
-                  <div className="w-18 h-18 rounded-2xl bg-gradient-to-br from-emerald-600 via-[#047857] to-teal-700 text-white flex items-center justify-center font-black text-2xl shadow-md border-2 border-white overflow-hidden relative">
-                    {avatar ? (
-                      <img src={avatar} alt={fullName || "User"} className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{(fullName || username || "U").charAt(0).toUpperCase()}</span>
-                    )}
+                  <div className="w-18 h-18 rounded-2xl bg-gradient-to-br from-emerald-600 via-[#047857] to-teal-700 text-white flex items-center justify-center font-black text-2xl shadow-md border-2 border-white select-none">
+                    <span>{(fullName || username || "U").trim().charAt(0).toUpperCase()}</span>
                   </div>
-
-                  <button
-                    onClick={handleUploadPhoto}
-                    title="Change Photo"
-                    className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl bg-white text-[#047857] border border-slate-200 shadow-md flex items-center justify-center cursor-pointer active:scale-90 transition-transform"
-                  >
-                    <Camera size={14} />
-                  </button>
                 </div>
 
                 {/* Profile Identity Details */}
@@ -1833,35 +1818,14 @@ export default function SettingsPage() {
                     exit={{ opacity: 0, y: -10 }}
                     className="space-y-6"
                   >
-                    {/* Avatar Upload */}
+                    {/* Avatar with initial letter */}
                     <div className="flex items-center gap-4 pb-4 border-b border-slate-100">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#064e3b] to-[#047857] text-white flex items-center justify-center font-black text-xl overflow-hidden relative">
-                        {avatar ? (
-                          <img src={avatar} alt={fullName} className="w-full h-full object-cover" />
-                        ) : (
-                          <span>{(fullName || "U").charAt(0).toUpperCase()}</span>
-                        )}
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#064e3b] to-[#047857] text-white flex items-center justify-center font-black text-2xl shadow-sm border border-emerald-300/40 select-none">
+                        <span>{(fullName || username || "U").trim().charAt(0).toUpperCase()}</span>
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-slate-900">Profile Photo</h4>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <button
-                            type="button"
-                            onClick={handleUploadPhoto}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-50 text-[#047857] font-bold text-xs hover:bg-emerald-100 cursor-pointer border border-emerald-200"
-                          >
-                            Upload Photo
-                          </button>
-                          {avatar && (
-                            <button
-                              type="button"
-                              onClick={handleRemovePhoto}
-                              className="px-3 py-1.5 rounded-lg text-red-600 font-bold text-xs hover:bg-red-50 cursor-pointer"
-                            >
-                              Remove
-                            </button>
-                          )}
-                        </div>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">Using initial from your legal name</p>
                       </div>
                     </div>
 

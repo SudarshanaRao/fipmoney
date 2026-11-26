@@ -9,9 +9,7 @@ import {
   CheckCircle2, AlertCircle, ArrowUpRight, Phone, Mail, Landmark
 } from "lucide-react";
 import { Tab } from "./Navigation";
-import { getLoggedInUser, getUserAvatar } from "../utils/userStorage";
-import { calculateProfileCompletion } from "../utils/profileCompletionCalculator";
-import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
+import { getLoggedInUser } from "../utils/userStorage";
 import { API_BASE_URL } from "../utils/apiConfig";
 import FipmoneySignature from "./ui/FipmoneySignature";
 
@@ -35,11 +33,6 @@ export default function AppMenuPage({
   const loggedInUser = typeof window !== "undefined" ? getLoggedInUser() : null;
   const rawMobile = loggedInUser?.mobileNumber || (typeof window !== "undefined" ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
   const loggedInMobile = rawMobile ? rawMobile.replace(/\D/g, "").slice(-10) : "";
-  const fullName = loggedInUser?.name || loggedInUser?.fullName || (typeof window !== "undefined" ? sessionStorage.getItem("fm_logged_in_name") || "Fipmoney Investor" : "Fipmoney Investor");
-  const userAvatar = typeof window !== "undefined" ? getUserAvatar(loggedInMobile) : null;
-  const email = loggedInUser?.email || (typeof window !== "undefined" ? sessionStorage.getItem("fm_logged_in_email") || "" : "");
-
-  const profileScore = propProfileCompletion ?? (loggedInUser ? calculateProfileCompletion(loggedInUser) : 85);
 
   useEffect(() => {
     if (typeof window !== "undefined" && loggedInMobile) {
@@ -93,133 +86,7 @@ export default function AppMenuPage({
 
       <div className="max-w-xl mx-auto px-4 sm:px-6 py-5 space-y-5 relative z-10">
 
-        {/* ── 1. USER PROFILE IDENTITY HERO CARD (Emerald Theme) ── */}
-        <div className="relative p-1 rounded-[26px] bg-gradient-to-br from-emerald-500/25 via-emerald-100/50 to-amber-400/20 shadow-lg shadow-emerald-950/5">
-          <div className="bg-white rounded-[22px] p-5 border border-emerald-100/80 overflow-hidden relative">
-            <div className="flex items-center gap-4">
-              {/* Avatar */}
-              <div className="relative shrink-0">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#059669] p-0.5 shadow-md shadow-emerald-950/20">
-                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-                    {userAvatar ? (
-                      <img src={userAvatar} alt={fullName} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-2xl font-black text-[#047857]">
-                        {fullName.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#047857] rounded-full border-2 border-white flex items-center justify-center text-white">
-                  <CheckCircle2 size={12} strokeWidth={3} />
-                </div>
-              </div>
-
-              {/* User Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-base font-black text-slate-900 truncate">
-                    {fullName}
-                  </h2>
-                  <span className="text-[10px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2 py-0.5 rounded-full shrink-0">
-                    Verified
-                  </span>
-                </div>
-                <p className="text-xs font-semibold text-slate-500 mt-0.5">
-                  +91 {loggedInMobile || "7013302191"}
-                </p>
-                {email && (
-                  <p className="text-[11px] font-medium text-slate-400 truncate">
-                    {email}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Profile Completion Bar */}
-            <div className="mt-4 pt-3.5 border-t border-slate-100">
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="font-bold text-slate-600 text-[11px]">Profile Setup</span>
-                <span className="font-black text-[#047857] text-[11px]">{profileScore}% Completed</span>
-              </div>
-              <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                <div 
-                  className="h-full rounded-full bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#10b981] transition-all duration-500"
-                  style={{ width: `${Math.min(100, Math.max(10, profileScore))}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Quick Action: Manage Profile */}
-            <button
-              onClick={() => onNavigate("settings")}
-              className="mt-3.5 w-full py-2.5 px-3 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/80 flex items-center justify-between text-xs font-bold text-[#047857] hover:text-[#064e3b] cursor-pointer transition-colors outline-none"
-            >
-              <span>Manage Profile & Bank Settings</span>
-              <ChevronRight size={15} className="text-[#047857]" />
-            </button>
-          </div>
-        </div>
-
-        {/* ── 2. FEATURED REWARDS & REFERRAL HUB (Deep Emerald Luxury Theme) ── */}
-        <div className="relative p-1 rounded-[26px] bg-gradient-to-br from-emerald-500/30 via-emerald-400/20 to-amber-400/30 shadow-xl shadow-emerald-950/15">
-          <div className="rounded-[22px] bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#047857] text-white p-5 border border-emerald-400/40 relative overflow-hidden shadow-lg">
-            {/* Ambient Radial Mesh */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[radial-gradient(circle,rgba(16,185,129,0.25)_0%,transparent_70%)] pointer-events-none" />
-            <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-[radial-gradient(circle,rgba(251,191,36,0.2)_0%,transparent_70%)] pointer-events-none" />
-
-            <div className="relative z-10 flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/25 border border-emerald-300/40 text-emerald-200 text-[10px] font-black uppercase tracking-wider">
-                  <Gift size={12} className="text-amber-300" />
-                  <span>Rewards & Referrals</span>
-                </div>
-                <h3 className="text-lg font-black text-white tracking-tight leading-snug">
-                  Refer & Earn{" "}
-                  <span className="bg-gradient-to-r from-[#fde047] via-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent">
-                    24K Pure Gold
-                  </span>
-                </h3>
-                <p className="text-xs text-emerald-100/85 font-medium leading-relaxed max-w-[260px]">
-                  Invite friends to Fipmoney and receive 24K digital gold rewards credited directly into your vault.
-                </p>
-              </div>
-
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-[#059669] p-0.5 shadow-lg shadow-emerald-950/40 shrink-0">
-                <div className="w-full h-full rounded-[14px] bg-[#064e3b] flex items-center justify-center">
-                  <Coins size={28} className="text-[#fde047]" />
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Reward Perks */}
-            <div className="grid grid-cols-3 gap-2 mt-4 relative z-10">
-              <div className="bg-white/10 border border-emerald-300/25 rounded-xl p-2 text-center">
-                <span className="block text-[10px] font-bold text-emerald-200/80">Reward</span>
-                <span className="block text-xs font-black text-[#fde047] mt-0.5">₹500 Gold</span>
-              </div>
-              <div className="bg-white/10 border border-emerald-300/25 rounded-xl p-2 text-center">
-                <span className="block text-[10px] font-bold text-emerald-200/80">Crediting</span>
-                <span className="block text-xs font-black text-emerald-200 mt-0.5">Instant</span>
-              </div>
-              <div className="bg-white/10 border border-emerald-300/25 rounded-xl p-2 text-center">
-                <span className="block text-[10px] font-bold text-emerald-200/80">Referrals</span>
-                <span className="block text-xs font-black text-white mt-0.5">Unlimited</span>
-              </div>
-            </div>
-
-            {/* Primary Action Button */}
-            <button
-              onClick={() => onNavigate("refer-and-earn")}
-              className="mt-4 w-full py-3 px-4 rounded-xl font-black text-xs text-[#2a1400] bg-gradient-to-r from-[#fbbf24] via-[#f59e0b] to-[#d97706] hover:from-[#fde047] active:scale-98 transition-all shadow-md shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer border-none outline-none relative z-10"
-            >
-              <span>View Rewards Hub & Invite Friends</span>
-              <ArrowUpRight size={15} strokeWidth={3} />
-            </button>
-          </div>
-        </div>
-
-        {/* ── 3. SAVINGS & WEALTH SERVICES (All Emerald Badges) ── */}
+        {/* ── SAVINGS & WEALTH SERVICES (All Emerald Badges) ── */}
         <div className="bg-white rounded-3xl p-5 border border-emerald-100/90 shadow-[0_2px_15px_rgba(4,120,87,0.04)] space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-2">
@@ -241,13 +108,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <Coins size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    Digital Gold & Silver
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Buy, sell & track 24K pure precious metals
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  Digital Gold & Silver
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -262,14 +124,9 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <PiggyBank size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors flex items-center gap-1.5">
-                    <span>Gold SIP Savings</span>
-                    <span className="text-[9px] font-black text-emerald-800 bg-emerald-100 border border-emerald-200/60 px-1.5 py-0.2 rounded-full">Automated</span>
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Daily or monthly disciplined accumulation
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors flex items-center gap-1.5">
+                  <span>Gold SIP Savings</span>
+                  <span className="text-[9px] font-black text-emerald-800 bg-emerald-100 border border-emerald-200/60 px-1.5 py-0.2 rounded-full">Automated</span>
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -284,13 +141,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <Sparkles size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    Silver SIP Savings
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Systematic 99.9% fine silver accumulation
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  Silver SIP Savings
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -305,13 +157,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <PieChart size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    My Portfolio
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Holdings valuation, profit/loss & passbook
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  My Portfolio
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -341,13 +188,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <Zap size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    Bills & Utility Recharges
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Electricity, DTH, Mobile, Fastag & Credit card rent
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  Bills & Utility Recharges
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -362,13 +204,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <Clock size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    Transaction History
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Invoices, GST receipts & order logs
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  Transaction History
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -376,9 +213,9 @@ export default function AppMenuPage({
           </div>
         </div>
 
-        {/* ── 5. AGENT PARTNER PORTAL (Emerald Luxury Card) ── */}
+        {/* ── AGENT PARTNER PORTAL (Emerald Luxury Card) ── */}
         <div className="rounded-3xl bg-gradient-to-br from-[#064e3b] via-[#047857] to-[#022c22] border border-emerald-400/50 shadow-md shadow-emerald-950/20 p-4 text-white relative overflow-hidden">
-          <div className="flex items-center justify-between gap-1 mb-1 relative z-10 pr-12">
+          <div className="flex items-center justify-between gap-1 mb-2.5 relative z-10 pr-12">
             <span className="font-extrabold text-xs text-[#fde047]">
               {isApprovedDga ? "DGA Partner Portal" : "Become an Agent"}
             </span>
@@ -386,11 +223,6 @@ export default function AppMenuPage({
               {isApprovedDga ? "Verified DGA" : "Commission"}
             </span>
           </div>
-          <p className="text-[11px] font-semibold text-emerald-100/90 mb-3 relative z-10 max-w-[280px]">
-            {isApprovedDga 
-              ? "Access your verified DGA Agent terminal & partner console."
-              : "Register as a Digital Gold Agent to earn commissions on gold purchases."}
-          </p>
 
           <button
             onClick={() => {
@@ -410,7 +242,7 @@ export default function AppMenuPage({
           />
         </div>
 
-        {/* ── 6. ACCOUNT & PREFERENCES (Emerald Theme) ── */}
+        {/* ── ACCOUNT & PREFERENCES (Emerald Theme) ── */}
         <div className="bg-white rounded-3xl p-5 border border-emerald-100/90 shadow-[0_2px_15px_rgba(4,120,87,0.04)] space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div className="flex items-center gap-2">
@@ -432,13 +264,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <User size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    Personal Information & KYC
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Aadhaar, PAN & Nominee details
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  Personal Information & KYC
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -453,13 +280,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <Landmark size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    Bank Account & Settlement
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    Direct IMPS withdrawal account
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  Bank Account & Settlement
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />
@@ -474,13 +296,8 @@ export default function AppMenuPage({
                 <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs">
                   <HelpCircle size={18} />
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
-                    Help & 24x7 Customer Support
-                  </div>
-                  <div className="text-[11px] font-medium text-slate-400">
-                    FAQs, ticket tracker & WhatsApp care
-                  </div>
+                <div className="text-xs font-bold text-slate-900 group-hover:text-[#047857] transition-colors">
+                  Help & 24x7 Customer Support
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-300 group-hover:text-[#047857] transition-colors" />

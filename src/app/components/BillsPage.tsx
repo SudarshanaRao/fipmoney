@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Smartphone, Car, Tv, MonitorPlay, Flame, Droplets, Zap,
-  FileText, Wifi, GraduationCap, Home, Gift, Play, Search,
-  Shield, CheckCircle2, CreditCard, ArrowRight, Clock, AlertCircle, ChevronRight,
-  LayoutGrid, Landmark, Plane, MoreHorizontal, Star, Bell, Receipt,
-  Users, Banknote
+  FileText, Wifi, GraduationCap, Home, Play,
+  Shield, CheckCircle2, CreditCard, Clock, AlertCircle, ChevronRight,
+  Star, Bell, Receipt, Users, Banknote, Sparkles, X, Check, Landmark
 } from "lucide-react";
 import { API_BASE_URL } from "../utils/apiConfig";
 import FipmoneySignature from "./ui/FipmoneySignature";
@@ -16,42 +15,36 @@ interface BillsPageProps {
   onNavigate: (page: string) => void;
 }
 
-const services = [
-  { label: "Mobile Prepaid", Icon: Smartphone, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "recharge" },
-  { label: "DTH", Icon: Tv, color: "#059669", bg: "#ecfdf5", shadow: "rgba(5, 150, 105, 0.15)", category: "recharge" },
-  { label: "Electricity", Icon: Zap, color: "#f59e0b", bg: "#fef3c7", shadow: "rgba(245, 158, 11, 0.15)", category: "utilities" },
-  { label: "FASTag", Icon: Car, color: "#10b981", bg: "#d1fae5", shadow: "rgba(16, 185, 129, 0.15)", category: "recharge" },
-  { label: "Broadband", Icon: Wifi, color: "#0d9488", bg: "#ccfbf1", shadow: "rgba(13, 148, 136, 0.15)", category: "utilities" },
-  { label: "Landline Postpaid", Icon: FileText, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "utilities" },
-  { label: "Gas", Icon: Flame, color: "#ef4444", bg: "#fee2e2", shadow: "rgba(239, 68, 68, 0.15)", category: "utilities" },
-  { label: "Water", Icon: Droplets, color: "#0284c7", bg: "#e0f2fe", shadow: "rgba(2, 132, 199, 0.15)", category: "utilities" },
-  { label: "Google Play", Icon: Play, color: "#10b981", bg: "#d1fae5", shadow: "rgba(16, 185, 129, 0.15)", category: "recharge" },
-  { label: "Cable TV", Icon: MonitorPlay, color: "#059669", bg: "#ecfdf5", shadow: "rgba(5, 150, 105, 0.15)", category: "entertainment" },
-  { label: "Mobile Postpaid", Icon: Smartphone, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "recharge" },
-  { label: "LPG Gas", Icon: Flame, color: "#ef4444", bg: "#fee2e2", shadow: "rgba(239, 68, 68, 0.15)", category: "utilities" },
-  { label: "Credit Card", Icon: CreditCard, color: "#ef4444", bg: "#fee2e2", shadow: "rgba(239, 68, 68, 0.15)", category: "financial" },
-  { label: "Rent", Icon: Home, color: "#10b981", bg: "#d1fae5", shadow: "rgba(16, 185, 129, 0.15)", category: "financial" },
-  { label: "Education Fees", Icon: GraduationCap, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "education" },
-  { label: "Insurance", Icon: Shield, color: "#06b6d4", bg: "#cffafe", shadow: "rgba(6, 182, 212, 0.15)", category: "financial" },
-  { label: "Subscriptions", Icon: Shield, color: "#047857", bg: "#ecfdf5", shadow: "rgba(4, 120, 87, 0.15)", category: "entertainment" },
-  { label: "More", Icon: MoreHorizontal, color: "#0d9488", bg: "#ccfbf1", shadow: "rgba(13, 148, 136, 0.15)", category: "other" }
-];
+interface ServiceItem {
+  label: string;
+  Icon: any;
+  color: string;
+  bg: string;
+  category: "recharge" | "utilities" | "financial" | "entertainment" | "other";
+}
 
-const CATEGORIES = [
-  { id: "all", label: "All Payments", Icon: LayoutGrid },
-  { id: "recharge", label: "Recharges", Icon: Smartphone },
-  { id: "utilities", label: "Utilities", Icon: Zap },
-  { id: "financial", label: "Financial Services", Icon: Landmark },
-  { id: "entertainment", label: "Entertainment", Icon: MonitorPlay },
-  { id: "travel", label: "Travel", Icon: Plane },
-  { id: "education", label: "Education", Icon: GraduationCap },
-  { id: "other", label: "Others", Icon: Clock }
+const services: ServiceItem[] = [
+  { label: "Mobile Prepaid", Icon: Smartphone, color: "#047857", bg: "#ecfdf5", category: "recharge" },
+  { label: "Electricity", Icon: Zap, color: "#d97706", bg: "#fef3c7", category: "utilities" },
+  { label: "DTH", Icon: Tv, color: "#059669", bg: "#ecfdf5", category: "recharge" },
+  { label: "FASTag", Icon: Car, color: "#10b981", bg: "#d1fae5", category: "recharge" },
+  { label: "Broadband", Icon: Wifi, color: "#0d9488", bg: "#ccfbf1", category: "utilities" },
+  { label: "Credit Card", Icon: CreditCard, color: "#dc2626", bg: "#fee2e2", category: "financial" },
+  { label: "Gas Cylinder", Icon: Flame, color: "#ea580c", bg: "#ffedd5", category: "utilities" },
+  { label: "Piped Gas", Icon: Flame, color: "#f97316", bg: "#fff7ed", category: "utilities" },
+  { label: "Water", Icon: Droplets, color: "#0284c7", bg: "#e0f2fe", category: "utilities" },
+  { label: "Mobile Postpaid", Icon: Smartphone, color: "#047857", bg: "#ecfdf5", category: "recharge" },
+  { label: "Landline", Icon: FileText, color: "#047857", bg: "#ecfdf5", category: "utilities" },
+  { label: "House Rent", Icon: Home, color: "#059669", bg: "#d1fae5", category: "financial" },
+  { label: "Education Fees", Icon: GraduationCap, color: "#4f46e5", bg: "#e0e7ff", category: "other" },
+  { label: "Insurance Premium", Icon: Shield, color: "#0891b2", bg: "#cffafe", category: "financial" },
+  { label: "Google Play", Icon: Play, color: "#10b981", bg: "#d1fae5", category: "entertainment" },
+  { label: "Cable TV", Icon: MonitorPlay, color: "#059669", bg: "#ecfdf5", category: "entertainment" },
+  { label: "Subscriptions", Icon: Sparkles, color: "#7c3aed", bg: "#ede9fe", category: "entertainment" },
+  { label: "Municipal Taxes", Icon: Landmark, color: "#475569", bg: "#f1f5f9", category: "other" }
 ];
 
 export default function BillsPage({ onNavigate }: { onNavigate: (page: string) => void }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeSubTab, setActiveSubTab] = useState<string>("all");
-
   const handleBillClick = (label: string) => {
     sessionStorage.setItem("selectedBillLabel", label);
     onNavigate("recharge-details");
@@ -79,64 +72,101 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
   }, []);
 
   const promoCards = [
-    { title: "Refer & Earn", desc: "Invite friends and earn digital gold rewards directly in your vault.", icon: Users, gradient: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", action: "Refer Now" },
-    { title: "Instant Cashbacks", desc: "Pay your utility bills and get assured cashbacks every month.", icon: Banknote, gradient: "linear-gradient(135deg, #064e3b 0%, #10b981 100%)", action: "Explore Offers" },
-    { title: "Instant & Reliable", desc: "Fast utility bill payments with instant digital confirmation.", icon: Shield, gradient: "linear-gradient(135deg, #022c22 0%, #047857 100%)", action: "Learn More" }
+    { 
+      title: "Refer & Earn 24K Gold", 
+      desc: "Invite friends to pay bills on Fipmoney and receive digital gold rewards in your vault.", 
+      icon: Users, 
+      gradient: "linear-gradient(135deg, #022c22 0%, #064e3b 50%, #047857 100%)", 
+      action: "Refer Now",
+      target: "refer-and-earn"
+    },
+    { 
+      title: "0% Convenience Fee", 
+      desc: "Enjoy zero platform charges and instant Bharat BillPay receipt generation.", 
+      icon: Banknote, 
+      gradient: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)", 
+      action: "Explore Perks",
+      target: null
+    },
+    { 
+      title: "Bank-Grade BBPS Security", 
+      desc: "All transactions are encrypted with 256-bit bank grade security protocols.", 
+      icon: Shield, 
+      gradient: "linear-gradient(135deg, #134e4a 0%, #047857 50%, #059669 100%)", 
+      action: "Learn More",
+      target: null
+    }
   ];
 
-  const filteredServices = services.filter(service => {
-    const matchesTab = activeSubTab === "all" || service.category === activeSubTab;
-    const matchesSearch = service.label.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
-
   return (
-    <div className="flex-1 h-screen overflow-y-auto bg-white pb-24 text-slate-900 font-sans relative">
+    <div className="flex-1 h-screen overflow-y-auto bg-[#f8fafc] pb-32 text-slate-900 font-sans relative selection:bg-[#047857] selection:text-white">
       
-      {/* Decorative Floating Mesh Gradients */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute top-80 right-10 w-80 h-80 bg-[#047857]/10 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none z-0" />
+      {/* Decorative Brand Ambient Mesh */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/8 rounded-full blur-3xl pointer-events-none z-0" />
+      <div className="absolute top-96 left-0 w-80 h-80 bg-[#047857]/6 rounded-full blur-3xl pointer-events-none z-0" />
 
-      <div className="p-4 md:p-6 lg:p-10 max-w-[1400px] mx-auto space-y-10 relative z-10">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-7 relative z-10">
         
-        {/* Sleek Minimal Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gray-100 pb-8">
-          <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Recharge & Bills</h1>
-            <p className="text-sm font-semibold text-slate-400 mt-1">Manage utility, recharge and other payments with bank-grade security.</p>
+        {/* ── RECHARGES & BILLS SECTION (No outer container) ── */}
+        <div className="space-y-4 sm:space-y-5">
+          {/* Main Page Title Section */}
+          <div className="space-y-1.5 px-1">
+            <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full text-[#047857] text-[10.5px] font-black uppercase tracking-wider">
+              <Zap size={12} className="fill-[#047857]" />
+              <span>Bharat BillPay (BBPS) Certified</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              Recharges <span className="text-[#047857]">& Bills</span>
+            </h1>
           </div>
-          
-          {/* Right Aligned Floating Search Bar */}
-          <div className="relative w-full md:w-80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-2xl border border-slate-100 bg-white overflow-hidden focus-within:border-emerald-500 transition-colors">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Search size={16} /></span>
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search operator or service..."
-              className="w-full pl-11 pr-4 py-3 text-xs font-bold text-slate-700 bg-transparent border-none outline-none placeholder-slate-400"
-            />
+
+          {/* Grid of Services (Clean icon grid without separate card containers) */}
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-6 gap-y-5 gap-x-2 sm:gap-x-4 pt-1">
+            {services.map((item, i) => (
+              <motion.div 
+                key={item.label}
+                onClick={() => handleBillClick(item.label)} 
+                className="relative flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group active:scale-95 select-none py-1 px-0.5"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i * 0.015, 0.15), duration: 0.25 }}
+              >
+                {/* Squircle Icon Container */}
+                <div 
+                  className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl sm:rounded-3xl flex items-center justify-center transition-all duration-200 mb-2 group-hover:scale-110 shadow-xs border border-white/80"
+                  style={{ background: item.bg, color: item.color }}
+                >
+                  <item.Icon size={24} strokeWidth={2.2} />
+                </div>
+                
+                <span className="text-[11.5px] sm:text-xs font-bold text-slate-700 leading-tight transition-colors group-hover:text-[#047857] line-clamp-2 max-w-[85px]">
+                  {item.label}
+                </span>
+              </motion.div>
+            ))}
           </div>
         </div>
 
-        {/* Saved & Due Bills Showcase (Smart Cards Layout) */}
+        {/* ── 2. SAVED & DUE BILLS SHOWCASE (Pending Due Alerts) ── */}
         <motion.div 
-          className="space-y-4"
+          className="space-y-3.5"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
         >
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <Clock size={16} className="text-[#047857]" /> Pending Due Alerts
-            </h2>
-            <span className="text-[10px] font-black uppercase text-[#047857] bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full">
-              3 Payments Due
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-[#047857]" />
+              <h2 className="text-sm font-black uppercase tracking-wider text-slate-500">
+                Pending Due Alerts
+              </h2>
+            </div>
+            <span className="text-[10px] font-black uppercase text-[#047857] bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+              {dueBills.length > 0 ? `${dueBills.length} Bills Due` : "Active Auto-Reminders"}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {isLoadingDues ? (
               <div className="col-span-1 md:col-span-3 flex justify-center py-10">
                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#047857] border-t-transparent" />
@@ -147,89 +177,71 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
                 return (
                   <motion.div 
                     key={i} 
-                    className="rounded-[2.2rem] p-7 shadow-[0_20px_45px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.22)] flex flex-col justify-between min-h-[200px] relative overflow-hidden group border border-solid border-white/10 text-white"
-                    style={{ background: bill.gradient || "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)" }}
-                    whileHover={{ y: -6, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="rounded-3xl p-5 shadow-sm flex flex-col justify-between min-h-[190px] relative overflow-hidden group border border-white/10 text-white"
+                    style={{ background: bill.gradient || "linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%)" }}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 22 }}
                   >
-                    {/* Background Shape Overlay */}
-                    <div className="absolute inset-0 opacity-[0.38] mix-blend-overlay pointer-events-none group-hover:scale-108 transition-transform duration-700" 
-                         style={{ backgroundImage: "url('/bg_shape.svg')", backgroundSize: "cover", backgroundPosition: "center" }} />
-                    
-                    {/* Premium Glowing Aura */}
-                    <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/15 transition-colors duration-500" />
-  
-                    {/* Glossy Diagonal Shine Sweep on Hover */}
-                    <div className="absolute -inset-full top-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
-  
                     {/* Due Date Tag on Top-Right */}
-                    <div className="absolute right-6 top-6 flex items-center gap-1.5 bg-white py-1.5 px-3.5 rounded-full border border-solid border-slate-100/10 shadow-[0_4px_15px_rgba(0,0,0,0.12)]">
+                    <div className="absolute right-4 top-4 flex items-center gap-1.5 bg-white/95 text-slate-900 py-1 px-3 rounded-full shadow-xs">
                       <span className={`w-2 h-2 rounded-full ${bill.expired ? "bg-rose-500 animate-pulse" : "bg-amber-500"}`} />
-                      <span className={`text-[9px] font-black uppercase tracking-wider ${bill.expired ? "text-rose-600" : "text-amber-600"}`}>
+                      <span className={`text-[9px] font-black uppercase tracking-wider ${bill.expired ? "text-rose-600" : "text-amber-700"}`}>
                         {bill.expired ? "Expired" : `Due in ${bill.dueIn}`}
                       </span>
                     </div>
                     
-                    <div className="space-y-1 relative z-10 pt-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 opacity-85">
-                          <BillIcon size={14} strokeWidth={2.5} />
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider">{bill.type}</span>
-                        </div>
-                        
-                        {/* EMV Micro Chip Outline */}
-                        <div className="w-7 h-5 rounded bg-gradient-to-r from-amber-400/20 to-yellow-300/10 border border-yellow-300/30 opacity-70" />
+                    <div className="space-y-1 relative z-10 pt-2">
+                      <div className="flex items-center gap-1.5 opacity-90 text-[10px] font-black uppercase tracking-wider">
+                        <BillIcon size={14} strokeWidth={2.5} />
+                        <span>{bill.type}</span>
                       </div>
-                      <h3 className="text-lg font-black tracking-tight mt-1">{bill.provider}</h3>
+                      <h3 className="text-lg font-black tracking-tight text-white">{bill.provider}</h3>
                     </div>
   
-                    <div className="flex items-end justify-between relative z-10 mt-6 pt-4 border-t border-white/10">
+                    <div className="flex items-end justify-between relative z-10 mt-5 pt-3.5 border-t border-white/15">
                       <div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider opacity-60">Amount due</span>
-                        <h2 className="text-2xl font-black font-outfit tracking-tight mt-0.5">{bill.amount}</h2>
+                        <span className="text-[9px] font-bold uppercase tracking-wider opacity-75">Amount due</span>
+                        <h4 className="text-2xl font-black tracking-tight">{bill.amount}</h4>
                       </div>
                       
                       <button 
                         onClick={() => handleBillClick(bill.type === "Prepaid" ? "Mobile Prepaid" : bill.type)}
-                        className="flex items-center gap-1.5 py-2.5 px-5 rounded-full text-slate-900 bg-white hover:bg-slate-50 border-none outline-none font-black text-xs cursor-pointer shadow-md transition-all duration-300 active:scale-95 hover:scale-102"
+                        className="flex items-center gap-1.5 py-2 px-4 rounded-xl text-slate-900 bg-white hover:bg-emerald-50 border-none outline-none font-black text-xs cursor-pointer shadow-xs active:scale-95 transition-all"
                       >
-                        Pay Now <ChevronRight size={12} strokeWidth={3} />
+                        <span>Pay Now</span>
+                        <ChevronRight size={13} strokeWidth={3} />
                       </button>
                     </div>
                   </motion.div>
                 );
               })
             ) : (
-              // No Dues -> Promotional Cards
+              // Promo Cards
               promoCards.map((promo, i) => {
                 const PromoIcon = promo.icon;
                 return (
                   <motion.div 
                     key={i} 
-                    className="rounded-[2.2rem] p-7 shadow-[0_20px_45px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.22)] flex flex-col justify-between min-h-[200px] relative overflow-hidden group border border-solid border-white/10 text-white"
+                    className="rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between min-h-[190px] relative overflow-hidden group border border-white/10 text-white"
                     style={{ background: promo.gradient }}
-                    whileHover={{ y: -6, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    whileHover={{ y: -4, scale: 1.01 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 22 }}
                   >
-                    <div className="absolute inset-0 opacity-[0.25] mix-blend-overlay pointer-events-none group-hover:scale-108 transition-transform duration-700" 
-                         style={{ backgroundImage: "url('/bg_shape.svg')", backgroundSize: "cover", backgroundPosition: "center" }} />
-                    <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/15 transition-colors duration-500" />
-                    <div className="absolute -inset-full top-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out pointer-events-none z-10" />
-
-                    <div className="space-y-1 relative z-10 pt-2">
-                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md mb-4 shadow-sm border border-white/30">
-                        <PromoIcon size={24} className="text-white drop-shadow-sm" strokeWidth={2.5} />
+                    <div className="space-y-1.5 relative z-10">
+                      <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center backdrop-blur-md mb-3 shadow-2xs border border-white/20">
+                        <PromoIcon size={20} className="text-white" strokeWidth={2.5} />
                       </div>
-                      <h3 className="text-xl font-black tracking-tight leading-tight">{promo.title}</h3>
-                      <p className="text-xs font-semibold opacity-85 leading-relaxed pt-1 max-w-[90%]">{promo.desc}</p>
+                      <h3 className="text-base sm:text-lg font-black tracking-tight leading-snug">{promo.title}</h3>
+                      <p className="text-xs font-medium opacity-85 leading-relaxed pt-0.5">{promo.desc}</p>
                     </div>
 
-                    <div className="flex items-end justify-between relative z-10 mt-6 pt-4 border-t border-white/10">
+                    <div className="flex items-end justify-between relative z-10 mt-5 pt-3.5 border-t border-white/15">
                       <button 
-                        onClick={() => promo.title === "Refer & Earn" ? onNavigate("refer-earn") : null}
-                        className="flex items-center gap-1.5 py-2.5 px-5 rounded-full text-slate-900 bg-white hover:bg-slate-50 border-none outline-none font-black text-xs cursor-pointer shadow-md transition-all duration-300 active:scale-95 hover:scale-102"
+                        onClick={() => promo.target ? onNavigate(promo.target) : null}
+                        className="flex items-center gap-1.5 py-2 px-4 rounded-xl text-slate-900 bg-white hover:bg-emerald-50 border-none outline-none font-black text-xs cursor-pointer shadow-xs active:scale-95 transition-all"
                       >
-                        {promo.action} <ChevronRight size={12} strokeWidth={3} />
+                        <span>{promo.action}</span>
+                        <ChevronRight size={13} strokeWidth={3} />
                       </button>
                     </div>
                   </motion.div>
@@ -239,171 +251,86 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
           </div>
         </motion.div>
 
-        {/* Split Category sidebar Layout */}
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          
-          {/* Left Column: Sidebar Tabs */}
-          <div className="w-full lg:w-64 bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] shrink-0 flex flex-col gap-1.5">
-            <span className="text-[11px] font-bold uppercase text-slate-500 tracking-wide block mb-3 px-2">Categories</span>
-            
-            {CATEGORIES.map(tab => {
-              const active = activeSubTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveSubTab(tab.id)}
-                  className={`w-full text-left px-4 py-3.5 rounded-2xl font-semibold text-sm outline-none border-none cursor-pointer transition-all duration-300 flex items-center justify-between group
-                    ${active ? "bg-emerald-50 text-[#047857] font-bold" : "bg-transparent text-slate-600 hover:bg-slate-50"}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <tab.Icon size={18} className={active ? "text-[#047857]" : "text-slate-400 group-hover:text-slate-500"} />
-                    <span>{tab.label}</span>
-                  </div>
-                  {active && <ChevronRight size={16} className="text-[#047857]" />}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Right Column: Grid list */}
-          <div className="flex-1 bg-white p-6 md:p-8 rounded-3xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] min-h-[300px]">
-            <div className="flex justify-between items-center mb-8">
-               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Popular Services</h2>
-               <button className="flex items-center gap-1.5 text-sm font-bold text-[#047857] bg-transparent border-none outline-none cursor-pointer hover:text-[#064e3b] transition-colors">
-                  <Star size={16} /> Manage Favourites
-               </button>
+        {/* ── 3. TRUST & FEATURE HIGHLIGHTS ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center text-[#047857] shrink-0 border border-emerald-200/60 shadow-2xs">
+              <Shield size={20} strokeWidth={2.5} />
             </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-black text-slate-900">Bank-Grade Security</h4>
+              <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">256-bit encrypted BBPS payment network</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0 border border-amber-200/60 shadow-2xs">
+              <Zap size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-black text-slate-900">Instant Confirmations</h4>
+              <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">Real-time bill fetch & operator clearance</p>
+            </div>
+          </div>
 
-            <AnimatePresence mode="popLayout">
-              {filteredServices.length === 0 ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex flex-col items-center justify-center p-12 text-center h-[240px]"
-                >
-                  <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mb-3">
-                    <AlertCircle size={24} />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-800">No payment category found</h3>
-                  <p className="text-xs text-slate-400 mt-1 max-w-xs">Check your search spelling or filter another category.</p>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 gap-y-6"
-                  layout
-                >
-                  {filteredServices.map((item, i) => (
-                    <motion.div 
-                      key={item.label}
-                      onClick={() => handleBillClick(item.label)} 
-                      className="bg-white rounded-3xl p-4 border border-slate-100 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 select-none hover:shadow-md hover:border-slate-200"
-                      layout
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i * 0.02, 0.2), duration: 0.3 }}
-                    >
-                      <div 
-                        className="w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300 mb-3"
-                        style={{ background: item.bg, color: item.color }}
-                      >
-                        <item.Icon size={20} strokeWidth={2.5} />
-                      </div>
-                      
-                      <span className="text-xs font-bold text-slate-800 leading-tight transition-colors">
-                        {item.label}
-                      </span>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 border border-blue-200/60 shadow-2xs">
+              <CreditCard size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-black text-slate-900">Zero Convenience Fee</h4>
+              <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">No hidden charges on utility bills</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 shrink-0 border border-purple-200/60 shadow-2xs">
+              <Receipt size={20} strokeWidth={2.5} />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-black text-slate-900">Certified Invoices</h4>
+              <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">Instant legal receipts & GST invoices</p>
+            </div>
           </div>
         </div>
 
-        {/* Feature Info Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-           <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-                 <Shield size={22} strokeWidth={2} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-slate-900">Secure Payments</h4>
-                 <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">Bank-grade security<br/>for all transactions</p>
-              </div>
-           </div>
-           
-           <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
-                 <Zap size={22} strokeWidth={2} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-slate-900">Instant Payments</h4>
-                 <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">Fast and hassle-free<br/>payment experience</p>
-              </div>
-           </div>
-
-           <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0">
-                 <CreditCard size={22} strokeWidth={2} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-slate-900">Multiple Options</h4>
-                 <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">Pay using UPI, Cards,<br/>Net Banking & more</p>
-              </div>
-           </div>
-
-           <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
-                 <Bell size={22} strokeWidth={2} />
-              </div>
-              <div>
-                 <h4 className="text-sm font-extrabold text-slate-900">Auto Reminders</h4>
-                 <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">Never miss a due date<br/>with smart reminders</p>
-              </div>
-           </div>
-        </div>
-
-        {/* BBPS Security Panel */}
-        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col lg:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-6">
+        {/* ── 4. OFFICIAL BBPS CERTIFICATION PANEL ── */}
+        <div className="bg-gradient-to-br from-white to-[#f8fafc] rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-5">
+          <div className="flex items-center gap-4">
             {/* Logo Mark for BBPS */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center justify-center bg-orange-500 text-white font-extrabold tracking-tighter w-12 h-12 rounded-lg text-center text-2xl font-sans select-none">
+            <div className="flex items-center gap-2 shrink-0 bg-white border border-slate-200 p-2 rounded-2xl shadow-2xs">
+              <div className="flex items-center justify-center bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-black w-10 h-10 rounded-xl text-center text-xl select-none">
                 B
               </div>
-              <div className="flex flex-col text-indigo-900 font-black tracking-tighter uppercase leading-none">
-                 <span className="text-lg">Bharat</span>
-                 <span className="text-lg">BillPay</span>
+              <div className="flex flex-col text-slate-900 font-black tracking-tighter uppercase leading-none pr-1">
+                <span className="text-xs text-orange-600">Bharat</span>
+                <span className="text-xs text-indigo-900">BillPay</span>
               </div>
             </div>
 
-            <div className="space-y-1 max-w-lg">
-              <h4 className="text-sm font-extrabold text-[#047857]">
-                Secure Payments Assured
+            <div className="space-y-0.5">
+              <h4 className="text-xs sm:text-sm font-black text-slate-900">
+                National Payments Corporation of India (NPCI) Certified
               </h4>
-              <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                All recharge and bill transactions are processed securely via the national BBPS network. Invoices generated represent certified legal receipts.
+              <p className="text-[11px] text-slate-500 font-medium leading-snug">
+                All recharge and utility transactions on Fipmoney are processed securely via the authorized BBPS network.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 flex-wrap justify-center lg:justify-end">
-             <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50/50 px-3 py-1.5 rounded-lg border border-emerald-100/50">
-                <Shield size={16} strokeWidth={2} />
-                <span className="text-[11px] font-bold text-slate-600">100% Safe & Secure</span>
-             </div>
-             <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50/50 px-3 py-1.5 rounded-lg border border-emerald-100/50">
-                <CheckCircle2 size={16} strokeWidth={2} />
-                <span className="text-[11px] font-bold text-slate-600">Instant Confirmation</span>
-             </div>
-             <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50/50 px-3 py-1.5 rounded-lg border border-emerald-100/50">
-                <Receipt size={16} strokeWidth={2} />
-                <span className="text-[11px] font-bold text-slate-600">Official Receipts</span>
-             </div>
+          <div className="flex items-center gap-2.5 flex-wrap justify-center lg:justify-end shrink-0">
+            <span className="inline-flex items-center gap-1.5 text-slate-700 bg-white px-3 py-1.5 rounded-full border border-slate-200 text-xs font-bold shadow-2xs">
+              <Check size={13} className="text-[#047857]" strokeWidth={3} />
+              <span>100% Secure</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-slate-700 bg-white px-3 py-1.5 rounded-full border border-slate-200 text-xs font-bold shadow-2xs">
+              <Check size={13} className="text-[#047857]" strokeWidth={3} />
+              <span>Instant Reciepts</span>
+            </span>
           </div>
         </div>
 
+        {/* Fipmoney Signature Watermark */}
         <FipmoneySignature />
 
       </div>
