@@ -56,14 +56,14 @@ const SECURITY_SLIDES = [
     title2: "Protected",
     title2Color: "text-[#7c3aed]",
     subtitle: "Your gold is securely stored in India's trusted institutional vaults and 100% insured, giving you complete peace of mind.",
-    logo: null,
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkgS4HuPB8PDAbY4WLdR8k58-YeVH34FCWCPawnwS8EA&s=10",
     badgeIcon: ShieldCheck,
     badgeBg: "bg-[#ece4ff] text-[#7c3aed]",
     bgColor: "from-[#faf8ff] via-[#f3eeff] to-[#e9e2ff]",
     borderColor: "border-[#e2d5ff]",
     dotActive: "bg-[#7c3aed]",
     graphic: "/vault.png",
-    logoStyle: "h-6 sm:h-7.5 w-auto object-contain",
+    logoStyle: "h-5 sm:h-6 w-auto object-contain",
   },
   {
     id: 2,
@@ -71,7 +71,7 @@ const SECURITY_SLIDES = [
     title1Color: "text-[#e11d48]",
     title2: "Monitored & Protected",
     subtitle: "Your gold is independently monitored by regulated security trustees 24/7 for an additional layer of protection.",
-    logo: null,
+    logo: "https://www.safegold.com/images/lander/vistra-logo.svg",
     badgeIcon: ShieldCheck,
     badgeBg: "bg-[#ffe4eb] text-[#e11d48]",
     bgColor: "from-[#fff5f7] via-[#ffeef2] to-[#ffdbe3]",
@@ -86,14 +86,14 @@ const SECURITY_SLIDES = [
     title2: "Partner",
     title2Color: "text-[#d97706]",
     subtitle: "Your digital gold is securely backed 1:1 by real 24K physical gold sourced from India's trusted bullion partners.",
-    logo: null,
+    logo: "https://www.phonepe.com/app/investment/safegold/about/img/Safe%20Gold.png",
     badgeIcon: Coins,
     badgeBg: "bg-[#fef3c7] text-[#d97706]",
     bgColor: "from-[#fffdf5] via-[#fef9e7] to-[#fef0c7]",
     borderColor: "border-[#fde68a]",
     dotActive: "bg-[#d97706]",
     graphic: "/gold.png",
-    logoStyle: "h-7.5 sm:h-9 w-auto object-contain",
+    logoStyle: "h-6 sm:h-7 w-auto object-contain",
   },
 ];
 
@@ -402,93 +402,12 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
         {/* ========================================================================= */}
         <div className="block md:hidden space-y-5 pb-24">
 
-          {/* 1. Top Security Banner Carousel Card */}
-          <div className="relative overflow-hidden rounded-[28px] min-h-[220px] shadow-sm">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeBannerIndex}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className={`bg-gradient-to-br ${SECURITY_SLIDES[activeBannerIndex].bgColor} border ${SECURITY_SLIDES[activeBannerIndex].borderColor} rounded-[28px] p-6 shadow-sm relative overflow-hidden flex items-stretch justify-between min-h-[220px] w-full`}
-              >
-                {/* Background Decorative Sparkle */}
-                <Sparkles size={18} className="absolute top-4 right-4 text-[#047857]/50 pointer-events-none" />
-
-                {/* Left Content Area */}
-                <div className="z-10 flex-1 pr-2 flex flex-col justify-between max-w-[210px] sm:max-w-[250px]">
-                  <div className="space-y-2.5">
-                    {/* Badge Icon & Title */}
-                    <div className="flex items-center gap-3">
-                      <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-xs ${SECURITY_SLIDES[activeBannerIndex].badgeBg}`}>
-                        {(() => {
-                          const IconComponent = SECURITY_SLIDES[activeBannerIndex].badgeIcon;
-                          return <IconComponent size={21} strokeWidth={2.5} />;
-                        })()}
-                      </div>
-                      <div className="leading-tight">
-                        <span className={`text-[17px] sm:text-lg font-black block text-gray-900 ${SECURITY_SLIDES[activeBannerIndex].title1Color || ""}`}>
-                          {SECURITY_SLIDES[activeBannerIndex].title1}
-                        </span>
-                        <span className={`text-[17px] sm:text-lg font-black block text-gray-900 ${SECURITY_SLIDES[activeBannerIndex].title2Color || ""}`}>
-                          {SECURITY_SLIDES[activeBannerIndex].title2}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Subtitle */}
-                    <p className="text-[12.5px] font-medium text-slate-600 leading-relaxed pt-0.5 max-w-[200px] sm:max-w-[230px]">
-                      {SECURITY_SLIDES[activeBannerIndex].subtitle}
-                    </p>
-                  </div>
-
-                  {/* Carousel Indicators */}
-                  <div className="flex items-center gap-2 pt-4">
-                    {SECURITY_SLIDES.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveBannerIndex(idx);
-                        }}
-                        className={`transition-all border-none outline-none cursor-pointer p-0 ${
-                          activeBannerIndex === idx
-                            ? `w-2.5 h-2.5 rounded-full ${SECURITY_SLIDES[activeBannerIndex].dotActive}`
-                            : "w-2.5 h-2.5 rounded-full bg-gray-300/80 hover:bg-gray-400"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* Right Graphic & Floating White Logo Pill */}
-                <div className="relative w-40 sm:w-48 flex items-center justify-end shrink-0 pointer-events-none">
-                  {/* 3D Asset Illustration */}
-                  <img 
-                    src={SECURITY_SLIDES[activeBannerIndex].graphic} 
-                    alt="Security Asset"
-                    className="w-36 sm:w-44 h-auto object-contain drop-shadow-md shrink-0 -mt-2 -mr-1 scale-105"
-                  />
-
-                  {/* Floating White Partner Logo Pill */}
-                  <div className="absolute bottom-1 right-0 bg-white/95 backdrop-blur-md rounded-xl px-2.5 py-1 shadow-xs border border-white/90 flex items-center justify-center z-20 max-w-[115px]">
-                    <img 
-                      src={SECURITY_SLIDES[activeBannerIndex].logo} 
-                      alt="Partner Logo"
-                      className={SECURITY_SLIDES[activeBannerIndex].logoStyle || "h-5 sm:h-6 w-auto object-contain"}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* 3. Section Title */}
+          {/* 1. Section Title */}
           <div className="pt-1">
             <h2 className="text-base font-black text-gray-900 tracking-tight">Choose your investment</h2>
           </div>
 
-          {/* 4. Investment Cards List */}
+          {/* 2. Investment Cards List */}
           <div className="space-y-4">
 
             {/* Card 1: Digital Gold */}
@@ -687,6 +606,88 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
               </button>
             </div>
 
+          </div>
+
+          {/* 3. Security Banner Carousel Card (Placed below investment cards) */}
+          <div className="relative overflow-hidden rounded-[28px] min-h-[195px] sm:min-h-[210px] shadow-sm pt-1">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeBannerIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className={`bg-gradient-to-br ${SECURITY_SLIDES[activeBannerIndex].bgColor} border ${SECURITY_SLIDES[activeBannerIndex].borderColor} rounded-[28px] p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[195px] sm:min-h-[210px] w-full`}
+              >
+                {/* Background Decorative Sparkle */}
+                <Sparkles size={18} className="absolute top-4 right-4 text-[#047857]/50 pointer-events-none" />
+
+                {/* Top Block: Header and Subtitle grouped closely without extra space */}
+                <div className="z-10 w-full space-y-1.5">
+                  {/* Badge Icon & Title in one line across any mobile size */}
+                  <div className="flex items-center gap-2.5 w-full">
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 shadow-xs ${SECURITY_SLIDES[activeBannerIndex].badgeBg}`}>
+                      {(() => {
+                        const IconComponent = SECURITY_SLIDES[activeBannerIndex].badgeIcon;
+                        return <IconComponent size={19} strokeWidth={2.5} />;
+                      })()}
+                    </div>
+                    <h3 className="text-[14.5px] min-[360px]:text-[15.5px] sm:text-[17px] font-black text-gray-900 tracking-tight whitespace-nowrap leading-tight flex items-center gap-1.5">
+                      <span className={SECURITY_SLIDES[activeBannerIndex].title1Color || ""}>
+                        {SECURITY_SLIDES[activeBannerIndex].title1}
+                      </span>
+                      <span className={SECURITY_SLIDES[activeBannerIndex].title2Color || ""}>
+                        {SECURITY_SLIDES[activeBannerIndex].title2}
+                      </span>
+                    </h3>
+                  </div>
+
+                  {/* Subtitle placed immediately below header */}
+                  <p className="text-[12px] sm:text-[12.5px] font-medium text-slate-600 leading-snug max-w-[185px] min-[360px]:max-w-[205px] sm:max-w-[250px] pl-0.5 pt-0.5">
+                    {SECURITY_SLIDES[activeBannerIndex].subtitle}
+                  </p>
+                </div>
+
+                {/* Bottom Row: Carousel Dots */}
+                <div className="flex items-center gap-2 pt-3 z-10">
+                  {SECURITY_SLIDES.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveBannerIndex(idx);
+                      }}
+                      className={`transition-all border-none outline-none cursor-pointer p-0 ${
+                        activeBannerIndex === idx
+                          ? `w-2.5 h-2.5 rounded-full ${SECURITY_SLIDES[activeBannerIndex].dotActive}`
+                          : "w-2.5 h-2.5 rounded-full bg-gray-300/80 hover:bg-gray-400"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Right Graphic & Floating White Partner Logo Pill (Moved above, parallel to text) */}
+                <div className="absolute right-3 sm:right-5 top-[50px] min-[360px]:top-[54px] pointer-events-none flex flex-col items-end z-10">
+                  {/* 3D Asset Illustration */}
+                  <img 
+                    src={SECURITY_SLIDES[activeBannerIndex].graphic} 
+                    alt="Security Asset"
+                    className="w-22 min-[360px]:w-26 sm:w-32 h-auto object-contain drop-shadow-md shrink-0 scale-105"
+                  />
+
+                  {/* Floating White Partner Logo Pill */}
+                  {SECURITY_SLIDES[activeBannerIndex].logo && (
+                    <div className="-mt-2 sm:-mt-2.5 mr-0.5 bg-white/95 backdrop-blur-md rounded-xl px-2.5 py-1 shadow-xs border border-white/90 flex items-center justify-center z-20 max-w-[115px]">
+                      <img 
+                        src={SECURITY_SLIDES[activeBannerIndex].logo} 
+                        alt="Partner Logo"
+                        className={SECURITY_SLIDES[activeBannerIndex].logoStyle || "h-5 sm:h-6 w-auto object-contain"}
+                      />
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
         </div>

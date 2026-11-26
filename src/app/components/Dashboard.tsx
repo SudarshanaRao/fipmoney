@@ -10,7 +10,7 @@ import {
   Smartphone, MonitorPlay, GraduationCap, Gift, Play, Flame, Tv, Wifi, Droplets, Car, FileText, Home, AlertCircle,
   Search, Bell, ChevronDown, Check, Building, RefreshCw, Grid, Award, Download, Clock, X, CheckCheck, Coins, Menu,
   Sun, AlertTriangle, Calculator, PiggyBank, Target, MoreHorizontal, UserPlus, Users, Share2, Handshake,
-  Calendar, Sparkles, Mail
+  Calendar, Sparkles, Mail, Lightbulb
 } from "lucide-react";
 import { Sidebar, MobileNav, MobileDrawerNav, Tab } from "./Navigation";
 import cardBgGold from "../../assets/card_bg_gold.jpg";
@@ -46,7 +46,7 @@ type Metal = "gold" | "silver";
 
 const GOLD = { G: "#d89221", G_LT: "#efb652", G_DK: "#b87312", BG: "#fdf8f0" };
 const SILVER = { G: "#7c93a8", G_LT: "#a8bfce", G_DK: "#4d6373", BG: "#f4f7f9" };
-const POS = "#10b981"; 
+const POS = "#10b981";
 
 const INITIAL_NOTIFICATIONS = [
   {
@@ -98,6 +98,7 @@ const tabSlugMap: Record<string, string> = {
   refer: "dashboard/referrals",
   settings: "dashboard/settings",
   "buy-gold": "dashboard/buy-gold",
+  "buy-silver": "dashboard/buy-silver",
   "sell-gold": "dashboard/sell-gold",
   "instant-loan": "dashboard/loans"
 };
@@ -197,7 +198,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         } else if (parsed.isApproved || parsed.status === 'approved' || parsed.status === 'APPROVED') {
           localIsApproved = true;
         }
-      } catch (e) {}
+      } catch (e) { }
     }
     setIsApprovedDga(localIsApproved);
 
@@ -221,13 +222,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                 mobile: data.data?.mobile || mobile,
               };
               localStorage.setItem("fm_dga_waitlist_data", JSON.stringify(updatedObj));
-            } catch (e) {}
+            } catch (e) { }
           } else if (data && data.success && !data.alreadyRegistered) {
             setIsApprovedDga(false);
             localStorage.removeItem("fm_dga_waitlist_data");
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     }
   }, []);
   const [agentFormData, setAgentFormData] = useState({
@@ -272,11 +273,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
     e.stopPropagation();
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
-  
+
   // Load dynamic logged-in user details directly from database session
   const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
   const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "" : "");
-  
+
   const userEmail = loggedInUser?.email || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_email_${loggedInMobile}`) || "" : "");
   const hasValidEmail = Boolean(userEmail && userEmail.trim().length > 0 && !userEmail.endsWith('@fipmoney.com'));
   const [showEmailMissingModal, setShowEmailMissingModal] = useState(() => !hasValidEmail);
@@ -286,13 +287,25 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const userCode = loggedInUser?.userCode || (typeof window !== 'undefined' ? localStorage.getItem(`fm_user_code_${loggedInMobile}`) || "FIP0001" : "FIP0001");
   const [userAvatar, setUserAvatar] = useState<string | null>(() => getUserAvatar(loggedInMobile));
   const [kycStatus, setKycStatus] = useState(loggedInUser?.isKycCompleted ? "full kyc" : "pending");
-  const [heroCarouselIndex, setHeroCarouselIndex] = useState(0);
   const [isRefreshingPortfolio, setIsRefreshingPortfolio] = useState(false);
   const [activeMetalTab, setActiveMetalTab] = useState<"gold" | "silver">("gold");
+  const [isMetalManuallySelected, setIsMetalManuallySelected] = useState(false);
+  const [quickBuyMetal, setQuickBuyMetal] = useState<"gold" | "silver">("gold");
+  const [quickBuyAmount, setQuickBuyAmount] = useState<number>(100);
 
+  // Auto carousel for Live Price Card (changes between gold and silver every 5s unless manually selected)
+  useEffect(() => {
+    if (isMetalManuallySelected) return;
+    const interval = setInterval(() => {
+      setActiveMetalTab(prev => (prev === 'gold' ? 'silver' : 'gold'));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isMetalManuallySelected]);
+
+  // Auto carousel for Top Banner Carousel
   useEffect(() => {
     const timer = setInterval(() => {
-      setHeroCarouselIndex(prev => (prev === 0 ? 1 : 0));
+      setActiveTopBannerIndex(prev => (prev + 1) % 3);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
@@ -317,10 +330,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
 
   const [virtualCard, setVirtualCard] = useState<{ cardNumber: string, expiry: string, cvv: string, nameOnCard: string } | null>(null);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
-  
+
   const goldPrice = 6420.50;
   const silverPrice = 84.20;
-  
+
   const [backendVault, setBackendVault] = useState<{ gold: number; silver: number; cash: number } | null>(null);
 
   useEffect(() => {
@@ -349,7 +362,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             const isCompleted = user.isKycCompleted;
             const level = user.kycLevel;
             setKycStatus(isCompleted ? "full kyc" : "pending");
-            
+
             const storedUser = localStorage.getItem("fm_current_logged_in_user");
             if (storedUser) {
               const userObj = JSON.parse(storedUser);
@@ -405,12 +418,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const goldHoldings = backendVault ? backendVault.gold : (typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_gold_holdings_${loggedInMobile}`) || "0") : 0);
   const silverHoldings = backendVault ? backendVault.silver : (typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_silver_holdings_${loggedInMobile}`) || "0") : 0);
   const cashBalance = backendVault ? backendVault.cash : (typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_cash_balance_${loggedInMobile}`) || "0") : 0);
-  
+
   const totalGrams = goldHoldings + silverHoldings;
   const portfolioVal = (goldHoldings * goldPrice) + (silverHoldings * silverPrice) + cashBalance;
-  
+
   const recentTransactions = typeof window !== 'undefined' ? getTransactions().slice(0, 4) : [];
-  
+
   const P = metal === "gold" ? GOLD : SILVER;
   const { G, G_LT, G_DK } = P;
   const metalName = metal === "gold" ? "Gold" : "Silver";
@@ -433,823 +446,840 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
     onNavigate("recharge-details");
   };
 
-  const MainDashboard = () => (
+  const renderMainDashboard = () => (
     <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-white flex flex-col pb-28 sm:pb-32 lg:pb-10 text-slate-900">
-       {/* Top Bar */}
-       <div className="hidden lg:flex h-[72px] border-b border-slate-200 items-center justify-between px-6 md:px-8 shrink-0 bg-white sticky top-0 z-20">
-         <div className="relative w-full max-w-md hidden md:block">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
-            <input type="text" placeholder="Search services, transactions..." className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-[#047857] transition-colors placeholder:text-slate-600 text-slate-900 font-medium" />
-         </div>
-         <div className="flex items-center gap-6 ml-auto">
-            {/* Notification Panel Trigger */}
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className={`relative border w-10 h-10 rounded-full flex items-center justify-center shadow-sm cursor-pointer outline-none transition-all ${
-                  showNotifications ? 'bg-white border-[#047857] text-emerald-800' : 'bg-[#f8fafc] border-slate-200 text-gray-500 hover:bg-gray-50'
+      {/* Top Bar */}
+      <div className="hidden lg:flex h-[72px] border-b border-slate-200 items-center justify-between px-6 md:px-8 shrink-0 bg-white sticky top-0 z-20">
+        <div className="relative w-full max-w-md hidden md:block">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+          <input type="text" placeholder="Search services, transactions..." className="w-full bg-[#f8fafc] border border-slate-200 rounded-xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:border-[#047857] transition-colors placeholder:text-slate-600 text-slate-900 font-medium" />
+        </div>
+        <div className="flex items-center gap-6 ml-auto">
+          {/* Notification Panel Trigger */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className={`relative border w-10 h-10 rounded-full flex items-center justify-center shadow-sm cursor-pointer outline-none transition-all ${showNotifications ? 'bg-white border-[#047857] text-emerald-800' : 'bg-[#f8fafc] border-slate-200 text-gray-500 hover:bg-gray-50'
                 }`}
-              >
-                <Bell size={18} />
-                {unreadCount > 0 && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white font-bold flex items-center justify-center border-2 border-white animate-pulse">
-                    {unreadCount}
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab("settings")}>
-               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-slate-200 shadow-xs">
-                 <span>{(userName || "U").charAt(0)}</span>
-                 {userAvatar && (
-                   <img
-                     src={userAvatar}
-                     alt={userName}
-                     className="absolute inset-0 w-full h-full object-cover"
-                     onError={(e) => {
-                       (e.target as HTMLElement).style.display = "none";
-                     }}
-                   />
-                 )}
-               </div>
-               <div className="flex flex-col hidden sm:flex">
-                 <span className="text-[11px] text-gray-500 font-medium">Welcome back,</span>
-                 <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-emerald-800 transition-colors">{userName}</span> <ChevronDown size={14} className="text-gray-400" /></div>
-               </div>
-            </div>
-         </div>
-       </div>
-
-        {/* Mobile View: Screenshot 1 & 2 Layout (< lg) */}
-        <div className="lg:hidden px-4 pt-3 pb-24 space-y-4">
-          
-
-
-          {/* Framer Motion Touch/Drag Carousel */}
-          <div className="w-full overflow-hidden rounded-3xl relative">
-            <motion.div
-              className="flex cursor-grab active:cursor-grabbing"
-              animate={{ x: `-${activeTopBannerIndex * 100}%` }}
-              transition={{ type: "spring", stiffness: 260, damping: 28 }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.15}
-              onDragEnd={(_, info) => {
-                const swipeThreshold = 50;
-                if (info.offset.x < -swipeThreshold && activeTopBannerIndex < 2) {
-                  setActiveTopBannerIndex((prev) => prev + 1);
-                } else if (info.offset.x > swipeThreshold && activeTopBannerIndex > 0) {
-                  setActiveTopBannerIndex((prev) => prev - 1);
-                }
-              }}
             >
-              {/* Card 1 (Default First Card): Daily, Weekly or Monthly Savings Card */}
-              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
-                {/* Top Row: Title Text & Right 3D Asset */}
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="space-y-0.5 max-w-[65%] mt-3 sm:mt-4">
-                    <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
-                      Start your{" "}
-                      <span className="text-[#047857] font-black">Daily, Weekly</span>{" "}
-                      or{" "}
-                      <span className="text-emerald-800 font-black">Monthly</span>{" "}
-                      savings with Fipmoney
-                    </h3>
-                  </div>
-
-                  {/* Right Side 3D Asset Image */}
-                  <div className="w-36 h-36 sm:w-44 sm:h-44 shrink-0 relative -mt-4 -mr-2 scale-105">
-                    <img 
-                      src="/daily_savings.png" 
-                      alt="Start Savings" 
-                      className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none" 
-                    />
-                  </div>
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white font-bold flex items-center justify-center border-2 border-white animate-pulse">
+                  {unreadCount}
                 </div>
-
-                {/* 3 Savings Frequency Pills */}
-                <div className="grid grid-cols-3 gap-1.5 relative z-10">
-                  {/* Daily */}
-                  <div 
-                    onClick={() => setTab("savings")}
-                    className="bg-[#f8fafc] hover:bg-white backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
-                  >
-                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
-                      <Calendar size={14} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[11px] font-black text-slate-900 leading-none">Daily</span>
-                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Save every day</span>
-                  </div>
-
-                  {/* Weekly */}
-                  <div 
-                    onClick={() => setTab("savings")}
-                    className="bg-[#f8fafc] hover:bg-white backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
-                  >
-                    <div className="w-6 h-6 rounded-lg bg-amber-100/80 text-amber-600 flex items-center justify-center mb-0.5">
-                      <Calendar size={14} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[11px] font-black text-slate-900 leading-none">Weekly</span>
-                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Save every week</span>
-                  </div>
-
-                  {/* Monthly */}
-                  <div 
-                    onClick={() => setTab("savings")}
-                    className="bg-[#f8fafc] hover:bg-white backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs cursor-pointer active:scale-95 transition-all"
-                  >
-                    <div className="w-6 h-6 rounded-lg bg-emerald-100/80 text-emerald-600 flex items-center justify-center mb-0.5">
-                      <Calendar size={14} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[11px] font-black text-slate-900 leading-none">Monthly</span>
-                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Grow every month</span>
-                  </div>
-                </div>
-
-                {/* Bottom Action Pill Banner */}
-                <div 
-                  onClick={() => setTab("savings")}
-                  className="bg-[#f8fafc] hover:bg-white border border-emerald-300 border border-slate-200 rounded-xl px-2.5 py-1.5 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shrink-0 shadow-2xs">
-                      <Sparkles size={11} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[10px] font-black text-slate-900">
-                      Small steps today, greater wealth tomorrow
-                    </span>
-                  </div>
-                  <ChevronRight size={14} strokeWidth={3} className="text-emerald-800 shrink-0" />
-                </div>
-              </div>
-
-              {/* Card 2 (Swiped Right): Become DGA Agent / Agent Dashboard Card */}
-              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
-                {/* Top Section: Left Info & Right 3D Asset */}
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="space-y-1.5 max-w-[64%] mt-2.5 sm:mt-3">
-                    {/* Verified Partner / Earn Commission Badge */}
-                    <div>
-                      <span className="bg-amber-100/90 text-amber-800 border border-amber-300/80 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase inline-flex items-center gap-1 shadow-2xs">
-                        <ShieldCheck size={11} strokeWidth={2.5} className="text-amber-700" />
-                        {isApprovedDga ? "Verified Partner" : "Earn Commission"}
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
-                      {isApprovedDga ? (
-                        <>Verified Digital Gold Agent <span className="text-[#047857] font-black">(DGA)</span></>
-                      ) : (
-                        <>Become a Digital Gold Agent <span className="text-[#047857] font-black">(DGA)</span></>
-                      )}
-                    </h3>
-
-                    {/* Subtitle */}
-                    <p className="text-[11px] font-medium text-slate-600 leading-tight">
-                      {isApprovedDga
-                        ? "Manage client portfolios & track instant payouts."
-                        : "Earn high commissions & exclusive rewards."}
-                    </p>
-
-                    {/* Action Button */}
-                    <div className="pt-0.5">
-                      <button
-                        onClick={() => {
-                          if (isApprovedDga) {
-                            setShowAgentOtpModal(true);
-                          } else {
-                            setTab("become-agent");
-                          }
-                        }}
-                        className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-[11px] px-3 py-1.5 rounded-full shadow-md shadow-emerald-900/20 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all outline-none"
-                      >
-                        <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
-                        <div className="w-4 h-4 rounded-full bg-white text-[#047857] flex items-center justify-center shrink-0">
-                          <ChevronRight size={12} strokeWidth={3} />
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Right Side 3D Asset Image */}
-                  <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0 relative -mt-5 -mr-2 scale-105">
-                    <img 
-                      src="/dga_asset.png" 
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = "/dga_gold_asset.png";
-                      }}
-                      alt="DGA Agent" 
-                      className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none" 
-                    />
-                  </div>
-                </div>
-
-                {/* Bottom 3 Feature Badges Row */}
-                <div className="grid grid-cols-3 gap-1.5 relative z-10">
-                  {/* Pill 1: Manage Clients */}
-                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
-                      <CreditCard size={14} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[11px] font-black text-slate-900 leading-none">Manage Clients</span>
-                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Client portfolios</span>
-                  </div>
-
-                  {/* Pill 2: Track Earnings */}
-                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
-                      <TrendingUp size={14} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[11px] font-black text-slate-900 leading-none">Track Earnings</span>
-                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Real-time payouts</span>
-                  </div>
-
-                  {/* Pill 3: Instant Payouts */}
-                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex flex-col items-center text-center shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-0.5">
-                      <Landmark size={14} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-[11px] font-black text-slate-900 leading-none">Instant Payouts</span>
-                    <span className="text-[8.5px] font-bold text-slate-500 leading-tight mt-0.5">Direct to Bank</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3 (Swiped Right): Refer & Earn Card */}
-              <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
-                {/* Top Section: Left Info & Right 3D Asset */}
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="space-y-1.5 max-w-[62%] mt-2 sm:mt-2.5">
-                    {/* User Plus Top Icon Badge */}
-                    <div className="w-8 h-8 rounded-xl bg-[#f8fafc] border border-slate-200 text-[#047857] flex items-center justify-center shadow-2xs">
-                      <UserPlus size={16} strokeWidth={2.5} />
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-none">
-                      Refer <span className="text-[#047857] font-black">& Earn</span>
-                    </h3>
-
-                    {/* Subtitle */}
-                    <p className="text-[11px] font-medium text-slate-600 leading-tight">
-                      Invite your friends to Fipmoney and earn exciting rewards.
-                    </p>
-                  </div>
-
-                  {/* Right Side 3D Asset Image (refer_card.png) */}
-                  <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0 relative -mt-5 -mr-2 scale-105">
-                    <img 
-                      src="/refer_card.png" 
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = "/refer_asset.png";
-                      }}
-                      alt="Refer and Earn" 
-                      className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none" 
-                    />
-                  </div>
-                </div>
-
-                {/* Middle 2 Feature Pills Row */}
-                <div className="grid grid-cols-2 gap-2 py-0.5 relative z-10 max-w-[65%]">
-                  {/* Badge 1: Exciting Rewards */}
-                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center shrink-0">
-                      <Gift size={13} strokeWidth={2.5} />
-                    </div>
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[10px] font-black text-slate-900">Exciting</span>
-                      <span className="text-[8.5px] font-bold text-slate-500 mt-0.5">Rewards</span>
-                    </div>
-                  </div>
-
-                  {/* Badge 2: Earn on every */}
-                  <div className="bg-[#f8fafc] backdrop-blur-xs border border-emerald-300 rounded-xl p-1.5 flex items-center gap-2 shadow-2xs">
-                    <div className="w-6 h-6 rounded-lg bg-[#f8fafc] text-[#047857] flex items-center justify-center shrink-0">
-                      <Coins size={13} strokeWidth={2.5} />
-                    </div>
-                    <div className="flex flex-col text-left leading-none">
-                      <span className="text-[10px] font-black text-slate-900">Earn on every</span>
-                      <span className="text-[8.5px] font-bold text-slate-500 mt-0.5">successful referral</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Action Pill Banner */}
-                <div 
-                  onClick={() => setTab("refer-and-earn")}
-                  className="bg-[#f8fafc] hover:bg-white border border-emerald-300 border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shrink-0 shadow-2xs">
-                      <ChevronRight size={13} strokeWidth={3} />
-                    </div>
-                    <span className="text-xs font-black text-slate-900">
-                      Refer Now
-                    </span>
-                  </div>
-                  <ChevronRight size={15} strokeWidth={3} className="text-emerald-800 shrink-0" />
-                </div>
-              </div>
-            </motion.div>
+              )}
+            </button>
           </div>
-
-          {/* Carousel Dots Indicator */}
-          <div className="flex items-center justify-center gap-1.5 pt-2 pb-1">
-            {[0, 1, 2].map((idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveTopBannerIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer border-none outline-none ${
-                  activeTopBannerIndex === idx
-                    ? "w-6 bg-[#047857] shadow-2xs"
-                    : "w-2 bg-slate-200 hover:bg-[#064e3b]"
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
-
-
-
-          {/* Quick Actions Card (Light Theme, Placed ABOVE Live Price) */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Quick Actions</h3>
-            </div>
-
-            {/* Top Grid: 5 Quick Actions Items */}
-            <div className="grid grid-cols-5 gap-2 text-center">
-              {/* 1. Digital Gold */}
-              <button
-                onClick={() => setTab("sip")}
-                className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-center justify-center p-1.5 shadow-2xs group-active:scale-95 transition-all mb-1">
-                  <img src="/gold-bars.png" alt="Digital Gold" className="w-8 h-8 object-contain drop-shadow-2xs" />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800 leading-tight">Digital Gold</span>
-              </button>
-
-              {/* 2. Digital Silver */}
-              <button
-                onClick={() => setTab("sip")}
-                className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center p-1.5 shadow-2xs group-active:scale-95 transition-all mb-1">
-                  <img src="/silver.png" alt="Digital Silver" className="w-8 h-8 object-contain drop-shadow-2xs" />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800 leading-tight">Digital Silver</span>
-              </button>
-
-              {/* 3. Start SIP */}
-              <button
-                onClick={() => setTab("sip")}
-                className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-600 shadow-2xs group-active:scale-95 transition-all mb-1">
-                  <PiggyBank size={22} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800 leading-tight">Start SIP</span>
-              </button>
-
-              {/* 4. Mobile Recharge */}
-              <button
-                onClick={() => handleBillClick("Mobile Recharge")}
-                className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs group-active:scale-95 transition-all mb-1">
-                  <Smartphone size={22} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800 leading-tight">Recharge</span>
-              </button>
-
-              {/* 5. Bills */}
-              <button
-                onClick={() => setTab("bills")}
-                className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-[#047857] shadow-2xs group-active:scale-95 transition-all mb-1">
-                  <FileText size={22} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800 leading-tight">Bills</span>
-              </button>
-            </div>
-
-            {/* Bottom Row: Gold SIP Banner (~75%) + More Button (~25%) */}
-            <div className="flex items-stretch gap-2.5 pt-1">
-              {/* Left Banner */}
-              <button
-                onClick={() => setTab("sip")}
-                className="flex-1 bg-slate-100/90 border border-slate-200/90 rounded-2xl px-4 py-3.5 flex items-center justify-between shadow-2xs cursor-pointer hover:bg-slate-200/60 active:scale-[0.99] transition-all text-left outline-none"
-              >
-                <span className="text-xs font-black text-slate-800 tracking-tight">
-                  Gold SIP starts at just ₹10
-                </span>
-              </button>
-
-              {/* Right More Button -> Navigates to /bills */}
-              <button
-                onClick={() => setTab("bills")}
-                className="w-24 bg-slate-100/90 hover:bg-slate-200/60 border border-slate-200/90 rounded-2xl px-3 py-3.5 flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all text-emerald-800 outline-none shrink-0"
-              >
-                <span className="text-xs font-black">More</span>
-                <ChevronRight size={15} strokeWidth={3} />
-              </button>
-            </div>
-          </div>
-
-          {/* Live Price Card with Gold & Silver Tab Switcher at Right Corner */}
-          <div className={`rounded-3xl p-5 border shadow-xs space-y-4 transition-all duration-300 ${
-            activeMetalTab === 'gold'
-              ? 'bg-[#fffdf5] border-amber-200/80'
-              : 'bg-[#f8fafc] border-slate-300'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-2xl ${activeMetalTab === 'gold' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-slate-700 shadow-slate-700/20'} text-white flex items-center justify-center shadow-md transition-all`}>
-                  <TrendingUp size={22} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Live Price</h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    {activeMetalTab === 'gold' ? '24K Gold - 7 Day Trend' : '999 Pure Silver - 7 Day Trend'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Gold & Silver Tab Switcher */}
-              <div className={`p-1 rounded-2xl flex items-center border shrink-0 transition-all ${
-                activeMetalTab === 'gold'
-                  ? 'bg-amber-100/70 border-amber-200/80'
-                  : 'bg-slate-200/80 border-slate-300/80'
-              }`}>
-                <button
-                  onClick={() => setActiveMetalTab('gold')}
-                  className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
-                    activeMetalTab === 'gold'
-                      ? 'bg-amber-500 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
-                  }`}
-                >
-                  Gold
-                </button>
-                <button
-                  onClick={() => setActiveMetalTab('silver')}
-                  className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${
-                    activeMetalTab === 'silver'
-                      ? 'bg-slate-800 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 bg-transparent'
-                  }`}
-                >
-                  Silver
-                </button>
-              </div>
-            </div>
-
-            {/* Highlighted Price Display (Same Row, No Container Pill) */}
-            <div className="pt-1 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Price</span>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className={`text-2xl font-black tracking-tight ${activeMetalTab === 'gold' ? 'text-amber-600' : 'text-slate-800'}`}>
-                  {activeMetalTab === 'gold'
-                    ? `₹${(goldPrice || 10250).toLocaleString('en-IN')}`
-                    : `₹${(silverPrice || 115).toLocaleString('en-IN')}`}
-                </span>
-                <span className="text-xs font-bold text-slate-500">/g</span>
-              </div>
-            </div>
-
-            <div className={`grid grid-cols-3 gap-2.5 pt-2 border-t transition-all ${
-              activeMetalTab === 'gold' ? 'border-amber-100' : 'border-slate-200'
-            }`}>
-              <div className="text-center">
-                <span className="text-[10px] text-slate-400 font-semibold block">Today's Change</span>
-                <span className="text-xs font-extrabold text-emerald-600">
-                  {activeMetalTab === 'gold' ? '+₹125' : '+₹2.50'}
-                </span>
-              </div>
-              <div className="text-center">
-                <span className="text-[10px] text-slate-400 font-semibold block">7D High</span>
-                <span className="text-xs font-extrabold text-slate-900">
-                  {activeMetalTab === 'gold' ? '₹10,235' : '₹118'}
-                </span>
-              </div>
-              <div className="text-center">
-                <span className="text-[10px] text-slate-400 font-semibold block">7D Low</span>
-                <span className="text-xs font-extrabold text-slate-900">
-                  {activeMetalTab === 'gold' ? '₹10,180' : '₹112'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* First SIP Banner Card (Placed Below Live Price on Mobile Screens) */}
-          <div className="bg-gradient-to-br from-[#f0fdf4] via-[#ecfdf5] to-[#d1fae5]/60 border border-emerald-200/90 rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
-            {/* Top Header Row */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-[#047857] tracking-tight">
-                A message for you
-              </span>
-              <div className="w-8 h-8 rounded-full bg-[#047857] text-white flex items-center justify-center shadow-xs">
-                <Mail size={16} />
-              </div>
-            </div>
-
-            {/* Middle Grid Row: Text Left, Piggy Bank Asset Right */}
-            <div className="grid grid-cols-12 gap-2 items-center">
-              <div className="col-span-7 space-y-1.5 z-10 pr-1">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">
-                  First SIP. Big Step. <br />
-                  <span className="text-[#047857]">Bright Future.</span>
-                </h3>
-                <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  Begin your Gold SIP journey with just ₹10. It's quick, easy and rewarding.
-                </p>
-              </div>
-              <div className="col-span-5 flex items-center justify-end z-0">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setTab("settings")}>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center font-black text-sm shrink-0 uppercase overflow-hidden relative border border-slate-200 shadow-xs">
+              <span>{(userName || "U").charAt(0)}</span>
+              {userAvatar && (
                 <img
-                  src="/suggestion_first_sip.png"
-                  alt="First SIP Piggy Bank"
-                  className="w-28 sm:w-32 max-h-[125px] object-contain drop-shadow-md pointer-events-none transform hover:scale-105 transition-transform"
+                  src={userAvatar}
+                  alt={userName}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
                 />
-              </div>
-            </div>
-
-            {/* Bottom Primary Button */}
-            <div className="pt-1">
-              <button
-                onClick={() => setTab("sip")}
-                className="w-full py-3 px-5 rounded-2xl font-black text-xs sm:text-sm bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white shadow-md shadow-emerald-900/20 flex items-center justify-center gap-1 transition-all cursor-pointer border-none outline-none active:scale-[0.98]"
-              >
-                <span>Start with ₹10</span>
-                <ChevronRight size={16} strokeWidth={3} />
-              </button>
-            </div>
-          </div>
-
-          {/* Gold Saving Plans Section (Mobile Light Theme) */}
-          <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-slate-200 shadow-md shadow-black/5 space-y-3.5">
-            {/* Header Title */}
-            <div className="flex items-center justify-between px-0.5">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">
-                Gold Saving plans
-              </h3>
-              <button
-                onClick={() => setTab("savings")}
-                className="text-[11px] font-black text-amber-700 hover:text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full flex items-center gap-0.5 cursor-pointer outline-none"
-              >
-                <span>View All</span>
-                <ChevronRight size={13} strokeWidth={3} />
-              </button>
-            </div>
-
-            {/* 3 Saving Plan Cards */}
-            <div className="space-y-3">
-              {/* Card 1: Save Daily */}
-              <div 
-                onClick={() => setTab("savings")}
-                className="bg-[#f0fdf4] hover:bg-[#dcfce7] border border-emerald-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-[#f8fafc] border border-slate-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
-                    <img 
-                      src="/daily_saving.png" 
-                      alt="Save Daily" 
-                      className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" 
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-black tracking-tight text-slate-900 leading-tight">Save Daily</h4>
-                    <p className="text-xs font-bold text-emerald-800 mt-0.5">Starts from just ₹10/day</p>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-[#f8fafc] text-slate-900 flex items-center justify-center shrink-0 group-hover:bg-white transition-all">
-                  <ChevronRight size={18} strokeWidth={3} />
-                </div>
-              </div>
-
-              {/* Card 2: Save Weekly */}
-              <div 
-                onClick={() => setTab("savings")}
-                className="bg-[#f0fdf4] hover:bg-[#dcfce7] border border-emerald-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
-                    <img 
-                      src="/weekly_saving.png" 
-                      alt="Save Weekly" 
-                      className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" 
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-black tracking-tight text-emerald-950 leading-tight">Save Weekly</h4>
-                    <p className="text-xs font-bold text-emerald-700 mt-0.5">Starts from just ₹50/week</p>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-emerald-200/80 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-300/80 transition-all">
-                  <ChevronRight size={18} strokeWidth={3} />
-                </div>
-              </div>
-
-              {/* Card 3: Save Monthly */}
-              <div 
-                onClick={() => setTab("savings")}
-                className="bg-[#fffbeb] hover:bg-[#fef3c7] border border-amber-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-100/80 border border-amber-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
-                    <img 
-                      src="/monthly_saving.png" 
-                      alt="Save Monthly" 
-                      className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" 
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-black tracking-tight text-amber-950 leading-tight">Save Monthly</h4>
-                    <p className="text-xs font-bold text-amber-700 mt-0.5">Starts from just ₹100/month</p>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-amber-200/80 text-amber-800 flex items-center justify-center shrink-0 group-hover:bg-amber-300/80 transition-all">
-                  <ChevronRight size={18} strokeWidth={3} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Become DGA Agent / Agent Dashboard Card (Below Live Price) */}
-          <div className="bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#047857] text-white rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4 border border-emerald-400/20">
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center border border-amber-400/30">
-                  <Coins size={22} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
-                    {isApprovedDga ? "Verified Partner" : "Earn Commission"}
-                  </span>
-                  <h3 className="text-base font-black text-white mt-1 leading-tight">
-                    {isApprovedDga ? "Verified Digital Gold Agent (DGA)" : "Become a Digital Gold Agent Today!"}
-                  </h3>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-xs text-white/80 font-medium relative z-10">
-              {isApprovedDga
-                ? "Access partner console, manage client portfolios & track instant commission payouts."
-                : "Earn high commissions, exclusive rewards & unlock a world of benefits."}
-            </p>
-
-            <div className="flex items-center gap-2.5 relative z-10 pt-2">
-              <button
-                onClick={() => {
-                  if (isApprovedDga) {
-                    setShowAgentOtpModal(true);
-                  } else {
-                    setTab("become-agent");
-                  }
-                }}
-                className="px-4 py-2.5 rounded-xl font-extrabold text-xs text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 transition-all shadow-md flex items-center gap-1.5 cursor-pointer border-none outline-none"
-              >
-                <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
-                <ChevronRight size={15} strokeWidth={3} />
-              </button>
-              {!isApprovedDga && (
-                <button
-                  onClick={() => setTab("become-agent")}
-                  className="px-3.5 py-2.5 rounded-xl font-bold text-xs text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all cursor-pointer outline-none"
-                >
-                  Know More
-                </button>
               )}
             </div>
+            <div className="flex flex-col hidden sm:flex">
+              <span className="text-[11px] text-gray-500 font-medium">Welcome back,</span>
+              <div className="flex items-center gap-1"><span className="text-sm font-bold text-gray-900 group-hover:text-emerald-800 transition-colors">{userName}</span> <ChevronDown size={14} className="text-gray-400" /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile View: Screenshot 1 & 2 Layout (< lg) */}
+      <div className="lg:hidden px-4 pt-3 pb-24 space-y-4">
+
+
+
+        {/* Framer Motion Touch/Drag Carousel */}
+        <div className="w-full overflow-hidden rounded-3xl relative">
+          <motion.div
+            className="flex cursor-grab active:cursor-grabbing"
+            animate={{ x: `-${activeTopBannerIndex * 100}%` }}
+            transition={{ type: "spring", stiffness: 260, damping: 28 }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.15}
+            onDragEnd={(_, info) => {
+              const swipeThreshold = 50;
+              if (info.offset.x < -swipeThreshold && activeTopBannerIndex < 2) {
+                setActiveTopBannerIndex((prev) => prev + 1);
+              } else if (info.offset.x > swipeThreshold && activeTopBannerIndex > 0) {
+                setActiveTopBannerIndex((prev) => prev - 1);
+              }
+            }}
+          >
+            {/* Card 1 (Default First Card): Daily, Weekly or Monthly Savings Card */}
+            <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+              {/* Top Row: Title Text & Right 3D Asset */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="space-y-0.5 max-w-[65%] mt-3 sm:mt-4">
+                  <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
+                    Start your{" "}
+                    <span className="text-[#047857] font-black">Daily, Weekly</span>{" "}
+                    or{" "}
+                    <span className="text-emerald-800 font-black">Monthly</span>{" "}
+                    savings with Fipmoney
+                  </h3>
+                </div>
+
+                {/* Right Side 3D Asset Image */}
+                <div className="w-36 h-36 sm:w-44 sm:h-44 shrink-0 relative -mt-4 -mr-2 scale-105">
+                  <img
+                    src="/daily_savings.png"
+                    alt="Start Savings"
+                    className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              {/* Bottom Action Pill Banner */}
+              <div
+                onClick={() => setTab("savings")}
+                className="bg-[#f8fafc] hover:bg-white border border-emerald-300 border border-slate-200 rounded-xl px-2.5 py-1.5 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Sparkles size={11} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[10px] font-black text-slate-900">
+                    Small steps today, greater wealth tomorrow
+                  </span>
+                </div>
+                <ChevronRight size={14} strokeWidth={3} className="text-emerald-800 shrink-0" />
+              </div>
+            </div>
+
+            {/* Card 2 (Swiped Right): Become DGA Agent / Agent Dashboard Card */}
+            <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+              {/* Top Section: Left Info & Right 3D Asset */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="space-y-1.5 max-w-[64%] mt-2.5 sm:mt-3">
+                  {/* Verified Partner / Earn Commission Badge */}
+                  <div>
+                    <span className="bg-amber-100/90 text-amber-800 border border-amber-300/80 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase inline-flex items-center gap-1 shadow-2xs">
+                      <ShieldCheck size={11} strokeWidth={2.5} className="text-amber-700" />
+                      {isApprovedDga ? "Verified Partner" : "Earn Commission"}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight leading-snug">
+                    {isApprovedDga ? (
+                      <>Verified Digital Gold Agent <span className="text-[#047857] font-black">(DGA)</span></>
+                    ) : (
+                      <>Become a Digital Gold Agent <span className="text-[#047857] font-black">(DGA)</span></>
+                    )}
+                  </h3>
+
+                  {/* Subtitle */}
+                  <p className="text-[11px] font-medium text-slate-600 leading-tight">
+                    {isApprovedDga
+                      ? "Manage client portfolios & track instant payouts."
+                      : "Earn high commissions & exclusive rewards."}
+                  </p>
+
+                  {/* Action Button */}
+                  <div className="pt-0.5">
+                    <button
+                      onClick={() => {
+                        if (isApprovedDga) {
+                          setShowAgentOtpModal(true);
+                        } else {
+                          setTab("become-agent");
+                        }
+                      }}
+                      className="bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-[11px] px-3 py-1.5 rounded-full shadow-md shadow-emerald-900/20 inline-flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all outline-none"
+                    >
+                      <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
+                      <div className="w-4 h-4 rounded-full bg-white text-[#047857] flex items-center justify-center shrink-0">
+                        <ChevronRight size={12} strokeWidth={3} />
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Side 3D Asset Image */}
+                <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0 relative -mt-5 -mr-2 scale-105">
+                  <img
+                    src="/dga_asset.png"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/dga_gold_asset.png";
+                    }}
+                    alt="DGA Agent"
+                    className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3 (Swiped Right): Refer & Earn Card */}
+            <div className="w-full shrink-0 min-w-full bg-gradient-to-br from-[#f8fafc] via-white to-[#f8fafc] border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-2.5 group">
+              {/* Top Section: Left Info & Right 3D Asset */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="space-y-1.5 max-w-[62%] mt-2 sm:mt-2.5">
+                  {/* User Plus Top Icon Badge */}
+                  <div className="w-8 h-8 rounded-xl bg-[#f8fafc] border border-slate-200 text-[#047857] flex items-center justify-center shadow-2xs">
+                    <UserPlus size={16} strokeWidth={2.5} />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-none">
+                    Refer <span className="text-[#047857] font-black">& Earn</span>
+                  </h3>
+
+                  {/* Subtitle */}
+                  <p className="text-[11px] font-medium text-slate-600 leading-tight">
+                    Invite your friends to Fipmoney and earn exciting rewards.
+                  </p>
+                </div>
+
+                {/* Right Side 3D Asset Image (refer_card.png) */}
+                <div className="w-40 h-40 sm:w-48 sm:h-48 shrink-0 relative -mt-5 -mr-2 scale-105">
+                  <img
+                    src="/refer_card.png"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/refer_asset.png";
+                    }}
+                    alt="Refer and Earn"
+                    className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              {/* Bottom Action Pill Banner */}
+              <div
+                onClick={() => setTab("refer-and-earn")}
+                className="bg-[#f8fafc] hover:bg-white border border-emerald-300 border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between transition-all relative z-10 cursor-pointer active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <ChevronRight size={13} strokeWidth={3} />
+                  </div>
+                  <span className="text-xs font-black text-slate-900">
+                    Refer Now
+                  </span>
+                </div>
+                <ChevronRight size={15} strokeWidth={3} className="text-emerald-800 shrink-0" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Carousel Dots Indicator */}
+        <div className="flex items-center justify-center gap-1.5 pt-2 pb-1">
+          {[0, 1, 2].map((idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveTopBannerIndex(idx)}
+              className={`h-2 rounded-full transition-all duration-300 cursor-pointer border-none outline-none ${activeTopBannerIndex === idx
+                  ? "w-6 bg-[#047857] shadow-2xs"
+                  : "w-2 bg-slate-200 hover:bg-[#064e3b]"
+                }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+
+
+        {/* Wealth Build Dock */}
+        <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-slate-200 shadow-xs space-y-3.5">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">Wealth Build</h3>
+            </div>
+            <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[9.5px] font-black px-2 py-0.5 rounded-full">
+              0% Locker Fee
+            </span>
           </div>
 
-          {/* Refer & Earn Card (Emerald & Gold Finishing) */}
-          <div className="bg-gradient-to-br from-[#ecfdf5] via-[#f0fdf4] to-[#fefce8] border border-emerald-200/70 rounded-3xl p-5 shadow-xs space-y-4">
-            {/* Header Row */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#064e3b] via-[#047857] to-[#059669] text-[#FBC740] flex items-center justify-center shadow-md shadow-emerald-900/20 shrink-0">
-                  <UserPlus size={22} strokeWidth={2.5} />
+            {/* 4 Clean Squircle Tiles Grid */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {/* Tile 1: Buy Gold */}
+              <button
+                onClick={() => onNavigate("buy-gold")}
+                className="bg-[#fffdf8] hover:bg-[#fff9ed] border border-amber-200/90 rounded-2xl p-3 flex items-center gap-3 text-left shadow-2xs active:scale-95 transition-all cursor-pointer outline-none group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-amber-100/80 border border-amber-300/70 p-1 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <img src="/gold-bars.png" alt="Gold" className="w-full h-full object-contain" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Refer & Earn</h3>
-                  <p className="text-xs text-emerald-800 font-medium">Invite friends and earn unlimited rewards</p>
+                <div className="min-w-0">
+                  <span className="text-xs font-black text-slate-900 block leading-tight">Buy Gold</span>
+                  <p className="text-[10px] font-medium text-slate-500 mt-0.5">Start from ₹10</p>
                 </div>
-              </div>
+              </button>
 
-              {/* Earn up to ₹500 Badge */}
-              <div className="bg-[#f8fafc] border border-amber-300/60 rounded-2xl px-3 py-1.5 text-right shadow-2xs shrink-0">
-                <span className="text-[10px] font-bold text-amber-700 block">Earn up to</span>
-                <span className="text-sm font-black text-[#064e3b]">₹500</span>
-              </div>
+              {/* Tile 2: Buy Silver */}
+              <button
+                onClick={() => onNavigate("buy-silver")}
+                className="bg-[#f8fafc] hover:bg-slate-100 border border-slate-200 rounded-2xl p-3 flex items-center gap-3 text-left shadow-2xs active:scale-95 transition-all cursor-pointer outline-none group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-300/70 p-1 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <img src="/silver.png" alt="Silver" className="w-full h-full object-contain" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs font-black text-slate-900 block leading-tight">Buy Silver</span>
+                  <p className="text-[10px] font-medium text-slate-500 mt-0.5">Start from ₹10</p>
+                </div>
+              </button>
+
+              {/* Tile 3: Gold SIP */}
+              <button
+                onClick={() => setTab("savings")}
+                className="bg-[#ecfdf5] hover:bg-[#d1fae5]/70 border border-emerald-200 rounded-2xl p-3 flex items-center gap-3 text-left shadow-2xs active:scale-95 transition-all cursor-pointer outline-none group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-300/70 text-[#047857] flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <PiggyBank size={20} strokeWidth={2.4} />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs font-black text-slate-900 block leading-tight">Gold SIP</span>
+                  <p className="text-[10px] font-medium text-slate-500 mt-0.5">From ₹10/day</p>
+                </div>
+              </button>
+
+              {/* Tile 4: Silver SIP */}
+              <button
+                onClick={() => setTab("silver-savings")}
+                className="bg-[#f0f9ff] hover:bg-[#e0f2fe]/70 border border-sky-200 rounded-2xl p-3 flex items-center gap-3 text-left shadow-2xs active:scale-95 transition-all cursor-pointer outline-none group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-sky-100 border border-sky-300/70 text-sky-700 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <TrendingUp size={20} strokeWidth={2.4} />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs font-black text-slate-900 block leading-tight">Silver SIP</span>
+                  <p className="text-[10px] font-medium text-slate-500 mt-0.5">From ₹10/day</p>
+                </div>
+              </button>
             </div>
+          </div>
 
-            {/* Middle Reward Highlight Card */}
-            <div 
-              onClick={() => setTab("refer-and-earn")}
-              className="bg-[#f8fafc] border border-emerald-200/70 rounded-2xl p-3 flex items-center justify-between shadow-2xs cursor-pointer hover:border-emerald-300 transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-emerald-50 text-[#047857] flex items-center justify-center shrink-0">
-                  <Coins size={20} strokeWidth={2.2} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black text-slate-900">You earn ₹500 per referral</h4>
-                  <p className="text-[11px] font-bold text-emerald-700">Friend gets ₹100 bonus</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-7 h-7 rounded-full bg-emerald-100/80 text-emerald-600 flex items-center justify-center">
-                  <Handshake size={16} strokeWidth={2.5} />
-                </div>
-                <ChevronRight size={16} className="text-slate-400" strokeWidth={2.5} />
-              </div>
+        {/* Separate Recharge & Bills Card (Matching Reference Screenshot Pattern - Light Theme) */}
+        <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-slate-200 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">Recharge & Bills</h3>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black border border-slate-200">
+              <ShieldCheck size={12} className="text-emerald-600" />
+              <span>BBPS</span>
             </div>
+          </div>
 
-            {/* 3-Step Process Row */}
-            <div className="grid grid-cols-3 gap-2 text-center pt-1">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs">
-                  <Share2 size={18} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800">Share Link</span>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/60 text-amber-600 flex items-center justify-center mb-1.5 shadow-2xs">
-                  <Users size={18} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800">Friend Joins</span>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/60 text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs">
-                  <Gift size={18} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-bold text-slate-800">Both Earn</span>
-              </div>
-            </div>
-
-            {/* Bottom Full-Width CTA Button */}
+          {/* 4 Service Items with Light Squircle Tiles matching user screenshot */}
+          <div className="grid grid-cols-4 gap-2 text-center">
+            {/* 1. Mobile Recharge */}
             <button
-              onClick={() => setTab("refer-and-earn")}
-              className="w-full bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white font-black text-xs py-3.5 px-4 rounded-2xl shadow-md shadow-emerald-950/20 border border-amber-400/40 flex items-center justify-center gap-2 cursor-pointer outline-none active:scale-[0.98] transition-all"
+              onClick={() => handleBillClick("Mobile Recharge")}
+              className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
             >
-              <Share2 size={16} strokeWidth={2.5} className="text-amber-300" />
-              <span>Start Referring Now</span>
-              <ChevronRight size={16} strokeWidth={3} className="text-amber-300" />
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/80 flex items-center justify-center text-[#047857] shadow-2xs group-active:scale-95 transition-all mb-1.5">
+                <Smartphone size={22} strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-800 leading-tight">Mobile<br />Recharge</span>
+            </button>
+
+            {/* 2. Tuition Fees */}
+            <button
+              onClick={() => handleBillClick("Education Fees")}
+              className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
+            >
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-sky-50 hover:bg-sky-100/80 border border-sky-200/80 flex items-center justify-center text-sky-600 shadow-2xs group-active:scale-95 transition-all mb-1.5">
+                <GraduationCap size={22} strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-800 leading-tight">Tuition<br />Fees</span>
+            </button>
+
+            {/* 3. Electricity Bill */}
+            <button
+              onClick={() => handleBillClick("Electricity")}
+              className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
+            >
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-amber-50 hover:bg-amber-100/80 border border-amber-200/80 flex items-center justify-center text-amber-600 shadow-2xs group-active:scale-95 transition-all mb-1.5">
+                <Lightbulb size={22} strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-800 leading-tight">Electricity<br />Bill</span>
+            </button>
+
+            {/* 4. Loan Repayment */}
+            <button
+              onClick={() => handleBillClick("Loan Repayment")}
+              className="flex flex-col items-center group cursor-pointer border-none bg-transparent outline-none"
+            >
+              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 flex items-center justify-center text-indigo-600 shadow-2xs group-active:scale-95 transition-all mb-1.5">
+                <Landmark size={22} strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-800 leading-tight">Loan<br />Repayment</span>
             </button>
           </div>
 
-          {/* Trust & Security Row (100% Secure, Easy to Use, 24/7 Support) */}
-          <div className="pt-4 pb-6 px-1">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {/* Item 1: 100% Secure */}
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
-                  <Shield size={20} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-black text-slate-900 leading-tight">100% Secure</span>
-                <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">Bank-level Security</span>
+          {/* Bottom Row: Credit Card to Bank Transfer Banner (~75%) + More Button (~25%) */}
+          <div className="flex items-stretch gap-2 pt-1">
+            {/* Left Promotional Banner: Credit Card to Bank Transfer */}
+            <button
+              onClick={() => handleBillClick("Credit Card")}
+              className="flex-1 bg-slate-100/90 hover:bg-slate-200/80 border border-slate-200/90 rounded-2xl px-3.5 py-2.5 flex items-center justify-between shadow-2xs cursor-pointer active:scale-[0.99] transition-all text-left outline-none group"
+            >
+              <span className="text-[11.5px] font-black text-slate-800 tracking-tight">
+                Credit Card to Bank Transfer
+              </span>
+              <div className="w-7 h-5 rounded bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                <CreditCard size={13} strokeWidth={2.2} />
               </div>
+            </button>
 
-              {/* Item 2: Easy to Use */}
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
-                  <CheckCircle2 size={20} strokeWidth={2.2} />
-                </div>
-                <span className="text-[11px] font-black text-slate-900 leading-tight">Easy to Use</span>
-                <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">Simple & Intuitive</span>
+            {/* Right "More →" Button -> Navigates to /bills (Matching Screenshot Compact Button - Light Theme) */}
+            <button
+              onClick={() => setTab("bills")}
+              className="w-[74px] bg-[#047857] hover:bg-[#064e3b] text-white border border-emerald-600/40 rounded-2xl px-2 py-2 flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all text-[11px] font-extrabold shadow-2xs outline-none shrink-0"
+            >
+              <span>More</span>
+              <ChevronRight size={13} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+
+        {/* Live Price Card with Gold & Silver Auto-Carousel & Tab Switcher */}
+        <div 
+          onClick={() => {
+            onNavigate(activeMetalTab === 'gold' ? 'buy-gold' : 'buy-silver');
+          }}
+          className={`rounded-3xl p-5 border shadow-xs space-y-4 transition-all duration-300 cursor-pointer hover:shadow-md active:scale-[0.99] select-none ${activeMetalTab === 'gold'
+              ? 'bg-[#fffdf5] border-amber-200/80 hover:border-amber-300'
+              : 'bg-[#f8fafc] border-slate-300 hover:border-slate-400'
+            }`}
+          role="button"
+          tabIndex={0}
+          title={activeMetalTab === 'gold' ? 'Click to Buy 24K Digital Gold' : 'Click to Buy 999 Pure Silver'}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl ${activeMetalTab === 'gold' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-slate-700 shadow-slate-700/20'} text-white flex items-center justify-center shadow-md transition-all`}>
+                <TrendingUp size={22} strokeWidth={2.5} />
               </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 tracking-tight">Live Price</h3>
+              </div>
+            </div>
 
-              {/* Item 3: 24/7 Support */}
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
-                  <Clock size={20} strokeWidth={2.2} />
+            {/* Gold & Silver Tab Switcher */}
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className={`p-1 rounded-2xl flex items-center border shrink-0 transition-all ${activeMetalTab === 'gold'
+                ? 'bg-amber-100/70 border-amber-200/80'
+                : 'bg-slate-200/80 border-slate-300/80'
+              }`}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMetalManuallySelected(true);
+                  setActiveMetalTab('gold');
+                }}
+                className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${activeMetalTab === 'gold'
+                    ? 'bg-amber-500 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                  }`}
+              >
+                Gold
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMetalManuallySelected(true);
+                  setActiveMetalTab('silver');
+                }}
+                className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer border-none outline-none ${activeMetalTab === 'silver'
+                    ? 'bg-slate-800 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 bg-transparent'
+                  }`}
+              >
+                Silver
+              </button>
+            </div>
+          </div>
+
+          {/* Highlighted Price Display (Same Row, No Container Pill) */}
+          <div className="pt-1 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Current Price</span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className={`text-2xl font-black tracking-tight transition-colors duration-300 ${activeMetalTab === 'gold' ? 'text-amber-600' : 'text-slate-800'}`}>
+                {activeMetalTab === 'gold'
+                  ? `₹${(goldPrice || 10250).toLocaleString('en-IN')}`
+                  : `₹${(silverPrice || 115).toLocaleString('en-IN')}`}
+              </span>
+              <span className="text-xs font-bold text-slate-500">/g</span>
+            </div>
+          </div>
+
+          <div className={`grid grid-cols-3 gap-2.5 pt-2 border-t transition-all ${activeMetalTab === 'gold' ? 'border-amber-100' : 'border-slate-200'
+            }`}>
+            <div className="text-center">
+              <span className="text-[10px] text-slate-400 font-semibold block">Today's Change</span>
+              <span className="text-xs font-extrabold text-emerald-600">
+                {activeMetalTab === 'gold' ? '+₹125' : '+₹2.50'}
+              </span>
+            </div>
+            <div className="text-center">
+              <span className="text-[10px] text-slate-400 font-semibold block">7D High</span>
+              <span className="text-xs font-extrabold text-slate-900">
+                {activeMetalTab === 'gold' ? '₹10,235' : '₹118'}
+              </span>
+            </div>
+            <div className="text-center">
+              <span className="text-[10px] text-slate-400 font-semibold block">7D Low</span>
+              <span className="text-xs font-extrabold text-slate-900">
+                {activeMetalTab === 'gold' ? '₹10,180' : '₹112'}
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Buy CTA Footer on Card */}
+          <div className="flex items-center justify-between pt-1 border-t border-dashed border-slate-200/90 text-[11px] font-bold text-slate-500">
+            <span className="flex items-center gap-1">
+              Tap to Buy {activeMetalTab === 'gold' ? '24K Digital Gold' : '999 Pure Silver'}
+            </span>
+            <span className={`flex items-center gap-0.5 text-xs font-black ${activeMetalTab === 'gold' ? 'text-amber-600' : 'text-slate-800'}`}>
+              Invest Now <ChevronRight size={14} strokeWidth={3} />
+            </span>
+          </div>
+        </div>
+
+        {/* First SIP Banner Card (Placed Below Live Price on Mobile Screens) */}
+        <div className="bg-gradient-to-br from-[#f0fdf4] via-[#ecfdf5] to-[#d1fae5]/60 border border-emerald-200/90 rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
+          {/* Top Header Row */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-[#047857] tracking-tight">
+              A message for you
+            </span>
+            <div className="w-8 h-8 rounded-full bg-[#047857] text-white flex items-center justify-center shadow-xs">
+              <Mail size={16} />
+            </div>
+          </div>
+
+          {/* Middle Grid Row: Text Left, Piggy Bank Asset Right */}
+          <div className="grid grid-cols-12 gap-2 items-center">
+            <div className="col-span-7 space-y-1.5 z-10 pr-1">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">
+                First SIP. Big Step. <br />
+                <span className="text-[#047857]">Bright Future.</span>
+              </h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Begin your Gold SIP journey with just ₹10. It's quick, easy and rewarding.
+              </p>
+            </div>
+            <div className="col-span-5 flex items-center justify-end z-0">
+              <img
+                src="/suggestion_first_sip.png"
+                alt="First SIP Piggy Bank"
+                className="w-28 sm:w-32 max-h-[125px] object-contain drop-shadow-md pointer-events-none transform hover:scale-105 transition-transform"
+              />
+            </div>
+          </div>
+
+          {/* Bottom Primary Button */}
+          <div className="pt-1">
+            <button
+              onClick={() => setTab("sip")}
+              className="w-full py-3 px-5 rounded-2xl font-black text-xs sm:text-sm bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white shadow-md shadow-emerald-900/20 flex items-center justify-center gap-1 transition-all cursor-pointer border-none outline-none active:scale-[0.98]"
+            >
+              <span>Start with ₹10</span>
+              <ChevronRight size={16} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Investments (1-Tap Quick-Buy Terminal) - Placed below Message for you card */}
+        <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-slate-200 shadow-xs space-y-4">
+          {/* Header with Metal Switcher */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight">Quick Investments</h3>
+            </div>
+
+            {/* Gold / Silver Switcher */}
+            <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setQuickBuyMetal("gold")}
+                className={`px-2.5 py-1 rounded-lg text-[10.5px] font-black transition-all cursor-pointer ${
+                  quickBuyMetal === "gold"
+                    ? "bg-amber-500 text-white shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                🟡 Gold
+              </button>
+              <button
+                type="button"
+                onClick={() => setQuickBuyMetal("silver")}
+                className={`px-2.5 py-1 rounded-lg text-[10.5px] font-black transition-all cursor-pointer ${
+                  quickBuyMetal === "silver"
+                    ? "bg-slate-700 text-white shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                ⚪ Silver
+              </button>
+            </div>
+          </div>
+
+          {/* Amount Input with Currency Symbol */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Investment Amount</span>
+            <div className="relative">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-black text-base select-none">
+                ₹
+              </div>
+              <input
+                type="number"
+                min={10}
+                max={200000}
+                value={quickBuyAmount || ""}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  setQuickBuyAmount(isNaN(val) ? 0 : val);
+                }}
+                placeholder="Enter amount (min ₹10)"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-8 pr-3 text-sm font-black text-slate-900 focus:outline-none focus:border-[#047857] focus:bg-white transition-all placeholder:text-slate-400 placeholder:font-medium shadow-2xs"
+              />
+            </div>
+          </div>
+
+          {/* Quick Amount Chips */}
+          <div className="grid grid-cols-4 gap-2">
+            {[10, 50, 100, 500].map((amt) => (
+              <button
+                key={amt}
+                type="button"
+                onClick={() => setQuickBuyAmount(amt)}
+                className={`py-2 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                  quickBuyAmount === amt
+                    ? quickBuyMetal === "gold"
+                      ? "bg-amber-100/80 border-amber-400 text-amber-950 shadow-2xs scale-[1.02]"
+                      : "bg-slate-200 border-slate-400 text-slate-950 shadow-2xs scale-[1.02]"
+                    : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                +₹{amt}
+              </button>
+            ))}
+          </div>
+
+          {/* Instant Action CTA Button */}
+          <button
+            onClick={() => onNavigate(quickBuyMetal === "gold" ? "buy-gold" : "buy-silver")}
+            className={`w-full py-3 rounded-2xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-sm active:scale-[0.99] transition-all cursor-pointer ${
+              quickBuyMetal === "gold"
+                ? "bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 text-white shadow-amber-500/20"
+                : "bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 hover:from-slate-800 text-white shadow-slate-700/20"
+            }`}
+          >
+            <span>Invest ₹{quickBuyAmount > 0 ? quickBuyAmount : 10} in {quickBuyMetal === "gold" ? "24K Gold" : "999 Silver"}</span>
+            <ChevronRight size={15} strokeWidth={3} />
+          </button>
+
+          {/* Sub-action link */}
+          <div className="flex items-center justify-between pt-0.5 text-[10.5px]">
+            <span className="font-semibold text-slate-500">Prefer auto-investing every day?</span>
+            <button
+              onClick={() => setTab("savings")}
+              className="font-black text-[#047857] hover:underline cursor-pointer flex items-center gap-0.5"
+            >
+              Start Daily SIP <ChevronRight size={12} strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+
+        {/* Gold Saving Plans Section (Mobile Light Theme) */}
+        <div className="bg-white rounded-3xl p-4.5 sm:p-5 border border-slate-200 shadow-md shadow-black/5 space-y-3.5">
+          {/* Header Title */}
+          <div className="flex items-center justify-between px-0.5">
+            <h3 className="text-lg font-black text-slate-900 tracking-tight">
+              Gold Saving plans
+            </h3>
+            <button
+              onClick={() => setTab("savings")}
+              className="text-[11px] font-black text-amber-700 hover:text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full flex items-center gap-0.5 cursor-pointer outline-none"
+            >
+              <span>View All</span>
+              <ChevronRight size={13} strokeWidth={3} />
+            </button>
+          </div>
+
+          {/* 3 Saving Plan Cards */}
+          <div className="space-y-3">
+            {/* Card 1: Save Daily */}
+            <div
+              onClick={() => setTab("savings")}
+              className="bg-[#f0fdf4] hover:bg-[#dcfce7] border border-emerald-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-14 h-14 rounded-2xl bg-[#f8fafc] border border-slate-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                  <img
+                    src="/daily_saving.png"
+                    alt="Save Daily"
+                    className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform"
+                  />
                 </div>
-                <span className="text-[11px] font-black text-slate-900 leading-tight">24/7 Support</span>
-                <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">We're here for you</span>
+                <div>
+                  <h4 className="text-base font-black tracking-tight text-slate-900 leading-tight">Save Daily</h4>
+                  <p className="text-xs font-bold text-emerald-800 mt-0.5">Starts from just ₹10/day</p>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-[#f8fafc] text-slate-900 flex items-center justify-center shrink-0 group-hover:bg-white transition-all">
+                <ChevronRight size={18} strokeWidth={3} />
+              </div>
+            </div>
+
+            {/* Card 2: Save Weekly */}
+            <div
+              onClick={() => setTab("savings")}
+              className="bg-[#f0fdf4] hover:bg-[#dcfce7] border border-emerald-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                  <img
+                    src="/weekly_saving.png"
+                    alt="Save Weekly"
+                    className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-base font-black tracking-tight text-emerald-950 leading-tight">Save Weekly</h4>
+                  <p className="text-xs font-bold text-emerald-700 mt-0.5">Starts from just ₹50/week</p>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-emerald-200/80 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-300/80 transition-all">
+                <ChevronRight size={18} strokeWidth={3} />
+              </div>
+            </div>
+
+            {/* Card 3: Save Monthly */}
+            <div
+              onClick={() => setTab("savings")}
+              className="bg-[#fffbeb] hover:bg-[#fef3c7] border border-amber-200/90 rounded-2xl p-4 shadow-xs hover:shadow-md flex items-center justify-between cursor-pointer active:scale-[0.99] transition-all group"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-14 h-14 rounded-2xl bg-amber-100/80 border border-amber-200/60 flex items-center justify-center shrink-0 p-1.5 shadow-2xs">
+                  <img
+                    src="/monthly_saving.png"
+                    alt="Save Monthly"
+                    className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-base font-black tracking-tight text-amber-950 leading-tight">Save Monthly</h4>
+                  <p className="text-xs font-bold text-amber-700 mt-0.5">Starts from just ₹100/month</p>
+                </div>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-amber-200/80 text-amber-800 flex items-center justify-center shrink-0 group-hover:bg-amber-300/80 transition-all">
+                <ChevronRight size={18} strokeWidth={3} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Become DGA Agent / Agent Dashboard Card (Below Live Price) */}
+        <div className="bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#047857] text-white rounded-3xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4 border border-emerald-400/20">
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center border border-amber-400/30">
+                <Coins size={22} strokeWidth={2.5} />
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+                  {isApprovedDga ? "Verified Partner" : "Earn Commission"}
+                </span>
+                <h3 className="text-base font-black text-white mt-1 leading-tight">
+                  {isApprovedDga ? "Verified Digital Gold Agent (DGA)" : "Become a Digital Gold Agent Today!"}
+                </h3>
               </div>
             </div>
           </div>
 
+          <p className="text-xs text-white/80 font-medium relative z-10">
+            {isApprovedDga
+              ? "Access partner console, manage client portfolios & track instant commission payouts."
+              : "Earn high commissions, exclusive rewards & unlock a world of benefits."}
+          </p>
+
+          <div className="flex items-center gap-2.5 relative z-10 pt-2">
+            <button
+              onClick={() => {
+                if (isApprovedDga) {
+                  setShowAgentOtpModal(true);
+                } else {
+                  setTab("become-agent");
+                }
+              }}
+              className="px-4 py-2.5 rounded-xl font-extrabold text-xs text-white bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 transition-all shadow-md flex items-center gap-1.5 cursor-pointer border-none outline-none"
+            >
+              <span>{isApprovedDga ? "Open Agent Dashboard" : "Become an Agent"}</span>
+              <ChevronRight size={15} strokeWidth={3} />
+            </button>
+            {!isApprovedDga && (
+              <button
+                onClick={() => setTab("become-agent")}
+                className="px-3.5 py-2.5 rounded-xl font-bold text-xs text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all cursor-pointer outline-none"
+              >
+                Know More
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Desktop View (Unchanged Desktop Layout >= lg) */}
-        <div className="hidden lg:block">
+        {/* Trust & Security Row (100% Secure, Easy to Use, 24/7 Support) */}
+        <div className="pt-4 pb-6 px-1">
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {/* Item 1: 100% Secure */}
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
+                <Shield size={20} strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-black text-slate-900 leading-tight">100% Secure</span>
+              <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">Bank-level Security</span>
+            </div>
+
+            {/* Item 2: Easy to Use */}
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
+                <CheckCircle2 size={20} strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-black text-slate-900 leading-tight">Easy to Use</span>
+              <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">Simple & Intuitive</span>
+            </div>
+
+            {/* Item 3: 24/7 Support */}
+            <div className="flex flex-col items-center">
+              <div className="w-10 h-10 rounded-2xl bg-[#f8fafc] text-[#047857] flex items-center justify-center mb-1.5 shadow-2xs border border-slate-200">
+                <Clock size={20} strokeWidth={2.2} />
+              </div>
+              <span className="text-[11px] font-black text-slate-900 leading-tight">24/7 Support</span>
+              <span className="text-[9px] font-bold text-slate-500 leading-tight mt-0.5">We're here for you</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Desktop View (Unchanged Desktop Layout >= lg) */}
+      <div className="hidden lg:block">
         {/* Become a Digital Gold Agent (DGA) Banner */}
         <div className="px-6 lg:px-8 pt-4 max-w-[1600px] mx-auto w-full">
           <div className="bg-gradient-to-r from-[#fffef5] via-[#fffbeb] to-[#fff7ed] rounded-[20px] p-4 sm:p-5 border border-amber-200/90 shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* Background ambient glow */}
             <div className="absolute top-0 right-1/4 w-40 h-40 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-32 h-32 bg-yellow-300/20 rounded-full blur-2xl pointer-events-none" />
-            
+
             {/* Left Content */}
             <div className="flex items-center gap-3.5 relative z-10">
               <img
@@ -1308,183 +1338,183 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </div>
         </div>
 
-       <div className="flex-1 p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 lg:gap-8 pb-28 sm:pb-32 lg:pb-10 max-w-[1600px] mx-auto w-full">
-         
-         {/* LEFT COLUMN */}
-         <div className="flex-1 space-y-8 min-w-0">
-            
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6 lg:gap-8 pb-28 sm:pb-32 lg:pb-10 max-w-[1600px] mx-auto w-full">
+
+          {/* LEFT COLUMN */}
+          <div className="flex-1 space-y-8 min-w-0">
+
             {/* Row 1: 3 Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-               {/* Vault Balance */}
-               <div className="bg-gradient-to-br from-[#ecfdf5] via-[#f0fdf4] to-white rounded-3xl p-6 border border-emerald-200 flex flex-col justify-center relative overflow-hidden shadow-sm">
-                 <h3 className="text-xs font-bold text-slate-900 mb-3 flex items-center gap-1.5">Vault Balance</h3>
-                 <div className="flex items-center gap-3 mb-1 relative z-10">
-                   <h2 className="text-[26px] font-black text-[#064e3b] tracking-tight">{showBalance ? `${totalGrams.toFixed(2)} g` : "******"}</h2>
-                   <button onClick={() => setShowBalance(!showBalance)} className="bg-transparent border-none outline-none cursor-pointer"><Eye size={18} className="text-[#047857] hover:text-[#047857]" /></button>
-                 </div>
-                 <p className="text-xs font-bold text-slate-900/70 relative z-10">≈ ₹{portfolioVal.toLocaleString('en-IN')}</p>
-                 <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/40 rounded-2xl flex items-center justify-center text-[#047857] shadow-sm backdrop-blur-sm">
-                    <Coins size={24} />
-                 </div>
-               </div>
-               
-               {/* Portfolio Value */}
-               <div className="bg-[#fffbeb] rounded-3xl p-6 border border-amber-100 flex flex-col justify-center relative overflow-hidden shadow-sm">
-                 <h3 className="text-xs font-bold text-amber-900 mb-3">Portfolio Value</h3>
-                 <h2 className="text-[26px] font-black text-[#78350f] mb-1 tracking-tight relative z-10">₹{portfolioVal.toLocaleString('en-IN')}</h2>
-                 <p className="text-xs font-bold text-amber-800/70 relative z-10">Total Investments</p>
-                 <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/50 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm backdrop-blur-sm">
-                    <TrendingUp size={24} />
-                 </div>
-               </div>
+              {/* Vault Balance */}
+              <div className="bg-gradient-to-br from-[#ecfdf5] via-[#f0fdf4] to-white rounded-3xl p-6 border border-emerald-200 flex flex-col justify-center relative overflow-hidden shadow-sm">
+                <h3 className="text-xs font-bold text-slate-900 mb-3 flex items-center gap-1.5">Vault Balance</h3>
+                <div className="flex items-center gap-3 mb-1 relative z-10">
+                  <h2 className="text-[26px] font-black text-[#064e3b] tracking-tight">{showBalance ? `${totalGrams.toFixed(2)} g` : "******"}</h2>
+                  <button onClick={() => setShowBalance(!showBalance)} className="bg-transparent border-none outline-none cursor-pointer"><Eye size={18} className="text-[#047857] hover:text-[#047857]" /></button>
+                </div>
+                <p className="text-xs font-bold text-slate-900/70 relative z-10">≈ ₹{portfolioVal.toLocaleString('en-IN')}</p>
+                <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/40 rounded-2xl flex items-center justify-center text-[#047857] shadow-sm backdrop-blur-sm">
+                  <Coins size={24} />
+                </div>
+              </div>
 
-               {/* KYC Status */}
-               <div className="bg-white rounded-3xl p-6 border border-emerald-50 flex flex-col justify-center relative overflow-hidden shadow-sm shadow-emerald-500/5">
-                 <h3 className="text-xs font-bold text-emerald-900/60 mb-3">KYC Status</h3>
-                 <h2 className="text-[26px] font-black text-gray-900 mb-1 tracking-tight relative z-10">{kycStatus === "full kyc" ? "Verified" : "Pending"}</h2>
-                 <p className="text-xs font-bold text-gray-500 relative z-10">{kycStatus === "full kyc" ? "Full KYC Completed" : "KYC Pending"}</p>
-                 <div className={`absolute right-4 bottom-4 w-[52px] h-[52px] rounded-full flex items-center justify-center text-white shadow-lg ${kycStatus === "full kyc" ? "bg-[#10b981] shadow-emerald-500/30" : "bg-red-500 shadow-red-500/30"}`}>
-                    {kycStatus === "full kyc" ? <Check size={28} strokeWidth={3} /> : <X size={28} strokeWidth={3} />}
-                 </div>
-               </div>
+              {/* Portfolio Value */}
+              <div className="bg-[#fffbeb] rounded-3xl p-6 border border-amber-100 flex flex-col justify-center relative overflow-hidden shadow-sm">
+                <h3 className="text-xs font-bold text-amber-900 mb-3">Portfolio Value</h3>
+                <h2 className="text-[26px] font-black text-[#78350f] mb-1 tracking-tight relative z-10">₹{portfolioVal.toLocaleString('en-IN')}</h2>
+                <p className="text-xs font-bold text-amber-800/70 relative z-10">Total Investments</p>
+                <div className="absolute right-4 bottom-4 w-[52px] h-[52px] bg-white/50 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm backdrop-blur-sm">
+                  <TrendingUp size={24} />
+                </div>
+              </div>
+
+              {/* KYC Status */}
+              <div className="bg-white rounded-3xl p-6 border border-emerald-50 flex flex-col justify-center relative overflow-hidden shadow-sm shadow-emerald-500/5">
+                <h3 className="text-xs font-bold text-emerald-900/60 mb-3">KYC Status</h3>
+                <h2 className="text-[26px] font-black text-gray-900 mb-1 tracking-tight relative z-10">{kycStatus === "full kyc" ? "Verified" : "Pending"}</h2>
+                <p className="text-xs font-bold text-gray-500 relative z-10">{kycStatus === "full kyc" ? "Full KYC Completed" : "KYC Pending"}</p>
+                <div className={`absolute right-4 bottom-4 w-[52px] h-[52px] rounded-full flex items-center justify-center text-white shadow-lg ${kycStatus === "full kyc" ? "bg-[#10b981] shadow-emerald-500/30" : "bg-red-500 shadow-red-500/30"}`}>
+                  {kycStatus === "full kyc" ? <Check size={28} strokeWidth={3} /> : <X size={28} strokeWidth={3} />}
+                </div>
+              </div>
             </div>
 
             {/* Row 2: Vault & Actions */}
             <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-6">
-               {/* My Vault */}
-               <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] relative overflow-hidden flex flex-col">
-                 <div className="flex items-center gap-3 mb-6 relative z-10">
-                    <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center"><Coins size={16} /></div>
-                    <h3 className="text-lg font-bold text-gray-900">My Vault</h3>
-                 </div>
-                 
-                 <div className="relative z-10 flex-1">
-                   <p className="text-xs font-bold text-gray-400 mb-1">Current Balance</p>
-                   <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-[28px] font-black text-amber-500 tracking-tight">{goldHoldings.toFixed(2)} g</h2>
-                   </div>
-                   <p className="text-[13px] font-bold text-gray-400 mb-6">= ₹{(goldHoldings * goldPrice).toFixed(2)}</p>
-                   
-                   <p className="text-xs font-bold text-gray-400 mb-1">Status: <span className={kycStatus === "full kyc" ? "text-emerald-500" : "text-amber-500"}>{kycStatus === "full kyc" ? "Full KYC" : "Pending KYC"} •</span></p>
-                   <p className="text-xs font-bold text-gray-400 mb-8">Max Capacity: <span className="text-gray-900">{kycStatus === "full kyc" ? "1000 g" : "0.00 g"}</span></p>
-                   
-                   <div className="flex gap-4">
-                     <button onClick={() => setTab("sip")} className="flex-1 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white py-3 rounded-xl text-sm font-bold shadow-md shadow-emerald-900/20 flex items-center justify-center gap-2 border-none outline-none cursor-pointer transition-all"><Plus size={18}/> Buy Gold</button>
-                     <button onClick={() => setTab("sip")} className="flex-1 bg-[#f8fafc] text-amber-600 border border-emerald-300 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 outline-none cursor-pointer hover:bg-white transition-colors"><Send size={18}/> Sell Gold</button>
-                   </div>
-                 </div>
-                 
-                 {/* Decorative Gold graphic on right */}
-                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-56 h-56 opacity-90 pointer-events-none hidden sm:block">
-                   <div className="absolute right-12 top-14 w-28 h-20 bg-gradient-to-br from-[#ffd66b] via-[#eab308] to-[#b45309] rounded-xl transform -rotate-12 shadow-[0_10px_25px_rgba(234,179,8,0.4)] border border-yellow-300" />
-                   <div className="absolute right-4 top-24 w-28 h-20 bg-gradient-to-br from-[#fde047] via-[#eab308] to-[#a16207] rounded-xl transform -rotate-12 shadow-[0_10px_25px_rgba(234,179,8,0.4)] border border-yellow-300" />
-                   
-                   <div className="absolute right-16 bottom-8 w-12 h-12 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500 rounded-full shadow-lg border border-slate-200" />
-                   <div className="absolute right-32 bottom-14 w-14 h-14 bg-gradient-to-br from-gray-100 via-gray-300 to-gray-400 rounded-full shadow-lg border border-slate-200" />
-                   <div className="absolute right-6 bottom-20 w-10 h-10 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 rounded-full shadow-md border border-slate-200" />
-                 </div>
-               </div>
+              {/* My Vault */}
+              <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] relative overflow-hidden flex flex-col">
+                <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center"><Coins size={16} /></div>
+                  <h3 className="text-lg font-bold text-gray-900">My Vault</h3>
+                </div>
 
-               {/* Quick Actions */}
-               <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col">
-                  <h3 className="text-lg font-bold text-gray-900 mb-8">Quick Actions</h3>
-                  <div className="grid grid-cols-3 gap-y-8 gap-x-2 flex-1 items-center">
-                     <div className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><Zap size={22} strokeWidth={2.5}/></div>
-                       <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900">UPI Pay</span>
-                     </div>
-                     <div onClick={() => setTab("sip")} className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><TrendingUp size={22} strokeWidth={2.5}/></div>
-                       <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900">Start SIP</span>
-                     </div>
-                     <div className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-white text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-300/50 shadow-sm"><Building size={22} strokeWidth={2.5}/></div>
-                       <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-nowrap">Bank Transfer</span>
-                     </div>
-                     <div className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-amber-50 text-amber-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-amber-100/50 shadow-sm"><RefreshCw size={22} strokeWidth={2.5}/></div>
-                       <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-nowrap">Vault Transfer</span>
-                     </div>
-                     <div onClick={() => setTab("bills")} className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><FileText size={22} strokeWidth={2.5}/></div>
-                       <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-pre-line">{"Bills &\nRecharges"}</span>
-                     </div>
-                     <div className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><Plus size={22} strokeWidth={2.5}/></div>
-                       <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 whitespace-nowrap">Add Money</span>
-                     </div>
+                <div className="relative z-10 flex-1">
+                  <p className="text-xs font-bold text-gray-400 mb-1">Current Balance</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-[28px] font-black text-amber-500 tracking-tight">{goldHoldings.toFixed(2)} g</h2>
                   </div>
-               </div>
+                  <p className="text-[13px] font-bold text-gray-400 mb-6">= ₹{(goldHoldings * goldPrice).toFixed(2)}</p>
+
+                  <p className="text-xs font-bold text-gray-400 mb-1">Status: <span className={kycStatus === "full kyc" ? "text-emerald-500" : "text-amber-500"}>{kycStatus === "full kyc" ? "Full KYC" : "Pending KYC"} •</span></p>
+                  <p className="text-xs font-bold text-gray-400 mb-8">Max Capacity: <span className="text-gray-900">{kycStatus === "full kyc" ? "1000 g" : "0.00 g"}</span></p>
+
+                  <div className="flex gap-4">
+                    <button onClick={() => setTab("sip")} className="flex-1 bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] text-white py-3 rounded-xl text-sm font-bold shadow-md shadow-emerald-900/20 flex items-center justify-center gap-2 border-none outline-none cursor-pointer transition-all"><Plus size={18} /> Buy Gold</button>
+                    <button onClick={() => setTab("sip")} className="flex-1 bg-[#f8fafc] text-amber-600 border border-emerald-300 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 outline-none cursor-pointer hover:bg-white transition-colors"><Send size={18} /> Sell Gold</button>
+                  </div>
+                </div>
+
+                {/* Decorative Gold graphic on right */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-56 h-56 opacity-90 pointer-events-none hidden sm:block">
+                  <div className="absolute right-12 top-14 w-28 h-20 bg-gradient-to-br from-[#ffd66b] via-[#eab308] to-[#b45309] rounded-xl transform -rotate-12 shadow-[0_10px_25px_rgba(234,179,8,0.4)] border border-yellow-300" />
+                  <div className="absolute right-4 top-24 w-28 h-20 bg-gradient-to-br from-[#fde047] via-[#eab308] to-[#a16207] rounded-xl transform -rotate-12 shadow-[0_10px_25px_rgba(234,179,8,0.4)] border border-yellow-300" />
+
+                  <div className="absolute right-16 bottom-8 w-12 h-12 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-500 rounded-full shadow-lg border border-slate-200" />
+                  <div className="absolute right-32 bottom-14 w-14 h-14 bg-gradient-to-br from-gray-100 via-gray-300 to-gray-400 rounded-full shadow-lg border border-slate-200" />
+                  <div className="absolute right-6 bottom-20 w-10 h-10 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 rounded-full shadow-md border border-slate-200" />
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col">
+                <h3 className="text-lg font-bold text-gray-900 mb-8">Quick Actions</h3>
+                <div className="grid grid-cols-3 gap-y-8 gap-x-2 flex-1 items-center">
+                  <div className="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><Zap size={22} strokeWidth={2.5} /></div>
+                    <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900">UPI Pay</span>
+                  </div>
+                  <div onClick={() => setTab("sip")} className="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><TrendingUp size={22} strokeWidth={2.5} /></div>
+                    <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900">Start SIP</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div className="w-[52px] h-[52px] rounded-[18px] bg-white text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-300/50 shadow-sm"><Building size={22} strokeWidth={2.5} /></div>
+                    <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-nowrap">Bank Transfer</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div className="w-[52px] h-[52px] rounded-[18px] bg-amber-50 text-amber-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-amber-100/50 shadow-sm"><RefreshCw size={22} strokeWidth={2.5} /></div>
+                    <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-nowrap">Vault Transfer</span>
+                  </div>
+                  <div onClick={() => setTab("bills")} className="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-[#047857] flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><FileText size={22} strokeWidth={2.5} /></div>
+                    <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 text-center leading-tight whitespace-pre-line">{"Bills &\nRecharges"}</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div className="w-[52px] h-[52px] rounded-[18px] bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:-translate-y-1 transition-transform border border-emerald-100/50 shadow-sm"><Plus size={22} strokeWidth={2.5} /></div>
+                    <span className="text-[11px] font-bold text-gray-600 group-hover:text-gray-900 whitespace-nowrap">Add Money</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Row 3: Bill Payments & Recharges */}
             <div className="bg-white rounded-[24px] p-6 lg:p-7 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
-               <div className="flex justify-between items-center mb-8">
-                 <h3 className="text-lg font-bold text-gray-900">Bill Payments & Recharges</h3>
-                 <span onClick={() => setTab("bills")} className="text-xs font-bold text-[#047857] hover:text-slate-900 cursor-pointer transition-colors">View All</span>
-               </div>
-               <div className="grid grid-cols-4 md:grid-cols-8 gap-y-6 gap-x-2">
-                  {[
-                    { label: "Mobile\nPrepaid", Icon: Smartphone, color: "#047857" },
-                    { label: "Electricity", Icon: Zap, color: "#eab308" },
-                    { label: "DTH", Icon: Tv, color: "#047857" },
-                    { label: "Credit Card", Icon: CreditCard, color: "#ef4444" },
-                    { label: "Mobile\nPostpaid", Icon: Smartphone, color: "#047857" },
-                    { label: "Gas", Icon: Flame, color: "#f97316" },
-                    { label: "Water", Icon: Droplets, color: "#3b82f6" },
-                    { label: "More", Icon: Grid, color: "#9ca3af" },
-                  ].map((b, i) => (
-                    <div key={i} onClick={() => { if(b.label !== "More") handleBillClick(b.label.replace('\n', ' ')); else setTab("bills"); }} className="flex flex-col items-center gap-3 cursor-pointer group">
-                       <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] border border-slate-200 shadow-sm flex items-center justify-center group-hover:-translate-y-1 transition-transform group-hover:shadow-md group-hover:border-emerald-300" style={{ color: b.color }}>
-                         <b.Icon size={22} strokeWidth={1.5}/>
-                       </div>
-                       <span className="text-[11px] font-bold text-gray-600 text-center leading-tight whitespace-pre-line group-hover:text-gray-900">{b.label}</span>
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-lg font-bold text-gray-900">Bill Payments & Recharges</h3>
+                <span onClick={() => setTab("bills")} className="text-xs font-bold text-[#047857] hover:text-slate-900 cursor-pointer transition-colors">View All</span>
+              </div>
+              <div className="grid grid-cols-4 md:grid-cols-8 gap-y-6 gap-x-2">
+                {[
+                  { label: "Mobile\nPrepaid", Icon: Smartphone, color: "#047857" },
+                  { label: "Electricity", Icon: Zap, color: "#eab308" },
+                  { label: "DTH", Icon: Tv, color: "#047857" },
+                  { label: "Credit Card", Icon: CreditCard, color: "#ef4444" },
+                  { label: "Mobile\nPostpaid", Icon: Smartphone, color: "#047857" },
+                  { label: "Gas", Icon: Flame, color: "#f97316" },
+                  { label: "Water", Icon: Droplets, color: "#3b82f6" },
+                  { label: "More", Icon: Grid, color: "#9ca3af" },
+                ].map((b, i) => (
+                  <div key={i} onClick={() => { if (b.label !== "More") handleBillClick(b.label.replace('\n', ' ')); else setTab("bills"); }} className="flex flex-col items-center gap-3 cursor-pointer group">
+                    <div className="w-12 h-12 rounded-2xl bg-[#f8fafc] border border-slate-200 shadow-sm flex items-center justify-center group-hover:-translate-y-1 transition-transform group-hover:shadow-md group-hover:border-emerald-300" style={{ color: b.color }}>
+                      <b.Icon size={22} strokeWidth={1.5} />
                     </div>
-                  ))}
-               </div>
+                    <span className="text-[11px] font-bold text-gray-600 text-center leading-tight whitespace-pre-line group-hover:text-gray-900">{b.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            
+
             {/* Row 4: Banner */}
             <div className="bg-gradient-to-r from-[#ecfdf5] via-[#f0fdf4] to-[#d1fae5]/50 rounded-2xl p-6 border border-emerald-200 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-               <div className="flex-1 relative z-10">
-                  <h3 className="text-lg font-bold text-[#064e3b] mb-1">Secure. Simple. Smart.</h3>
-                  <p className="text-xs text-gray-600 font-medium">All your financial needs in one place.</p>
-               </div>
-               <div className="flex flex-wrap gap-4 relative z-10 justify-center">
-                  <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
-                    <Shield size={18} className="text-[#047857]"/>
-                    <div>
-                      <div className="text-[10px] font-bold text-gray-900">100% Secure</div>
-                      <div className="text-[8px] text-gray-500 font-medium mt-0.5">Bank-level Security</div>
-                    </div>
+              <div className="flex-1 relative z-10">
+                <h3 className="text-lg font-bold text-[#064e3b] mb-1">Secure. Simple. Smart.</h3>
+                <p className="text-xs text-gray-600 font-medium">All your financial needs in one place.</p>
+              </div>
+              <div className="flex flex-wrap gap-4 relative z-10 justify-center">
+                <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
+                  <Shield size={18} className="text-[#047857]" />
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-900">100% Secure</div>
+                    <div className="text-[8px] text-gray-500 font-medium mt-0.5">Bank-level Security</div>
                   </div>
-                  <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
-                    <CheckCircle2 size={18} className="text-[#047857]"/>
-                    <div>
-                      <div className="text-[10px] font-bold text-gray-900">Easy to Use</div>
-                      <div className="text-[8px] text-gray-500 font-medium mt-0.5">Simple & Intuitive</div>
-                    </div>
+                </div>
+                <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
+                  <CheckCircle2 size={18} className="text-[#047857]" />
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-900">Easy to Use</div>
+                    <div className="text-[8px] text-gray-500 font-medium mt-0.5">Simple & Intuitive</div>
                   </div>
-                  <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
-                    <Clock size={18} className="text-[#047857]"/>
-                    <div>
-                      <div className="text-[10px] font-bold text-gray-900">24/7 Support</div>
-                      <div className="text-[8px] text-gray-500 font-medium mt-0.5">We're here for you</div>
-                    </div>
+                </div>
+                <div className="bg-[#f8fafc] backdrop-blur py-2.5 px-4 rounded-xl flex items-center gap-3 border border-white shadow-sm">
+                  <Clock size={18} className="text-[#047857]" />
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-900">24/7 Support</div>
+                    <div className="text-[8px] text-gray-500 font-medium mt-0.5">We're here for you</div>
                   </div>
-               </div>
-               
-               {/* Decorative Avatar graphic */}
-               <div className="absolute right-[-20px] bottom-[-20px] opacity-10 pointer-events-none hidden lg:block">
-                  <Smartphone size={120} />
-               </div>
+                </div>
+              </div>
+
+              {/* Decorative Avatar graphic */}
+              <div className="absolute right-[-20px] bottom-[-20px] opacity-10 pointer-events-none hidden lg:block">
+                <Smartphone size={120} />
+              </div>
             </div>
-            
-         </div>
-         
-         {/* RIGHT COLUMN */}
-         <div className="w-full lg:w-[320px] xl:w-[350px] shrink-0 space-y-6">
-            
+
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div className="w-full lg:w-[320px] xl:w-[350px] shrink-0 space-y-6">
+
             {/* Personalized Suggestion Card (Replaces Fipmoney Virtual Card) */}
             <PersonalizedSuggestionCard
               userName={userName}
@@ -1492,61 +1522,61 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               mobileNumber={loggedInMobile}
               onNavigate={(page) => setTab(page as any)}
             />
-            
+
             {/* Upgrade Card */}
             <div className="rounded-[24px] p-6 text-white relative overflow-hidden shadow-sm bg-gradient-to-r from-[#022c22] via-[#064e3b] to-[#022c22] border border-emerald-300/30">
-               <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
-               <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-emerald-950/20 rounded-full blur-xl pointer-events-none" />
-               
-               <h3 className="text-lg font-bold mb-2 relative z-10 tracking-tight">Upgrade to Premium</h3>
-               <p className="text-[11px] text-emerald-100 leading-relaxed max-w-[65%] mb-5 relative z-10 font-medium">Unlock exclusive benefits and higher limits.</p>
-               <button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer outline-none relative z-10 backdrop-blur-sm shadow-sm hover:shadow-md">Upgrade Now</button>
-               
-               <div className="absolute right-2 bottom-4 opacity-100 drop-shadow-xl z-0">
-                 {/* Visual placeholder for the crown icon */}
-                 <div className="relative">
-                   <Award size={64} className="text-[#fcd34d]" strokeWidth={1.5} />
-                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full blur-[2px]" />
-                 </div>
-               </div>
+              <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
+              <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-emerald-950/20 rounded-full blur-xl pointer-events-none" />
+
+              <h3 className="text-lg font-bold mb-2 relative z-10 tracking-tight">Upgrade to Premium</h3>
+              <p className="text-[11px] text-emerald-100 leading-relaxed max-w-[65%] mb-5 relative z-10 font-medium">Unlock exclusive benefits and higher limits.</p>
+              <button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-[11px] font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer outline-none relative z-10 backdrop-blur-sm shadow-sm hover:shadow-md">Upgrade Now</button>
+
+              <div className="absolute right-2 bottom-4 opacity-100 drop-shadow-xl z-0">
+                {/* Visual placeholder for the crown icon */}
+                <div className="relative">
+                  <Award size={64} className="text-[#fcd34d]" strokeWidth={1.5} />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full blur-[2px]" />
+                </div>
+              </div>
             </div>
-            
+
             {/* Recent Transactions */}
             <div className="bg-white rounded-[24px] p-6 border border-slate-200 shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col gap-6">
-               <div className="flex justify-between items-center">
-                 <h3 className="text-[15px] font-bold text-gray-900">Recent Transactions</h3>
-                 <span onClick={() => setTab("history")} className="text-[11px] font-bold text-[#047857] hover:text-slate-900 cursor-pointer transition-colors">View All</span>
-               </div>
-               
-               <div className="flex flex-col gap-4">
-                 {recentTransactions.length === 0 ? (
-                   <div className="py-8 text-center text-gray-400 text-xs font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                     No transactions recorded yet
-                   </div>
-                 ) : (
-                   recentTransactions.map((t, i) => (
-                     <div key={i} className="flex items-center gap-3">
-                       <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-gray-50/50 shadow-sm bg-white text-[#047857]">
-                          <Coins size={16} strokeWidth={2.5} />
-                       </div>
-                       <div className="flex-1 min-w-0">
-                          <div className="text-[12px] font-bold text-gray-900 truncate">{t.source || t.category}</div>
-                          <div className="text-[10px] font-medium text-gray-400 truncate">{new Date(t.date).toLocaleDateString()}</div>
-                       </div>
-                       <div className="text-right shrink-0 ml-2">
-                          <div className={`text-[12px] font-bold ${t.type === 'Buy' ? 'text-emerald-500' : 'text-gray-900'}`}>{t.type === 'Buy' ? '+' : '-'} ₹{t.amount}</div>
-                          <div className="text-[10px] font-medium text-gray-400">{t.status}</div>
-                       </div>
-                     </div>
-                   ))
-                 )}
-                </div>
-                
-                <button onClick={() => setTab("history")} className="mt-1 text-[11px] font-bold text-[#047857] border border-emerald-300 rounded-xl py-3 w-full hover:bg-white transition-colors flex items-center justify-center gap-2 cursor-pointer bg-transparent outline-none">
-                   <Download size={14} strokeWidth={2.5} /> Download Statement
-                </button>
-             </div>
-             
+              <div className="flex justify-between items-center">
+                <h3 className="text-[15px] font-bold text-gray-900">Recent Transactions</h3>
+                <span onClick={() => setTab("history")} className="text-[11px] font-bold text-[#047857] hover:text-slate-900 cursor-pointer transition-colors">View All</span>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                {recentTransactions.length === 0 ? (
+                  <div className="py-8 text-center text-gray-400 text-xs font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                    No transactions recorded yet
+                  </div>
+                ) : (
+                  recentTransactions.map((t, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border border-gray-50/50 shadow-sm bg-white text-[#047857]">
+                        <Coins size={16} strokeWidth={2.5} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12px] font-bold text-gray-900 truncate">{t.source || t.category}</div>
+                        <div className="text-[10px] font-medium text-gray-400 truncate">{new Date(t.date).toLocaleDateString()}</div>
+                      </div>
+                      <div className="text-right shrink-0 ml-2">
+                        <div className={`text-[12px] font-bold ${t.type === 'Buy' ? 'text-emerald-500' : 'text-gray-900'}`}>{t.type === 'Buy' ? '+' : '-'} ₹{t.amount}</div>
+                        <div className="text-[10px] font-medium text-gray-400">{t.status}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <button onClick={() => setTab("history")} className="mt-1 text-[11px] font-bold text-[#047857] border border-emerald-300 rounded-xl py-3 w-full hover:bg-white transition-colors flex items-center justify-center gap-2 cursor-pointer bg-transparent outline-none">
+                <Download size={14} strokeWidth={2.5} /> Download Statement
+              </button>
+            </div>
+
           </div>
 
           {/* ── FIPMONEY SIGNATURE WATERMARK ── */}
@@ -1557,7 +1587,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
     </div>
   );
 
-  const NotificationsPage = () => (
+  const renderNotificationsPage = () => (
     <div className="flex-1 h-screen overflow-y-auto overflow-x-hidden bg-[#fcfdfd] flex flex-col p-6 lg:p-8 max-w-[1200px] mx-auto w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
@@ -1601,9 +1631,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
               <div
                 key={n.id}
                 onClick={() => markAsRead(n.id)}
-                className={`p-6 flex flex-col sm:flex-row items-start gap-4 transition-colors cursor-pointer group ${
-                  n.read ? 'bg-[#f8fafc] hover:bg-white' : 'bg-white hover:bg-[#f8fafc]'
-                }`}
+                className={`p-6 flex flex-col sm:flex-row items-start gap-4 transition-colors cursor-pointer group ${n.read ? 'bg-[#f8fafc] hover:bg-white' : 'bg-white hover:bg-[#f8fafc]'
+                  }`}
               >
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border shadow-xs ${n.iconBg}`}>
                   <n.Icon size={22} strokeWidth={2.5} />
@@ -1679,7 +1708,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           </header>
         )}
         {tab === "home" ? (
-          <MainDashboard />
+          renderMainDashboard()
         ) : tab === "portfolio" ? (
           <PortfolioPage onNavigate={(target) => setTab(target as Tab)} />
         ) : tab === "bills" ? (
@@ -1701,7 +1730,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         ) : tab === "help" ? (
           <HelpSupportPage />
         ) : tab === "notifications" ? (
-          <NotificationsPage />
+          renderNotificationsPage()
         ) : ["banking", "offers"].includes(tab) ? (
           <ComingSoon tab={tab} />
         ) : tab === "become-agent" ? (
@@ -1715,7 +1744,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         ) : tab === "privacy" ? (
           <PrivacyPolicy onBack={() => setTab("menu")} />
         ) : tab === "menu" ? (
-          <AppMenuPage 
+          <AppMenuPage
             onNavigate={(target) => setTab(target as Tab)}
             onLogout={() => {
               if (typeof window !== 'undefined') {
@@ -1729,7 +1758,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
             profileCompletion={profileCompletion}
           />
         ) : (
-          <MainDashboard />
+          renderMainDashboard()
         )}
       </div>
       <MobileNav activeTab={tab} onTabChange={setTab} profileCompletion={profileCompletion} />
@@ -1808,11 +1837,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
                       key={n.id}
                       layout
                       onClick={() => markAsRead(n.id)}
-                      className={`p-4 rounded-2xl border transition-all cursor-pointer relative group flex gap-3.5 items-start ${
-                        n.read
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer relative group flex gap-3.5 items-start ${n.read
                           ? 'bg-[#f8fafc] border-slate-200 hover:border-emerald-300 shadow-2xs'
                           : 'bg-white border-emerald-200 shadow-md shadow-emerald-950/5 ring-1 ring-emerald-500/20'
-                      }`}
+                        }`}
                     >
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-2xs ${n.iconBg}`}>
                         <n.Icon size={18} strokeWidth={2.5} />
@@ -2105,8 +2133,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
           onNavigate('agent-dashboard');
         }}
       />
-      
-      <style dangerouslySetInnerHTML={{__html: `
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}} />
