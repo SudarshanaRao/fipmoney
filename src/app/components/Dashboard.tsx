@@ -33,6 +33,7 @@ import GoldSipSetupPage from "./GoldSipSetupPage";
 import SilverSipSetupPage from "./SilverSipSetupPage";
 import BecomeAgentPage from "./BecomeAgentPage";
 import AppMenuPage from "./AppMenuPage";
+import FipmoneySignature from "./ui/FipmoneySignature";
 import PersonalizedSuggestionCard from "./PersonalizedSuggestionCard";
 import ProfileCompletionWidget from "./ProfileCompletionWidget";
 import { clearUserSession, getLoggedInUser, getUserAvatar } from "../utils/userStorage";
@@ -1548,35 +1549,8 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
              
           </div>
 
-          {/* ── FIPMONEY SIGNATURE WATERMARK (Luxury Cursive Brand Crest) ── */}
-          <div className="mt-14 mb-4 pt-8 border-t border-slate-100 flex flex-col items-center justify-center text-center select-none relative">
-            <style>{`
-              @import url('https://fonts.googleapis.com/css2?family=Allura&family=Great+Vibes&display=swap');
-              .fipmoney-watermark-sig {
-                font-family: 'Great Vibes', 'Allura', cursive;
-              }
-            `}</style>
-
-            {/* Subtle Crest & Accent Lines */}
-            <div className="flex items-center gap-3 mb-1.5 opacity-60">
-              <div className="h-[1px] w-12 bg-gradient-to-r from-transparent via-[#047857]/40 to-[#047857]" />
-              <img src="/fipmoney_logo_final.png" alt="Fipmoney" className="h-6 w-auto object-contain" />
-              <div className="h-[1px] w-12 bg-gradient-to-l from-transparent via-[#047857]/40 to-[#047857]" />
-            </div>
-
-            {/* Stylish Signature Watermark */}
-            <span className="fipmoney-watermark-sig text-5xl sm:text-6xl tracking-wide bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#10b981] bg-clip-text text-transparent font-normal opacity-85 leading-tight py-1">
-              Fipmoney
-            </span>
-
-            {/* Watermark Slogan */}
-            <p className="text-[10px] font-black tracking-[0.28em] uppercase text-emerald-950/45 mt-0.5">
-              24K Pure Digital Bullion • Financial Freedom
-            </p>
-            <p className="text-[9.5px] font-semibold text-slate-400 mt-1">
-              100% Insured Bank-Grade Vaults • Regulated IDBI Custody
-            </p>
-          </div>
+          {/* ── FIPMONEY SIGNATURE WATERMARK ── */}
+          <FipmoneySignature className="mt-8 mb-2" />
 
         </div>
       </div>

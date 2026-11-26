@@ -15,6 +15,7 @@ import {
   Database,
   CheckCircle2 
 } from "lucide-react";
+import FipmoneySignature from "./ui/FipmoneySignature";
 
 interface FooterProps {
   onNavigate?: (page: string) => void;
@@ -218,21 +219,8 @@ export default function Footer({ onNavigate }: FooterProps) {
             </div>
           </div>
           
-          {/* Fipmoney Luxury Cursive Signature Watermark */}
-          <div className="flex flex-col items-center justify-center text-center my-6 select-none">
-            <style>{`
-              @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Allura&display=swap');
-              .fipmoney-footer-sig {
-                font-family: 'Great Vibes', 'Allura', cursive;
-              }
-            `}</style>
-            <span className="fipmoney-footer-sig text-5xl md:text-6xl tracking-wide bg-gradient-to-r from-emerald-200 via-emerald-100 to-amber-200 bg-clip-text text-transparent font-normal opacity-75">
-              Fipmoney
-            </span>
-            <span className="text-[9px] font-black uppercase tracking-[0.35em] text-emerald-200/50 mt-0.5">
-              Financial Freedom • 24K Pure Bullion
-            </span>
-          </div>
+          {/* Fipmoney Signature Watermark */}
+          <FipmoneySignature variant="dark" className="py-4" />
           
           {/* Bottom Edge Warning */}
           <div className="border-t border-emerald-300/20 mt-6 pt-5 flex justify-center text-center">

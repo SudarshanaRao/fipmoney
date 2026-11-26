@@ -10,6 +10,7 @@ import {
   Users, Banknote
 } from "lucide-react";
 import { API_BASE_URL } from "../utils/apiConfig";
+import FipmoneySignature from "./ui/FipmoneySignature";
 
 interface BillsPageProps {
   onNavigate: (page: string) => void;
@@ -80,7 +81,7 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
   const promoCards = [
     { title: "Refer & Earn", desc: "Invite friends and earn digital gold rewards directly in your vault.", icon: Users, gradient: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)", action: "Refer Now" },
     { title: "Instant Cashbacks", desc: "Pay your utility bills and get assured cashbacks every month.", icon: Banknote, gradient: "linear-gradient(135deg, #064e3b 0%, #10b981 100%)", action: "Explore Offers" },
-    { title: "Bank-Grade Security", desc: "Your payments are protected with 256-bit encryption.", icon: Shield, gradient: "linear-gradient(135deg, #022c22 0%, #047857 100%)", action: "Learn More" }
+    { title: "Instant & Reliable", desc: "Fast utility bill payments with instant digital confirmation.", icon: Shield, gradient: "linear-gradient(135deg, #022c22 0%, #047857 100%)", action: "Learn More" }
   ];
 
   const filteredServices = services.filter(service => {
@@ -402,6 +403,8 @@ export default function BillsPage({ onNavigate }: { onNavigate: (page: string) =
              </div>
           </div>
         </div>
+
+        <FipmoneySignature />
 
       </div>
     </div>

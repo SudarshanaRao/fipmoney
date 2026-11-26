@@ -12,6 +12,7 @@ import { getTransactions, Transaction } from "../utils/transactionStorage";
 import { useFipModal } from "./FipModal";
 
 import { LoadingSpinner } from "./LottiePlayer";
+import FipmoneySignature from "./ui/FipmoneySignature";
 
 const GOLD = { G_DK: "#b87312", G_LT: "#efb652", BG: "#fdf8f0" };
 
@@ -1522,6 +1523,8 @@ export default function HistoryPage() {
           )}
         </motion.div>
       </AnimatePresence>
+
+      <FipmoneySignature />
     </div>
 
     </div>

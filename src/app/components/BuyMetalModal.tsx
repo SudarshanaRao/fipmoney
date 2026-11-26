@@ -894,7 +894,7 @@ export default function BuyMetalModal({
                 </button>
 
                 <p className="text-[10px] font-bold text-slate-400 text-center mt-2 tracking-wide">
-                  100% Secure Payment • SSL Encrypted • Trusted by 1M+ users
+                  100% Secure Payment • Trusted by 1M+ users
                 </p>
               </div>
 

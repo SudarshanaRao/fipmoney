@@ -13,6 +13,7 @@ import { getLoggedInUser, getUserAvatar } from "../utils/userStorage";
 import { calculateProfileCompletion } from "../utils/profileCompletionCalculator";
 import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import { API_BASE_URL } from "../utils/apiConfig";
+import FipmoneySignature from "./ui/FipmoneySignature";
 
 interface AppMenuPageProps {
   onNavigate: (tab: Tab) => void;
@@ -86,13 +87,6 @@ export default function AppMenuPage({
             <h1 className="text-2xl font-black text-slate-900 tracking-tight mt-1">
               App Menu
             </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#047857] text-[11px] font-bold">
-              <ShieldCheck size={14} className="text-[#047857]" />
-              <span>256-Bit SSL</span>
-            </div>
           </div>
         </div>
       </div>
@@ -551,16 +545,8 @@ export default function AppMenuPage({
           )}
         </div>
 
-        {/* ── 9. FOOTER ── */}
-        <div className="text-center pt-2 pb-4 space-y-1">
-          <div className="flex items-center justify-center gap-2">
-            <img src={fipMoneyLogo} alt="FipMoney" className="h-5 w-auto object-contain opacity-80" />
-            <span className="text-xs font-black text-emerald-900/60">Fipmoney Wealth</span>
-          </div>
-          <p className="text-[10px] font-semibold text-slate-400">
-            100% Insured Bank-Grade Vault Storage • SSL 256-Bit Encryption
-          </p>
-        </div>
+        {/* ── 9. FIPMONEY SIGNATURE WATERMARK ── */}
+        <FipmoneySignature className="pt-4 pb-2" />
 
       </div>
     </div>

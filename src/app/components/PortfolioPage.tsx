@@ -11,6 +11,7 @@ import { addTransaction, getTransactions, Transaction } from "../utils/transacti
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
 import BuyMetalModal from "./BuyMetalModal";
 import SellMetalModal from "./SellMetalModal";
+import FipmoneySignature from "./ui/FipmoneySignature";
 
 interface PortfolioPageProps {
   onNavigate?: (page: string) => void;
@@ -861,6 +862,8 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
              </div>
           </div>
         </div>
+
+        <FipmoneySignature />
 
       </div>
 

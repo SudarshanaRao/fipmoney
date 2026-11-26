@@ -1315,12 +1315,8 @@ export default function AuthFlow({ onNavigate }: { onNavigate: (page: string) =>
                       </button>
                     </form>
 
-                    {/* Trust & Policy Footer */}
-                    <div className="mt-5 pt-4 border-t border-slate-100 text-center space-y-2">
-                      <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-500">
-                        <ShieldCheck size={14} className="text-[#047857]" />
-                        <span>256-Bit SSL Encrypted • 100% Insured Bank-Grade Vaults</span>
-                      </div>
+                    {/* Policy Footer */}
+                    <div className="mt-5 pt-4 border-t border-slate-100 text-center">
                       <p className="text-[11px] text-slate-400 leading-relaxed">
                         By continuing, you agree to our{" "}
                         <span onClick={() => onNavigate("terms")} className="text-emerald-800 font-bold hover:underline cursor-pointer">

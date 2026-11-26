@@ -25,6 +25,7 @@ import {
   X
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import FipmoneySignature from "./ui/FipmoneySignature";
 
 type PlanType = 'daily' | 'weekly' | 'monthly' | null;
 
@@ -1547,6 +1548,8 @@ export default function SavingsPage({ onNavigate }: { onNavigate: (page: string)
             </div>
           )}
         </AnimatePresence>
+
+        <FipmoneySignature />
 
       </div>
     </div>

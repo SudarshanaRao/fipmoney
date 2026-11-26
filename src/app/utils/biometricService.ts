@@ -1,4 +1,4 @@
-import { NativeBiometric } from "@capgo/capacitor-native-biometric";
+import { NativeBiometric, BiometryType } from "@capgo/capacitor-native-biometric";
 import { Capacitor } from "@capacitor/core";
 
 const BIOMETRIC_ENABLED_KEY = "fipmoney_biometric_enabled";
@@ -22,7 +22,7 @@ export const checkBiometricAvailability = async (): Promise<BiometricCheckResult
   }
 
   try {
-    const result = await NativeBiometric.isAvailable();
+    const result = await NativeBiometric.isAvailable({ useFallback: true });
     return {
       isAvailable: result.isAvailable,
       biometryType: result.biometryType ? String(result.biometryType) : "FINGERPRINT",
@@ -35,12 +35,13 @@ export const checkBiometricAvailability = async (): Promise<BiometricCheckResult
 };
 
 /**
- * Prompts the user with the native Fingerprint / Face ID prompt.
+ * Prompts the user with the native Android / iOS system lock popup
+ * (supports Fingerprint, Face Unlock, Pattern, PIN, or Password).
  * Only triggers if running natively in the APK.
  */
 export const authenticateWithBiometrics = async (
-  title = "Fipmoney Security",
-  reason = "Scan your fingerprint to access Fipmoney"
+  title = "Unlock Fipmoney",
+  reason = "Verify your identity to access Fipmoney"
 ): Promise<{ success: boolean; error?: string }> => {
   const isNative = Capacitor.isNativePlatform();
 
@@ -50,26 +51,49 @@ export const authenticateWithBiometrics = async (
   }
 
   try {
-    const availability = await NativeBiometric.isAvailable();
+    const availability = await NativeBiometric.isAvailable({ useFallback: true });
     if (!availability.isAvailable) {
-      return { success: false, error: "Biometrics not available or not enrolled on this device." };
+      return { success: false, error: "Screen lock or biometrics not configured on this device." };
     }
 
-    await NativeBiometric.verifyIdentity({
-      reason,
-      title,
-      subtitle: "Biometric Verification",
-      description: "Touch the fingerprint sensor to continue",
-      negativeButtonText: "Cancel",
-      maxAttempts: 3,
-    });
+    try {
+      // Primary: Android default system lock popup supporting Fingerprint, Face, PIN, Pattern & Password
+      // Note: negativeButtonText must be omitted when DEVICE_CREDENTIAL is included on Android
+      await NativeBiometric.verifyIdentity({
+        reason,
+        title,
+        subtitle: "Use your device PIN, pattern, or biometrics",
+        useFallback: true,
+        maxAttempts: 5,
+        allowedBiometryTypes: [
+          BiometryType.FINGERPRINT,
+          BiometryType.FACE_AUTHENTICATION,
+          BiometryType.IRIS_AUTHENTICATION,
+          BiometryType.DEVICE_CREDENTIAL,
+        ],
+      });
+    } catch (primaryErr: any) {
+      const msg = String(primaryErr?.message || "").toLowerCase();
+      // If DEVICE_CREDENTIAL isn't supported by an older Android build, fall back to standard biometric prompt
+      if (msg.includes("credential") || msg.includes("unsupported") || msg.includes("invalid")) {
+        await NativeBiometric.verifyIdentity({
+          reason,
+          title,
+          subtitle: "Verify your identity",
+          negativeButtonText: "Cancel",
+          maxAttempts: 5,
+        });
+      } else {
+        throw primaryErr;
+      }
+    }
 
     return { success: true };
   } catch (error: any) {
     console.error("Biometric authentication error:", error);
     return {
       success: false,
-      error: error?.message || "Biometric authentication failed or was cancelled.",
+      error: error?.message || "Authentication failed or was cancelled.",
     };
   }
 };
