@@ -1,3 +1,5 @@
+import { DEFAULT_LIVE_GOLD_PRICE, DEFAULT_LIVE_SILVER_PRICE, getLiveGoldPrice, getLiveSilverPrice } from "./metalPriceConfig";
+
 // Utility to interact with MetalpriceAPI for live Gold & Silver rates in INR
 
 export interface MetalPriceApiResponse {
@@ -63,8 +65,8 @@ const FALLBACK_RATES: MetalPriceApiResponse = {
   rates: {
     EUR: 0.0090703423,
     INREUR: 110.2494227933,
-    INRXAG: 5762.7625509287,
-    INRXAU: 398690.624784264,
+    INRXAG: DEFAULT_LIVE_SILVER_PRICE * TROY_OUNCE_IN_GRAMS,
+    INRXAU: DEFAULT_LIVE_GOLD_PRICE * TROY_OUNCE_IN_GRAMS,
     XAG: 0.0001735279,
     XAU: 0.0000025082,
   },
@@ -79,11 +81,11 @@ export function parseMetalPrices(
   const inrXau = data.rates.INRXAU || FALLBACK_RATES.rates.INRXAU;
   const inrXag = data.rates.INRXAG || FALLBACK_RATES.rates.INRXAG;
 
-  const goldPerGram24K = inrXau / TROY_OUNCE_IN_GRAMS;
+  const goldPerGram24K = getLiveGoldPrice();
   const goldPerGram22K = goldPerGram24K * (22 / 24);
   const goldPerGram18K = goldPerGram24K * (18 / 24);
 
-  const silverPerGram = inrXag / TROY_OUNCE_IN_GRAMS;
+  const silverPerGram = getLiveSilverPrice();
 
   return {
     timestamp: data.timestamp ? data.timestamp * 1000 : Date.now(),

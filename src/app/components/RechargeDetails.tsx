@@ -246,19 +246,36 @@ export default function RechargeDetails({ onBack }: { onBack: () => void }) {
             colors: ["#d89221", "#efb652", "#b87312", "#ffffff"]
           });
 
-          // Log bill payment to localStorage history
+          // Log bill payment to localStorage history and backend
           const sourceName = isCcToBank 
             ? `${billLabel} (${recipientName || "Self"})` 
             : (selectedProvider?.operatorName || billLabel || "Utility Bill Pay");
 
+          const activeMobile = mobileNumber || (typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || "7013302191") : "7013302191");
+          const rechargeAmt = Number(amount) || 0;
+
           addTransaction({
             type: "Bill Pay",
-            category: billLabel || "Bills",
-            amount: Number(amount) || 0,
+            category: billLabel || "Mobile Recharge",
+            amount: rechargeAmt,
             status: "Completed",
             paymentMethod: isCcToBank ? "Credit Card" : "UPI",
             source: sourceName
           });
+
+          // Sync to backend MongoDB BBPS transactions
+          createRechargeTransactionApi({
+            mobile: activeMobile,
+            amount: rechargeAmt,
+            category: billLabel || "Mobile Recharge",
+            billerName: sourceName,
+            accountNumber: accountNumber || mobileNumber || activeMobile,
+            paymentGateway: isCcToBank ? "Credit Card" : "UPI"
+          });
+
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('fm_transaction_created'));
+          }
         } else {
           setCurrentStep(prev => prev + 1);
         }

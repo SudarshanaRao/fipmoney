@@ -8,7 +8,9 @@ import {
   Activity, CircleDollarSign, Percent, X, Check, Search, Bell, Eye, Lock, RefreshCw, BarChart2, Info, ArrowUp, Crown, LineChart, Banknote, Calendar, ChevronDown, Clock, ChevronLeft
 } from "lucide-react";
 import { addTransaction, getTransactions, Transaction } from "../utils/transactionStorage";
+import { getLoggedInUser } from "../utils/userStorage";
 import { fetchVaultSummaryApi } from "../utils/vaultApi";
+import { DEFAULT_LIVE_GOLD_PRICE, DEFAULT_LIVE_SILVER_PRICE, getLiveGoldPrice, getLiveSilverPrice, fetchLiveMetalPricesApi } from "../utils/metalPriceConfig";
 import BuyMetalModal from "./BuyMetalModal";
 import SellMetalModal from "./SellMetalModal";
 import FipmoneySignature from "./ui/FipmoneySignature";
@@ -19,11 +21,13 @@ interface PortfolioPageProps {
 
 export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
   // Load logged-in user details
-  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
+  const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+  const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || "") : "");
   const isDemoUser = ["7013302191", "9491841941", "7893863597"].includes(loggedInMobile);
 
-  const [goldPrice, setGoldPrice] = useState<number>(6420.50);
-  const [silverPrice, setSilverPrice] = useState<number>(84.20);
+  const [goldPrice, setGoldPrice] = useState<number>(() => getLiveGoldPrice());
+  const [silverPrice, setSilverPrice] = useState<number>(() => getLiveSilverPrice());
+  const [backendInvested, setBackendInvested] = useState<number>(0);
 
   const [goldHoldings, setGoldHoldings] = useState<number>(() => {
     if (typeof window !== "undefined") {
@@ -43,16 +47,46 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
 
   const [recentTxs, setRecentTxs] = useState<Transaction[]>([]);
 
+  // Centralized live bullion rate synchronization
   useEffect(() => {
-    if (loggedInMobile) {
-      fetchVaultSummaryApi(loggedInMobile).then((data) => {
-        if (data) {
-          setGoldHoldings(typeof data.goldHoldingsGrams === 'number' ? data.goldHoldingsGrams : 0);
-          setSilverHoldings(typeof data.silverHoldingsGrams === 'number' ? data.silverHoldingsGrams : 0);
-        }
-      });
-      setRecentTxs(getTransactions());
-    }
+    const syncPrices = () => {
+      setGoldPrice(getLiveGoldPrice());
+      setSilverPrice(getLiveSilverPrice());
+    };
+    syncPrices();
+    fetchLiveMetalPricesApi().then((rates) => {
+      if (rates && rates.goldPrice > 0) {
+        setGoldPrice(rates.goldPrice);
+        setSilverPrice(rates.silverPrice);
+      }
+    });
+
+    window.addEventListener("fm_prices_updated", syncPrices);
+    window.addEventListener("storage", syncPrices);
+    return () => {
+      window.removeEventListener("fm_prices_updated", syncPrices);
+      window.removeEventListener("storage", syncPrices);
+    };
+  }, []);
+
+  useEffect(() => {
+    const reloadVault = () => {
+      if (loggedInMobile) {
+        fetchVaultSummaryApi(loggedInMobile).then((data) => {
+          if (data) {
+            setGoldHoldings(typeof data.goldHoldingsGrams === 'number' ? data.goldHoldingsGrams : 0);
+            setSilverHoldings(typeof data.silverHoldingsGrams === 'number' ? data.silverHoldingsGrams : 0);
+            if (data.values && typeof data.values.totalInvested === 'number') {
+              setBackendInvested(data.values.totalInvested);
+            }
+          }
+        });
+        setRecentTxs(getTransactions());
+      }
+    };
+    reloadVault();
+    window.addEventListener("fm_vault_updated", reloadVault);
+    return () => window.removeEventListener("fm_vault_updated", reloadVault);
   }, [loggedInMobile]);
 
   // Buy & Sell modal states
@@ -78,9 +112,13 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
     if (buyMetal === "gold") {
       setGoldHoldings(newGrams);
       localStorage.setItem(`fip_gold_holdings_${loggedInMobile}`, newGrams.toString());
+      const curInvested = parseFloat(localStorage.getItem(`fip_gold_invested_${loggedInMobile}`) || "0");
+      localStorage.setItem(`fip_gold_invested_${loggedInMobile}`, (curInvested + amount).toString());
     } else {
       setSilverHoldings(newGrams);
       localStorage.setItem(`fip_silver_holdings_${loggedInMobile}`, newGrams.toString());
+      const curInvested = parseFloat(localStorage.getItem(`fip_silver_invested_${loggedInMobile}`) || "0");
+      localStorage.setItem(`fip_silver_invested_${loggedInMobile}`, (curInvested + amount).toString());
     }
 
     addTransaction({
@@ -123,21 +161,47 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
     setIsSellModalOpen(false);
   };
 
-  // Calculate portfolio values
-  const goldValue = goldHoldings * goldPrice;
-  const silverValue = silverHoldings * silverPrice;
-  const totalValue = goldValue + silverValue;
+  // User completed transactions and real invested capital
+  const allTxs = recentTxs.length > 0 ? recentTxs : (typeof window !== 'undefined' ? getTransactions() : []);
+  const goldBuys = allTxs.filter(t => (t.category || "").toLowerCase().includes("gold") && t.type === "Buy");
+  const silverBuys = allTxs.filter(t => (t.category || "").toLowerCase().includes("silver") && t.type === "Buy");
 
-  // Mock Average Purchase Prices to calculate gains
-  const avgGoldBuyPrice = 5850.00;
-  const avgSilverBuyPrice = 76.50;
+  const storedGoldInvested = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_gold_invested_${loggedInMobile}`) || "0") : 0;
+  const storedSilverInvested = typeof window !== 'undefined' ? parseFloat(localStorage.getItem(`fip_silver_invested_${loggedInMobile}`) || "0") : 0;
 
-  const goldCostBasis = goldHoldings * avgGoldBuyPrice;
-  const silverCostBasis = silverHoldings * avgSilverBuyPrice;
-  const totalCostBasis = goldCostBasis + silverCostBasis;
+  const txGoldInvested = goldBuys.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  const txSilverInvested = silverBuys.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-  const totalGain = totalValue - totalCostBasis;
-  const totalGainPercent = totalCostBasis > 0 ? (totalGain / totalCostBasis) * 100 : 0;
+  const effectiveGoldInvested = Math.max(storedGoldInvested, txGoldInvested, backendInvested);
+  const effectiveSilverInvested = Math.max(storedSilverInvested, txSilverInvested);
+
+  // Gold vault market valuation & true invested cost basis
+  let goldCostBasis = 0;
+  let goldValue = 0;
+  let avgGoldBuyPrice = goldPrice;
+
+  if (goldHoldings > 0) {
+    goldValue = Number((goldHoldings * goldPrice).toFixed(2));
+    goldCostBasis = effectiveGoldInvested;
+    avgGoldBuyPrice = effectiveGoldInvested > 0 ? Number((effectiveGoldInvested / goldHoldings).toFixed(2)) : goldPrice;
+  }
+
+  // Silver vault market valuation & true invested cost basis
+  let silverCostBasis = 0;
+  let silverValue = 0;
+  let avgSilverBuyPrice = silverPrice;
+
+  if (silverHoldings > 0) {
+    silverValue = Number((silverHoldings * silverPrice).toFixed(2));
+    silverCostBasis = effectiveSilverInvested;
+    avgSilverBuyPrice = effectiveSilverInvested > 0 ? Number((effectiveSilverInvested / silverHoldings).toFixed(2)) : silverPrice;
+  }
+
+  const totalValue = Number((goldValue + silverValue).toFixed(2));
+  const totalCostBasis = Number((goldCostBasis + silverCostBasis).toFixed(2));
+
+  const totalGain = totalCostBasis > 0 ? Number((totalValue - totalCostBasis).toFixed(2)) : (totalValue > 0 ? totalValue : 0);
+  const totalGainPercent = totalCostBasis > 0 ? Number(((totalGain / totalCostBasis) * 100).toFixed(2)) : (totalValue > 0 ? 100 : 0);
 
   // Sync holdings from localStorage periodically
   useEffect(() => {
@@ -420,7 +484,7 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                 <div className="space-y-4">
                    <div className="flex justify-between items-center text-[12px]">
                       <span className="text-gray-500 font-medium">Today's Gain</span>
-                      <span className="text-emerald-500 font-bold flex items-center gap-1"><ArrowUp size={10} strokeWidth={3}/> ₹1,250 (1.12%)</span>
+                      <span className="text-emerald-500 font-bold flex items-center gap-1">{totalGain >= 0 ? <ArrowUp size={10} strokeWidth={3}/> : <ArrowDownRight size={10} strokeWidth={3} className="text-rose-500"/>} ₹{Math.abs(Math.round(totalGain)).toLocaleString()} ({totalGainPercent.toFixed(2)}%)</span>
                    </div>
                    <div className="w-full h-px bg-gray-50" />
                    <div className="flex justify-between items-center text-[12px]">
@@ -430,7 +494,7 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                    <div className="w-full h-px bg-gray-50" />
                    <div className="flex justify-between items-center text-[12px]">
                       <span className="text-gray-500 font-medium">All Time Returns</span>
-                      <span className="text-emerald-500 font-bold flex items-center gap-1"><ArrowUp size={10} strokeWidth={3}/> 12.48%</span>
+                      <span className="text-emerald-500 font-bold flex items-center gap-1">{totalGainPercent >= 0 ? <ArrowUp size={10} strokeWidth={3}/> : <ArrowDownRight size={10} strokeWidth={3} className="text-rose-500"/>} {totalGainPercent.toFixed(2)}%</span>
                    </div>
                    <div className="w-full h-px bg-gray-50" />
                    <div className="flex justify-between items-center text-[12px]">
@@ -589,7 +653,7 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                 <div className="space-y-4">
                    <div className="flex justify-between items-center text-[13px]">
                       <span className="text-gray-500 font-medium">Today's Gain</span>
-                      <span className="text-emerald-500 font-bold flex items-center gap-1"><ArrowUp size={12} strokeWidth={3}/> ₹1,250 (1.12%)</span>
+                      <span className="text-emerald-500 font-bold flex items-center gap-1">{totalGain >= 0 ? <ArrowUp size={12} strokeWidth={3}/> : <ArrowDownRight size={12} strokeWidth={3} className="text-rose-500"/>} ₹{Math.abs(Math.round(totalGain)).toLocaleString()} ({totalGainPercent.toFixed(2)}%)</span>
                    </div>
                    <div className="w-full h-px bg-gray-50" />
                    <div className="flex justify-between items-center text-[13px]">
@@ -599,7 +663,7 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                    <div className="w-full h-px bg-gray-50" />
                    <div className="flex justify-between items-center text-[13px]">
                       <span className="text-gray-500 font-medium">All Time Returns</span>
-                      <span className="text-emerald-500 font-bold flex items-center gap-1"><ArrowUp size={12} strokeWidth={3}/> 12.48%</span>
+                      <span className="text-emerald-500 font-bold flex items-center gap-1">{totalGainPercent >= 0 ? <ArrowUp size={12} strokeWidth={3}/> : <ArrowDownRight size={12} strokeWidth={3} className="text-rose-500"/>} {totalGainPercent.toFixed(2)}%</span>
                    </div>
                    <div className="w-full h-px bg-gray-50" />
                    <div className="flex justify-between items-center text-[13px]">
@@ -813,8 +877,8 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                          </div>
 
                          <div className="text-right">
-                            <div className={`text-[15px] font-extrabold ${tx.type === "Buy" ? "text-emerald-600" : "text-gray-900"}`}>
-                               {tx.type === "Buy" ? "+" : "-"}₹{tx.amount ? tx.amount.toLocaleString('en-IN') : "0"}
+                            <div className={`text-[15px] font-extrabold ${["Buy", "Reward", "Bonus", "REFERRAL_BONUS"].includes(tx.type) ? "text-emerald-600" : "text-gray-900"}`}>
+                               {["Buy", "Reward", "Bonus", "REFERRAL_BONUS"].includes(tx.type) ? "+" : "-"}₹{tx.amount ? tx.amount.toLocaleString('en-IN') : "0"}
                             </div>
                             {tx.grams && (
                                <div className="text-[11px] font-semibold text-gray-400">
@@ -825,42 +889,12 @@ export default function PortfolioPage({ onNavigate }: PortfolioPageProps) {
                       </div>
                    ))
                 ) : (
-                   /* Sample Demo Transactions when empty */
-                   [
-                      { id: 'demo1', type: 'Buy', category: 'Gold', amount: 5000, grams: '0.7788 g', date: new Date().toISOString(), status: 'Completed', source: 'Digital Gold Vault' },
-                      { id: 'demo2', type: 'Buy', category: 'Silver', amount: 2500, grams: '29.6912 g', date: new Date(Date.now() - 86400000 * 2).toISOString(), status: 'Completed', source: 'Digital Silver Vault' },
-                      { id: 'demo3', type: 'Sell', category: 'Gold', amount: 1200, grams: '0.1869 g', date: new Date(Date.now() - 86400000 * 5).toISOString(), status: 'Completed', source: 'Bank Instant Transfer' }
-                   ].map((tx) => (
-                      <div key={tx.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
-                         <div className="flex items-center gap-3.5">
-                            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-                               tx.category === "Gold" ? "bg-amber-50 border border-amber-100" : "bg-purple-50 border border-purple-100"
-                            }`}>
-                               <img src={tx.category === "Gold" ? "/gold-bars.png" : "/silver.png"} alt={tx.category} className="w-6 h-6 object-contain" />
-                            </div>
-                            <div>
-                               <div className="text-[14px] font-bold text-gray-900">
-                                  {tx.type} {tx.category}
-                               </div>
-                               <div className="text-[11px] text-gray-400 font-medium">
-                                  {new Date(tx.date).toLocaleDateString("en-IN", { day: '2-digit', month: 'short', year: 'numeric' })} · {tx.source}
-                               </div>
-                            </div>
-                         </div>
-
-                         <div className="text-right">
-                            <div className={`text-[15px] font-extrabold ${tx.type === "Buy" ? "text-emerald-600" : "text-gray-900"}`}>
-                               {tx.type === "Buy" ? "+" : "-"}₹{tx.amount.toLocaleString('en-IN')}
-                            </div>
-                            <div className="text-[11px] font-semibold text-gray-400">
-                               {tx.grams}
-                            </div>
-                         </div>
-                      </div>
-                   ))
-                )}
-             </div>
-          </div>
+                   <div className="py-8 text-center text-gray-400 text-xs font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                       No recent transactions recorded yet
+                    </div>
+                 )}
+              </div>
+           </div>
         </div>
 
         <FipmoneySignature />

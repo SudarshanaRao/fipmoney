@@ -2,6 +2,7 @@ import Referral from '../models/Referral.js';
 import User from '../models/User.js';
 import KycRequest from '../models/KycRequest.js';
 import VaultTransaction from '../models/VaultTransaction.js';
+import { getActiveBullionRates } from './userController.js';
 
 /**
  * Helper to compute AML (Anti-Money Laundering) Risk Score (0-100)
@@ -83,7 +84,7 @@ export const getAdminReferrals = async (req, res) => {
           mobileNumber: cleanRefereeMobile,
           type: 'BUY',
           metal: 'GOLD',
-          amount: { $gte: 250 },
+          amount: { $gt: 0 },
           status: { $in: ['COMPLETED', 'SUCCESS'] }
         }).lean();
 
@@ -313,18 +314,94 @@ export const updateAdminReferralStatus = async (req, res) => {
       });
     }
 
+    const prevStatus = referral.status;
     referral.status = status;
-    if (rewardAmount !== undefined) {
-      referral.rewardAmount = rewardAmount;
-    } else if (status === 'Credited' || status === 'REWARD_CREDITED') {
-      if (!referral.rewardAmount) referral.rewardAmount = 100;
-    }
+    const effectiveRewardAmount = rewardAmount !== undefined ? Number(rewardAmount) : (referral.rewardAmount || 100);
+    referral.rewardAmount = effectiveRewardAmount;
 
     await referral.save();
 
+    // If transitioned to Credited / REWARD_CREDITED and not previously credited, deposit bonus gold into both users' vaults!
+    const isCredited = ['Credited', 'REWARD_CREDITED'].includes(status);
+    const wasCredited = ['Credited', 'REWARD_CREDITED'].includes(prevStatus);
+
+    if (isCredited && !wasCredited) {
+      try {
+        const { goldPrice, silverPrice } = await getActiveBullionRates();
+        const userRewardAmount = effectiveRewardAmount > 0 ? (effectiveRewardAmount / 2) : 50;
+        const bonusGrams = Number((userRewardAmount / goldPrice).toFixed(4));
+
+        // 1. Credit Referrer
+        if (referral.referrerMobile || referral.referralCodeUsed) {
+          const cleanRefCode = String(referral.referralCodeUsed || '').trim();
+          const cleanRefMob = String(referral.referrerMobile || '').trim();
+          const referrerUser = await User.findOne({
+            $or: [
+              { mobileNumber: cleanRefMob },
+              { mobile: cleanRefMob },
+              { referralCode: new RegExp(`^${cleanRefCode}$`, 'i') },
+              { userCode: new RegExp(`^${cleanRefCode}$`, 'i') }
+            ]
+          });
+
+          if (referrerUser) {
+            referrerUser.goldHoldingsGrams = Number(((referrerUser.goldHoldingsGrams || 0) + bonusGrams).toFixed(4));
+            const gVal = Number(((referrerUser.goldHoldingsGrams || 0) * goldPrice).toFixed(2));
+            const sVal = Number(((referrerUser.silverHoldingsGrams || 0) * silverPrice).toFixed(2));
+            referrerUser.portfolioValue = Number((gVal + sVal + (referrerUser.cashBalance || 0)).toFixed(2));
+            await referrerUser.save();
+
+            await VaultTransaction.create({
+              txId: 'FIP' + Math.floor(100000 + Math.random() * 900000),
+              mobileNumber: referrerUser.mobileNumber,
+              type: 'REFERRAL_BONUS',
+              metal: 'GOLD',
+              amount: userRewardAmount,
+              grams: bonusGrams,
+              ratePerGram: goldPrice,
+              status: 'COMPLETED',
+              source: 'Referral Reward',
+            });
+          }
+        }
+
+        // 2. Credit Referee
+        if (referral.refereeMobile) {
+          const refereeUser = await User.findOne({
+            $or: [
+              { mobileNumber: String(referral.refereeMobile).trim() },
+              { mobile: String(referral.refereeMobile).trim() }
+            ]
+          });
+
+          if (refereeUser) {
+            refereeUser.goldHoldingsGrams = Number(((refereeUser.goldHoldingsGrams || 0) + bonusGrams).toFixed(4));
+            const gVal = Number(((refereeUser.goldHoldingsGrams || 0) * goldPrice).toFixed(2));
+            const sVal = Number(((refereeUser.silverHoldingsGrams || 0) * silverPrice).toFixed(2));
+            refereeUser.portfolioValue = Number((gVal + sVal + (refereeUser.cashBalance || 0)).toFixed(2));
+            await refereeUser.save();
+
+            await VaultTransaction.create({
+              txId: 'FIP' + Math.floor(100000 + Math.random() * 900000),
+              mobileNumber: refereeUser.mobileNumber,
+              type: 'REFERRAL_BONUS',
+              metal: 'GOLD',
+              amount: userRewardAmount,
+              grams: bonusGrams,
+              ratePerGram: goldPrice,
+              status: 'COMPLETED',
+              source: 'Referral Reward',
+            });
+          }
+        }
+      } catch (err) {
+        console.error('[referralController] Error crediting bonus gold to user vaults:', err);
+      }
+    }
+
     return res.status(200).json({
       success: true,
-      message: `Referral status updated to '${status}'`,
+      message: `Referral status updated to '${status}' and reward gold credited to vault holdings`,
       data: referral
     });
   } catch (error) {

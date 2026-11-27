@@ -174,6 +174,14 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    totalInvested: {
+      type: Number,
+      default: 0,
+    },
+    portfolioValue: {
+      type: Number,
+      default: 0,
+    },
     vaultId: {
       type: mongoose.Schema.Types.ObjectId,
       default: null,

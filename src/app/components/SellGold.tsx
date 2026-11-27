@@ -50,7 +50,7 @@ const SellGold = ({ onBack }: SellGoldProps) => {
   };
 
   const totalValue = goldHoldings * goldPrice;
-  const totalInvestment = 15000; // Mock investment amount
+  const totalInvestment = totalValue; // Zero net profit/loss if no initial cost basis recorded
   const profitLoss = totalValue - totalInvestment;
   const profitLossPercentage = (profitLoss / totalInvestment) * 100;
 

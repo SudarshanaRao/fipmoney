@@ -12,8 +12,10 @@ import { Badge } from "./ui/badge";
 import { Switch } from "./ui/switch";
 import { Input } from "./ui/input";
 import { useFipModal } from "./FipModal";
-import { addTransaction } from "../utils/transactionStorage";
+import { addTransaction, getTransactions } from "../utils/transactionStorage";
+import { getLoggedInUser } from "../utils/userStorage";
 import { fetchLatestMetalPrices } from "../utils/metalPriceApi";
+import { DEFAULT_LIVE_GOLD_PRICE, DEFAULT_LIVE_SILVER_PRICE, getLiveGoldPrice, getLiveSilverPrice, fetchLiveMetalPricesApi } from "../utils/metalPriceConfig";
 import BuyMetalModal from "./BuyMetalModal";
 import SellMetalModal from "./SellMetalModal";
 
@@ -115,28 +117,41 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [amount, setAmount] = useState<string>("");
   const [grams, setGrams] = useState<string>("");
 
-  // Security locks & live prices from MetalpriceAPI
+  // Security locks & live prices
   const [vaultLocked, setVaultLocked] = useState<boolean>(false);
-  const [goldPrice, setGoldPrice] = useState<number>(6420.50);
-  const [silverPrice, setSilverPrice] = useState<number>(84.20);
+  const [goldPrice, setGoldPrice] = useState<number>(() => getLiveGoldPrice());
+  const [silverPrice, setSilverPrice] = useState<number>(() => getLiveSilverPrice());
 
   useEffect(() => {
-    const loadLiveRates = async () => {
-      try {
-        const live = await fetchLatestMetalPrices();
-        if (live && live.gold && live.silver) {
-          setGoldPrice(live.gold.perGram24K);
-          setSilverPrice(live.silver.perGram);
-        }
-      } catch (err) {
-        console.warn("MetalpriceAPI live fetch error:", err);
+    fetchLiveMetalPricesApi().then((rates) => {
+      if (rates) {
+        if (rates.goldPrice) setGoldPrice(rates.goldPrice);
+        if (rates.silverPrice) setSilverPrice(rates.silverPrice);
+      }
+    });
+
+    const handlePricesUpdated = (e: Event) => {
+      const custom = e as CustomEvent;
+      if (custom && custom.detail) {
+        if (custom.detail.goldPrice) setGoldPrice(custom.detail.goldPrice);
+        if (custom.detail.silverPrice) setSilverPrice(custom.detail.silverPrice);
+      } else {
+        setGoldPrice(getLiveGoldPrice());
+        setSilverPrice(getLiveSilverPrice());
       }
     };
-    loadLiveRates();
+
+    window.addEventListener("fm_prices_updated", handlePricesUpdated);
+    window.addEventListener("storage", handlePricesUpdated);
+    return () => {
+      window.removeEventListener("fm_prices_updated", handlePricesUpdated);
+      window.removeEventListener("storage", handlePricesUpdated);
+    };
   }, []);
 
   // User simulated holdings
-  const loggedInMobile = typeof window !== 'undefined' ? sessionStorage.getItem("fm_logged_in_mobile") || "7013302191" : "7013302191";
+  const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+  const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || "") : "");
   const isDemoUser = ["7013302191", "9491841941", "7893863597"].includes(loggedInMobile);
 
   const [goldHoldings, setGoldHoldings] = useState<number>(() => {
@@ -182,13 +197,22 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showSellModal, setShowSellModal] = useState(false);
 
-  // Static mock transactions history
-  const [transactions, setTransactions] = useState([
-    { id: "FIP839120", type: "Buy", metal: "Gold", amount: "₹5,000", grams: "0.7788 g", date: "Today, 10:14 AM", status: "Completed" },
-    { id: "FIP728193", type: "Buy", metal: "Silver", amount: "₹2,500", grams: "29.6912 g", date: "12 Jul 2026", status: "Completed" },
-    { id: "FIP619283", type: "Sell", metal: "Gold", amount: "₹8,000", grams: "1.2461 g", date: "05 Jul 2026", status: "Completed" },
-    { id: "FIP510293", type: "Buy", metal: "Gold", amount: "₹150", grams: "0.0234 g", date: "01 Jul 2026", status: "Completed" }
-  ]);
+  // Real transaction state loaded dynamically
+  const [transactions, setTransactions] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = (getTransactions() || []).filter(t => (t.category || "").toLowerCase().includes("gold") || (t.category || "").toLowerCase().includes("silver"));
+      return stored.map(tx => ({
+        id: tx.id,
+        type: tx.type,
+        metal: tx.category,
+        amount: `₹${Number(tx.amount || 0).toLocaleString()}`,
+        grams: tx.grams || "",
+        date: new Date(tx.date).toLocaleDateString(),
+        status: tx.status
+      }));
+    }
+    return [];
+  });
 
   useEffect(() => {
     if (txSuccess && successMsg) {
@@ -220,20 +244,15 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
     }
   }, [txSuccess]);
 
-  // Live price simulator
+  // Centralized live bullion rate synchronization (no random drift)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setGoldPrice(prev => {
-        const change = (Math.random() - 0.5) * 1.5;
-        return Number((prev + change).toFixed(2));
-      });
-      setSilverPrice(prev => {
-        const change = (Math.random() - 0.5) * 0.08;
-        return Number((prev + change).toFixed(2));
-      });
-    }, 4000);
-
-    return () => clearInterval(interval);
+    const syncPrices = () => {
+      setGoldPrice(getLiveGoldPrice());
+      setSilverPrice(getLiveSilverPrice());
+    };
+    syncPrices();
+    window.addEventListener("fm_prices_updated", syncPrices);
+    return () => window.removeEventListener("fm_prices_updated", syncPrices);
   }, []);
 
   const activePrice = metal === "gold" ? goldPrice : silverPrice;
@@ -274,8 +293,8 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
   const dailySellLimit = isFullKyc ? 1000000 : 5000;
   const maxStorage = isFullKyc ? 1000 : 50;
 
-  // Visual limits used (mocked used buy limits)
-  const buyUsed = 2400; // Mocked amount bought today in rupees
+  // Daily limits tracker
+  const buyUsed = 0;
 
   // Handle transaction submit
   const handleTransaction = async () => {
@@ -667,7 +686,7 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
                 </div>
 
                 {/* Right Graphic & Floating White Partner Logo Pill (Moved above, parallel to text) */}
-                <div className="absolute right-3 sm:right-5 top-[50px] min-[360px]:top-[54px] pointer-events-none flex flex-col items-end z-10">
+                <div className="absolute right-3 sm:right-5 top-[50px] min-[360px]:top-14 pointer-events-none flex flex-col items-end z-10">
                   {/* 3D Asset Illustration */}
                   <img 
                     src={SECURITY_SLIDES[activeBannerIndex].graphic} 
@@ -1256,11 +1275,30 @@ export default function DigitalGoldSilver({ onNavigate, kycStatus }: DigitalGold
       initialAmount={amount}
       initialGrams={grams}
       initialMode={lastInputType}
+      mobileNumber={loggedInMobile}
+      onNavigatePortfolio={() => {
+        setShowBuyModal(false);
+        if (onNavigate) {
+          onNavigate("portfolio");
+        }
+      }}
+      onNavigateHome={() => {
+        setShowBuyModal(false);
+        if (onNavigate) {
+          onNavigate("home");
+        }
+      }}
       onSuccess={(finalAmount, finalGrams) => {
         const txId = "FIP" + Math.floor(100000 + Math.random() * 900000);
         setLastTxId(txId);
-        if (metal === "gold") setGoldHoldings(prev => prev + finalGrams);
-        else setSilverHoldings(prev => prev + finalGrams);
+        if (loggedInMobile) {
+          fetchVaultSummaryApi(loggedInMobile).then((data) => {
+            if (data) {
+              setGoldHoldings(typeof data.goldHoldingsGrams === 'number' ? data.goldHoldingsGrams : 0);
+              setSilverHoldings(typeof data.silverHoldingsGrams === 'number' ? data.silverHoldingsGrams : 0);
+            }
+          });
+        }
         setSuccessMsg(`Successfully bought ${finalGrams.toFixed(4)}g of 24K pure Digital ${label}!`);
       }}
     />

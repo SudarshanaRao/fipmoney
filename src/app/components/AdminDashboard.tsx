@@ -24,6 +24,7 @@ import fipMoneyLogo from "../../imports/fipmoney_logo_final.png";
 import fipmoneyIcon from "../../imports/fipmoney_icon_square.png";
 import { LoadingSpinner } from "./LottiePlayer";
 import { API_BASE_URL } from "../utils/apiConfig";
+import { DEFAULT_LIVE_GOLD_PRICE, DEFAULT_LIVE_SILVER_PRICE, getLiveGoldPrice, getLiveSilverPrice, setLiveMetalPricesLocal } from "../utils/metalPriceConfig";
 
 const getDynamicVariableDefaults = (): Record<string, string> => {
   const baseDomain = (typeof window !== 'undefined' && window.location && window.location.origin)
@@ -140,35 +141,15 @@ const INITIAL_SIP_PLANS = [
 
 const INITIAL_USERS: any[] = [];
 
-const INITIAL_INVESTMENTS = [
-  { id: "INV-8891", userId: "USR-7712", userName: "Rohan Verma", userPhone: "+91 98112 34567", planName: "Daily Savings Plan", amount: "₹100 / day", totalGold: "12.450 g", totalValue: "₹97,732", startDate: "2025-01-12", autoPay: "Active", status: "Active", amtScore: 98 },
-  { id: "INV-8892", userId: "USR-7711", userName: "Priya Sharma", userPhone: "+91 98765 12345", planName: "Weekly Savings Plan", amount: "₹500 / wk", totalGold: "8.120 g", totalValue: "₹63,742", startDate: "2025-02-01", autoPay: "Active", status: "Active", amtScore: 92 },
-  { id: "INV-8893", userId: "USR-7709", userName: "Amit Kumar", userPhone: "+91 99887 76655", planName: "Monthly Savings Plan", amount: "₹2,500 / mo", totalGold: "24.800 g", totalValue: "₹1,94,680", startDate: "2024-11-15", autoPay: "Paused", status: "Paused", amtScore: 85 },
-  { id: "INV-8894", userId: "USR-7707", userName: "Sunita Joshi", userPhone: "+91 94111 22334", planName: "Wealth Builder Plan", amount: "₹5,000 / mo", totalGold: "48.250 g", totalValue: "₹3,78,762", startDate: "2024-08-20", autoPay: "Active", status: "Active", amtScore: 88 },
-  { id: "INV-8895", userId: "USR-7708", userName: "Deepak Mehra", userPhone: "+91 95001 23456", planName: "Daily Savings Plan", amount: "₹50 / day", totalGold: "5.600 g", totalValue: "₹43,960", startDate: "2025-03-04", autoPay: "Active", status: "Paused", amtScore: 34 },
-];
+const INITIAL_INVESTMENTS: any[] = [];
 
-const INITIAL_TRANSACTIONS = [
-  { id: "TXN-90412", userName: "Rohan Verma", type: "Auto-SIP Deposit", amount: "₹100", goldPurchased: "0.0127 g", gateway: "Razorpay (UPI)", refId: "pay_Pk91283a", date: "2026-08-08 14:22", status: "Success", amtScore: 98 },
-  { id: "TXN-90411", userName: "Priya Sharma", type: "Manual Gold Buy", amount: "₹2,500", goldPurchased: "0.3184 g", gateway: "PhonePe", refId: "pay_Pk91280b", date: "2026-08-08 13:45", status: "Success", amtScore: 92 },
-  { id: "TXN-90410", userName: "Amit Kumar", type: "Cash Redemption", amount: "₹19,250", goldPurchased: "-2.450 g", gateway: "ICICI Bank Payout", refId: "pout_912800", date: "2026-08-08 11:10", status: "Pending", amtScore: 85 },
-  { id: "TXN-90409", userName: "Neha Singh", type: "Referral Bonus", amount: "₹100", goldPurchased: "0.0127 g", gateway: "Internal Reward Vault", refId: "rew_881920", date: "2026-08-08 09:30", status: "Success", amtScore: 90 },
-  { id: "TXN-90408", userName: "Deepak Mehra", type: "Auto-SIP Deposit", amount: "₹500", goldPurchased: "0.0000 g", gateway: "Paytm UPI", refId: "pay_Pk91255z", date: "2026-08-08 08:15", status: "Failed", amtScore: 34 },
-];
+const INITIAL_TRANSACTIONS: any[] = [];
 
 const INITIAL_KYC_REQUESTS: any[] = [];
 
-const INITIAL_PAYOUTS = [
-  { id: "POUT-5012", userId: "USR-7709", userName: "Amit Kumar", type: "Cash Bank Payout", amount: "₹19,250", goldGrams: "2.450 g", bankDetails: "HDFC Bank (A/C: ****4892)", requestedDate: "2026-08-08 11:10", status: "Pending", amtScore: 85 },
-  { id: "POUT-5011", userId: "USR-7707", userName: "Sunita Joshi", type: "Physical Gold Coin Delivery", amount: "5.000 g Coin", goldGrams: "5.000 g", bankDetails: "Delivery to Mumbai Address", requestedDate: "2026-08-08 09:15", status: "Pending", amtScore: 88 },
-  { id: "POUT-5010", userId: "USR-7712", userName: "Rohan Verma", type: "Cash Bank Payout", amount: "₹45,230", goldGrams: "5.760 g", bankDetails: "SBI (A/C: ****1029)", requestedDate: "2026-08-07 18:40", status: "Approved", amtScore: 98 },
-];
+const INITIAL_PAYOUTS: any[] = [];
 
-const INITIAL_REFERRALS = [
-  { id: "REF-201", referrer: "Rohan Verma", referee: "Vikas Sharma", code: "ROHAN100", reward: "₹100 Gold", date: "2026-08-08", status: "Credited", amtScore: 98 },
-  { id: "REF-202", referrer: "Priya Sharma", referee: "Anjali Gupta", code: "PRIYA50", reward: "₹100 Gold", date: "2026-08-07", status: "Credited", amtScore: 92 },
-  { id: "REF-203", referrer: "Deepak Mehra", referee: "Fake Account", code: "DEEPAK10", reward: "₹100 Gold", date: "2026-08-07", status: "Flagged Fraud", amtScore: 34 },
-];
+const INITIAL_REFERRALS: any[] = [];
 
 export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }: AdminDashboardProps) {
   const currentAdmin = getCurrentAdmin() || {
@@ -187,6 +168,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   // Tab Slug Mapping for URL Syncing & Page Refreshes
   const navToSlugMap: Record<string, string> = React.useMemo(() => ({
     "Dashboard": "dashboard",
+    "Live Bullion Rates": "live-prices",
     "SIP Plans": "sip-plans",
     "Investments": "investments",
     "Gold Holdings": "gold-holdings",
@@ -881,7 +863,93 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
     createdAt?: string;
   }
 
-  const [liveGoldRate, setLiveGoldRate] = useState<number>(7815.00);
+  const [liveGoldRate, setLiveGoldRate] = useState<number>(() => getLiveGoldPrice());
+  const [liveSilverRate, setLiveSilverRate] = useState<number>(() => getLiveSilverPrice());
+  const [adminGoldInput, setAdminGoldInput] = useState<string>(() => getLiveGoldPrice().toString());
+  const [adminSilverInput, setAdminSilverInput] = useState<string>(() => getLiveSilverPrice().toString());
+  const [lastPricesUpdated, setLastPricesUpdated] = useState<string>("Today, Just now");
+  const [lastUpdatedBy, setLastUpdatedBy] = useState<string>("Super Admin");
+  const [isUpdatingPrices, setIsUpdatingPrices] = useState<boolean>(false);
+  const isRatesInputDirtyRef = React.useRef<{ gold: boolean; silver: boolean }>({ gold: false, silver: false });
+
+  const fetchLiveMetalPrices = async (forceSyncInputs: boolean = false) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/metal-prices`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.success) {
+          if (json.goldPrice) {
+            const goldNum = Number(json.goldPrice);
+            setLiveGoldRate(goldNum);
+            // DO NOT OVERWRITE if user is currently editing gold input
+            if (forceSyncInputs || !isRatesInputDirtyRef.current.gold) {
+              setAdminGoldInput(goldNum.toString());
+            }
+          }
+          if (json.silverPrice) {
+            const silverNum = Number(json.silverPrice);
+            setLiveSilverRate(silverNum);
+            // DO NOT OVERWRITE if user is currently editing silver input
+            if (forceSyncInputs || !isRatesInputDirtyRef.current.silver) {
+              setAdminSilverInput(silverNum.toString());
+            }
+          }
+          if (json.lastUpdated) {
+            setLastPricesUpdated(new Date(json.lastUpdated).toLocaleString('en-IN', {
+              day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            }));
+          }
+          if (json.updatedBy) setLastUpdatedBy(json.updatedBy);
+        }
+      }
+    } catch (e) {
+      console.warn('Error fetching live metal prices in admin:', e);
+    }
+  };
+
+  const handleSaveLiveMetalPrices = async (goldVal: number, silverVal: number) => {
+    if (isNaN(goldVal) || goldVal <= 0 || isNaN(silverVal) || silverVal <= 0) {
+      triggerToast("Please enter valid positive numbers for both Gold and Silver prices.");
+      return;
+    }
+    setIsUpdatingPrices(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/metal-prices`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goldPrice: goldVal,
+          silverPrice: silverVal,
+          updatedBy: currentAdmin?.name || currentAdmin?.role || 'Super Admin'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLiveGoldRate(goldVal);
+        setLiveSilverRate(silverVal);
+        setAdminGoldInput(goldVal.toString());
+        setAdminSilverInput(silverVal.toString());
+        isRatesInputDirtyRef.current.gold = false;
+        isRatesInputDirtyRef.current.silver = false;
+        setLastPricesUpdated(new Date().toLocaleString('en-IN', {
+          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }));
+        setLastUpdatedBy(currentAdmin?.name || 'Super Admin');
+        
+        setLiveMetalPricesLocal(goldVal, silverVal);
+
+        triggerToast(`Live Rates Updated: Gold ₹${goldVal.toFixed(2)}/g, Silver ₹${silverVal.toFixed(2)}/g! Reflected on User Dashboard.`);
+        addAuditLog(`Live Bullion Rates updated: Gold ₹${goldVal}/g, Silver ₹${silverVal}/g`, 'Rate Change', 'Warning');
+        fetchGoldHoldings();
+      } else {
+        triggerToast(data.message || "Failed to update metal prices.");
+      }
+    } catch (e: any) {
+      triggerToast(`Network error: ${e.message}`);
+    } finally {
+      setIsUpdatingPrices(false);
+    }
+  };
   const [goldHoldingsSummary, setGoldHoldingsSummary] = useState<any>({
     liveGoldRate: 7815.00,
     totalPhysicalVaultGoldKg: "154.850 kg",
@@ -980,8 +1048,15 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
   React.useEffect(() => {
     if (activeNav === "Dashboard") {
       fetchDashboardTelemetry();
+      fetchLiveMetalPrices();
       const interval = setInterval(() => {
         fetchDashboardTelemetry();
+      }, 5000);
+      return () => clearInterval(interval);
+    } else if (activeNav === "Live Bullion Rates") {
+      fetchLiveMetalPrices(true);
+      const interval = setInterval(() => {
+        fetchLiveMetalPrices(false);
       }, 5000);
       return () => clearInterval(interval);
     } else if (activeNav === "SIP Plans") {
@@ -1926,6 +2001,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
 
             {[
               { id: "Dashboard", label: "Dashboard", icon: LayoutDashboard },
+              { id: "Live Bullion Rates", label: "Live Bullion Rates", icon: Sparkles },
               { id: "SIP Plans", label: "SIP Plans", icon: FileText },
               { id: "Investments", label: "Investments", icon: TrendingUp },
               { id: "Gold Holdings", label: "Gold Holdings", icon: Coins },
@@ -2137,6 +2213,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
         {activeNav === "Dashboard" && (
           <div className="space-y-5">
             {/* AMT SECURITY HIGH RISK ALERT BANNER */}
+            {Boolean(dashboardTelemetry.amtSecurityTelemetry?.highRiskCount && dashboardTelemetry.amtSecurityTelemetry.highRiskCount > 0) && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
@@ -2145,7 +2222,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <div>
                   <h4 className="text-xs font-black text-slate-900">AMT Security Risk Telemetry</h4>
                   <p className="text-[11px] font-semibold text-slate-600">
-                    {dashboardTelemetry.amtSecurityTelemetry?.highRiskCount || 1} User Account ({dashboardTelemetry.amtSecurityTelemetry?.flaggedUsers?.[0]?.name || 'Deepak Mehra'}) is flagged with High Risk AMT Score ({dashboardTelemetry.amtSecurityTelemetry?.flaggedUsers?.[0]?.score || 34}/100).
+                    {dashboardTelemetry.amtSecurityTelemetry?.highRiskCount || 0} User Account(s) flagged with High Risk AMT Score.
                   </p>
                 </div>
               </div>
@@ -2154,6 +2231,46 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 className="bg-amber-600 hover:bg-amber-700 text-white font-black text-xs px-3 py-1.5 rounded-lg border-none cursor-pointer shrink-0"
               >
                 Review Flagged
+              </button>
+            </div>
+            )}
+
+            {/* LIVE BULLION SPOT RATES SUMMARY BAR */}
+            <div className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-sky-500/10 border border-slate-200/90 rounded-2xl p-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-xs shadow-xs">
+                    Au
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">24K Digital Gold Rate</span>
+                    <span className="text-sm font-black text-slate-900">₹{liveGoldRate.toFixed(2)}/g</span>
+                  </div>
+                </div>
+
+                <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+                    Ag
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">99.9% Digital Silver Rate</span>
+                    <span className="text-sm font-black text-slate-900">₹{liveSilverRate.toFixed(2)}/g</span>
+                  </div>
+                </div>
+
+                <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
+                  <CheckCircle2 size={12} /> Reflected in User Dashboard
+                </span>
+              </div>
+
+              <button
+                onClick={() => setActiveNav("Live Bullion Rates")}
+                className="w-full md:w-auto px-4 py-2 rounded-xl bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 cursor-pointer border-none shadow-sm transition-all"
+              >
+                <Sparkles size={14} />
+                <span>Manage Live Bullion Prices</span>
               </button>
             </div>
 
@@ -2275,7 +2392,12 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                   <button onClick={() => setActiveNav("Transactions")} className="text-[11px] font-extrabold text-[#7C3AED] hover:underline cursor-pointer border-none bg-transparent">View All</button>
                 </div>
                 <div className="space-y-2">
-                  {transactions.slice(0, 3).map((txn) => {
+                  {transactions.length === 0 ? (
+                    <div className="py-4 text-center text-slate-400 text-[11px] font-semibold">
+                      No transactions recorded yet
+                    </div>
+                  ) : (
+                    transactions.slice(0, 3).map((txn) => {
                     const amtDetails = getAmtScoreDetails(txn.amtScore);
                     return (
                       <div key={txn.id} className="flex items-center justify-between text-[11px] pb-1.5 border-b border-slate-100">
@@ -2291,7 +2413,8 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                         </div>
                       </div>
                     );
-                  })}
+                  })
+                  )}
                 </div>
               </div>
             </div>
@@ -2484,6 +2607,308 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
           </div>
         )}
 
+        {/* LIVE BULLION RATES & SPOT PRICING CONTROL SECTION */}
+        {activeNav === "Live Bullion Rates" && (
+          <div className="space-y-6">
+            {/* Header Banner */}
+            <div className="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white p-6 rounded-3xl border border-purple-500/30 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="relative z-10 max-w-xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-200 text-xs font-black uppercase tracking-wider mb-2">
+                  <Sparkles size={13} className="text-amber-400" />
+                  <span>Real-Time Bullion Pricing Engine</span>
+                </div>
+                <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+                  Live Metal Price Control Center
+                </h2>
+                <p className="text-xs text-slate-300 font-medium leading-relaxed mt-1">
+                  Manually adjust spot market rates for 24K Pure Digital Gold and 99.9% Digital Silver. Rates update instantaneously in MongoDB and sync in real-time across users' Home Dashboard, Digital Vault, Portfolio, and 5-minute locked Buy/Sell modals.
+                </p>
+                <div className="flex flex-wrap items-center gap-3 mt-4 text-[11px] font-bold text-slate-300">
+                  <span className="flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">
+                    <CheckCircle2 size={13} /> Active on User Apps
+                  </span>
+                  <span className="flex items-center gap-1.5 text-slate-300">
+                    <Clock size={13} className="text-purple-300" /> Last updated: {lastPricesUpdated} ({lastUpdatedBy})
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <button
+                  onClick={() => {
+                    isRatesInputDirtyRef.current.gold = false;
+                    isRatesInputDirtyRef.current.silver = false;
+                    setAdminGoldInput(DEFAULT_LIVE_GOLD_PRICE.toString());
+                    setAdminSilverInput(DEFAULT_LIVE_SILVER_PRICE.toString());
+                    handleSaveLiveMetalPrices(DEFAULT_LIVE_GOLD_PRICE, DEFAULT_LIVE_SILVER_PRICE);
+                  }}
+                  className="px-4 py-2.5 rounded-xl border border-white/20 hover:bg-white/10 text-white font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-transparent"
+                >
+                  <RefreshCw size={14} />
+                  <span>Reset to Standard Defaults</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Price Edit Cards Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+              {/* 1. DIGITAL GOLD (24K 99.9% Pure) */}
+              <div className="bg-white rounded-3xl border border-amber-200/80 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between">
+                <div className="flex items-start justify-between pb-4 border-b border-amber-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-white flex items-center justify-center font-black text-xl shadow-md shadow-amber-500/30">
+                      Au
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black uppercase">
+                        24K 99.9% Pure
+                      </div>
+                      <h3 className="text-lg font-black text-slate-900 mt-0.5">Digital Gold Live Spot Rate</h3>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Active User Rate</span>
+                    <span className="text-2xl font-black text-amber-600">₹{liveGoldRate.toLocaleString('en-IN', { minimumFractionDigits: 2 })}/g</span>
+                  </div>
+                </div>
+
+                {/* Form Input with Formatted Helpers */}
+                <div className="my-5 space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                      New 24K Gold Rate Per Gram (₹)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-base">₹</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="1"
+                        value={adminGoldInput}
+                        onChange={(e) => {
+                          isRatesInputDirtyRef.current.gold = true;
+                          setAdminGoldInput(e.target.value);
+                        }}
+                        onFocus={() => {
+                          isRatesInputDirtyRef.current.gold = true;
+                        }}
+                        placeholder="11200.00"
+                        className="w-full bg-slate-50 focus:bg-white border-2 border-slate-200 focus:border-amber-500 rounded-2xl pl-9 pr-14 py-3.5 text-xl font-black text-slate-900 outline-none transition-all shadow-inner"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-400 uppercase">/ gram</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Increment / Decrement Buttons for Gold */}
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-500 block mb-2">Quick Adjustment Steps:</span>
+                    <div className="grid grid-cols-6 gap-1.5">
+                      {[-500, -100, -50, 50, 100, 500].map((step) => (
+                        <button
+                          key={step}
+                          type="button"
+                          onClick={() => {
+                            isRatesInputDirtyRef.current.gold = true;
+                            const cur = Number(adminGoldInput) || liveGoldRate;
+                            const updated = Math.max(1, cur + step);
+                            setAdminGoldInput(updated.toFixed(2));
+                          }}
+                          className={`py-1.5 px-1 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                            step > 0 
+                              ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200" 
+                              : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                          }`}
+                        >
+                          {step > 0 ? `+₹${step}` : `-₹${Math.abs(step)}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Standard Commercial Unit Equivalents */}
+                  <div className="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-3.5 grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">1 Gram</span>
+                      <span className="text-xs font-black text-slate-900">₹{(Number(adminGoldInput) || liveGoldRate).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">10 Grams</span>
+                      <span className="text-xs font-black text-slate-900">₹{((Number(adminGoldInput) || liveGoldRate) * 10).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">1 Kilogram (1000g)</span>
+                      <span className="text-xs font-black text-slate-900">₹{((Number(adminGoldInput) || liveGoldRate) * 1000).toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => handleSaveLiveMetalPrices(Number(adminGoldInput), Number(adminSilverInput))}
+                    disabled={isUpdatingPrices}
+                    className="w-full py-3.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white font-black text-sm flex items-center justify-center gap-2 cursor-pointer border-none shadow-md shadow-amber-500/25 transition-all"
+                  >
+                    {isUpdatingPrices ? <RefreshCw className="animate-spin w-4 h-4" /> : <Save size={16} />}
+                    <span>Publish 24K Gold Rate to App</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 2. DIGITAL SILVER (99.9% Fine Pure) */}
+              <div className="bg-white rounded-3xl border border-sky-200/80 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between">
+                <div className="flex items-start justify-between pb-4 border-b border-sky-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-400 via-sky-500 to-slate-600 text-white flex items-center justify-center font-black text-xl shadow-md shadow-sky-500/30">
+                      Ag
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-black uppercase">
+                        99.9% Fine Silver
+                      </div>
+                      <h3 className="text-lg font-black text-slate-900 mt-0.5">Digital Silver Live Spot Rate</h3>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Active User Rate</span>
+                    <span className="text-2xl font-black text-sky-600">₹{liveSilverRate.toLocaleString('en-IN', { minimumFractionDigits: 2 })}/g</span>
+                  </div>
+                </div>
+
+                {/* Form Input with Formatted Helpers */}
+                <div className="my-5 space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                      New 99.9% Silver Rate Per Gram (₹)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-base">₹</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.1"
+                        value={adminSilverInput}
+                        onChange={(e) => {
+                          isRatesInputDirtyRef.current.silver = true;
+                          setAdminSilverInput(e.target.value);
+                        }}
+                        onFocus={() => {
+                          isRatesInputDirtyRef.current.silver = true;
+                        }}
+                        placeholder="115.00"
+                        className="w-full bg-slate-50 focus:bg-white border-2 border-slate-200 focus:border-sky-500 rounded-2xl pl-9 pr-14 py-3.5 text-xl font-black text-slate-900 outline-none transition-all shadow-inner"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-extrabold text-slate-400 uppercase">/ gram</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Increment / Decrement Buttons for Silver */}
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-500 block mb-2">Quick Adjustment Steps:</span>
+                    <div className="grid grid-cols-6 gap-1.5">
+                      {[-10, -5, -1, 1, 5, 10].map((step) => (
+                        <button
+                          key={step}
+                          type="button"
+                          onClick={() => {
+                            isRatesInputDirtyRef.current.silver = true;
+                            const cur = Number(adminSilverInput) || liveSilverRate;
+                            const updated = Math.max(0.1, cur + step);
+                            setAdminSilverInput(updated.toFixed(2));
+                          }}
+                          className={`py-1.5 px-1 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                            step > 0 
+                              ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200" 
+                              : "bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                          }`}
+                        >
+                          {step > 0 ? `+₹${step}` : `-₹${Math.abs(step)}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Standard Commercial Unit Equivalents */}
+                  <div className="bg-sky-50/60 border border-sky-200/70 rounded-2xl p-3.5 grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">1 Gram</span>
+                      <span className="text-xs font-black text-slate-900">₹{(Number(adminSilverInput) || liveSilverRate).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">10 Grams</span>
+                      <span className="text-xs font-black text-slate-900">₹{((Number(adminSilverInput) || liveSilverRate) * 10).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">1 Kilogram (1000g)</span>
+                      <span className="text-xs font-black text-slate-900">₹{((Number(adminSilverInput) || liveSilverRate) * 1000).toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => handleSaveLiveMetalPrices(Number(adminGoldInput), Number(adminSilverInput))}
+                    disabled={isUpdatingPrices}
+                    className="w-full py-3.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 active:scale-[0.99] text-white font-black text-sm flex items-center justify-center gap-2 cursor-pointer border-none shadow-md shadow-sky-600/25 transition-all"
+                  >
+                    {isUpdatingPrices ? <RefreshCw className="animate-spin w-4 h-4" /> : <Save size={16} />}
+                    <span>Publish 99.9% Silver Rate to App</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Combined Action Bar */}
+            <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-slate-900">Instant Broadcast Mechanism</h4>
+                  <p className="text-[11px] font-medium text-slate-500">
+                    Clicking "Save & Broadcast Both Rates" atomically updates the MongoDB rates record and dispatches real-time events to all active client web & mobile sessions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  onClick={() => handleSaveLiveMetalPrices(Number(adminGoldInput), Number(adminSilverInput))}
+                  disabled={isUpdatingPrices}
+                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-[#7C3AED] via-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 border-none shadow-lg shadow-purple-600/30 cursor-pointer active:scale-[0.99] transition-all"
+                >
+                  {isUpdatingPrices ? <RefreshCw className="animate-spin w-4 h-4" /> : <Zap size={16} />}
+                  <span>Save & Broadcast Both Rates</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Platform Impact Telemetry Overview */}
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6">
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Layers size={14} className="text-purple-600" />
+                Live Architecture & Client Impact Flow
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-medium text-slate-600">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="font-black text-slate-900 block mb-1">1. User Dashboard & Home</span>
+                  Displays live Gold & Silver market cards with ticker rates and 24h change estimations matching these configured rates.
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="font-black text-slate-900 block mb-1">2. Buy & Sell Calculations</span>
+                  Calculates exact grams allocated per rupee (e.g. ₹2,500 = {(2500 / (Number(adminGoldInput) || liveGoldRate)).toFixed(4)} g gold) and locks for 5 minutes during checkout.
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                  <span className="font-black text-slate-900 block mb-1">3. Portfolio Valuation & Returns</span>
+                  Multiplies user's stored vault grams by these live rates to calculate total asset valuation and overall percentage returns.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 2. SIP PLANS PAGE */}
         {activeNav === "SIP Plans" && (
           <div className="space-y-6">
@@ -2588,7 +3013,14 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {investments.filter(i => i.userName.toLowerCase().includes(searchQuery.toLowerCase()) || i.id.toLowerCase().includes(searchQuery.toLowerCase())).map(inv => {
+                    {investments.filter(i => i.userName.toLowerCase().includes(searchQuery.toLowerCase()) || i.id.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-slate-400 font-semibold text-xs">
+                          No active investment records found
+                        </td>
+                      </tr>
+                    ) : (
+                      investments.filter(i => i.userName.toLowerCase().includes(searchQuery.toLowerCase()) || i.id.toLowerCase().includes(searchQuery.toLowerCase())).map(inv => {
                       const amtInfo = getAmtScoreDetails(inv.amtScore);
                       return (
                         <tr key={inv.id} className="hover:bg-slate-50">
@@ -2621,7 +3053,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           </td>
                         </tr>
                       );
-                    })}
+                    }))}
                   </tbody>
                 </table>
               </div>
@@ -2642,22 +3074,22 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                 <p className="text-xs font-semibold text-slate-500">Real-time benchmark pricing control, physical vault reserve management, and trustee audit stream.</p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-4">
                 <div className="text-right">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Live 24K Rate / Gram</div>
-                  <div className="text-xl font-black text-slate-900">₹{liveGoldRate.toFixed(2)}</div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">24K Gold / Gram</div>
+                  <div className="text-xl font-black text-amber-600">₹{liveGoldRate.toFixed(2)}</div>
+                </div>
+                <div className="h-7 w-px bg-slate-200 hidden sm:block" />
+                <div className="text-right">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase">99.9% Silver / Gram</div>
+                  <div className="text-xl font-black text-sky-600">₹{liveSilverRate.toFixed(2)}</div>
                 </div>
                 <button
-                  onClick={() => {
-                    const newRate = prompt("Enter new Live 24K Gold Rate per gram (₹):", liveGoldRate.toString());
-                    if (newRate && !isNaN(Number(newRate))) {
-                      handleUpdateBenchmarkGoldRate(Number(newRate));
-                    }
-                  }}
-                  className="bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl border-none cursor-pointer flex items-center gap-1.5 shadow-sm transition-all"
+                  onClick={() => setActiveNav("Live Bullion Rates")}
+                  className="bg-[#7C3AED] hover:bg-purple-700 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl border-none cursor-pointer flex items-center gap-1.5 shadow-sm transition-all"
                 >
-                  <Edit2 size={13} />
-                  <span>Override Benchmark Rate</span>
+                  <Sparkles size={13} />
+                  <span>Update Live Prices</span>
                 </button>
               </div>
             </div>
@@ -2666,7 +3098,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
             <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
               <div className="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 text-white rounded-2xl p-5 shadow-lg shadow-amber-500/15 relative overflow-hidden">
                 <div className="absolute right-3 top-3 opacity-15">
-                  <Coins size={54} />
+                  <Coins size={48} />
                 </div>
                 <div className="text-[10px] font-black uppercase tracking-wider opacity-90">TOTAL PHYSICAL VAULT GOLD</div>
                 <div className="text-3xl font-black mt-1">{goldHoldingsSummary?.totalPhysicalVaultGoldKg || "154.850 kg"}</div>
@@ -2913,7 +3345,14 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {payouts.map(pout => {
+                    {payouts.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-slate-400 font-semibold text-xs">
+                          No redemption or payout requests recorded yet
+                        </td>
+                      </tr>
+                    ) : (
+                      payouts.map(pout => {
                       const amtInfo = getAmtScoreDetails(pout.amtScore);
                       return (
                         <tr key={pout.id} className="hover:bg-slate-50">
@@ -2958,7 +3397,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           </td>
                         </tr>
                       );
-                    })}
+                    }))}
                   </tbody>
                 </table>
               </div>
@@ -2990,7 +3429,14 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-medium">
-                    {transactions.filter(t => t.userName.toLowerCase().includes(searchQuery.toLowerCase()) || t.id.toLowerCase().includes(searchQuery.toLowerCase())).map(txn => {
+                    {transactions.filter(t => t.userName.toLowerCase().includes(searchQuery.toLowerCase()) || t.id.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="p-8 text-center text-slate-400 font-semibold text-xs">
+                          No financial transactions recorded yet
+                        </td>
+                      </tr>
+                    ) : (
+                      transactions.filter(t => t.userName.toLowerCase().includes(searchQuery.toLowerCase()) || t.id.toLowerCase().includes(searchQuery.toLowerCase())).map(txn => {
                       const amtInfo = getAmtScoreDetails(txn.amtScore);
                       return (
                         <tr key={txn.id} className="hover:bg-slate-50">
@@ -3014,7 +3460,7 @@ export default function AdminDashboard({ secretCode = "2787", onBackToMainSite }
                           </td>
                         </tr>
                       );
-                    })}
+                    }))}
                   </tbody>
                 </table>
               </div>

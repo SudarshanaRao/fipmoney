@@ -120,13 +120,7 @@ export default function ReferAndEarn({ onNavigate }: ReferAndEarnProps) {
     { id: "faq6", question: "Where can I track my referrals?", answer: "You can track the status of all your referrals and pending earnings directly in the 'Your Earnings Summary' section." }
   ];
 
-  const mockTopReferrers = [
-    { rank: 1, name: "Rohit Sharma", amount: "₹12,450", referrals: 124, avatar: "https://i.pravatar.cc/150?img=11" },
-    { rank: 2, name: "Priya Mehta", amount: "₹8,750", referrals: 86, avatar: "https://i.pravatar.cc/150?img=5" },
-    { rank: 3, name: "Amit Verma", amount: "₹6,320", referrals: 63, avatar: "https://i.pravatar.cc/150?img=12" },
-    { rank: 4, name: "Sneha Reddy", amount: "₹4,980", referrals: 48, avatar: "https://i.pravatar.cc/150?img=9" },
-    { rank: 5, name: "You (Dharsh)", amount: "₹1,250", referrals: 12, avatar: "https://i.pravatar.cc/150?img=14", isYou: true },
-  ];
+  // Top referrers will load from backend API
 
   return (
     <div className="flex-1 h-screen overflow-y-auto bg-white pb-24 text-slate-900 font-sans relative">

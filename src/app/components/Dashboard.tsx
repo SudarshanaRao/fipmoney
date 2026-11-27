@@ -39,7 +39,8 @@ import ProfileCompletionWidget from "./ProfileCompletionWidget";
 import { clearUserSession, getLoggedInUser, getUserAvatar } from "../utils/userStorage";
 import { getTransactions, Transaction } from "../utils/transactionStorage";
 import TransactionDetailsPage from "./TransactionDetailsPage";
-import { fetchVaultSummaryApi } from "../utils/vaultApi";
+import { fetchVaultSummaryApi, fetchUserTransactionsApi } from "../utils/vaultApi";
+import { DEFAULT_LIVE_GOLD_PRICE, DEFAULT_LIVE_SILVER_PRICE, getLiveGoldPrice, getLiveSilverPrice, fetchLiveMetalPricesApi } from "../utils/metalPriceConfig";
 import { decryptData256 } from "../utils/cryptoUtils";
 import React from "react";
 
@@ -90,6 +91,7 @@ const INITIAL_NOTIFICATIONS = [
 
 const tabSlugMap: Record<string, string> = {
   home: "dashboard",
+  portfolio: "dashboard/portfolio",
   savings: "dashboard/savings",
   "silver-savings": "dashboard/silver-savings",
   "setup-sip": "dashboard/setup-sip",
@@ -112,6 +114,7 @@ const getInitialUserTab = (): Tab => {
       const subPath = path.replace("dashboard/", "");
       const slugMap: Record<string, Tab> = {
         overview: "home",
+        portfolio: "portfolio",
         savings: "savings",
         "silver-savings": "silver-savings",
         "silver-sip": "silver-savings",
@@ -127,7 +130,8 @@ const getInitialUserTab = (): Tab => {
         loans: "instant-loan"
       };
       if (slugMap[subPath]) return slugMap[subPath];
-    } else if (path === "savings") return "savings";
+    } else if (path === "portfolio" || path === "dashboard/portfolio") return "portfolio";
+    else if (path === "savings") return "savings";
     else if (path === "silver-savings" || path === "silver-sip") return "silver-savings";
     else if (path === "setup-sip" || path === "setup-gold-sip") return "setup-sip" as Tab;
     else if (path === "setup-silver-sip") return "setup-silver-sip" as Tab;
@@ -163,6 +167,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         const subPath = path.replace("dashboard/", "");
         const slugMap: Record<string, Tab> = {
           overview: "home",
+          portfolio: "portfolio",
           savings: "savings",
           transactions: "history",
           "transaction-details": "transaction-details",
@@ -176,8 +181,20 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
         if (slugMap[subPath]) setTabState(slugMap[subPath]);
       }
     };
+
+    const handleCustomNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        setTab(customEvent.detail as Tab);
+      }
+    };
+
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('fm_navigate_tab', handleCustomNavigate);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('fm_navigate_tab', handleCustomNavigate);
+    };
   }, []);
   const [metal, setMetal] = useState<Metal>("gold");
   const [showBalance, setShowBalance] = useState(true);
@@ -337,23 +354,79 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const [virtualCard, setVirtualCard] = useState<{ cardNumber: string, expiry: string, cvv: string, nameOnCard: string } | null>(null);
   const [isLoadingCard, setIsLoadingCard] = useState(true);
 
-  const goldPrice = 6420.50;
-  const silverPrice = 84.20;
-
-  const [backendVault, setBackendVault] = useState<{ gold: number; silver: number; cash: number } | null>(null);
+  const [goldPrice, setGoldPrice] = useState<number>(() => getLiveGoldPrice());
+  const [silverPrice, setSilverPrice] = useState<number>(() => getLiveSilverPrice());
 
   useEffect(() => {
-    if (loggedInMobile) {
-      fetchVaultSummaryApi(loggedInMobile).then((data) => {
-        if (data) {
-          setBackendVault({
-            gold: data.goldHoldingsGrams || 0,
-            silver: data.silverHoldingsGrams || 0,
-            cash: data.cashBalance || 0,
-          });
+    fetchLiveMetalPricesApi().then((rates) => {
+      if (rates) {
+        if (rates.goldPrice) setGoldPrice(rates.goldPrice);
+        if (rates.silverPrice) setSilverPrice(rates.silverPrice);
+      }
+    });
+
+    const handlePricesUpdated = (e: Event) => {
+      const custom = e as CustomEvent;
+      if (custom && custom.detail) {
+        if (custom.detail.goldPrice) setGoldPrice(custom.detail.goldPrice);
+        if (custom.detail.silverPrice) setSilverPrice(custom.detail.silverPrice);
+      } else {
+        setGoldPrice(getLiveGoldPrice());
+        setSilverPrice(getLiveSilverPrice());
+      }
+    };
+
+    window.addEventListener("fm_prices_updated", handlePricesUpdated);
+    window.addEventListener("storage", handlePricesUpdated);
+    const interval = setInterval(() => {
+      fetchLiveMetalPricesApi().then((rates) => {
+        if (rates) {
+          if (rates.goldPrice) setGoldPrice(rates.goldPrice);
+          if (rates.silverPrice) setSilverPrice(rates.silverPrice);
         }
       });
-      // Fetch latest user KYC state
+    }, 15000);
+
+    return () => {
+      window.removeEventListener("fm_prices_updated", handlePricesUpdated);
+      window.removeEventListener("storage", handlePricesUpdated);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const [backendVault, setBackendVault] = useState<{ gold: number; silver: number; cash: number } | null>(null);
+  const [liveTransactions, setLiveTransactions] = useState<Transaction[]>(() => {
+    return typeof window !== 'undefined' ? getTransactions() : [];
+  });
+
+  useEffect(() => {
+    const fetchVaultData = () => {
+      if (loggedInMobile) {
+        fetchVaultSummaryApi(loggedInMobile).then((data) => {
+          if (data) {
+            setBackendVault({
+              gold: data.goldHoldingsGrams || 0,
+              silver: data.silverHoldingsGrams || 0,
+              cash: data.cashBalance || 0,
+            });
+          }
+        });
+
+        fetchUserTransactionsApi(loggedInMobile).then((txns) => {
+          if (txns && txns.length > 0) {
+            setLiveTransactions(txns);
+          } else {
+            setLiveTransactions(getTransactions());
+          }
+        });
+      }
+    };
+
+    fetchVaultData();
+    window.addEventListener("fm_vault_updated", fetchVaultData);
+    window.addEventListener("fm_transaction_created", fetchVaultData);
+
+    if (loggedInMobile) {
       fetch(`${API_BASE_URL}/users/search?mobile=${loggedInMobile}`)
         .then(res => {
           const contentType = res.headers.get("content-type");
@@ -418,6 +491,11 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
     } else {
       setIsLoadingCard(false);
     }
+
+    return () => {
+      window.removeEventListener("fm_vault_updated", fetchVaultData);
+      window.removeEventListener("fm_transaction_created", fetchVaultData);
+    };
   }, [loggedInMobile]);
 
   // Zero out all predefined mock balances & holdings, reading backend or localStorage
@@ -428,7 +506,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (page: string) =
   const totalGrams = goldHoldings + silverHoldings;
   const portfolioVal = (goldHoldings * goldPrice) + (silverHoldings * silverPrice) + cashBalance;
 
-  const recentTransactions = typeof window !== 'undefined' ? getTransactions().slice(0, 4) : [];
+  const recentTransactions = liveTransactions.slice(0, 4);
 
   const P = metal === "gold" ? GOLD : SILVER;
   const { G, G_LT, G_DK } = P;

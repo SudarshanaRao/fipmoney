@@ -29,8 +29,18 @@ export default function TransactionDetailsModal({
 
   if (!isOpen || !transaction) return null;
 
-  const isGold = !transaction.category || transaction.category.toLowerCase().includes("gold");
-  const isSilver = transaction.category?.toLowerCase().includes("silver");
+  const isBill = transaction.type === "Bill Pay" || Boolean(transaction.category && (
+    transaction.category.toLowerCase().includes("bill") ||
+    transaction.category.toLowerCase().includes("recharge") ||
+    transaction.category.toLowerCase().includes("prepaid") ||
+    transaction.category.toLowerCase().includes("postpaid") ||
+    transaction.category.toLowerCase().includes("electricity") ||
+    transaction.category.toLowerCase().includes("dth") ||
+    transaction.category.toLowerCase().includes("fastag")
+  ));
+  const isReward = transaction.type === "Reward" || transaction.type === "Bonus" || transaction.type === "REFERRAL_BONUS" || Boolean(transaction.category?.toLowerCase().includes("reward"));
+  const isGold = !isBill && !isReward && (!transaction.category || transaction.category.toLowerCase().includes("gold"));
+  const isSilver = !isBill && !isReward && Boolean(transaction.category?.toLowerCase().includes("silver"));
   const metalName = isSilver ? "Silver" : "Gold";
   const metalPurity = isSilver ? "99.9% Pure Silver" : "24K | 99.9% Pure Gold";
 
@@ -42,15 +52,13 @@ export default function TransactionDetailsModal({
 
   // Weight / Grams calculation if not already present
   let displayGrams = transaction.grams;
-  if (!displayGrams) {
+  if (!displayGrams && !isBill) {
     if (isGold) {
       const approxRate = 12446.01;
       displayGrams = (totalAmount / approxRate).toFixed(4);
     } else if (isSilver) {
       const approxRate = 165.50;
       displayGrams = (totalAmount / approxRate).toFixed(3);
-    } else {
-      displayGrams = "1.000";
     }
   }
 
@@ -151,10 +159,10 @@ export default function TransactionDetailsModal({
                 {/* Title & Subtitle */}
                 <div className="flex flex-col text-left">
                   <span className="text-[14.5px] font-black text-slate-900 leading-tight">
-                    {transaction.source || (transaction.type === "Buy" ? "Instant Saving" : `${transaction.type} ${metalName}`)}
+                    {transaction.source || (isBill ? "Mobile Recharge" : (transaction.type === "Buy" ? "Instant Saving" : `${transaction.type} ${metalName}`))}
                   </span>
                   <span className="text-xs text-slate-500 font-medium mt-0.5">
-                    {metalName} purchased
+                    {isBill ? `${transaction.category || "BBPS Service"} · Payment Successful` : isReward ? "Referral Bonus Gold Credited" : `${metalName} purchased`}
                   </span>
                 </div>
               </div>
@@ -164,9 +172,15 @@ export default function TransactionDetailsModal({
                 <span className="text-lg font-black text-slate-950 tracking-tight">
                   ₹{totalAmount.toLocaleString("en-IN")}
                 </span>
-                <span className="text-[11px] font-bold text-[#047857] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full mt-0.5">
-                  {displayGrams} g
-                </span>
+                {displayGrams && !isBill ? (
+                  <span className="text-[11px] font-bold text-[#047857] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full mt-0.5">
+                    {displayGrams} g
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full mt-0.5">
+                    Completed
+                  </span>
+                )}
               </div>
             </div>
 
@@ -208,7 +222,7 @@ export default function TransactionDetailsModal({
                     <div className="w-[2px] h-7 bg-emerald-500/70 my-0.5" />
                   </div>
                   <div className="flex-1 flex items-center justify-between pt-0.5">
-                    <span className="text-xs font-bold text-slate-800">{metalName} order</span>
+                    <span className="text-xs font-bold text-slate-800">{isBill ? "Biller Clearance" : `${metalName} order`}</span>
                     <div className="flex flex-col items-end">
                       <span className="bg-emerald-50 border border-emerald-200 text-[#047857] text-[10px] font-black px-2 py-0.5 rounded-md">
                         Success
@@ -220,30 +234,32 @@ export default function TransactionDetailsModal({
                   </div>
                 </div>
 
-                {/* Step 3: Metal purchase */}
-                <div className="flex items-start gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shadow-2xs">
-                      <Check size={12} strokeWidth={3.5} />
+                {/* Step 3: Metal purchase (Only for bullion) */}
+                {!isBill && (
+                  <div className="flex items-start gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className="w-5 h-5 rounded-full bg-[#047857] text-white flex items-center justify-center shadow-2xs">
+                        <Check size={12} strokeWidth={3.5} />
+                      </div>
+                    </div>
+                    <div className="flex-1 flex items-center justify-between pt-0.5">
+                      <span className="text-xs font-bold text-slate-800">{metalName} purchase</span>
+                      <div className="flex flex-col items-end">
+                        <span className="bg-emerald-50 border border-emerald-200 text-[#047857] text-[10px] font-black px-2 py-0.5 rounded-md">
+                          Success
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium mt-0.5">
+                          {formattedDate}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex-1 flex items-center justify-between pt-0.5">
-                    <span className="text-xs font-bold text-slate-800">{metalName} purchase</span>
-                    <div className="flex flex-col items-end">
-                      <span className="bg-emerald-50 border border-emerald-200 text-[#047857] text-[10px] font-black px-2 py-0.5 rounded-md">
-                        Success
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-medium mt-0.5">
-                        {formattedDate}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Status Message */}
               <p className="text-[11.5px] text-slate-600 text-center font-medium pt-1">
-                {metalName} has been added to your Fipmoney locker.
+                {isBill ? "Payment processed & confirmed by service provider." : isReward ? "Reward credited directly into your 24K Gold locker." : `${metalName} has been added to your Fipmoney locker.`}
               </p>
 
               {/* Action Buttons in Fipmoney Theme */}
@@ -253,7 +269,7 @@ export default function TransactionDetailsModal({
                   onClick={handleSaveAgain}
                   className="w-full bg-gradient-to-r from-[#064e3b] via-[#047857] to-[#059669] hover:from-[#022c22] hover:via-[#064e3b] hover:to-[#047857] active:scale-[0.98] text-white font-black text-xs sm:text-sm py-3.5 px-4 rounded-xl shadow-md shadow-emerald-900/20 flex items-center justify-center gap-2 border-none cursor-pointer outline-none transition-all"
                 >
-                  Save ₹{totalAmount.toLocaleString("en-IN")} Again
+                  {isBill ? `Pay ₹${totalAmount.toLocaleString("en-IN")} Again` : `Save ₹${totalAmount.toLocaleString("en-IN")} Again`}
                 </button>
 
                 {/* Invoice Button */}
@@ -291,31 +307,44 @@ export default function TransactionDetailsModal({
                   {/* PRICE BREAKDOWN */}
                   <div>
                     <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2.5">
-                      PRICE BREAKDOWN
+                      {isBill ? "PAYMENT SUMMARY" : "PRICE BREAKDOWN"}
                     </h4>
                     <div className="space-y-2 text-xs">
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="font-medium">{metalName} quantity</span>
-                        <span className="font-bold text-slate-900">{displayGrams} g</span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="font-medium">{metalName} purchased at</span>
-                        <span className="font-bold text-slate-900">₹{ratePerGram}/g</span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="font-medium">{metalName} value</span>
-                        <span className="font-bold text-slate-900">₹{netValue.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-600">
-                        <span className="font-medium">GST (3%)</span>
-                        <span className="font-bold text-slate-900">₹{gstAmount.toFixed(2)}</span>
-                      </div>
-
-                      {/* Highlighted Extra added row */}
-                      <div className="flex justify-between items-center p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-[#047857]">
-                        <span className="font-bold text-xs">Extra {metalName.toLowerCase()} added</span>
-                        <span className="font-black text-xs">+₹15.0</span>
-                      </div>
+                      {isBill ? (
+                        <>
+                          <div className="flex justify-between items-center text-slate-600">
+                            <span className="font-medium">Service / Biller</span>
+                            <span className="font-bold text-slate-900">{transaction.source || "Utility"}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-slate-600">
+                            <span className="font-medium">Category</span>
+                            <span className="font-bold text-slate-900">{transaction.category || "Recharge"}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-slate-600">
+                            <span className="font-medium">Convenience Fee</span>
+                            <span className="font-bold text-emerald-600">₹0.00 (Zero Fee)</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between items-center text-slate-600">
+                            <span className="font-medium">{metalName} quantity</span>
+                            <span className="font-bold text-slate-900">{displayGrams} g</span>
+                          </div>
+                          <div className="flex justify-between items-center text-slate-600">
+                            <span className="font-medium">{metalName} purchased at</span>
+                            <span className="font-bold text-slate-900">₹{ratePerGram}/g</span>
+                          </div>
+                          <div className="flex justify-between items-center text-slate-600">
+                            <span className="font-medium">{metalName} value</span>
+                            <span className="font-bold text-slate-900">₹{netValue.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-slate-600">
+                            <span className="font-medium">GST (3%)</span>
+                            <span className="font-bold text-slate-900">₹{gstAmount.toFixed(2)}</span>
+                          </div>
+                        </>
+                      )}
 
                       <div className="border-t border-slate-100 pt-2 flex justify-between items-center text-slate-900">
                         <span className="font-black text-xs">Total Amount</span>

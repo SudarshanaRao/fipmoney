@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import BuyMetalModal from "./BuyMetalModal";
+import { getLiveSilverPrice } from "../utils/metalPriceConfig";
+import { getLoggedInUser } from "../utils/userStorage";
 
 interface BuySilverProps {
   onBack: () => void;
@@ -9,6 +11,8 @@ interface BuySilverProps {
 
 export default function BuySilver({ onBack }: BuySilverProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+  const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || "") : "");
 
   const handleClose = () => {
     setIsOpen(false);
@@ -25,8 +29,20 @@ export default function BuySilver({ onBack }: BuySilverProps) {
         isOpen={isOpen}
         onClose={handleClose}
         onSuccess={handleSuccess}
+        onNavigatePortfolio={() => {
+          setIsOpen(false);
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("fm_dashboard_tab", "portfolio");
+            window.location.href = "/dashboard/portfolio";
+          }
+        }}
+        onNavigateHome={() => {
+          setIsOpen(false);
+          onBack();
+        }}
         metal="silver"
-        basePrice={84.20}
+        basePrice={getLiveSilverPrice()}
+        mobileNumber={loggedInMobile}
       />
     </div>
   );

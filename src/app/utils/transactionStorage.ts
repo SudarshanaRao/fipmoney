@@ -1,6 +1,6 @@
 export interface Transaction {
   id: string;
-  type: "Buy" | "Sell" | "Bill Pay";
+  type: "Buy" | "Sell" | "Bill Pay" | "Reward" | "Bonus" | "REFERRAL_BONUS";
   category: string; // e.g. "Gold", "Silver", "Mobile Prepaid", "Electricity", "Broadband", etc.
   amount: number;
   grams?: string;
@@ -31,8 +31,11 @@ export function addTransaction(tx: Omit<Transaction, "id" | "date">): Transactio
   };
   if (typeof window !== "undefined") {
     const list = getTransactions();
-    const updated = [newTx, ...list];
+    // Prevent duplicate entries by ID
+    const exists = list.some(item => item.id === newTx.id);
+    const updated = exists ? list : [newTx, ...list];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('fm_transaction_created', { detail: newTx }));
   }
   return newTx;
 }

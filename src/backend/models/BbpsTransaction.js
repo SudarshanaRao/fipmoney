@@ -27,17 +27,6 @@ const bbpsTransactionSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: [
-        'Mobile Recharge',
-        'Electricity',
-        'DTH',
-        'LPG Gas',
-        'Fastag',
-        'Water Bill',
-        'Broadband',
-        'Credit Card Bill',
-        'Piped Gas',
-      ],
       default: 'Mobile Recharge',
     },
     accountNumber: {

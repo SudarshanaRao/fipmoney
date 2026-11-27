@@ -41,6 +41,7 @@ import {
   ResponsiveContainer,
   ReferenceDot
 } from "recharts";
+import { DEFAULT_LIVE_GOLD_PRICE } from "../utils/metalPriceConfig";
 
 type Step = "input" | "processing" | "success";
 type SettlementOption = "bank" | "physical" | "jewellery";
@@ -80,7 +81,7 @@ export default function SellMetalModal({
   onClose,
   onSuccess,
   metal = "gold",
-  basePrice = 12457.21,
+  basePrice = DEFAULT_LIVE_GOLD_PRICE,
   initialAmount,
   initialGrams,
   initialMode

@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import BuyMetalModal from "./BuyMetalModal";
+import { getLiveGoldPrice } from "../utils/metalPriceConfig";
+import { getLoggedInUser } from "../utils/userStorage";
 
 interface BuyGoldProps {
   onBack: () => void;
@@ -9,6 +11,8 @@ interface BuyGoldProps {
 
 export default function BuyGold({ onBack }: BuyGoldProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+  const loggedInMobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || "") : "");
 
   const handleClose = () => {
     setIsOpen(false);
@@ -25,8 +29,20 @@ export default function BuyGold({ onBack }: BuyGoldProps) {
         isOpen={isOpen}
         onClose={handleClose}
         onSuccess={handleSuccess}
+        onNavigatePortfolio={() => {
+          setIsOpen(false);
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("fm_dashboard_tab", "portfolio");
+            window.location.href = "/dashboard/portfolio";
+          }
+        }}
+        onNavigateHome={() => {
+          setIsOpen(false);
+          onBack();
+        }}
         metal="gold"
-        basePrice={12452.85}
+        basePrice={getLiveGoldPrice()}
+        mobileNumber={loggedInMobile}
       />
     </div>
   );

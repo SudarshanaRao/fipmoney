@@ -23,6 +23,8 @@ import {
   updateBbpsTransactionStatus,
   getGoldHoldingsSummary,
   updateGoldRateBenchmark,
+  getLiveMetalPrices,
+  updateLiveMetalPrices,
   createVaultAuditEntry,
   triggerTrusteeAudit,
 } from '../controllers/adminController.js';
@@ -774,6 +776,27 @@ router.get('/gold-holdings', getGoldHoldingsSummary);
  *         description: Server Error
  */
 router.put('/gold-holdings/rate', updateGoldRateBenchmark);
+
+/**
+ * @openapi
+ * /api/admin/metal-prices:
+ *   get:
+ *     tags:
+ *       - Admin Dashboard & Security
+ *     summary: Get live Gold & Silver prices
+ *     responses:
+ *       200:
+ *         description: Success
+ *   put:
+ *     tags:
+ *       - Admin Dashboard & Security
+ *     summary: Update live Gold & Silver prices manually
+ *     responses:
+ *       200:
+ *         description: Prices updated
+ */
+router.get('/metal-prices', getLiveMetalPrices);
+router.put('/metal-prices', updateLiveMetalPrices);
 
 /**
  * @openapi

@@ -1,10 +1,24 @@
 import express from 'express';
-import { checkMobile, checkEmail, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, buyGoldOrSilver, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPresignedUploadUrl, confirmProfileImageUpload, getProfileImageUrl, deleteProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus, getUserSessions, revokeUserSession, checkSessionStatus } from '../controllers/userController.js';
+import { checkMobile, checkEmail, checkUsername, checkReferral, sendOtp, verifyOtp, sendEmailOtp, verifyEmailOtp, checkAdminEmail, sendSuperAdminAuthOtp, verifySuperAdminAuthOtp, authUser, getUsers, getUserById, getUserByUuid, getUserCard, getVaultSummary, getUserTransactionHistory, buyGoldOrSilver, buyGold, sellGoldOrSilver, updateProfile, completeKyc, getUserByMobile, getDashboardData, getProfileSettings, getReferralsTracking, getReferralSummary, uploadProfileImage, getPresignedUploadUrl, confirmProfileImageUpload, getProfileImageUrl, deleteProfileImage, getPendingDues, getUserAmlScore, getUserAmtScore, getAllAdminUsers, adminUpdateAmlScore, adminUpdateAmtScore, adminToggleUserStatus, getUserSessions, revokeUserSession, checkSessionStatus } from '../controllers/userController.js';
+import { getLiveMetalPrices } from '../controllers/adminController.js';
 import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/users/metal-prices:
+ *   get:
+ *     summary: Get Current Live 24K Gold & 99.9% Silver Prices
+ *     tags:
+ *       - Bullion Rates
+ *     responses:
+ *       200:
+ *         description: Live gold and silver rates
+ */
+router.get('/metal-prices', getLiveMetalPrices);
 
 /**
  * @swagger
@@ -308,6 +322,62 @@ router.get('/vault/summary', getVaultSummary);
 
 /**
  * @swagger
+ * /api/users/transactions:
+ *   get:
+ *     summary: Get Complete User Transaction History
+ *     description: Retrieves real, persistent transaction history from MongoDB (Vault purchases/sales/rewards and BBPS payments) for a given mobile number.
+ *     tags:
+ *       - Digital Vault & Portfolio Management
+ *     parameters:
+ *       - in: query
+ *         name: mobile
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "9876543210"
+ *         description: User registered mobile number
+ *     responses:
+ *       200:
+ *         description: List of transactions sorted latest first.
+ */
+router.get('/transactions', getUserTransactionHistory);
+router.post('/recharge', createBillOrRechargeTransaction);
+router.post('/bill-pay', createBillOrRechargeTransaction);
+router.get('/transactions/history', getUserTransactionHistory);
+router.get('/transactions/:mobileNumber', getUserTransactionHistory);
+
+/**
+ * @swagger
+ * /api/users/buy-gold:
+ *   post:
+ *     summary: Buy Gold and update portfolio
+ *     description: Purchases 24K digital gold, credits user holdings, increments totalInvested and updates portfolioValue in MongoDB.
+ *     tags:
+ *       - Digital Vault & Portfolio Management
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mobileNumber
+ *               - amount
+ *               - grams
+ *             properties:
+ *               mobileNumber: { type: string, example: "9876543210" }
+ *               amount: { type: number, example: 1000 }
+ *               grams: { type: number, example: 0.1511 }
+ *               lockedPrice: { type: number, example: 11200.00 }
+ *               paymentMethod: { type: string, example: "UPI" }
+ *     responses:
+ *       200:
+ *         description: Gold successfully purchased and portfolio value updated in MongoDB.
+ */
+router.post('/buy-gold', buyGold);
+
+/**
+ * @swagger
  * /api/users/vault/buy:
  *   post:
  *     summary: Buy Gold or Silver
@@ -330,7 +400,7 @@ router.get('/vault/summary', getVaultSummary);
  *               metal: { type: string, enum: ["GOLD", "SILVER"], example: "GOLD" }
  *               amount: { type: number, example: 1000 }
  *               grams: { type: number, example: 0.1557 }
- *               lockedPrice: { type: number, example: 6420.50, description: "Locked rate for 5-minute price lock window" }
+ *               lockedPrice: { type: number, example: 11200.00, description: "Locked rate for 5-minute price lock window" }
  *               paymentMethod: { type: string, example: "UPI" }
  *     responses:
  *       200:

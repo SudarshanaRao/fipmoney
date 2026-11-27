@@ -8,6 +8,7 @@ import VaultTransaction from '../models/VaultTransaction.js';
 import SipPlan from '../models/SipPlan.js';
 import BbpsTransaction from '../models/BbpsTransaction.js';
 import GoldHolding from '../models/GoldHolding.js';
+import LiveMetalPrice from '../models/LiveMetalPrice.js';
 
 // Helper to hash password/PIN
 const hashPassword = (pwd) => {
@@ -843,10 +844,7 @@ export const getAdminBbpsTransactions = async (req, res) => {
   try {
     let txns = await BbpsTransaction.find().sort({ createdAt: -1 });
 
-    // Seed defaults if empty
-    if (txns.length === 0) {
-      txns = await BbpsTransaction.insertMany(DEFAULT_BBPS_TRANSACTIONS);
-    }
+    // Do not seed dummy transactions
 
     const totalCount = txns.length;
     const totalVolumeNum = txns.reduce((acc, curr) => acc + (curr.amount || 0), 0);
@@ -1120,6 +1118,99 @@ export const getGoldHoldingsSummary = async (req, res) => {
 };
 
 /**
+ * @desc    Fetch Current Live 24K Gold and 99.9% Silver Prices
+ * @route   GET /api/admin/metal-prices or GET /api/users/metal-prices
+ * @access  Public / Admin
+ */
+export const getLiveMetalPrices = async (req, res) => {
+  try {
+    let priceRecord = await LiveMetalPrice.findOne().sort({ updatedAt: -1 });
+    if (!priceRecord) {
+      priceRecord = await LiveMetalPrice.create({
+        goldPrice: currentBenchmarkGoldRate || 11200.00,
+        silverPrice: 115.00,
+        updatedBy: 'System Default'
+      });
+    }
+
+    // Keep memory benchmark in sync
+    currentBenchmarkGoldRate = priceRecord.goldPrice;
+
+    return res.status(200).json({
+      success: true,
+      goldPrice: Number(priceRecord.goldPrice),
+      silverPrice: Number(priceRecord.silverPrice),
+      lastUpdated: priceRecord.lastUpdated || priceRecord.updatedAt,
+      updatedBy: priceRecord.updatedBy || 'Admin'
+    });
+  } catch (error) {
+    console.error('[getLiveMetalPrices Error]:', error);
+    return res.status(200).json({
+      success: true,
+      goldPrice: currentBenchmarkGoldRate || 11200.00,
+      silverPrice: 115.00,
+      lastUpdated: new Date(),
+      updatedBy: 'Default Fallback'
+    });
+  }
+};
+
+/**
+ * @desc    Manually Update Live Gold & Silver Prices from Admin Panel
+ * @route   PUT /api/admin/metal-prices
+ * @access  Admin
+ */
+export const updateLiveMetalPrices = async (req, res) => {
+  try {
+    const { goldPrice, silverPrice, updatedBy } = req.body;
+
+    const parsedGold = Number(goldPrice);
+    const parsedSilver = Number(silverPrice);
+
+    if (isNaN(parsedGold) || parsedGold <= 0 || isNaN(parsedSilver) || parsedSilver <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid positive numeric values are required for both goldPrice and silverPrice.'
+      });
+    }
+
+    currentBenchmarkGoldRate = parsedGold;
+
+    let priceRecord = await LiveMetalPrice.findOne().sort({ updatedAt: -1 });
+    if (priceRecord) {
+      priceRecord.goldPrice = parsedGold;
+      priceRecord.silverPrice = parsedSilver;
+      priceRecord.updatedBy = updatedBy || 'Admin';
+      priceRecord.lastUpdated = new Date();
+      await priceRecord.save();
+    } else {
+      priceRecord = await LiveMetalPrice.create({
+        goldPrice: parsedGold,
+        silverPrice: parsedSilver,
+        updatedBy: updatedBy || 'Admin',
+        lastUpdated: new Date()
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Live metal prices updated: Gold ₹${parsedGold.toFixed(2)}/g, Silver ₹${parsedSilver.toFixed(2)}/g!`,
+      goldPrice: parsedGold,
+      silverPrice: parsedSilver,
+      lastUpdated: priceRecord.lastUpdated,
+      updatedBy: priceRecord.updatedBy
+    });
+  } catch (error) {
+    console.error('[updateLiveMetalPrices Error]:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update live metal prices',
+      error: error.message
+    });
+  }
+};
+
+/**
  * @desc    Override/Update 24K Live Benchmark Gold Rate per gram
  * @route   PUT /api/admin/gold-holdings/rate
  * @access  Admin
@@ -1132,6 +1223,24 @@ export const updateGoldRateBenchmark = async (req, res) => {
     }
 
     currentBenchmarkGoldRate = Number(rate);
+
+    // Also persist in LiveMetalPrice model
+    try {
+      let priceRecord = await LiveMetalPrice.findOne().sort({ updatedAt: -1 });
+      if (priceRecord) {
+        priceRecord.goldPrice = currentBenchmarkGoldRate;
+        priceRecord.lastUpdated = new Date();
+        await priceRecord.save();
+      } else {
+        await LiveMetalPrice.create({
+          goldPrice: currentBenchmarkGoldRate,
+          silverPrice: 115.00,
+          updatedBy: 'Admin Benchmark'
+        });
+      }
+    } catch (e) {
+      console.warn('Could not sync LiveMetalPrice document:', e.message);
+    }
 
     return res.status(200).json({
       success: true,

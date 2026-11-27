@@ -9,6 +9,8 @@ import {
   Coins, TrendingUp, Eye, ArrowUpRight, PiggyBank, Gift
 } from "lucide-react";
 import { getTransactions, Transaction } from "../utils/transactionStorage";
+import { fetchUserTransactionsApi } from "../utils/vaultApi";
+import { getLoggedInUser } from "../utils/userStorage";
 import { useFipModal } from "./FipModal";
 
 import { LoadingSpinner } from "./LottiePlayer";
@@ -582,14 +584,33 @@ export default function HistoryPage({ onNavigate }: { onNavigate?: (tab: string,
   const { showAlert } = useFipModal();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load transactions
+  // Load transactions from MongoDB API and fallback to local cache
   useEffect(() => {
     setIsLoading(true);
-    const timer = setTimeout(() => {
-      setAllTransactions(getTransactions());
-      setIsLoading(false);
-    }, 400);
-    return () => clearTimeout(timer);
+    const loggedInUser = typeof window !== 'undefined' ? getLoggedInUser() : null;
+    const mobile = loggedInUser?.mobileNumber || (typeof window !== 'undefined' ? (sessionStorage.getItem("fm_logged_in_mobile") || localStorage.getItem("fm_logged_in_mobile") || "") : "");
+    
+    const loadTxns = () => {
+      fetchUserTransactionsApi(mobile).then((backendTxns) => {
+        if (backendTxns && backendTxns.length > 0) {
+          setAllTransactions(backendTxns);
+        } else {
+          setAllTransactions(getTransactions());
+        }
+        setIsLoading(false);
+      }).catch(() => {
+        setAllTransactions(getTransactions());
+        setIsLoading(false);
+      });
+    };
+
+    loadTxns();
+    window.addEventListener("fm_transaction_created", loadTxns);
+    window.addEventListener("fm_vault_updated", loadTxns);
+    return () => {
+      window.removeEventListener("fm_transaction_created", loadTxns);
+      window.removeEventListener("fm_vault_updated", loadTxns);
+    };
   }, []);
 
   // Filter logic
@@ -704,126 +725,17 @@ export default function HistoryPage({ onNavigate }: { onNavigate?: (tab: string,
   const [mobileTab, setMobileTab] = useState<"all" | "gold" | "sip" | "bills" | "rewards">("all");
   const [showFilterModal, setShowFilterModal] = useState(false);
 
-  // Sample transactions matching user screenshots for mobile display
-  const sampleMobileTxs = [
-    {
-      id: "SIP20241216001",
-      title: "SIP Investment",
-      subtitle: "ICICI Prudential Bluechip Fund",
-      category: "sip",
-      amount: -3000,
-      status: "pending",
-      dateStr: "16 Dec 2024",
-      timeStr: "10:00",
-      refId: "SIP20241216001",
-      charges: 7.50,
-      gst: 1.35,
-      netAmount: 3008.85,
-      iconType: "sip"
-    },
-    {
-      id: "GLD20241215001",
-      title: "Gold Purchase",
-      subtitle: "Bought 2.5g digital gold",
-      category: "gold",
-      amount: -12500,
-      status: "completed",
-      dateStr: "15 Dec 2024",
-      timeStr: "14:30",
-      refId: "GLD20241215001",
-      charges: 62.50,
-      gst: 11.25,
-      netAmount: 12573.75,
-      iconType: "gold"
-    },
-    {
-      id: "SIP20241214001",
-      title: "SIP Investment",
-      subtitle: "HDFC Top 100 Fund",
-      category: "sip",
-      amount: -5000,
-      status: "completed",
-      dateStr: "14 Dec 2024",
-      timeStr: "09:15",
-      refId: "SIP20241214001",
-      charges: 12.50,
-      gst: 2.25,
-      netAmount: 5014.75,
-      iconType: "sip"
-    },
-    {
-      id: "BIL20241213002",
-      title: "Electricity Bill",
-      subtitle: "BESCOM Electricity Payment",
-      category: "bills",
-      amount: -1450,
-      status: "completed",
-      dateStr: "13 Dec 2024",
-      timeStr: "18:20",
-      refId: "BIL20241213002",
-      charges: 0.00,
-      gst: 0.00,
-      netAmount: 1450.00,
-      iconType: "bills"
-    },
-    {
-      id: "GLD20241212002",
-      title: "Gold Sale",
-      subtitle: "Sold 1.2g digital gold",
-      category: "gold",
-      amount: 6000,
-      status: "completed",
-      dateStr: "12 Dec 2024",
-      timeStr: "11:20",
-      refId: "GLD20241212002",
-      charges: 30.00,
-      gst: 5.40,
-      netAmount: 5964.60,
-      iconType: "gold"
-    },
-    {
-      id: "REW20241211001",
-      title: "Referral Bonus",
-      subtitle: "Friend signup reward",
-      category: "rewards",
-      amount: 500,
-      status: "completed",
-      dateStr: "11 Dec 2024",
-      timeStr: "13:10",
-      refId: "REW20241211001",
-      charges: 0.00,
-      gst: 0.00,
-      netAmount: 500.00,
-      iconType: "rewards"
-    },
-    {
-      id: "BNK20241210001",
-      title: "Bank Transfer",
-      subtitle: "Money transferred to bank",
-      category: "bank",
-      amount: -2500,
-      status: "failed",
-      dateStr: "10 Dec 2024",
-      timeStr: "15:30",
-      refId: "BNK20241210001",
-      charges: 5.00,
-      gst: 0.90,
-      netAmount: 2505.90,
-      iconType: "bank"
-    }
-  ];
-
   const handleSelectMobileTx = (tx: any) => {
     const finalTx: Transaction = tx.rawTx || {
-      id: tx.id || tx.refId,
-      type: tx.title.includes("Gold") || tx.title.includes("Silver") || tx.category === "gold" ? "Buy" : "Bill Pay",
-      category: tx.category === "silver" ? "Silver" : "Gold",
-      amount: Math.abs(tx.amount),
-      grams: tx.subtitle?.match(/([0-9.]+\s*g)/i)?.[1] || (tx.category === "gold" ? "0.0401" : undefined),
-      date: new Date().toISOString(),
-      status: tx.status === "completed" ? "Completed" : "Failed",
-      paymentMethod: "UPI",
-      source: tx.title
+      id: tx.id || tx.refId || `FM${Date.now()}`,
+      type: tx.title?.includes("Gold") || tx.title?.includes("Silver") || tx.category === "gold" ? "Buy" : (tx.type || "Bill Pay"),
+      category: tx.category === "silver" ? "Silver" : (tx.category === "gold" ? "Gold" : "Bill Pay"),
+      amount: Math.abs(tx.amount || 0),
+      grams: tx.subtitle?.match(/([0-9.]+\s*g)/i)?.[1] || tx.grams,
+      date: tx.date || new Date().toISOString(),
+      status: tx.status === "completed" || tx.status === "Completed" ? "Completed" : "Failed",
+      paymentMethod: tx.paymentMethod || "UPI",
+      source: tx.title || tx.source || "Vault"
     };
     try {
       sessionStorage.setItem("fm_selected_tx", JSON.stringify(finalTx));
@@ -835,47 +747,53 @@ export default function HistoryPage({ onNavigate }: { onNavigate?: (tab: string,
 
   // Mobile filtered list computation
   const getMobileDisplayTxs = () => {
-    let sourceList = sampleMobileTxs;
-
-    if (allTransactions.length > 0) {
-      sourceList = allTransactions.map((tx) => {
-        const isPositive = tx.type === "Buy" || tx.type === "Receive" || tx.type === "Sell";
-        const amt = (tx.type === "Sell" || tx.type === "Receive") ? tx.amount : -tx.amount;
-        const chg = Math.round(tx.amount * 0.0025 * 100) / 100;
-        const gstVal = Math.round(chg * 0.18 * 100) / 100;
-        const net = Math.abs(amt) + chg + gstVal;
-
-        let iconType = "gold";
-        const cat = tx.category.toLowerCase();
-        const src = tx.source.toLowerCase();
-        if (cat.includes("gold") || cat.includes("silver")) iconType = "gold";
-        else if (cat.includes("sip") || src.includes("fund")) iconType = "sip";
-        else if (tx.type === "Bill Pay" || cat.includes("bill") || src.includes("electricity") || src.includes("recharge") || src.includes("wifi") || src.includes("fiber")) iconType = "bills";
-        else if (cat.includes("reward") || src.includes("referral")) iconType = "rewards";
-        else iconType = "bank";
-
-        const dateObj = new Date(tx.date);
-        const dateStr = dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
-        const timeStr = dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
-
-        return {
-          id: tx.id,
-          title: tx.source || `${tx.type} ${tx.category}`,
-          subtitle: `${tx.type} ${tx.grams ? `(${tx.grams})` : ""}`,
-          category: iconType,
-          amount: amt,
-          status: tx.status.toLowerCase(),
-          dateStr: dateStr,
-          timeStr: timeStr,
-          refId: tx.id,
-          charges: chg,
-          gst: gstVal,
-          netAmount: net,
-          iconType: iconType,
-          rawTx: tx
-        };
-      });
+    if (!allTransactions || allTransactions.length === 0) {
+      return [];
     }
+
+    let sourceList = allTransactions.map((tx) => {
+      const typeStr = (tx.type || "").toLowerCase();
+      const cat = (tx.category || "").toLowerCase();
+      const src = (tx.source || "").toLowerCase();
+
+      const isReward = typeStr.includes("reward") || typeStr.includes("bonus") || cat.includes("reward") || src.includes("referral");
+      const isBill = tx.type === "Bill Pay" || cat.includes("bill") || cat.includes("recharge") || cat.includes("prepaid") || cat.includes("postpaid") || cat.includes("dth") || cat.includes("fastag") || cat.includes("electricity") || cat.includes("gas") || cat.includes("water") || cat.includes("rent") || cat.includes("fees") || src.includes("electricity") || src.includes("recharge") || src.includes("wifi") || src.includes("fiber") || src.includes("dth") || src.includes("fastag") || src.includes("jio") || src.includes("airtel") || src.includes("vi ") || src.includes("bsnl");
+
+      const isPositive = isReward || tx.type === "Sell" || tx.type === "Receive";
+      const amt = isPositive ? Math.abs(tx.amount) : -Math.abs(tx.amount);
+      const chg = isReward ? 0 : Math.round(tx.amount * 0.0025 * 100) / 100;
+      const gstVal = isReward ? 0 : Math.round(chg * 0.18 * 100) / 100;
+      const net = isReward ? Math.abs(amt) : Math.abs(amt) + chg + gstVal;
+
+      let iconType = "gold";
+      if (isReward) iconType = "rewards";
+      else if (cat.includes("silver")) iconType = "silver";
+      else if (cat.includes("gold")) iconType = "gold";
+      else if (cat.includes("sip") || src.includes("fund")) iconType = "sip";
+      else if (isBill) iconType = "bills";
+      else iconType = "bank";
+
+      const dateObj = new Date(tx.date);
+      const dateStr = dateObj.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+      const timeStr = dateObj.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+      return {
+        id: tx.id,
+        title: tx.source || `${tx.type} ${tx.category}`,
+        subtitle: `${tx.type} ${tx.grams ? `(${tx.grams})` : ""}`,
+        category: iconType,
+        amount: amt,
+        status: (tx.status || "completed").toLowerCase(),
+        dateStr: dateStr,
+        timeStr: timeStr,
+        refId: tx.id,
+        charges: chg,
+        gst: gstVal,
+        netAmount: net,
+        iconType: iconType,
+        rawTx: tx
+      };
+    });
 
     // Filter by Mobile Tab
     if (mobileTab !== "all") {
@@ -1408,8 +1326,9 @@ export default function HistoryPage({ onNavigate }: { onNavigate?: (tab: string,
             className="space-y-4"
           >
             {mobileDisplayList.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 border border-slate-200">
-                <p className="text-xs font-bold text-gray-500">No transactions match your criteria</p>
+              <div className="p-8 text-center bg-white rounded-2xl border border-slate-200">
+                <p className="text-xs font-bold text-gray-500">No transactions recorded yet</p>
+                <p className="text-[11px] text-gray-400 mt-1">Your bullion purchases, sales, and bill payments will appear here.</p>
               </div>
             ) : (
               mobileDisplayList.map((tx) => {
@@ -1529,25 +1448,6 @@ export default function HistoryPage({ onNavigate }: { onNavigate?: (tab: string,
                     >
                       <Eye size={16} />
                     </button>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="w-full h-px bg-gray-100" />
-
-                  {/* Bottom 3-Column Metrics */}
-                  <div className="grid grid-cols-3 gap-2 pt-0.5">
-                    <div>
-                      <div className="text-[11px] text-gray-400 font-medium">Charges</div>
-                      <div className="text-[13px] text-gray-900 font-bold mt-0.5">₹{tx.charges.toFixed(2)}</div>
-                    </div>
-                    <div>
-                      <div className="text-[11px] text-gray-400 font-medium">GST</div>
-                      <div className="text-[13px] text-gray-900 font-bold mt-0.5">₹{tx.gst.toFixed(2)}</div>
-                    </div>
-                    <div>
-                      <div className="text-[11px] text-gray-400 font-medium">Net Amount</div>
-                      <div className="text-[13px] text-gray-900 font-bold mt-0.5">₹{tx.netAmount.toFixed(2)}</div>
-                    </div>
                   </div>
                 </div>
               );

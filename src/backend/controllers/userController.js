@@ -3,8 +3,10 @@ import mongoose from 'mongoose';
 import User from '../models/User.js';
 import VirtualCard from '../models/VirtualCard.js';
 import VaultTransaction from '../models/VaultTransaction.js';
+import BbpsTransaction from '../models/BbpsTransaction.js';
 import Otp from '../models/Otp.js';
 import Referral from '../models/Referral.js';
+import LiveMetalPrice from '../models/LiveMetalPrice.js';
 import { generateUniqueCardDetails } from '../utils/cardGenerator.js';
 import { uploadProfileImageToS3, generatePresignedUploadUrl, generatePresignedViewUrl, deleteObjectFromS3 } from '../utils/s3Uploader.js';
 import { initializeUserAml, updateKycAmlScore, evaluateTransactionAml } from '../utils/amlEvaluator.js';
@@ -846,6 +848,95 @@ export const getUserCard = async (req, res, next) => {
   }
 };
 
+// @desc    Get complete User Transaction History from MongoDB
+// @route   GET /api/users/transactions
+// @access  Public / User
+export const getUserTransactionHistory = async (req, res, next) => {
+  try {
+    const mobile = req.query.mobile || req.params.mobileNumber || req.params.mobile || req.headers['x-user-mobile'];
+
+    if (!mobile) {
+      return res.status(400).json({
+        success: false,
+        message: 'mobile query parameter or mobileNumber route param is required',
+      });
+    }
+
+    const cleanMobile = String(mobile).trim();
+
+    // 1. Fetch all Vault Transactions (Buy, Sell, Referral Bonus) from MongoDB
+    const vaultTxns = await VaultTransaction.find({ mobileNumber: cleanMobile })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 2. Fetch all BBPS / Bill Payment Transactions if available
+    let bbpsTxns = [];
+    try {
+      bbpsTxns = await BbpsTransaction.find({ $or: [{ userPhone: cleanMobile }, { accountNumber: cleanMobile }] })
+        .sort({ createdAt: -1 })
+        .lean();
+    } catch (err) {
+      // BbpsTransaction is optional
+    }
+
+    // 3. Format and normalize into standard unified transaction objects
+    const formattedVaultTxns = vaultTxns.map(tx => ({
+      id: tx.txId,
+      type: tx.type === 'BUY' ? 'Buy' : tx.type === 'SELL' ? 'Sell' : 'Bonus',
+      category: tx.metal ? (tx.metal.charAt(0).toUpperCase() + tx.metal.slice(1).toLowerCase()) : 'Gold',
+      amount: tx.amount,
+      grams: tx.grams !== undefined && tx.grams !== null ? `${Number(tx.grams).toFixed(4)} g` : undefined,
+      date: tx.createdAt ? new Date(tx.createdAt).toISOString() : new Date().toISOString(),
+      status: tx.status === 'COMPLETED' ? 'Completed' : tx.status === 'PENDING' ? 'Pending' : 'Failed',
+      paymentMethod: tx.paymentMethod || 'UPI',
+      source: tx.source || `${tx.metal === 'GOLD' ? 'Gold' : 'Silver'} Vault`,
+      ratePerGram: tx.ratePerGram,
+    }));
+
+    const formattedBbpsTxns = bbpsTxns.map(tx => ({
+      id: tx.txnId,
+      type: 'Bill Pay',
+      category: tx.category || 'Bill Pay',
+      amount: tx.amount,
+      grams: tx.goldCashbackFormatted || undefined,
+      date: tx.createdAt ? new Date(tx.createdAt).toISOString() : new Date().toISOString(),
+      status: tx.status === 'Success' ? 'Completed' : tx.status === 'Pending' ? 'Pending' : 'Failed',
+      paymentMethod: tx.paymentGateway || 'UPI',
+      source: tx.billerName || tx.category || 'BBPS Service',
+    }));
+
+    // 4. Merge and sort by date descending
+    const allTransactions = [...formattedVaultTxns, ...formattedBbpsTxns].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'User transaction history retrieved successfully from MongoDB',
+      count: allTransactions.length,
+      data: allTransactions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Helper to get active live rates from DB
+export const getActiveBullionRates = async () => {
+  try {
+    const priceRecord = await LiveMetalPrice.findOne().sort({ updatedAt: -1 });
+    if (priceRecord) {
+      return {
+        goldPrice: Number(priceRecord.goldPrice) || 11200.00,
+        silverPrice: Number(priceRecord.silverPrice) || 115.00,
+      };
+    }
+  } catch (err) {
+    console.warn('[getActiveBullionRates] Fallback to default rates:', err.message);
+  }
+  return { goldPrice: 11200.00, silverPrice: 115.00 };
+};
+
 // @desc    Get vault and portfolio summary by mobile number
 // @route   GET /api/users/vault/summary
 export const getVaultSummary = async (req, res, next) => {
@@ -867,8 +958,7 @@ export const getVaultSummary = async (req, res, next) => {
       };
     }
 
-    const goldPrice = 6420.50;
-    const silverPrice = 84.20;
+    const { goldPrice, silverPrice } = await getActiveBullionRates();
 
     const goldGrams = user.goldHoldingsGrams || 0;
     const silverGrams = user.silverHoldingsGrams || 0;
@@ -896,6 +986,7 @@ export const getVaultSummary = async (req, res, next) => {
           goldVaultValue,
           silverVaultValue,
           cashBalance,
+          totalInvested: user.totalInvested || 0,
           portfolioValue,
         },
         recentTransactions: transactions,
@@ -936,7 +1027,8 @@ export const buyGoldOrSilver = async (req, res, next) => {
       });
     }
 
-    const ratePerGram = lockedPrice || (metalUpper === 'GOLD' ? 6420.50 : 84.20);
+    const { goldPrice, silverPrice } = await getActiveBullionRates();
+    const ratePerGram = Number(lockedPrice) || (metalUpper === 'GOLD' ? goldPrice : silverPrice);
     const numGrams = Number(grams);
     const numAmount = Number(amount);
 
@@ -973,23 +1065,53 @@ export const buyGoldOrSilver = async (req, res, next) => {
       source: `${metalUpper === 'GOLD' ? 'Gold' : 'Silver'} Vault`,
     });
 
-    const goldPrice = 6420.50;
-    const silverPrice = 84.20;
-
     // --- Referral Bonus Logic ---
-    if (numAmount >= 250 && user.referredBy) {
+    let referrerCreditedData = null;
+    if (numAmount > 0) {
       const existingBonus = await VaultTransaction.findOne({
         mobileNumber: cleanMobile,
         type: 'REFERRAL_BONUS'
       });
 
       if (!existingBonus) {
-        const referrer = await User.findOne({ referralCode: user.referredBy });
+        // Robust referrer search across referralCode, mobileNumber, userCode, username, and Referral collection
+        let referrer = null;
+        const refSearchTerms = [];
+        if (user.referredBy) {
+          const cleanRef = String(user.referredBy).trim();
+          refSearchTerms.push(
+            { referralCode: new RegExp(`^${cleanRef}$`, 'i') },
+            { mobileNumber: cleanRef },
+            { mobile: cleanRef },
+            { userCode: new RegExp(`^${cleanRef}$`, 'i') },
+            { username: new RegExp(`^${cleanRef}$`, 'i') }
+          );
+        }
+
+        const referralDoc = await Referral.findOne({ refereeMobile: cleanMobile });
+        if (referralDoc) {
+          if (referralDoc.referrerMobile) {
+            const cleanRefMob = String(referralDoc.referrerMobile).trim();
+            refSearchTerms.push({ mobileNumber: cleanRefMob }, { mobile: cleanRefMob });
+          }
+          if (referralDoc.referralCodeUsed) {
+            const cleanCodeUsed = String(referralDoc.referralCodeUsed).trim();
+            refSearchTerms.push(
+              { referralCode: new RegExp(`^${cleanCodeUsed}$`, 'i') },
+              { userCode: new RegExp(`^${cleanCodeUsed}$`, 'i') }
+            );
+          }
+        }
+
+        if (refSearchTerms.length > 0) {
+          referrer = await User.findOne({ $or: refSearchTerms });
+        }
+
         if (referrer) {
           const bonusAmount = 50;
           const bonusGrams = Number((bonusAmount / goldPrice).toFixed(4));
           
-          // Credit Referee
+          // 1. Credit Referee
           user.goldHoldingsGrams = Number(((user.goldHoldingsGrams || 0) + bonusGrams).toFixed(4));
           await VaultTransaction.create({
             txId: 'FIP' + Math.floor(100000 + Math.random() * 900000),
@@ -1003,9 +1125,13 @@ export const buyGoldOrSilver = async (req, res, next) => {
             source: 'Referral Reward',
           });
 
-          // Credit Referrer
+          // 2. Credit Referrer (Gold grams + Portfolio Value + VaultTransaction)
           referrer.goldHoldingsGrams = Number(((referrer.goldHoldingsGrams || 0) + bonusGrams).toFixed(4));
+          const refGVal = Number(((referrer.goldHoldingsGrams || 0) * goldPrice).toFixed(2));
+          const refSVal = Number(((referrer.silverHoldingsGrams || 0) * silverPrice).toFixed(2));
+          referrer.portfolioValue = Number((refGVal + refSVal + (referrer.cashBalance || 0)).toFixed(2));
           await referrer.save();
+
           await VaultTransaction.create({
             txId: 'FIP' + Math.floor(100000 + Math.random() * 900000),
             mobileNumber: referrer.mobileNumber,
@@ -1022,6 +1148,14 @@ export const buyGoldOrSilver = async (req, res, next) => {
             { refereeMobile: cleanMobile },
             { status: 'REWARD_CREDITED', rewardAmount: bonusAmount * 2 }
           );
+
+          referrerCreditedData = {
+            mobileNumber: referrer.mobileNumber,
+            bonusAmount,
+            bonusGrams,
+            newGoldHoldings: referrer.goldHoldingsGrams,
+            newPortfolioValue: referrer.portfolioValue,
+          };
         }
       }
     }
@@ -1033,6 +1167,10 @@ export const buyGoldOrSilver = async (req, res, next) => {
     const silverVaultValue = Number(((user.silverHoldingsGrams || 0) * silverPrice).toFixed(2));
     const portfolioValue = Number((goldVaultValue + silverVaultValue + (user.cashBalance || 0)).toFixed(2));
 
+    user.portfolioValue = portfolioValue;
+    user.totalInvested = Number(((user.totalInvested || 0) + numAmount).toFixed(2));
+    await user.save();
+
     return res.status(200).json({
       success: true,
       message: `Successfully purchased ${numGrams}g of ${metalUpper}! Saved in MongoDB database.`,
@@ -1043,13 +1181,23 @@ export const buyGoldOrSilver = async (req, res, next) => {
           silverHoldingsGrams: user.silverHoldingsGrams,
           goldVaultValue,
           silverVaultValue,
+          cashBalance: user.cashBalance || 0,
+          totalInvested: user.totalInvested,
           portfolioValue,
         },
+        referrerCredited: referrerCreditedData,
       },
     });
   } catch (error) {
     next(error);
   }
+};
+
+// @desc    Buy Gold (Dedicated Endpoint - Persist in MongoDB and Update Portfolio)
+// @route   POST /api/users/buy-gold
+export const buyGold = async (req, res, next) => {
+  req.body.metal = 'GOLD';
+  return buyGoldOrSilver(req, res, next);
 };
 
 // @desc    Sell Gold or Silver (Persist in MongoDB)
@@ -1104,6 +1252,9 @@ export const sellGoldOrSilver = async (req, res, next) => {
 
     await user.save();
 
+    const { goldPrice, silverPrice } = await getActiveBullionRates();
+    const activeRate = Number(ratePerGram) || (metalUpper === 'GOLD' ? goldPrice : silverPrice);
+
     const txId = 'FIP' + Math.floor(100000 + Math.random() * 900000);
     const transaction = await VaultTransaction.create({
       txId,
@@ -1112,14 +1263,12 @@ export const sellGoldOrSilver = async (req, res, next) => {
       metal: metalUpper,
       amount: numAmount,
       grams: numGrams,
-      ratePerGram: ratePerGram || (metalUpper === 'GOLD' ? 6420.50 : 84.20),
+      ratePerGram: activeRate,
       status: 'COMPLETED',
       paymentMethod: 'Bank Transfer',
       source: `${metalUpper === 'GOLD' ? 'Gold' : 'Silver'} Vault`,
     });
 
-    const goldPrice = 6420.50;
-    const silverPrice = 84.20;
     const goldVaultValue = Number(((user.goldHoldingsGrams || 0) * goldPrice).toFixed(2));
     const silverVaultValue = Number(((user.silverHoldingsGrams || 0) * silverPrice).toFixed(2));
     const portfolioValue = Number((goldVaultValue + silverVaultValue + user.cashBalance).toFixed(2));
@@ -1362,8 +1511,7 @@ export const getDashboardData = async (req, res, next) => {
     }
 
     // 1. Vault Values
-    const goldPrice = 6420.50; // Mock current price
-    const silverPrice = 84.20; // Mock current price
+    const { goldPrice, silverPrice } = await getActiveBullionRates();
 
     const goldGrams = user.goldHoldingsGrams || 0;
     const silverGrams = user.silverHoldingsGrams || 0;
